@@ -9,7 +9,8 @@ import { useSearchParams } from "next/navigation";
 // icons
 import { HideOutline, ShowOutline } from "@makeplane/propel/icons";
 // plane internal packages
-import { API_BASE_URL, E_PASSWORD_STRENGTH } from "@plane/constants";
+import type { TAdminAuthErrorInfo } from "@plane/constants";
+import { API_BASE_URL, E_PASSWORD_STRENGTH, EAdminAuthErrorCodes } from "@plane/constants";
 import { Button } from "@makeplane/propel/components/button";
 import { Checkbox } from "@makeplane/propel/components/checkbox";
 import { InputField } from "@makeplane/propel/components/input-field";
@@ -20,24 +21,13 @@ import { Banner } from "@makeplane/propel/components/banner";
 import { getPasswordStrength, validatePersonName, validateCompanyName } from "@plane/utils";
 // components
 import { AuthHeader } from "@/app/(all)/(home)/auth-header";
+import { authErrorHandler } from "@/app/(all)/(home)/auth-helpers";
 import { FormHeader } from "./form-header";
 // hooks
 import { useCsrfToken } from "@/hooks/use-csrf-token";
 
-// error codes
-enum EErrorCodes {
-  INSTANCE_NOT_CONFIGURED = "INSTANCE_NOT_CONFIGURED",
-  ADMIN_ALREADY_EXIST = "ADMIN_ALREADY_EXIST",
-  REQUIRED_EMAIL_PASSWORD_FIRST_NAME = "REQUIRED_EMAIL_PASSWORD_FIRST_NAME",
-  INVALID_EMAIL = "INVALID_EMAIL",
-  INVALID_PASSWORD = "INVALID_PASSWORD",
-  USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS",
-}
-
-type TError = {
-  type: EErrorCodes | undefined;
-  message: string | undefined;
-};
+// shown under their field instead of in the banner
+const INLINE_ERROR_CODES = new Set([EAdminAuthErrorCodes.INVALID_ADMIN_EMAIL, EAdminAuthErrorCodes.PASSWORD_TOO_WEAK]);
 
 // form data
 type TFormData = {
@@ -70,8 +60,8 @@ export function InstanceSetupForm() {
   const telemetryParam = searchParams?.get("is_telemetry_enabled");
   const isTelemetryEnabledParam = telemetryParam ? telemetryParam === "True" : undefined;
   const errorCode = searchParams?.get("error_code") || undefined;
-  const errorMessage = searchParams?.get("error_message") || undefined;
   // state
+  const [errorInfo, setErrorInfo] = useState<TAdminAuthErrorInfo | undefined>(undefined);
   const [showPassword, setShowPassword] = useState({
     password: false,
     retypePassword: false,
@@ -97,27 +87,13 @@ export function InstanceSetupForm() {
       setFormData((prev) => ({ ...prev, is_telemetry_enabled: isTelemetryEnabledParam }));
   }, [firstNameParam, lastNameParam, companyParam, emailParam, isTelemetryEnabledParam]);
 
+  useEffect(() => {
+    if (errorCode) setErrorInfo(authErrorHandler(errorCode as EAdminAuthErrorCodes));
+  }, [errorCode]);
+
   // derived values
-  const errorData: TError = useMemo(() => {
-    if (errorCode && errorMessage) {
-      switch (errorCode) {
-        case EErrorCodes.INSTANCE_NOT_CONFIGURED:
-          return { type: EErrorCodes.INSTANCE_NOT_CONFIGURED, message: errorMessage };
-        case EErrorCodes.ADMIN_ALREADY_EXIST:
-          return { type: EErrorCodes.ADMIN_ALREADY_EXIST, message: errorMessage };
-        case EErrorCodes.REQUIRED_EMAIL_PASSWORD_FIRST_NAME:
-          return { type: EErrorCodes.REQUIRED_EMAIL_PASSWORD_FIRST_NAME, message: errorMessage };
-        case EErrorCodes.INVALID_EMAIL:
-          return { type: EErrorCodes.INVALID_EMAIL, message: errorMessage };
-        case EErrorCodes.INVALID_PASSWORD:
-          return { type: EErrorCodes.INVALID_PASSWORD, message: errorMessage };
-        case EErrorCodes.USER_ALREADY_EXISTS:
-          return { type: EErrorCodes.USER_ALREADY_EXISTS, message: errorMessage };
-        default:
-          return { type: undefined, message: undefined };
-      }
-    } else return { type: undefined, message: undefined };
-  }, [errorCode, errorMessage]);
+  const fieldError = (code: EAdminAuthErrorCodes) =>
+    errorInfo?.code === code && typeof errorInfo.message === "string" ? errorInfo.message : undefined;
 
   const isButtonDisabled = useMemo(
     () =>
@@ -144,11 +120,15 @@ export function InstanceSetupForm() {
             heading="Setup your Plane Instance"
             subHeading="Post setup you will be able to manage this Plane instance."
           />
-          {errorData.type &&
-            errorData?.message &&
-            ![EErrorCodes.INVALID_EMAIL, EErrorCodes.INVALID_PASSWORD].includes(errorData.type) && (
-              <Banner placement="inline" variant="danger" description={errorData?.message} />
-            )}
+          {errorInfo && !INLINE_ERROR_CODES.has(errorInfo.code) && (
+            <Banner
+              placement="inline"
+              variant="danger"
+              description={<>{errorInfo.message}</>}
+              dismissLabel="Dismiss banner"
+              onDismiss={() => setErrorInfo(undefined)}
+            />
+          )}
           <form
             className="space-y-4"
             method="POST"
@@ -214,12 +194,12 @@ export function InstanceSetupForm() {
               placeholder="name@company.com"
               value={formData.email}
               onChange={(e) => handleFormChange("email", e.target.value)}
-              aria-invalid={errorData.type === EErrorCodes.INVALID_EMAIL}
+              aria-invalid={errorInfo?.code === EAdminAuthErrorCodes.INVALID_ADMIN_EMAIL}
               autoComplete="off"
               orientation="vertical"
               label="Email"
               required
-              error={errorData.type === EErrorCodes.INVALID_EMAIL && errorData.message ? errorData.message : undefined}
+              error={fieldError(EAdminAuthErrorCodes.INVALID_ADMIN_EMAIL)}
             />
 
             <InputField
@@ -250,16 +230,14 @@ export function InstanceSetupForm() {
                 placeholder="New password"
                 value={formData.password}
                 onChange={(e) => handleFormChange("password", e.target.value)}
-                aria-invalid={errorData.type === EErrorCodes.INVALID_PASSWORD}
+                aria-invalid={errorInfo?.code === EAdminAuthErrorCodes.PASSWORD_TOO_WEAK}
                 onFocus={() => setIsPasswordInputFocused(true)}
                 onBlur={() => setIsPasswordInputFocused(false)}
                 autoComplete="new-password"
                 orientation="vertical"
                 label="Set a password"
                 required
-                error={
-                  errorData.type === EErrorCodes.INVALID_PASSWORD && errorData.message ? errorData.message : undefined
-                }
+                error={fieldError(EAdminAuthErrorCodes.PASSWORD_TOO_WEAK)}
                 endIcon={
                   <IconButton
                     type="button"

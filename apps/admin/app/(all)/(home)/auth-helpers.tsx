@@ -20,6 +20,18 @@ export enum EErrorAlertType {
 const errorCodeMessages: {
   [key in EAdminAuthErrorCodes]: { title: string; message: (email?: string) => React.ReactNode };
 } = {
+  [EAdminAuthErrorCodes.INSTANCE_NOT_CONFIGURED]: {
+    title: `Instance not configured`,
+    message: () => `Instance not configured. Please contact your administrator.`,
+  },
+  [EAdminAuthErrorCodes.PASSWORD_TOO_WEAK]: {
+    title: `Password too weak`,
+    message: () => `Please use a stronger password.`,
+  },
+  [EAdminAuthErrorCodes.RATE_LIMIT_EXCEEDED]: {
+    title: `Rate limit exceeded`,
+    message: () => `Too many requests. Please try again later.`,
+  },
   // admin
   [EAdminAuthErrorCodes.ADMIN_ALREADY_EXIST]: {
     title: `Admin already exists`,
@@ -77,6 +89,9 @@ const errorCodeMessages: {
 
 export const authErrorHandler = (errorCode: EAdminAuthErrorCodes, email?: string): TAdminAuthErrorInfo | undefined => {
   const bannerAlertErrorCodes = [
+    EAdminAuthErrorCodes.INSTANCE_NOT_CONFIGURED,
+    EAdminAuthErrorCodes.PASSWORD_TOO_WEAK,
+    EAdminAuthErrorCodes.RATE_LIMIT_EXCEEDED,
     EAdminAuthErrorCodes.ADMIN_ALREADY_EXIST,
     EAdminAuthErrorCodes.REQUIRED_ADMIN_EMAIL_PASSWORD_FIRST_NAME,
     EAdminAuthErrorCodes.INVALID_ADMIN_EMAIL,

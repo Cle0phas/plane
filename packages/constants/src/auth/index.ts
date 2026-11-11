@@ -84,6 +84,10 @@ export type TAuthErrorInfo = {
 };
 
 export enum EAdminAuthErrorCodes {
+  // Shared with user auth, also returned by the admin endpoints
+  INSTANCE_NOT_CONFIGURED = "5000",
+  PASSWORD_TOO_WEAK = "5021",
+  RATE_LIMIT_EXCEEDED = "5900",
   // Admin
   ADMIN_ALREADY_EXIST = "5150",
   REQUIRED_ADMIN_EMAIL_PASSWORD_FIRST_NAME = "5155",
