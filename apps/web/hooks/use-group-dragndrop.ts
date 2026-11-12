@@ -7,7 +7,9 @@
 import { useParams } from "next/navigation";
 import { setToast } from "@plane/blocks/toast";
 import type { SetToastProps } from "@plane/blocks/toast";
+import { useTranslation } from "@plane/i18n";
 import type { EIssuesStoreType, TIssue, TIssueGroupByOptions, TIssueOrderByOptions } from "@plane/types";
+import { getWorkflowRefusalKey } from "@/components/workflow";
 import type { GroupDropLocation } from "@/components/issues/issue-layouts/utils";
 import { handleGroupDragDrop } from "@/components/issues/issue-layouts/utils";
 import { ISSUE_FILTER_DEFAULT_DATA } from "@/store/issue/helpers/base-issues.store";
@@ -35,6 +37,7 @@ export const useGroupIssuesDragNDrop = (
   subGroupBy?: TIssueGroupByOptions
 ) => {
   const { workspaceSlug } = useParams();
+  const { t } = useTranslation();
 
   const {
     issue: { getIssueById },
@@ -95,7 +98,16 @@ export const useGroupIssuesDragNDrop = (
       delete data[moduleKey];
     }
 
-    updateIssue && updateIssue(projectId, issueId, data).catch(() => setToast(errorToastProps));
+    // oxlint-disable-next-line no-unused-expressions
+    updateIssue &&
+      updateIssue(projectId, issueId, data).catch((error: unknown) =>
+        setToast({
+          ...errorToastProps,
+          message: t(getWorkflowRefusalKey(error) ?? "entity.update.failed", {
+            entity: t("issue.label", { count: 1 }),
+          }),
+        })
+      );
   };
 
   const handleOnDrop = async (source: GroupDropLocation, destination: GroupDropLocation) => {

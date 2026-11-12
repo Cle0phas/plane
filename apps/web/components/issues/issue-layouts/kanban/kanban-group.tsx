@@ -148,7 +148,13 @@ export const KanbanGroup = observer(function KanbanGroup(props: IKanbanGroup) {
           setIsDraggingOverColumn(true);
           // handle if dragging a workflowState
           if (source) {
-            handleWorkFlowState(source?.groupId, groupId, source?.subGroupId, sub_group_id);
+            handleWorkFlowState(
+              source?.groupId,
+              groupId,
+              source?.subGroupId,
+              sub_group_id,
+              source?.id ? issuesMap[source.id] : undefined
+            );
           }
         },
         onDragLeave: () => {
@@ -159,7 +165,13 @@ export const KanbanGroup = observer(function KanbanGroup(props: IKanbanGroup) {
           setIsDraggingOverColumn(true);
           // handle if dragging a workflowState
           if (source) {
-            handleWorkFlowState(source?.groupId, groupId, source?.subGroupId, sub_group_id);
+            handleWorkFlowState(
+              source?.groupId,
+              groupId,
+              source?.subGroupId,
+              sub_group_id,
+              source?.id ? issuesMap[source.id] : undefined
+            );
           }
         },
         onDrop: (payload) => {
@@ -169,12 +181,9 @@ export const KanbanGroup = observer(function KanbanGroup(props: IKanbanGroup) {
 
           if (!source || !destination) return;
 
-          if ((isWorkflowDropDisabled || isDropDisabled) && dropErrorMessage) {
-            setToast({
-              type: "warning",
-              title: t("common.warning"),
-              message: dropErrorMessage,
-            });
+          if (isWorkflowDropDisabled || isDropDisabled) {
+            const message = isWorkflowDropDisabled ? t("workflows.workflow_disabled.title") : dropErrorMessage;
+            if (message) setToast({ type: "warning", title: t("common.warning"), message });
             return;
           }
 
@@ -201,6 +210,8 @@ export const KanbanGroup = observer(function KanbanGroup(props: IKanbanGroup) {
     isWorkflowDropDisabled,
     dropErrorMessage,
     handleOnDrop,
+    handleWorkFlowState,
+    issuesMap,
   ]);
 
   const prePopulateQuickAddData = (

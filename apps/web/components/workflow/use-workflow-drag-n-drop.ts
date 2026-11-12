@@ -4,20 +4,58 @@
  * See the LICENSE file for details.
  */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import type { TIssueGroupByOptions } from "@plane/types";
+import { useCallback, useState } from "react";
+import { useParams } from "next/navigation";
+import type { TIssue, TIssueGroupByOptions } from "@plane/types";
+// hooks
+import { useProjectState } from "@/hooks/store/use-project-state";
+// local imports
+import { isWorkflowDropForbidden } from "./drag-n-drop-helpers";
+import { getAllowedTargetStateIds, getEffectiveTypeId } from "./helpers";
+import { useProjectDefaultTypeId, useProjectWorkflowScheme, useWorkflowActor } from "./use-allowed-states";
 
-export const useWorkFlowFDragNDrop = (
-  groupBy: TIssueGroupByOptions | undefined,
-  subGroupBy?: TIssueGroupByOptions
-) => ({
-  workflowDisabledSource: undefined,
-  isWorkflowDropDisabled: false,
-  getIsWorkflowWorkItemCreationDisabled: (groupId: string, subGroupId?: string) => false,
-  handleWorkFlowState: (
-    sourceGroupId: string,
-    destinationGroupId: string,
-    sourceSubGroupId?: string,
-    destinationSubGroupId?: string
-  ) => {},
-});
+/** Each column calls it: the column learns whether the item being dragged may land in it (spec 7.4). */
+export const useWorkFlowFDragNDrop = (groupBy: TIssueGroupByOptions | undefined, subGroupBy?: TIssueGroupByOptions) => {
+  const { workspaceSlug, projectId } = useParams();
+  const scheme = useProjectWorkflowScheme(projectId?.toString());
+  const projectDefaultTypeId = useProjectDefaultTypeId(projectId?.toString());
+  const actor = useWorkflowActor(workspaceSlug?.toString(), projectId?.toString());
+  const { getProjectStates } = useProjectState();
+  const [workflowDisabledSource, setWorkflowDisabledSource] = useState<string | undefined>(undefined);
+
+  const handleWorkFlowState = useCallback(
+    (
+      sourceGroupId: string,
+      destinationGroupId: string,
+      _sourceSubGroupId?: string,
+      destinationSubGroupId?: string,
+      issue?: TIssue
+    ) => {
+      const allowed = issue?.project_id
+        ? getAllowedTargetStateIds({
+            scheme,
+            projectStates: getProjectStates(issue.project_id) ?? [],
+            issue: { ...issue, type_id: getEffectiveTypeId(issue.type_id, projectDefaultTypeId) },
+            actor,
+          })
+        : null;
+      const forbidden = isWorkflowDropForbidden({
+        groupBy,
+        subGroupBy,
+        destinationGroupId,
+        destinationSubGroupId,
+        allowed,
+      });
+      setWorkflowDisabledSource(forbidden ? sourceGroupId : undefined);
+    },
+    [scheme, projectDefaultTypeId, actor, getProjectStates, groupBy, subGroupBy]
+  );
+
+  return {
+    workflowDisabledSource,
+    isWorkflowDropDisabled: workflowDisabledSource !== undefined,
+    // Creation stays possible in any column: the server puts new items in the initial state (T1).
+    getIsWorkflowWorkItemCreationDisabled: (_groupId: string, _subGroupId?: string) => false,
+    handleWorkFlowState,
+  };
+};

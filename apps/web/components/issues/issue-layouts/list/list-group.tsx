@@ -205,10 +205,18 @@ export const ListGroup = observer(function ListGroup(props: Props) {
         },
         onDrag: ({ source }) => {
           const sourceGroupId = source?.data?.groupId as string | undefined;
+          const sourceId = source?.data?.id as string | undefined;
           const currentGroupId = group.id;
 
           // oxlint-disable-next-line no-unused-expressions
-          sourceGroupId && handleWorkFlowState(sourceGroupId, currentGroupId);
+          sourceGroupId &&
+            handleWorkFlowState(
+              sourceGroupId,
+              currentGroupId,
+              undefined,
+              undefined,
+              sourceId ? issuesMap[sourceId] : undefined
+            );
 
           const sourceIndex = getGroupIndex(sourceGroupId);
           const currentIndex = getGroupIndex(currentGroupId);
@@ -227,12 +235,8 @@ export const ListGroup = observer(function ListGroup(props: Props) {
           if (!source || !destination) return;
 
           if (isWorkflowDropDisabled || group.isDropDisabled) {
-            if (group.dropErrorMessage)
-              setToast({
-                type: "warning",
-                title: t("common.warning"),
-                message: group.dropErrorMessage,
-              });
+            const message = isWorkflowDropDisabled ? t("workflows.workflow_disabled.title") : group.dropErrorMessage;
+            if (message) setToast({ type: "warning", title: t("common.warning"), message });
             return;
           }
 
@@ -255,6 +259,8 @@ export const ListGroup = observer(function ListGroup(props: Props) {
     setDragColumnOrientation,
     setIsDraggingOverColumn,
     isWorkflowDropDisabled,
+    handleWorkFlowState,
+    issuesMap,
   ]);
 
   const isDragAllowed = group_by ? DRAG_ALLOWED_GROUPS.includes(group_by) : true;
