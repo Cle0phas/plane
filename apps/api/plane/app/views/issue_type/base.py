@@ -203,16 +203,16 @@ class WorkspaceIssueTypeEndpoint(BaseAPIView):
             error = _issue_type_delete_error(issue_type)
             if error:
                 return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
-            before = issue_type_snapshot(issue_type)
-            issue_type.delete()
+            # Audit first: delete() queues the soft-delete cascade at once, outside this transaction's rollback.
             record_audit(
                 workspace_id=issue_type.workspace_id,
                 actor_id=request.user.id,
                 action="issue_type.deleted",
                 target_type="issue_type",
                 target_id=issue_type.id,
-                before=before,
+                before=issue_type_snapshot(issue_type),
             )
+            issue_type.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -372,14 +372,14 @@ class ProjectIssueTypeDetailEndpoint(BaseAPIView):
                     {"error": "Work items of this project use this work item type."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            before = project_issue_type_snapshot(link)
-            link.delete()
+            # Audit first, for the same reason as the workspace type deletion.
             record_audit(
                 workspace_id=link.workspace_id,
                 actor_id=request.user.id,
                 action="project_issue_type.disabled",
                 target_type="project_issue_type",
                 target_id=link.id,
-                before=before,
+                before=project_issue_type_snapshot(link),
             )
+            link.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

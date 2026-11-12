@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # See the LICENSE file for details.
 
+from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
@@ -270,6 +271,16 @@ class TestProjectIssueTypeWrite:
         assert not ProjectIssueType.objects.filter(pk=link.pk).exists()
         entry = AuditLog.objects.get(target_id=link.id, action="project_issue_type.disabled")
         assert entry.before["issue_type_id"] == str(bug.id) and entry.after is None
+
+    def test_a_failed_audit_removes_nothing_and_enqueues_nothing(self, workspace, users, project, bug, mock_celery):
+        link = ProjectIssueType.objects.create(project=project, issue_type=bug)
+
+        with patch("plane.app.views.issue_type.base.record_audit", side_effect=RuntimeError("audit down")):
+            response = _client(users["admin"]).delete(_detail_url(workspace, project, bug))
+
+        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert ProjectIssueType.objects.filter(pk=link.pk).exists()
+        mock_celery.assert_not_called()
 
 
 @pytest.mark.contract

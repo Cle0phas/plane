@@ -309,6 +309,15 @@ class TestWorkspaceIssueTypeWrite:
         entry = AuditLog.objects.get(target_id=bug.id, action="issue_type.deleted")
         assert entry.before["name"] == "Bug" and entry.after is None
 
+    def test_a_failed_audit_deletes_nothing_and_enqueues_nothing(self, workspace, users, bug, mock_celery):
+        with patch("plane.app.views.issue_type.base.record_audit", side_effect=RuntimeError("audit down")):
+            response = _client(users["admin"]).delete(DETAIL_URL.format(slug=workspace.slug, pk=bug.id))
+
+        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert IssueType.objects.filter(pk=bug.pk).exists()
+        # The soft-delete cascade runs in a worker outside the transaction: it must not be queued.
+        mock_celery.assert_not_called()
+
     def test_admin_cannot_touch_a_type_of_another_workspace(self, workspace, users, mock_celery):
         foreign = IssueTypeFactory(workspace=WorkspaceFactory(), name="Foreign")
         client = _client(users["admin"])
