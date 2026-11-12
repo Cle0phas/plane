@@ -169,6 +169,7 @@ class SubIssuesEndpoint(BaseAPIView):
                 "is_draft",
                 "archived_at",
                 "state_group",
+                "type_id",
             )
         )
 

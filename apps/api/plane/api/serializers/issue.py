@@ -13,7 +13,6 @@ from rest_framework import serializers
 # Module imports
 from plane.db.models import (
     Issue,
-    IssueType,
     IssueActivity,
     IssueAssignee,
     FileAsset,
@@ -31,6 +30,7 @@ from plane.utils.content_validator import (
     validate_html_content,
     validate_binary_data,
 )
+from plane.utils.issue_types import validate_work_item_type_id
 
 from .base import BaseSerializer
 from .cycle import CycleLiteSerializer, CycleSerializer
@@ -63,9 +63,7 @@ class IssueSerializer(BaseSerializer):
         write_only=True,
         required=False,
     )
-    type_id = serializers.PrimaryKeyRelatedField(
-        source="type", queryset=IssueType.objects.all(), required=False, allow_null=True
-    )
+    type_id = serializers.UUIDField(required=False, allow_null=True)
 
     class Meta:
         model = Issue
@@ -81,6 +79,7 @@ class IssueSerializer(BaseSerializer):
             "deleted_at",
             "archived_at",
             "sequence_id",
+            "type",
         ]
         exclude = ["description_json", "description_stripped"]
 
@@ -179,6 +178,13 @@ class IssueSerializer(BaseSerializer):
         ):
             raise serializers.ValidationError("Estimate point is not valid please pass a valid estimate_point_id")
 
+        if "type_id" in data:
+            data["type_id"] = validate_work_item_type_id(
+                data["type_id"],
+                project_id=self.context.get("project_id"),
+                current_type_id=self.instance.type_id if self.instance else None,
+            )
+
         return data
 
     def create(self, validated_data):
@@ -189,14 +195,7 @@ class IssueSerializer(BaseSerializer):
         workspace_id = self.context["workspace_id"]
         default_assignee_id = self.context["default_assignee_id"]
 
-        issue_type = validated_data.pop("type", None)
-
-        if not issue_type:
-            # Get default issue type
-            issue_type = IssueType.objects.filter(project_issue_types__project_id=project_id, is_default=True).first()
-            issue_type = issue_type
-
-        issue = Issue.objects.create(**validated_data, project_id=project_id, type=issue_type)
+        issue = Issue.objects.create(**validated_data, project_id=project_id)
 
         # Issue Audit Users
         created_by_id = issue.created_by_id
