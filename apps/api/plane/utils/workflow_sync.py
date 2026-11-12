@@ -251,10 +251,10 @@ def apply_scheme(*, project, default_workflow_id, items, mappings, actor_id):
         # Lock order everywhere: workflows (id order) then projects; also serialises with a workflow DELETE.
         list(
             Workflow.objects.select_for_update(of=("self",))
-            .filter(pk__in={default_workflow_id, *items.values()})
+            .filter(pk__in={default_workflow_id, *items.values()}, workspace_id=project.workspace_id)
             .order_by("id")
         )
-        project = Project.objects.select_for_update(of=("self",)).get(pk=project.pk)
+        project = Project.objects.select_for_update(of=("self",)).get(pk=project.pk, archived_at__isnull=True)
         validate_scheme(project, default_workflow_id, items)
         statuses = _statuses_by_workflow({default_workflow_id, *items.values()})
         planned, missing = [], []
@@ -296,7 +296,7 @@ def apply_scheme(*, project, default_workflow_id, items, mappings, actor_id):
 def detach_scheme(*, project, actor_id):
     """Spec 5.3: the project becomes free again; its states stay and lose their link."""
     with transaction.atomic():
-        project = Project.objects.select_for_update(of=("self",)).get(pk=project.pk)
+        project = Project.objects.select_for_update(of=("self",)).get(pk=project.pk, archived_at__isnull=True)
         scheme = ProjectWorkflowScheme.objects.filter(project_id=project.id).first()
         if scheme is None:
             return False

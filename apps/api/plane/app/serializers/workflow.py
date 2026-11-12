@@ -208,3 +208,9 @@ class ProjectWorkflowSchemeInputSerializer(serializers.Serializer):
         if len(set(type_ids)) != len(type_ids):
             raise serializers.ValidationError("Each work item type appears once.")
         return items
+
+    def validate_mappings(self, mappings):
+        keys = [(mapping["state_id"], mapping["workflow_id"]) for mapping in mappings]
+        if len(set(keys)) != len(keys):
+            raise serializers.ValidationError("Each state and workflow pair appears once.")
+        return mappings

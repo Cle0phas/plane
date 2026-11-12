@@ -172,6 +172,46 @@ class TestWrite:
             format="json",
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "items" in response.data
+
+    def test_a_mapping_listed_twice_is_refused(self, workspace, users, project, software):
+        line = {"state_id": str(uuid4()), "workflow_id": str(software.id), "status_id": str(uuid4())}
+        response = _client(users["admin"]).put(
+            _url(SCHEME_URL, workspace, project),
+            {"default_workflow_id": str(software.id), "items": [], "mappings": [line, line]},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "mappings" in response.data
+
+    def test_an_arrival_status_outside_the_workflow_is_refused(self, workspace, users, project, software, support):
+        legacy = State.objects.create(name="Backlog", project=project)
+        Issue.objects.create(name="Item", project=project, state=legacy)
+        foreign_status = support.states_by_name["Closed"].status_id
+        body = {
+            "default_workflow_id": str(software.id),
+            "items": [],
+            "mappings": [
+                {"state_id": str(legacy.id), "workflow_id": str(software.id), "status_id": str(foreign_status)}
+            ],
+        }
+        response = _client(users["admin"]).put(_url(SCHEME_URL, workspace, project), body, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["scheme"] == ["invalid_mapping"]
+        assert response.data["needs"][0]["state_id"] == str(legacy.id)
+
+    @pytest.mark.parametrize("verb", ["put", "post", "delete"])
+    def test_foreign_and_unknown_projects_look_the_same_on_writes(self, workspace, users, software, verb):
+        foreign = ProjectFactory(workspace=WorkspaceFactory())
+        client = _client(users["admin"])
+        body = {"default_workflow_id": str(software.id), "items": []}
+        url = PREVIEW_URL if verb == "post" else SCHEME_URL
+        args = () if verb == "delete" else (body,)
+        kwargs = {} if verb == "delete" else {"format": "json"}
+        hidden = getattr(client, verb)(url.format(slug=workspace.slug, project_id=foreign.id), *args, **kwargs)
+        missing = getattr(client, verb)(url.format(slug=workspace.slug, project_id=uuid4()), *args, **kwargs)
+        assert hidden.status_code == missing.status_code == status.HTTP_404_NOT_FOUND
+        assert hidden.data == missing.data
 
     def test_detach(self, workspace, users, project, software):
         link_project(project, software)
@@ -179,6 +219,9 @@ class TestWrite:
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not ProjectWorkflowScheme.objects.exists()
         assert not State.objects.filter(project=project, workflow_status__isnull=False).exists()
+        assert AuditLog.objects.filter(
+            action="project_workflow_scheme.detached", actor_id=users["project_admin"].id
+        ).exists()
 
     def test_an_archived_project_cannot_be_linked(self, workspace, users, project, software):
         Project.objects.filter(pk=project.pk).update(archived_at=timezone.now())

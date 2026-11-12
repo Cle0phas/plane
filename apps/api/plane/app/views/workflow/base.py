@@ -19,7 +19,7 @@ from plane.app.serializers import (
     WorkflowStatusSerializer,
 )
 from plane.app.serializers.workflow import DUPLICATE_WORKFLOW_NAME_MESSAGE
-from plane.app.views.issue_type.base import can_manage_project_issue_types
+from plane.app.views.issue_type.base import _require_project_manager
 from plane.db.models import (
     Project,
     ProjectWorkflowScheme,
@@ -219,16 +219,6 @@ class WorkflowGraphEndpoint(BaseAPIView):
             return Response({"graph": ["duplicate_status_name"]}, status=status.HTTP_400_BAD_REQUEST)
         workflow.refresh_from_db()
         return Response(workflow_detail(workflow, True), status=status.HTTP_200_OK)
-
-
-FORBIDDEN = {"error": "You don't have the required permissions."}
-
-
-def _require_project_manager(request, slug, project_id):
-    """A4 is the same rule as R3 of the work item types: workspace admins and project admins."""
-    if can_manage_project_issue_types(request.user, slug, project_id):
-        return None
-    return Response(FORBIDDEN, status=status.HTTP_403_FORBIDDEN)
 
 
 def _writable_project(slug, project_id):
