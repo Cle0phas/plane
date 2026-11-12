@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # See the LICENSE file for details.
 
+import json
 from uuid import UUID, uuid4
 
 import pytest
@@ -21,7 +22,17 @@ class TestFilterIssueType:
 
     def test_post_accepts_a_list(self):
         type_id = uuid4()
-        assert filter_issue_type({"issue_type": [str(type_id), "bad"]}, {}, "POST") == {"type__in": [type_id]}
+        assert filter_issue_type({"issue_type": [str(type_id), "bad"]}, {}, "POST") == {"type__in": [str(type_id)]}
+
+    def test_post_output_is_json_serialisable(self):
+        type_id = uuid4()
+        result = issue_filters({"issue_type": str(type_id)}, "POST")
+        assert json.loads(json.dumps(result)) == {"type__in": [str(type_id)]}
+
+    @pytest.mark.parametrize("method", ["GET", "POST"])
+    @pytest.mark.parametrize("value", [5, {"a": 1}, [1, None], True])
+    def test_non_string_values_are_dropped(self, method, value):
+        assert filter_issue_type({"issue_type": value}, {}, method) == {}
 
     def test_empty_value_is_a_no_op(self):
         assert filter_issue_type({"issue_type": ""}, {}, "GET") == {}
