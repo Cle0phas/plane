@@ -93,7 +93,7 @@ describe("getAllowedTargetStateIds", () => {
 
   it("keeps the current state and adds arrow targets and global targets", () => {
     const allowed = getAllowedTargetStateIds({ scheme, projectStates: states, issue: issue("todo"), actor: member });
-    expect([...(allowed ?? [])].toSorted()).toEqual(["s-cancelled", "s-doing", "s-todo"]);
+    expect(new Set(allowed)).toEqual(new Set(["s-cancelled", "s-doing", "s-todo"]));
   });
 
   it("applies restrict actors with OR between criteria", () => {
@@ -122,7 +122,7 @@ describe("getAllowedTargetStateIds", () => {
       issue: issue("new", { type_id: "bug" }),
       actor: member,
     });
-    expect([...(allowed ?? [])].toSorted()).toEqual(["s-doing", "s-new"]);
+    expect(new Set(allowed)).toEqual(new Set(["s-doing", "s-new"]));
   });
 
   it("offers only global transitions from an unmanaged state", () => {
@@ -133,7 +133,7 @@ describe("getAllowedTargetStateIds", () => {
       issue: issue("x", { state_id: "s-stray" }),
       actor: member,
     });
-    expect([...(allowed ?? [])].toSorted()).toEqual(["s-cancelled", "s-stray"]);
+    expect(new Set(allowed)).toEqual(new Set(["s-cancelled", "s-stray"]));
   });
 
   it("refuses rules without a known actor", () => {
@@ -143,6 +143,63 @@ describe("getAllowedTargetStateIds", () => {
       issue: issue("doing", { created_by: "me" }),
       actor: { userId: undefined, projectRole: undefined },
     });
+    expect(allowed?.has("s-done")).toBe(false);
+  });
+
+  it("admits listed users and assignees", () => {
+    const rules = (params: object): TWorkflowGraph => ({
+      ...software,
+      transitions: [arrow(["doing"], "done", [{ type: "restrict_actors", params }])],
+    });
+    const run = (params: object, overrides: Partial<TWorkflowIssue>) =>
+      getAllowedTargetStateIds({
+        scheme: { ...scheme, workflows: [rules(params), support] },
+        projectStates: states,
+        issue: issue("doing", overrides),
+        actor: member,
+      })?.has("s-done");
+    expect(run({ user_ids: ["me"] }, {})).toBe(true);
+    expect(run({ user_ids: ["other"] }, {})).toBe(false);
+    expect(run({ assignee: true }, { assignee_ids: ["me"] })).toBe(true);
+    expect(run({ assignee: true }, {})).toBe(false);
+  });
+
+  it("refuses an unknown rule type", () => {
+    const unknown = { type: "other", params: {} } as unknown as TWorkflowRule;
+    const graph: TWorkflowGraph = { ...software, transitions: [arrow(["doing"], "done", [unknown])] };
+    const allowed = getAllowedTargetStateIds({
+      scheme: { ...scheme, workflows: [graph, support] },
+      projectStates: states,
+      issue: issue("doing"),
+      actor: { userId: "me", projectRole: 20 },
+    });
+    expect(allowed?.has("s-done")).toBe(false);
+  });
+
+  it("requires every rule of an arrow to pass", () => {
+    const both = [
+      { type: "restrict_actors", params: { roles: [20] } },
+      { type: "restrict_actors", params: { user_ids: ["someone-else"] } },
+    ] as TWorkflowRule[];
+    const graph: TWorkflowGraph = { ...software, transitions: [arrow(["doing"], "done", both)] };
+    const allowed = getAllowedTargetStateIds({
+      scheme: { ...scheme, workflows: [graph, support] },
+      projectStates: states,
+      issue: issue("doing"),
+      actor: { userId: "me", projectRole: 20 },
+    });
+    expect(allowed?.has("s-done")).toBe(false);
+  });
+
+  it("does not offer a source-bound arrow from an unmanaged state", () => {
+    const stray = projectState(null, "s-stray");
+    const allowed = getAllowedTargetStateIds({
+      scheme,
+      projectStates: [...states, stray],
+      issue: issue("x", { state_id: "s-stray" }),
+      actor: { userId: "me", projectRole: 20 },
+    });
+    expect(allowed?.has("s-doing")).toBe(false);
     expect(allowed?.has("s-done")).toBe(false);
   });
 });
@@ -155,7 +212,7 @@ describe("initial and workflow states", () => {
   });
 
   it("lists the states of the type workflow", () => {
-    expect([...(getWorkflowStateIds(scheme, states, "bug") ?? [])].toSorted()).toEqual(["s-doing", "s-new"]);
+    expect(new Set(getWorkflowStateIds(scheme, states, "bug"))).toEqual(new Set(["s-doing", "s-new"]));
   });
 });
 
@@ -168,5 +225,6 @@ describe("getWorkflowRefusalKey", () => {
     expect(getWorkflowRefusalKey({ workflow: ["<script>"] })).toBeUndefined();
     expect(getWorkflowRefusalKey({ detail: "x" })).toBeUndefined();
     expect(getWorkflowRefusalKey(undefined)).toBeUndefined();
+    expect(getWorkflowRefusalKey(new Error("Network Error"))).toBeUndefined();
   });
 });

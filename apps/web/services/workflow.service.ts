@@ -27,7 +27,7 @@ export class WorkflowService extends APIService {
     return promise
       .then((response) => response?.data)
       .catch((error) => {
-        throw error?.response?.data;
+        throw error?.response?.data ?? error;
       });
   }
 

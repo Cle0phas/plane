@@ -74,6 +74,7 @@ export const getAllowedTargetStateIds = ({
   return allowed;
 };
 
+/** `typeId` is the effective type id: the project's default type when the item has none, as the server does. */
 export const getInitialStateId = (
   scheme: TProjectWorkflowScheme | undefined,
   projectStates: IState[],
@@ -83,7 +84,7 @@ export const getInitialStateId = (
   return initial ? stateIdsByStatus(projectStates).get(initial.status.id) : undefined;
 };
 
-/** W9: every state of the type's workflow can receive an item changing type; null for a free project. */
+/** `typeId` is the effective type id (see getInitialStateId). W9: every state of the type's workflow can receive an item changing type; null for a free project. */
 export const getWorkflowStateIds = (
   scheme: TProjectWorkflowScheme | undefined,
   projectStates: IState[],

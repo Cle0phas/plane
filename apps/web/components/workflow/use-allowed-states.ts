@@ -18,11 +18,11 @@ export const useProjectWorkflowScheme = (projectId: string | undefined) => {
 
 export const useWorkflowActor = (workspaceSlug: string | undefined, projectId: string | undefined): TWorkflowActor => {
   const { data: currentUser } = useUser();
-  const { getProjectRoleByWorkspaceSlugAndProjectId } = useUserPermissions();
+  const { workspaceProjectsPermissions } = useUserPermissions();
   return {
     userId: currentUser?.id,
-    projectRole:
-      workspaceSlug && projectId ? getProjectRoleByWorkspaceSlugAndProjectId(workspaceSlug, projectId) : undefined,
+    // Raw membership role: the getter elevates workspace admins to ADMIN, the server does not (W6).
+    projectRole: workspaceSlug && projectId ? workspaceProjectsPermissions[workspaceSlug]?.[projectId] : undefined,
   };
 };
 
