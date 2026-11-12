@@ -9,7 +9,7 @@ import re
 from rest_framework import serializers
 
 # Module imports
-from plane.db.models import IssueType
+from plane.db.models import IssueType, ProjectIssueType
 from .base import BaseSerializer
 
 LOGO_COLOR_PATTERN = re.compile(r"#[0-9a-fA-F]{6}")
@@ -89,3 +89,12 @@ class IssueTypeSerializer(BaseSerializer):
 
     def validate_logo_props(self, value):
         return clean_logo_props(value)
+
+
+class ProjectIssueTypeSerializer(BaseSerializer):
+    issue_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = ProjectIssueType
+        fields = ["id", "project_id", "issue_type_id", "is_default", "issue_count"]
+        read_only_fields = fields

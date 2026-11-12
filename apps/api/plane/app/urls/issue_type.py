@@ -4,7 +4,11 @@
 
 from django.urls import path
 
-from plane.app.views import WorkspaceIssueTypeEndpoint
+from plane.app.views import (
+    ProjectIssueTypeDetailEndpoint,
+    ProjectIssueTypeListEndpoint,
+    WorkspaceIssueTypeEndpoint,
+)
 
 urlpatterns = [
     path(
@@ -16,5 +20,15 @@ urlpatterns = [
         "workspaces/<str:slug>/issue-types/<uuid:pk>/",
         WorkspaceIssueTypeEndpoint.as_view(),
         name="workspace-issue-types",
+    ),
+    path(
+        "workspaces/<str:slug>/projects/<uuid:project_id>/issue-types/",
+        ProjectIssueTypeListEndpoint.as_view(),
+        name="project-issue-types",
+    ),
+    path(
+        "workspaces/<str:slug>/projects/<uuid:project_id>/issue-types/<uuid:issue_type_id>/",
+        ProjectIssueTypeDetailEndpoint.as_view(),
+        name="project-issue-type",
     ),
 ]

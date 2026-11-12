@@ -4,6 +4,7 @@
 
 # Python imports
 import copy
+import uuid
 
 # Django imports
 from django.db import IntegrityError, transaction
@@ -16,9 +17,17 @@ from rest_framework.response import Response
 
 # Module imports
 from plane.app.permissions import ROLE, allow_permission
-from plane.app.serializers import IssueTypeSerializer
+from plane.app.serializers import IssueTypeSerializer, ProjectIssueTypeSerializer
 from plane.app.serializers.issue_type import DUPLICATE_NAME_MESSAGE
-from plane.db.models import Issue, IssueType, ProjectIssueType, Workspace
+from plane.db.models import (
+    Issue,
+    IssueType,
+    Project,
+    ProjectIssueType,
+    ProjectMember,
+    Workspace,
+    WorkspaceMember,
+)
 from plane.db.models.issue_type import DEFAULT_ISSUE_TYPE_LOGO_PROPS
 from plane.utils.audit import record_audit
 from ..base import BaseAPIView
@@ -202,6 +211,170 @@ class WorkspaceIssueTypeEndpoint(BaseAPIView):
                 action="issue_type.deleted",
                 target_type="issue_type",
                 target_id=issue_type.id,
+                before=before,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+FORBIDDEN = {"error": "You don't have the required permissions."}
+NOT_AN_OBJECT = {"error": "The payload must be an object."}
+DEFAULT_CONSTRAINT_ERROR = {"error": "The project default work item type changed concurrently, retry."}
+
+
+def can_manage_project_issue_types(user, slug, project_id):
+    """R3: workspace admins, even outside the project, and admins of the project."""
+    if WorkspaceMember.objects.filter(
+        member=user, workspace__slug=slug, role=ROLE.ADMIN.value, is_active=True
+    ).exists():
+        return True
+    return ProjectMember.objects.filter(
+        member=user, workspace__slug=slug, project_id=project_id, role=ROLE.ADMIN.value, is_active=True
+    ).exists()
+
+
+def _require_project_manager(request, slug, project_id):
+    """Return the 403 response when the caller may not manage the project types, else None."""
+    if can_manage_project_issue_types(request.user, slug, project_id):
+        return None
+    return Response(FORBIDDEN, status=status.HTTP_403_FORBIDDEN)
+
+
+def project_issue_types(slug, project_id):
+    return ProjectIssueType.objects.filter(
+        project_id=project_id, project__workspace__slug=slug, issue_type__deleted_at__isnull=True
+    ).annotate(
+        issue_count=count_subquery(
+            Issue.objects.filter(project_id=OuterRef("project_id"), type_id=OuterRef("issue_type_id")), "type_id"
+        )
+    )
+
+
+def project_issue_type_snapshot(link):
+    return {"project_id": str(link.project_id), "issue_type_id": str(link.issue_type_id), "is_default": link.is_default}
+
+
+class ProjectIssueTypeListEndpoint(BaseAPIView):
+    @allow_permission(allowed_roles=[ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST], level="WORKSPACE")
+    def get(self, request, slug, project_id):
+        project = Project.objects.get(workspace__slug=slug, pk=project_id)
+        links = project_issue_types(slug, project.id).order_by("-is_default", "issue_type__name")
+        return Response(ProjectIssueTypeSerializer(links, many=True).data, status=status.HTTP_200_OK)
+
+    @allow_permission(allowed_roles=[ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST], level="WORKSPACE")
+    def post(self, request, slug, project_id):
+        refusal = _require_project_manager(request, slug, project_id)
+        if refusal:
+            return refusal
+        if not isinstance(request.data, dict):
+            return Response(NOT_AN_OBJECT, status=status.HTTP_400_BAD_REQUEST)
+        raw_type_id = request.data.get("issue_type_id")
+        try:
+            requested_type_id = uuid.UUID(raw_type_id) if isinstance(raw_type_id, str) else None
+        except ValueError:
+            requested_type_id = None
+        if requested_type_id is None:
+            return Response({"error": "issue_type_id must be a valid UUID."}, status=status.HTTP_400_BAD_REQUEST)
+        project = Project.objects.get(workspace__slug=slug, pk=project_id)
+        issue_type = IssueType.objects.get(workspace__slug=slug, pk=requested_type_id)
+        if not issue_type.is_active:
+            return Response(
+                {"error": "An inactive work item type cannot be enabled in a project."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        with transaction.atomic():
+            link, created = ProjectIssueType.objects.get_or_create(project=project, issue_type=issue_type)
+            if created:
+                record_audit(
+                    workspace_id=project.workspace_id,
+                    actor_id=request.user.id,
+                    action="project_issue_type.enabled",
+                    target_type="project_issue_type",
+                    target_id=link.id,
+                    after=project_issue_type_snapshot(link),
+                )
+        data = ProjectIssueTypeSerializer(project_issue_types(slug, project.id).get(pk=link.pk)).data
+        return Response(data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+
+class ProjectIssueTypeDetailEndpoint(BaseAPIView):
+    @allow_permission(allowed_roles=[ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST], level="WORKSPACE")
+    def patch(self, request, slug, project_id, issue_type_id):
+        refusal = _require_project_manager(request, slug, project_id)
+        if refusal:
+            return refusal
+        if not isinstance(request.data, dict):
+            return Response(NOT_AN_OBJECT, status=status.HTTP_400_BAD_REQUEST)
+        # Identity check: JSON 1, 1.0 and "true" must not count as true.
+        if request.data.get("is_default") is not True:
+            return Response(
+                {"error": "Only setting is_default to true is supported."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            with transaction.atomic():
+                # Lock every link of the project in id order, so concurrent default switches queue
+                # instead of deadlocking (R7).
+                links = list(
+                    ProjectIssueType.objects.select_for_update(of=("self",))
+                    .select_related("issue_type")
+                    .filter(project_id=project_id, project__workspace__slug=slug, issue_type__deleted_at__isnull=True)
+                    .order_by("id")
+                )
+                link = next((item for item in links if item.issue_type_id == issue_type_id), None)
+                if link is None:
+                    raise ProjectIssueType.DoesNotExist
+                if not link.issue_type.is_active:
+                    return Response(
+                        {"error": "An inactive work item type cannot be the project default."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                previous = next((item for item in links if item.is_default), None)
+                if previous is None or previous.pk != link.pk:
+                    ProjectIssueType.objects.filter(pk__in=[item.pk for item in links if item.is_default]).update(
+                        is_default=False
+                    )
+                    link.is_default = True
+                    link.save(update_fields=["is_default", "updated_at"])
+                    record_audit(
+                        workspace_id=link.workspace_id,
+                        actor_id=request.user.id,
+                        action="project_issue_type.default_changed",
+                        target_type="project_issue_type",
+                        target_id=link.id,
+                        before={"default_issue_type_id": str(previous.issue_type_id) if previous else None},
+                        after={"default_issue_type_id": str(link.issue_type_id)},
+                    )
+        except IntegrityError:
+            return Response(DEFAULT_CONSTRAINT_ERROR, status=status.HTTP_400_BAD_REQUEST)
+        data = ProjectIssueTypeSerializer(project_issue_types(slug, project_id).get(pk=link.pk)).data
+        return Response(data, status=status.HTTP_200_OK)
+
+    @allow_permission(allowed_roles=[ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST], level="WORKSPACE")
+    def delete(self, request, slug, project_id, issue_type_id):
+        refusal = _require_project_manager(request, slug, project_id)
+        if refusal:
+            return refusal
+        with transaction.atomic():
+            link = ProjectIssueType.objects.select_for_update(of=("self",)).get(
+                project_id=project_id, project__workspace__slug=slug, issue_type_id=issue_type_id
+            )
+            if link.is_default:
+                return Response(
+                    {"error": "The project default work item type cannot be removed."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if Issue.objects.filter(project_id=project_id, type_id=issue_type_id).exists():
+                return Response(
+                    {"error": "Work items of this project use this work item type."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            before = project_issue_type_snapshot(link)
+            link.delete()
+            record_audit(
+                workspace_id=link.workspace_id,
+                actor_id=request.user.id,
+                action="project_issue_type.disabled",
+                target_type="project_issue_type",
+                target_id=link.id,
                 before=before,
             )
         return Response(status=status.HTTP_204_NO_CONTENT)

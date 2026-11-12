@@ -233,7 +233,11 @@ from .webhook.base import (
     WebhookSecretRegenerateEndpoint,
 )
 
-from .issue_type.base import WorkspaceIssueTypeEndpoint
+from .issue_type.base import (
+    WorkspaceIssueTypeEndpoint,
+    ProjectIssueTypeListEndpoint,
+    ProjectIssueTypeDetailEndpoint,
+)
 
 from .error_404 import custom_404_view
 
