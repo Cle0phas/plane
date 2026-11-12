@@ -103,7 +103,7 @@ class IssueManager(SoftDeletionManager):
 
 
 class Issue(ChangeTrackerMixin, ProjectBaseModel):
-    TRACKED_FIELDS = ["state_id", "project_id"]
+    TRACKED_FIELDS = ["state_id", "project_id", "type_id"]
 
     PRIORITY_CHOICES = (
         ("urgent", "Urgent"),
@@ -179,8 +179,10 @@ class Issue(ChangeTrackerMixin, ProjectBaseModel):
         ordering = ("-created_at",)
 
     def save(self, *args, **kwargs):
-        self._ensure_default_state()
+        # The type must be known before the state is defaulted or checked.
         kwargs = self._ensure_default_type(kwargs)
+        self._ensure_default_state()
+        self._ensure_workflow_state()
         kwargs = self._sync_completed_at(kwargs)
 
         if self._state.adding:
@@ -231,6 +233,12 @@ class Issue(ChangeTrackerMixin, ProjectBaseModel):
         """Assign a default state when none is set."""
         if self.state is not None:
             return
+        from plane.utils.workflows import initial_state, workflow_id_for
+
+        workflow_id = workflow_id_for(self.project_id, self.type_id)
+        if workflow_id is not None:
+            self.state = initial_state(self.project_id, workflow_id)
+            return
         try:
             from plane.db.models import State
 
@@ -238,6 +246,29 @@ class Issue(ChangeTrackerMixin, ProjectBaseModel):
             self.state = default_state or State.objects.filter(~models.Q(is_triage=True), project=self.project).first()
         except ImportError as e:
             log_exception(e)
+
+    def _ensure_workflow_state(self):
+        """Spec 4.4: under a workflow scheme an item only rests in a managed state of its own workflow."""
+        if self.state_id is None or not (
+            self._state.adding or self.has_changed("state_id") or self.has_changed("type_id")
+        ):
+            return
+        from plane.db.models import State
+        from plane.utils.workflows import state_in_workflow, workflow_id_for
+
+        workflow_id = workflow_id_for(self.project_id, self.type_id)
+        if workflow_id is None:
+            return
+        if self.state.group == StateGroup.TRIAGE.value:
+            # Intake only: an item may start in triage or stay there, never be moved into it from a managed state.
+            previous_id = self._original_values.get("state_id")
+            if self._state.adding or (
+                previous_id is not None
+                and State.all_state_objects.filter(pk=previous_id, group=StateGroup.TRIAGE.value).exists()
+            ):
+                return
+        if not state_in_workflow(self.state, workflow_id, self.project_id):
+            raise ValidationError("The state is not part of the work item workflow.")
 
     def _ensure_default_type(self, kwargs):
         """Use the project default type when the type is missing or not enabled in the project. Returns kwargs."""
