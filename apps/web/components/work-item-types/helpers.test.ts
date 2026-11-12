@@ -197,10 +197,14 @@ describe("project work item type actions", () => {
 });
 
 describe("project refusal keys", () => {
-  it("maps an inactive default refusal and leaves other refusals to the default message", () => {
-    expect(getActionRefusalKey({ error: "x" }, "project_set_default")).toBe(
-      "work_item_types.settings.cant_set_default_inactive_message"
-    );
+  it("leaves every project refusal to the default message", () => {
+    // A project default switch is refused for an inactive type or a concurrent change: one message cannot name both.
+    expect(
+      getActionRefusalKey(
+        { error: "The project default work item type changed concurrently, retry." },
+        "project_set_default"
+      )
+    ).toBeUndefined();
     expect(getActionRefusalKey({ error: "x" }, "project_disable")).toBeUndefined();
   });
 });

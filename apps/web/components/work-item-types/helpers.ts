@@ -131,10 +131,9 @@ export type TWorkItemTypeRowAction =
   | "project_disable"
   | "project_set_default";
 
-// Only the set default actions have a single possible refusal (inactive type); the others fall back to the default message.
+// Only the workspace set default has a single possible refusal (inactive type); the others fall back to the default message.
 const ACTION_REFUSAL_KEYS: Partial<Record<TWorkItemTypeRowAction, string>> = {
   set_default: "work_item_types.settings.cant_set_default_inactive_message",
-  project_set_default: "work_item_types.settings.cant_set_default_inactive_message",
 };
 
 export const getActionRefusalKey = (error: unknown, action: TWorkItemTypeRowAction): string | undefined =>
