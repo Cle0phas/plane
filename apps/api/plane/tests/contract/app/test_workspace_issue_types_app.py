@@ -151,6 +151,10 @@ class TestWorkspaceIssueTypeWrite:
             {"in_use": "emoji", "emoji": {"value": "smile"}},
             {"in_use": "image"},
             "not-an-object",
+            {"in_use": "icon", "icon": {"name": "bug_report", "color": "#ffffff\n"}},
+            {"in_use": "icon", "icon": {"name": "bug_report\n"}},
+            {"in_use": "emoji", "emoji": {"value": "128512\n"}},
+            {"in_use": "emoji", "emoji": {"value": "128512-1114112"}},
         ],
     )
     def test_unexpected_logo_props_are_rejected(self, workspace, users, logo_props):
@@ -226,6 +230,34 @@ class TestWorkspaceIssueTypeWrite:
             DETAIL_URL.format(slug=workspace.slug, pk=bug.id), {"is_default": True}, format="json"
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    @pytest.mark.parametrize("payload", [{"is_default": 1}, {"is_default": 1, "is_active": False}])
+    def test_is_default_must_be_exactly_true(self, workspace, users, default_type, bug, payload):
+        IssueType.objects.filter(pk=bug.pk).update(is_active=payload.get("is_active", False))
+
+        response = _client(users["admin"]).patch(
+            DETAIL_URL.format(slug=workspace.slug, pk=bug.id), payload, format="json"
+        )
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        bug.refresh_from_db()
+        default_type.refresh_from_db()
+        assert default_type.is_default and not bug.is_default
+        assert not AuditLog.objects.exists()
+
+    @pytest.mark.parametrize("method", ["post", "patch"])
+    @pytest.mark.parametrize("body", [["name", "Story"], "Story", 1])
+    def test_a_non_object_body_is_rejected(self, workspace, users, bug, method, body):
+        url = (
+            LIST_URL.format(slug=workspace.slug)
+            if method == "post"
+            else DETAIL_URL.format(slug=workspace.slug, pk=bug.id)
+        )
+
+        response = getattr(_client(users["admin"]), method)(url, body, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert not AuditLog.objects.exists()
 
     def test_a_project_default_type_cannot_be_deactivated(self, workspace, users, bug, project):
         ProjectIssueType.objects.filter(project=project).update(is_default=False)

@@ -12,9 +12,9 @@ from rest_framework import serializers
 from plane.db.models import IssueType
 from .base import BaseSerializer
 
-LOGO_COLOR_PATTERN = re.compile(r"^#[0-9a-fA-F]{6}$")
-LOGO_ICON_NAME_PATTERN = re.compile(r"^[a-z0-9_-]{1,64}$")
-LOGO_EMOJI_PATTERN = re.compile(r"^[0-9]{1,7}(-[0-9]{1,7}){0,9}$")
+LOGO_COLOR_PATTERN = re.compile(r"#[0-9a-fA-F]{6}")
+LOGO_ICON_NAME_PATTERN = re.compile(r"[a-z0-9_-]{1,64}")
+LOGO_EMOJI_PATTERN = re.compile(r"[0-9]{1,7}(-[0-9]{1,7}){0,9}")
 DUPLICATE_NAME_MESSAGE = "A work item type with this name already exists."
 INVALID_LOGO_PROPS_MESSAGE = "logo_props must be an emoji code or a named icon with hexadecimal colours."
 
@@ -33,7 +33,9 @@ def clean_logo_props(value):
             not isinstance(emoji, dict)
             or set(emoji) != {"value"}
             or not isinstance(emoji["value"], str)
-            or not LOGO_EMOJI_PATTERN.match(emoji["value"])
+            or not LOGO_EMOJI_PATTERN.fullmatch(emoji["value"])
+            # String.fromCodePoint throws above U+10FFFF, which would break rendering for every member.
+            or any(int(code) > 0x10FFFF for code in emoji["value"].split("-"))
         ):
             raise serializers.ValidationError(INVALID_LOGO_PROPS_MESSAGE)
         return {"in_use": "emoji", "emoji": {"value": emoji["value"]}}
@@ -42,12 +44,12 @@ def clean_logo_props(value):
         if not isinstance(icon, dict) or set(icon) - {"name", "color", "background_color"}:
             raise serializers.ValidationError(INVALID_LOGO_PROPS_MESSAGE)
         name = icon.get("name")
-        if not isinstance(name, str) or not LOGO_ICON_NAME_PATTERN.match(name):
+        if not isinstance(name, str) or not LOGO_ICON_NAME_PATTERN.fullmatch(name):
             raise serializers.ValidationError(INVALID_LOGO_PROPS_MESSAGE)
         cleaned = {"name": name}
         for key in ("color", "background_color"):
             if key in icon:
-                if not isinstance(icon[key], str) or not LOGO_COLOR_PATTERN.match(icon[key]):
+                if not isinstance(icon[key], str) or not LOGO_COLOR_PATTERN.fullmatch(icon[key]):
                     raise serializers.ValidationError(INVALID_LOGO_PROPS_MESSAGE)
                 cleaned[key] = icon[key]
         return {"in_use": "icon", "icon": cleaned}

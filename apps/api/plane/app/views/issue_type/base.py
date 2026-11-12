@@ -132,14 +132,26 @@ class WorkspaceIssueTypeEndpoint(BaseAPIView):
     def patch(self, request, slug, pk=None):
         if pk is None:
             return Response(METHOD_NOT_ALLOWED, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        make_default = request.data.get("is_default")
-        if make_default not in (None, True):
+        if not isinstance(request.data, dict):
+            return Response({"error": "The payload must be an object."}, status=status.HTTP_400_BAD_REQUEST)
+        # Identity check: JSON 1 equals True and must not slip past the R5 checks.
+        if "is_default" in request.data and request.data["is_default"] is not True:
             return Response(
                 {"error": "Choose another default work item type instead of unsetting this one."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        make_default = "is_default" in request.data
         try:
             with transaction.atomic():
+                if make_default:
+                    # Lock every type of the workspace in id order first, so concurrent default switches
+                    # queue instead of deadlocking (R5).
+                    list(
+                        IssueType.objects.select_for_update(of=("self",))
+                        .filter(workspace__slug=slug)
+                        .order_by("id")
+                        .values_list("id", flat=True)
+                    )
                 issue_type = IssueType.objects.select_for_update(of=("self",)).get(workspace__slug=slug, pk=pk)
                 before = issue_type_snapshot(issue_type)
                 serializer = IssueTypeSerializer(
@@ -148,14 +160,13 @@ class WorkspaceIssueTypeEndpoint(BaseAPIView):
                 if not serializer.is_valid():
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
                 is_active = serializer.validated_data.get("is_active", issue_type.is_active)
-                error = _issue_type_update_error(issue_type, is_active, make_default is True)
+                error = _issue_type_update_error(issue_type, is_active, make_default)
                 if error:
                     return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
                 if make_default and not issue_type.is_default:
-                    # Locking every type of the workspace serialises concurrent default changes (R5).
-                    workspace_types = IssueType.objects.select_for_update().filter(workspace_id=issue_type.workspace_id)
-                    list(workspace_types)
-                    workspace_types.filter(is_default=True).update(is_default=False)
+                    IssueType.objects.filter(workspace_id=issue_type.workspace_id, is_default=True).update(
+                        is_default=False
+                    )
                     issue_type = serializer.save(is_default=True)
                 else:
                     issue_type = serializer.save()
