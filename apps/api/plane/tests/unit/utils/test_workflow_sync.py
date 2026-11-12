@@ -22,6 +22,7 @@ from plane.utils.workflow_sync import (
     detach_scheme,
     mapping_needs,
     propagate_statuses,
+    resync_workflow,
     status_usage,
     sync_project_states,
 )
@@ -181,6 +182,35 @@ class TestMappingAndApply:
         needs = mapping_needs(project, software.id, {})
         assert [(need["state_name"], need["workflow_id"]) for need in needs] == [("New", str(software.id))]
 
+    def test_a_type_leaving_its_workflow_moves_its_items_and_drops_the_empty_states(
+        self, project, software, support, bug, mock_celery, django_capture_on_commit_callbacks
+    ):
+        states = link_project(project, software, {bug: support})
+        issue = Issue.objects.create(name="Bug", project=project, state=states["New"], type=bug)
+        mapping = {(states["New"].id, software.id): software.states_by_name["Doing"].status_id}
+        with django_capture_on_commit_callbacks(execute=True):
+            result = _apply(project, software, mappings=mapping)
+        issue.refresh_from_db()
+        assert issue.state_id == result[software.states_by_name["Doing"].status_id].id
+        assert not State.objects.filter(pk__in=[states["New"].pk, states["Closed"].pk]).exists()
+        assert State.all_state_objects.filter(pk=states["New"].pk, deleted_at__isnull=False).exists()
+        assert mock_celery.call_count == 1
+        entry = AuditLog.objects.filter(action="project_workflow_scheme.applied").latest("created_at")
+        assert entry.before["items"] == {str(bug.id): str(support.id)}
+        assert entry.after["items"] == {}
+        assert entry.after["moved_issue_count"] == 1
+
+    def test_identifiers_are_canonical_so_upper_case_input_is_a_replay(self, project, software, support, bug):
+        link_project(project, software, {bug: support})
+        apply_scheme(
+            project=project,
+            default_workflow_id=str(software.id).upper(),
+            items={str(bug.id).upper(): str(support.id).upper()},
+            mappings={},
+            actor_id=project.workspace.owner_id,
+        )
+        assert AuditLog.objects.filter(action="project_workflow_scheme.applied").count() == 1
+
     def test_detach_keeps_the_states_and_unlinks_them(self, project, software):
         states = link_project(project, software)
         assert detach_scheme(project=project, actor_id=project.workspace.owner_id) is True
@@ -188,6 +218,15 @@ class TestMappingAndApply:
         assert State.objects.filter(pk=states["To do"].pk, workflow_status__isnull=True).exists()
         assert AuditLog.objects.filter(action="project_workflow_scheme.detached", target_id=project.id).exists()
         assert detach_scheme(project=project, actor_id=project.workspace.owner_id) is False
+
+
+class TestResync:
+    def test_resync_works_outside_a_transaction_block(self, project, software):
+        link_project(project, software)
+        extra = WorkflowStatus.objects.create(workspace=software.workspace, name="Review", color="#3A3A3A")
+        WorkflowState.objects.create(workflow=software, status=extra, position_x=900)
+        resync_workflow(software.id)
+        assert State.objects.filter(project=project, workflow_status=extra).exists()
 
 
 class TestUsageAndGroups:

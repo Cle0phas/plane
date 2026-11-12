@@ -4,6 +4,7 @@
 
 # Python imports
 import json
+from uuid import UUID
 
 # Django imports
 from django.db import transaction
@@ -35,9 +36,15 @@ class SchemeError(Exception):
         self.details = details
 
 
+def _canonical(identifier):
+    return str(UUID(str(identifier)))
+
+
 def _normalise(default_workflow_id, items):
     """Scheme identifiers as strings, so request data and ORM values compare equal."""
-    return str(default_workflow_id), {str(type_id): str(workflow_id) for type_id, workflow_id in items.items()}
+    return _canonical(default_workflow_id), {
+        _canonical(type_id): _canonical(workflow_id) for type_id, workflow_id in items.items()
+    }
 
 
 def _type_filter(workflow_id, default_workflow_id, items):
@@ -59,7 +66,17 @@ def _statuses_by_workflow(workflow_ids):
     return result
 
 
-def sync_project_states(project):
+def _drop_obsolete_states(project, kept_by_status):
+    obsolete = State.objects.filter(project_id=project.id, workflow_status__isnull=False).exclude(
+        workflow_status_id__in=kept_by_status.keys()
+    )
+    if Issue.objects.filter(state__in=obsolete).exists():
+        raise SchemeError("status_in_use")
+    Project.objects.filter(pk=project.pk, default_state__in=obsolete).update(default_state=None)
+    obsolete.delete()
+
+
+def sync_project_states(project, *, drop_obsolete=True):
     """W4, W17: exactly one managed project state per status of the scheme workflows; returns {status_id: State}."""
     scheme = ProjectWorkflowScheme.objects.get(project_id=project.id)
     workflow_ids = {scheme.default_workflow_id, *scheme.items.values_list("workflow_id", flat=True)}
@@ -83,11 +100,9 @@ def sync_project_states(project):
                 setattr(state, field, value)
             state.save()
         result[status.id] = state
-    obsolete = [state.pk for status_id, state in linked.items() if status_id not in result]
-    if obsolete:
-        if Issue.objects.filter(state_id__in=obsolete).exists():
-            raise SchemeError("status_in_use")
-        State.objects.filter(pk__in=obsolete).delete()
+    # apply_scheme moves the items out of obsolete states first, then drops them itself.
+    if drop_obsolete:
+        _drop_obsolete_states(project, result)
     initial_status_id = (
         WorkflowState.objects.filter(workflow_id=scheme.default_workflow_id, is_initial=True)
         .values_list("status_id", flat=True)
@@ -229,7 +244,8 @@ def apply_scheme(*, project, default_workflow_id, items, mappings, actor_id):
     """Spec 5.1 step 3: attach or change the scheme and move work items as mapped, in one replayable transaction."""
     default_workflow_id, items = _normalise(default_workflow_id, items)
     mappings = {
-        (str(state_id), str(workflow_id)): str(status_id) for (state_id, workflow_id), status_id in mappings.items()
+        (_canonical(state_id), _canonical(workflow_id)): _canonical(status_id)
+        for (state_id, workflow_id), status_id in mappings.items()
     }
     with transaction.atomic():
         project = Project.objects.select_for_update(of=("self",)).get(pk=project.pk)
@@ -249,10 +265,11 @@ def apply_scheme(*, project, default_workflow_id, items, mappings, actor_id):
 
         scheme, before = _save_scheme(project, default_workflow_id, items)
         # Linking first creates the target states; the moves then leave the old states empty.
-        states = sync_project_states(project)
+        states = sync_project_states(project, drop_obsolete=False)
         moves = _move_issues(
             project, planned, {str(key): state for key, state in states.items()}, default_workflow_id, items
         )
+        _drop_obsolete_states(project, states)
         _drop_unmanaged_states(project)
         after = _scheme_snapshot(scheme)
         if before != after or moves:
@@ -273,7 +290,8 @@ def apply_scheme(*, project, default_workflow_id, items, mappings, actor_id):
 def detach_scheme(*, project, actor_id):
     """Spec 5.3: the project becomes free again; its states stay and lose their link."""
     with transaction.atomic():
-        scheme = ProjectWorkflowScheme.objects.select_for_update(of=("self",)).filter(project_id=project.id).first()
+        project = Project.objects.select_for_update(of=("self",)).get(pk=project.pk)
+        scheme = ProjectWorkflowScheme.objects.filter(project_id=project.id).first()
         if scheme is None:
             return False
         before = _scheme_snapshot(scheme)
@@ -352,6 +370,7 @@ def propagate_statuses(statuses):
 
 def resync_workflow(workflow_id):
     """Re-sync every project using the workflow, locking projects in id order like apply_scheme does."""
-    project_ids = list(projects_using(workflow_id).values_list("id", flat=True))
-    for project in Project.objects.select_for_update(of=("self",)).filter(pk__in=project_ids).order_by("id"):
-        sync_project_states(project)
+    with transaction.atomic():
+        project_ids = list(projects_using(workflow_id).values_list("id", flat=True))
+        for project in Project.objects.select_for_update(of=("self",)).filter(pk__in=project_ids).order_by("id"):
+            sync_project_states(project)
