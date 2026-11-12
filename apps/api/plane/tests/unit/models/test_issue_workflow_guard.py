@@ -41,14 +41,14 @@ def test_a_move_out_of_the_workflow_is_refused_but_arrows_are_not_checked_here(c
     issue.state = states["Closed"]
     with pytest.raises(ValidationError):
         issue.save()
-    issue.refresh_from_db()
+    # A fresh load: refresh_from_db does not reset the change tracker.
+    issue = Issue.objects.get(pk=issue.pk)
     issue.state = states["Done"]
     issue.save()
     # No arrow leads back to "To do": the model checks membership only, the serializers check arrows.
     issue.state = states["To do"]
     issue.save()
-    issue.refresh_from_db()
-    assert issue.state_id == states["To do"].id
+    assert Issue.objects.get(pk=issue.pk).state_id == states["To do"].id
 
 
 def test_a_type_change_into_a_workflow_without_the_state_is_refused(ctx):
@@ -100,3 +100,20 @@ def test_saving_other_fields_does_not_recheck(ctx):
     issue = Issue.objects.get(pk=issue.pk)
     issue.name = "Renamed"
     issue.save()
+
+
+def test_a_workflow_without_a_resolvable_initial_state_refuses_a_stateless_item(ctx):
+    project, _, states = ctx
+    State.objects.filter(pk=states["To do"].pk).update(workflow_status=None)
+    with pytest.raises(ValidationError):
+        Issue.objects.create(name="Task", project=project)
+
+
+def test_moving_an_item_to_another_managed_project_keeping_its_state_is_refused(ctx, workspace, create_user):
+    project, _, _ = ctx
+    other = Project.objects.create(name="Other", identifier="OTHR", workspace=workspace, created_by=create_user)
+    link_project(other, build_workflow(workspace, "Other flow", ["Open", "Shut"], [(["Open"], "Shut", None)]))
+    issue = Issue.objects.create(name="Task", project=project)
+    issue.project = other
+    with pytest.raises(ValidationError):
+        issue.save()

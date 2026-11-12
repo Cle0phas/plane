@@ -249,8 +249,11 @@ class Issue(ChangeTrackerMixin, ProjectBaseModel):
 
     def _ensure_workflow_state(self):
         """Spec 4.4: under a workflow scheme an item only rests in a managed state of its own workflow."""
-        if self.state_id is None or not (
-            self._state.adding or self.has_changed("state_id") or self.has_changed("type_id")
+        if not (
+            self._state.adding
+            or self.has_changed("state_id")
+            or self.has_changed("type_id")
+            or self.has_changed("project_id")
         ):
             return
         from plane.db.models import State
@@ -259,6 +262,9 @@ class Issue(ChangeTrackerMixin, ProjectBaseModel):
         workflow_id = workflow_id_for(self.project_id, self.type_id)
         if workflow_id is None:
             return
+        if self.state_id is None:
+            # Fail closed: the workflow has no resolvable initial state, never save a stateless managed item.
+            raise ValidationError("The work item workflow has no initial state.")
         if self.state.group == StateGroup.TRIAGE.value:
             # Intake only: an item may start in triage or stay there, never be moved into it from a managed state.
             previous_id = self._original_values.get("state_id")
