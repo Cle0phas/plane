@@ -1,0 +1,153 @@
+# Copyright (c) 2023-present Plane Software, Inc. and contributors
+# SPDX-License-Identifier: AGPL-3.0-only
+# See the LICENSE file for details.
+
+# Third party imports
+from crum import get_current_user
+from django.db.models import Q
+from rest_framework import serializers
+
+# Module imports
+from plane.db.models import (
+    IssueAssignee,
+    ProjectIssueType,
+    ProjectMember,
+    ProjectWorkflowScheme,
+    ProjectWorkflowSchemeItem,
+    State,
+    StateGroup,
+    WorkflowState,
+    WorkflowTransition,
+)
+from plane.db.models.workflow import RULE_RESTRICT_ACTORS
+
+TRANSITION_NOT_ALLOWED = "transition_not_allowed"
+ARRIVAL_STATE_REQUIRED = "arrival_state_required"
+
+
+def refusal(code):
+    """One body per refusal kind, whatever the cause, so a refusal reveals nothing of the configuration (4.5)."""
+    return serializers.ValidationError({"workflow": [code]})
+
+
+def workflow_id_for(project_id, type_id):
+    """Spec 3.3: the type's workflow in the project scheme, else the scheme default; None for a free project."""
+    scheme = ProjectWorkflowScheme.objects.filter(project_id=project_id).values("id", "default_workflow_id").first()
+    if scheme is None:
+        return None
+    if type_id is not None:
+        workflow_id = (
+            ProjectWorkflowSchemeItem.objects.filter(scheme_id=scheme["id"], issue_type_id=type_id)
+            .values_list("workflow_id", flat=True)
+            .first()
+        )
+        if workflow_id is not None:
+            return workflow_id
+    return scheme["default_workflow_id"]
+
+
+def project_default_type_id(project_id):
+    return (
+        ProjectIssueType.objects.filter(project_id=project_id, is_default=True)
+        .values_list("issue_type_id", flat=True)
+        .first()
+    )
+
+
+def state_in_workflow(state, workflow_id):
+    return (
+        state is not None
+        and state.workflow_status_id is not None
+        and WorkflowState.objects.filter(workflow_id=workflow_id, status_id=state.workflow_status_id).exists()
+    )
+
+
+def initial_state(project_id, workflow_id):
+    """The project state mirroring the workflow's initial status (W7)."""
+    status_id = (
+        WorkflowState.objects.filter(workflow_id=workflow_id, is_initial=True).values_list("status_id", flat=True).first()
+    )
+    if status_id is None:
+        return None
+    return State.objects.filter(project_id=project_id, workflow_status_id=status_id).first()
+
+
+def _actor_allowed(params, issue, actor):
+    """W6: any one criterion admits the actor; workspace admins are not exempt."""
+    if actor is None or not getattr(actor, "is_authenticated", False):
+        return False
+    actor_id = str(actor.id)
+    if actor_id in params.get("user_ids", []):
+        return True
+    if params.get("creator") is True and str(issue.created_by_id) == actor_id:
+        return True
+    if params.get("assignee") is True and IssueAssignee.objects.filter(issue_id=issue.id, assignee_id=actor.id).exists():
+        return True
+    roles = params.get("roles", [])
+    return bool(roles) and ProjectMember.objects.filter(
+        project_id=issue.project_id, member_id=actor.id, is_active=True, role__in=roles
+    ).exists()
+
+
+def _rule_allows(rule, issue, actor):
+    if rule.rule_type == RULE_RESTRICT_ACTORS:
+        return _actor_allowed(rule.params, issue, actor)
+    # An unknown rule type fails closed.
+    return False
+
+
+def check_transition(issue, from_state, to_state, actor, workflow_id=None):
+    """Spec 4.1: whether the issue's workflow lets actor move it from from_state to to_state."""
+    if workflow_id is None:
+        workflow_id = workflow_id_for(issue.project_id, issue.type_id)
+    if workflow_id is None:
+        return True
+    if from_state is not None and to_state is not None and from_state.pk == to_state.pk:
+        return True
+    if to_state is None or to_state.workflow_status_id is None:
+        return False
+    # Triage and unmanaged states have no arrow of their own, only global ones (P5).
+    sources = Q(from_any=True)
+    if from_state is not None and from_state.workflow_status_id is not None:
+        sources |= Q(sources__source__status_id=from_state.workflow_status_id)
+    transitions = (
+        WorkflowTransition.objects.filter(sources, workflow_id=workflow_id, target__status_id=to_state.workflow_status_id)
+        .distinct()
+        .prefetch_related("rules")
+    )
+    return any(all(_rule_allows(rule, issue, actor) for rule in transition.rules.all()) for transition in transitions)
+
+
+def resolve_workflow_state(*, project_id, instance, state, state_given, type_id):
+    """State a written work item must take (T1, T2, 4.1), None to keep the request as is; raises one refusal."""
+    if state is not None and state.group == StateGroup.TRIAGE.value:
+        # Intake items stay in triage outside any workflow (invariant 6).
+        return None
+    if instance is None:
+        workflow_id = workflow_id_for(project_id, type_id or project_default_type_id(project_id))
+        if workflow_id is None:
+            return None
+        initial = initial_state(project_id, workflow_id)
+        if initial is None or (state_given and state is not None and state.pk != initial.pk):
+            raise refusal(TRANSITION_NOT_ALLOWED)
+        return initial
+    new_type_id = type_id if type_id is not None else instance.type_id
+    workflow_id = workflow_id_for(project_id, new_type_id)
+    if workflow_id is None:
+        return None
+    if state_given and state is None:
+        raise refusal(TRANSITION_NOT_ALLOWED)
+    if new_type_id != instance.type_id:
+        # A type change is a change of workflow, not a move inside one: no arrow needed (T2).
+        if state_given:
+            if not state_in_workflow(state, workflow_id):
+                raise refusal(TRANSITION_NOT_ALLOWED)
+            return None
+        if state_in_workflow(instance.state, workflow_id):
+            return None
+        raise refusal(ARRIVAL_STATE_REQUIRED)
+    if not state_given or state.pk == instance.state_id:
+        return None
+    if not check_transition(instance, instance.state, state, get_current_user(), workflow_id=workflow_id):
+        raise refusal(TRANSITION_NOT_ALLOWED)
+    return None
