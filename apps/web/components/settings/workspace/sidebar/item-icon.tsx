@@ -11,6 +11,7 @@ import {
   ExportOutline,
   MembersOutline,
   WebhooksOutline,
+  WorkflowsOutline,
   WorkItemsOutline,
 } from "@makeplane/propel/icons";
 // plane imports
@@ -24,4 +25,5 @@ export const WORKSPACE_SETTINGS_ICONS: Record<TWorkspaceSettingsTabs, IconGlyph 
   "billing-and-plans": BillingsOutline,
   webhooks: WebhooksOutline,
   "work-item-types": WorkItemsOutline,
+  workflows: WorkflowsOutline,
 };

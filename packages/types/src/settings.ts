@@ -16,7 +16,8 @@ export type TWorkspaceSettingsTabs =
   | "billing-and-plans"
   | "export"
   | "webhooks"
-  | "work-item-types";
+  | "work-item-types"
+  | "workflows";
 export type TWorkspaceSettingsItem = {
   key: TWorkspaceSettingsTabs;
   i18n_label: string;
