@@ -25,9 +25,10 @@ class StateSerializer(BaseSerializer):
             "description",
             "sequence",
             "order",
+            "workflow_status",
         ]
         # Defaults only change through mark_as_default, which also clears the old one
-        read_only_fields = ["workspace", "project", "default"]
+        read_only_fields = ["workspace", "project", "default", "workflow_status"]
 
     def validate(self, attrs):
         if attrs.get("group") == StateGroup.TRIAGE.value:

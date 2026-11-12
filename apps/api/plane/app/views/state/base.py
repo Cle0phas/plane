@@ -20,6 +20,7 @@ from plane.app.serializers import StateSerializer
 from plane.app.permissions import ROLE, allow_permission
 from plane.db.models import State, Issue
 from plane.utils.cache import invalidate_cache
+from plane.utils.workflows import MANAGED_STATES_REFUSAL, project_has_scheme
 
 
 class StateViewSet(BaseViewSet):
@@ -56,6 +57,9 @@ class StateViewSet(BaseViewSet):
     @invalidate_cache(path="workspaces/:slug/states/", url_params=True, user=False)
     @allow_permission([ROLE.ADMIN])
     def create(self, request, slug, project_id):
+        # Spec 5.4: the states of a linked project mirror its workflows and change only through them.
+        if project_has_scheme(project_id):
+            return Response(MANAGED_STATES_REFUSAL, status=status.HTTP_400_BAD_REQUEST)
         try:
             serializer = StateSerializer(data=request.data)
             if serializer.is_valid():
@@ -72,6 +76,9 @@ class StateViewSet(BaseViewSet):
 
     @allow_permission([ROLE.ADMIN])
     def partial_update(self, request, slug, project_id, pk):
+        # Spec 5.4: the states of a linked project mirror its workflows and change only through them.
+        if project_has_scheme(project_id):
+            return Response(MANAGED_STATES_REFUSAL, status=status.HTTP_400_BAD_REQUEST)
         try:
             state = self.get_queryset().get(pk=pk)
             serializer = StateSerializer(state, data=request.data, partial=True)
@@ -117,6 +124,9 @@ class StateViewSet(BaseViewSet):
     @invalidate_cache(path="workspaces/:slug/states/", url_params=True, user=False)
     @allow_permission([ROLE.ADMIN])
     def mark_as_default(self, request, slug, project_id, pk):
+        # Spec 5.4: the states of a linked project mirror its workflows and change only through them.
+        if project_has_scheme(project_id):
+            return Response(MANAGED_STATES_REFUSAL, status=status.HTTP_400_BAD_REQUEST)
         state = self.get_queryset().get(pk=pk)
         # One UPDATE, so concurrent calls can't leave the project with zero or two defaults
         State.objects.filter(project_id=project_id).update(
@@ -127,6 +137,9 @@ class StateViewSet(BaseViewSet):
     @invalidate_cache(path="workspaces/:slug/states/", url_params=True, user=False)
     @allow_permission([ROLE.ADMIN])
     def destroy(self, request, slug, project_id, pk):
+        # Spec 5.4: the states of a linked project mirror its workflows and change only through them.
+        if project_has_scheme(project_id):
+            return Response(MANAGED_STATES_REFUSAL, status=status.HTTP_400_BAD_REQUEST)
         state = State.objects.get(is_triage=False, pk=pk, project_id=project_id, workspace__slug=slug)
 
         if state.default:

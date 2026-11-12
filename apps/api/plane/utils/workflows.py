@@ -196,3 +196,10 @@ def workflow_close_state(project_id, workflow_id):
     if status_id is None:
         return None
     return State.objects.filter(project_id=project_id, workflow_status_id=status_id).first()
+
+
+MANAGED_STATES_REFUSAL = {"error": "managed_by_workflow"}
+
+
+def project_has_scheme(project_id):
+    return ProjectWorkflowScheme.objects.filter(project_id=project_id).exists()
