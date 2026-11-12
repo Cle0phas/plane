@@ -56,8 +56,8 @@ export interface IBaseIssuesStore {
   ) => number | undefined;
 }
 
-// Partial: the public space app has no work item types, so it cannot group by them.
-export const ISSUE_FILTER_DEFAULT_DATA: Partial<Record<TIssueDisplayFilterOptions, keyof IIssue>> = {
+// The public space app has no work item types, so it cannot group by them.
+export const ISSUE_FILTER_DEFAULT_DATA: Record<Exclude<TIssueDisplayFilterOptions, "issue_type">, keyof IIssue> = {
   project: "project_id",
   cycle: "cycle_id",
   module: "module_ids",
