@@ -16,6 +16,7 @@ import {
   StateOutline,
   TriggerOutline,
   ViewsOutline,
+  WorkflowsOutline,
   WorkItemsOutline,
 } from "@makeplane/propel/icons";
 // plane imports
@@ -36,5 +37,6 @@ export const PROJECT_SETTINGS_ICONS: Record<TProjectSettingsTabs, IconGlyph | Re
   labels: LabelsOutline,
   estimates: EstimateOutline,
   work_item_types: WorkItemsOutline,
+  workflows: WorkflowsOutline,
   automations: TriggerOutline,
 };

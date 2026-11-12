@@ -1,0 +1,238 @@
+/**
+ * Copyright (c) 2023-present Plane Software, Inc. and contributors
+ * SPDX-License-Identifier: AGPL-3.0-only
+ * See the LICENSE file for details.
+ */
+
+import { useEffect, useState } from "react";
+import { observer } from "mobx-react";
+import { Button } from "@makeplane/propel/components/button";
+import { ConfirmDialog } from "@plane/blocks/dialog";
+import { setToast } from "@plane/blocks/toast";
+import { useTranslation } from "@plane/i18n";
+import type { TWorkflowMappingNeed } from "@plane/types";
+// hooks
+import { useProjectState } from "@/hooks/store/use-project-state";
+import { useWorkItemType } from "@/hooks/store/use-work-item-type";
+import { useWorkflow } from "@/hooks/store/use-workflow";
+// local imports
+import { buildSchemePayload, getSchemeErrorKey, needKey, pendingNeeds } from "./scheme-helpers";
+
+type Props = { workspaceSlug: string; projectId: string };
+
+const SELECT_CLASS = "rounded-md border border-subtle bg-layer-1 px-2 py-1.5 text-body-sm-regular";
+
+export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ workspaceSlug, projectId }: Props) {
+  const { t } = useTranslation();
+  const {
+    getWorkspaceWorkflows,
+    getProjectScheme,
+    fetchWorkflowDetail,
+    getWorkflowDetail,
+    previewProjectScheme,
+    applyProjectScheme,
+    detachProjectScheme,
+  } = useWorkflow();
+  const { getProjectAssignableTypes } = useWorkItemType();
+  const { fetchProjectStates } = useProjectState();
+  const scheme = getProjectScheme(projectId);
+  const workflows = getWorkspaceWorkflows(workspaceSlug);
+  const types = getProjectAssignableTypes(workspaceSlug, projectId);
+
+  const [defaultWorkflowId, setDefaultWorkflowId] = useState("");
+  const [typeChoices, setTypeChoices] = useState<Record<string, string>>({});
+  const [needs, setNeeds] = useState<TWorkflowMappingNeed[] | null>(null);
+  const [arrivals, setArrivals] = useState<Record<string, string>>({});
+  const [errorKey, setErrorKey] = useState<string | null>(null);
+  const [isBusy, setIsBusy] = useState(false);
+  const [isDetachOpen, setIsDetachOpen] = useState(false);
+
+  useEffect(() => {
+    setDefaultWorkflowId(scheme?.default_workflow_id ?? "");
+    setTypeChoices(Object.fromEntries((scheme?.items ?? []).map((item) => [item.issue_type_id, item.workflow_id])));
+  }, [scheme]);
+
+  const payload = () => buildSchemePayload(defaultWorkflowId, typeChoices, arrivals);
+
+  const refresh = () => Promise.allSettled([fetchProjectStates(workspaceSlug, projectId)]);
+
+  const goToMapping = async () => {
+    setErrorKey(null);
+    setIsBusy(true);
+    try {
+      const chosen = new Set([defaultWorkflowId, ...Object.values(typeChoices).filter(Boolean)]);
+      await Promise.all([...chosen].map((workflowId) => fetchWorkflowDetail(workspaceSlug, workflowId)));
+      setArrivals({});
+      setNeeds(pendingNeeds(await previewProjectScheme(workspaceSlug, projectId, payload())));
+    } catch (error) {
+      setErrorKey(getSchemeErrorKey(error));
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const apply = async () => {
+    setErrorKey(null);
+    setIsBusy(true);
+    try {
+      await applyProjectScheme(workspaceSlug, projectId, payload());
+      await refresh();
+      setNeeds(null);
+      setToast({ type: "success", title: t("workflows.scheme.applied"), message: "" });
+    } catch (error) {
+      setErrorKey(getSchemeErrorKey(error));
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const detach = async () => {
+    setIsBusy(true);
+    try {
+      await detachProjectScheme(workspaceSlug, projectId);
+      await refresh();
+      setIsDetachOpen(false);
+      setToast({ type: "success", title: t("workflows.scheme.detached"), message: "" });
+    } catch (error) {
+      setErrorKey(getSchemeErrorKey(error));
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const workflowName = (workflowId: string) => workflows.find((workflow) => workflow.id === workflowId)?.name ?? "";
+
+  return (
+    <div className="space-y-6">
+      {!scheme?.default_workflow_id && (
+        <p className="text-body-sm-regular text-secondary">{t("workflows.scheme.free")}</p>
+      )}
+      {errorKey && (
+        <p role="alert" className="text-body-sm-regular text-danger-primary">
+          {t(errorKey)}
+        </p>
+      )}
+      {needs === null ? (
+        <div className="space-y-4">
+          <label className="flex flex-col gap-1 text-body-xs-medium text-secondary">
+            {t("workflows.scheme.default_workflow")}
+            <select
+              className={SELECT_CLASS}
+              value={defaultWorkflowId}
+              onChange={(event) => setDefaultWorkflowId(event.target.value)}
+            >
+              <option value="" disabled>
+                {t("workflows.scheme.choose")}
+              </option>
+              {workflows.map((workflow) => (
+                <option key={workflow.id} value={workflow.id}>
+                  {workflow.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          {types.map((type) => (
+            <label key={type.id} className="flex flex-col gap-1 text-body-xs-medium text-secondary">
+              {t("workflows.scheme.per_type", { type: type.name })}
+              <select
+                className={SELECT_CLASS}
+                value={typeChoices[type.id] ?? ""}
+                onChange={(event) => setTypeChoices((current) => ({ ...current, [type.id]: event.target.value }))}
+              >
+                <option value="">{t("workflows.scheme.same_as_default")}</option>
+                {workflows.map((workflow) => (
+                  <option key={workflow.id} value={workflow.id}>
+                    {workflow.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))}
+          <div className="flex gap-2">
+            <Button
+              variant="primary"
+              size="md"
+              stretch="auto"
+              disabled={!defaultWorkflowId}
+              loading={isBusy}
+              label={t("workflows.scheme.next")}
+              onClick={goToMapping}
+            />
+            {scheme?.default_workflow_id && (
+              <Button
+                variant="danger-outline"
+                size="md"
+                stretch="auto"
+                label={t("workflows.scheme.detach")}
+                onClick={() => setIsDetachOpen(true)}
+              />
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <h3 className="text-body-md-medium text-primary">{t("workflows.scheme.mapping.title")}</h3>
+          {needs.length === 0 ? (
+            <p className="text-body-sm-regular text-secondary">{t("workflows.scheme.mapping.none")}</p>
+          ) : (
+            <>
+              <p className="text-body-sm-regular text-secondary">{t("workflows.scheme.mapping.description")}</p>
+              {needs.map((need) => (
+                <label key={needKey(need)} className="flex flex-col gap-1 text-body-xs-medium text-secondary">
+                  {t("workflows.scheme.mapping.row", {
+                    state: need.state_name,
+                    workflow: workflowName(need.workflow_id),
+                    count: need.issue_count,
+                  })}
+                  <select
+                    className={SELECT_CLASS}
+                    value={arrivals[needKey(need)] ?? ""}
+                    onChange={(event) =>
+                      setArrivals((current) => ({ ...current, [needKey(need)]: event.target.value }))
+                    }
+                  >
+                    <option value="" disabled>
+                      {t("workflows.scheme.mapping.pick")}
+                    </option>
+                    {(getWorkflowDetail(need.workflow_id)?.states ?? []).map((state) => (
+                      <option key={state.status.id} value={state.status.id}>
+                        {state.status.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+            </>
+          )}
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="md"
+              stretch="auto"
+              label={t("workflows.scheme.back")}
+              onClick={() => setNeeds(null)}
+            />
+            <Button
+              variant="primary"
+              size="md"
+              stretch="auto"
+              loading={isBusy}
+              disabled={needs.some((need) => !arrivals[needKey(need)])}
+              label={t("workflows.scheme.apply")}
+              onClick={apply}
+            />
+          </div>
+        </div>
+      )}
+      <ConfirmDialog
+        handleClose={() => setIsDetachOpen(false)}
+        handleSubmit={detach}
+        isSubmitting={isBusy}
+        isOpen={isDetachOpen}
+        title={t("workflows.scheme.detach")}
+        content={t("workflows.scheme.detach_confirm")}
+        primaryButtonText={{ loading: t("workflows.scheme.detach"), default: t("workflows.scheme.detach") }}
+      />
+    </div>
+  );
+});
