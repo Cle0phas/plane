@@ -170,3 +170,29 @@ def resolve_workflow_state(*, project_id, instance, state, state_given, type_id)
     if not check_transition(instance, instance.state, state, get_current_user(), workflow_id=workflow_id):
         raise refusal(TRANSITION_NOT_ALLOWED)
     return None
+
+
+def intake_accept_state(issue):
+    """T3: an accepted intake item enters its workflow's initial state, or the project default when free."""
+    workflow_id = workflow_id_for(issue.project_id, issue.type_id)
+    if workflow_id is not None:
+        return initial_state(issue.project_id, workflow_id)
+    return State.objects.filter(project_id=issue.project_id, default=True).first()
+
+
+def workflow_close_state(project_id, workflow_id):
+    """T4: a cancelled state reachable by a rule-free global transition; the task has no actor (P9)."""
+    status_id = (
+        WorkflowTransition.objects.filter(
+            workflow_id=workflow_id,
+            from_any=True,
+            rules__isnull=True,
+            target__status__group=StateGroup.CANCELLED.value,
+        )
+        .order_by("created_at")
+        .values_list("target__status_id", flat=True)
+        .first()
+    )
+    if status_id is None:
+        return None
+    return State.objects.filter(project_id=project_id, workflow_status_id=status_id).first()

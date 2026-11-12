@@ -16,9 +16,10 @@ from django.utils import timezone
 
 # Module imports
 from plane.bgtasks.issue_activities_task import issue_activity
-from plane.db.models import IntakeIssue, Issue, Project, State
+from plane.db.models import IntakeIssue, Issue, Project, State, StateGroup
 from plane.db.models.intake import IntakeIssueStatus
 from plane.utils.exception_logger import log_exception
+from plane.utils.workflows import workflow_close_state, workflow_id_for
 
 logger = logging.getLogger("plane.worker")
 
@@ -120,13 +121,28 @@ def close_old_issues():
 
             # Check if Issues
             if issues:
-                if project.default_state is None:
-                    close_state = State.objects.filter(group="cancelled").first()
-                else:
-                    close_state = project.default_state
-
+                # The fallback must come from this project: the unscoped lookup could pick another tenant's state.
+                fallback = (
+                    project.default_state
+                    if project.default_state and project.default_state.project_id == project_id
+                    else State.objects.filter(project_id=project_id, group=StateGroup.CANCELLED.value).first()
+                )
+                workflows_by_type = {}
+                close_states = {}
                 issues_to_update = []
                 for issue in issues:
+                    if issue.type_id not in workflows_by_type:
+                        workflows_by_type[issue.type_id] = workflow_id_for(project_id, issue.type_id)
+                    workflow_id = workflows_by_type[issue.type_id]
+                    if workflow_id is None:
+                        close_state = fallback
+                    else:
+                        if workflow_id not in close_states:
+                            close_states[workflow_id] = workflow_close_state(project_id, workflow_id)
+                        close_state = close_states[workflow_id]
+                    # No reachable closing state: the item stays where it is (T4).
+                    if close_state is None or close_state.pk == issue.state_id:
+                        continue
                     issue.state = close_state
                     issues_to_update.append(issue)
 
