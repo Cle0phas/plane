@@ -57,11 +57,13 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
 
   // A revalidated scheme must not overwrite what the user is editing.
   const isPristine = useRef(true);
+  // Bumped after a successful apply or detach so the form re-reads the scheme whatever the render order.
+  const [syncTick, setSyncTick] = useState(0);
   useEffect(() => {
     if (!isPristine.current || needs !== null) return;
     setDefaultWorkflowId(scheme?.default_workflow_id ?? "");
     setTypeChoices(Object.fromEntries((scheme?.items ?? []).map((item) => [item.issue_type_id, item.workflow_id])));
-  }, [scheme, needs]);
+  }, [scheme, needs, syncTick]);
 
   const payload = (arrivalsOverride = arrivals) =>
     buildSchemePayload(
@@ -95,8 +97,9 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
     setIsBusy(true);
     try {
       await applyProjectScheme(workspaceSlug, projectId, payload());
-      isPristine.current = true;
       await refresh();
+      isPristine.current = true;
+      setSyncTick((tick) => tick + 1);
       setNeeds(null);
       setToast({ type: "success", title: t("workflows.scheme.applied"), message: "" });
     } catch (error) {
@@ -115,8 +118,9 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
     setIsBusy(true);
     try {
       await detachProjectScheme(workspaceSlug, projectId);
-      isPristine.current = true;
       await refresh();
+      isPristine.current = true;
+      setSyncTick((tick) => tick + 1);
       setIsDetachOpen(false);
       setToast({ type: "success", title: t("workflows.scheme.detached"), message: "" });
     } catch (error) {
