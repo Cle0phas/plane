@@ -8,6 +8,8 @@ import { describe, expect, it } from "vitest";
 import type { IState, TProjectWorkflowScheme, TWorkflowGraph, TWorkflowRule } from "@plane/types";
 import {
   getAllowedTargetStateIds,
+  getArrivalStateIds,
+  getEffectiveTypeId,
   getInitialStateId,
   getWorkflowRefusalKey,
   getWorkflowStateIds,
@@ -214,6 +216,28 @@ describe("initial and workflow states", () => {
 
   it("lists the states of the type workflow", () => {
     expect(new Set(getWorkflowStateIds(scheme, states, "bug"))).toEqual(new Set(["s-doing", "s-new"]));
+  });
+});
+
+describe("getEffectiveTypeId", () => {
+  it("falls back to the project default type, as the server does", () => {
+    expect(getEffectiveTypeId("bug", "task")).toBe("bug");
+    expect(getEffectiveTypeId(null, "task")).toBe("task");
+    expect(getEffectiveTypeId(undefined, undefined)).toBeNull();
+  });
+});
+
+describe("getArrivalStateIds", () => {
+  it("asks for an arrival state only when the current state is outside the new workflow", () => {
+    expect(new Set(getArrivalStateIds(scheme, states, "bug", "s-todo"))).toEqual(new Set(["s-doing", "s-new"]));
+    expect(getArrivalStateIds(scheme, states, "bug", "s-doing")).toBeNull();
+    expect(getArrivalStateIds(scheme, states, "bug", null)).not.toBeNull();
+  });
+
+  it("never asks in a free project", () => {
+    expect(
+      getArrivalStateIds({ default_workflow_id: null, items: [], workflows: [] }, states, "bug", "s-todo")
+    ).toBeNull();
   });
 });
 

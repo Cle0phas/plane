@@ -8,8 +8,9 @@
 import { useProjectState } from "@/hooks/store/use-project-state";
 import { useUser, useUserPermissions } from "@/hooks/store/user";
 import { useWorkflow } from "@/hooks/store/use-workflow";
+import { useWorkItemType } from "@/hooks/store/use-work-item-type";
 // local imports
-import { getAllowedTargetStateIds, type TWorkflowActor, type TWorkflowIssue } from "./helpers";
+import { getAllowedTargetStateIds, getEffectiveTypeId, type TWorkflowActor, type TWorkflowIssue } from "./helpers";
 
 export const useProjectWorkflowScheme = (projectId: string | undefined) => {
   const { getProjectScheme } = useWorkflow();
@@ -34,7 +35,13 @@ export const useAllowedStateIds = (
 ): Set<string> | null => {
   const scheme = useProjectWorkflowScheme(projectId);
   const { getProjectStates } = useProjectState();
+  const { getProjectDefaultTypeId } = useWorkItemType();
   const actor = useWorkflowActor(workspaceSlug, projectId);
   if (!issue || !projectId) return null;
-  return getAllowedTargetStateIds({ scheme, projectStates: getProjectStates(projectId) ?? [], issue, actor });
+  return getAllowedTargetStateIds({
+    scheme,
+    projectStates: getProjectStates(projectId) ?? [],
+    issue: { ...issue, type_id: getEffectiveTypeId(issue.type_id, getProjectDefaultTypeId(projectId)) },
+    actor,
+  });
 };

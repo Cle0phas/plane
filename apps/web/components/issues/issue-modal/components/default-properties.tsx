@@ -4,10 +4,10 @@
  * See the LICENSE file for details.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import type { Control } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
 import { Icon as PropelIcon } from "@makeplane/propel/components/icon";
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@makeplane/propel/components/menu";
 import { Pill } from "@makeplane/propel/components/pill";
@@ -28,14 +28,44 @@ import { MemberSelect } from "@/components/dropdowns/member/member-select";
 import { ModuleSelect } from "@/components/dropdowns/module/module-select";
 import { PrioritySelect } from "@/components/dropdowns/priority/priority-select";
 import { StateSelect } from "@/components/dropdowns/state/state-select";
+import { getEffectiveTypeId, getInitialStateId, useProjectWorkflowScheme } from "@/components/workflow";
 import { ParentIssuesListModal } from "@/components/issues/parent-issues-list-modal";
 import { IssueIdentifier } from "@/components/issues/issue-detail/issue-identifier";
 // hooks
 import { useProjectEstimates } from "@/hooks/store/estimates";
 import { useProject } from "@/hooks/store/use-project";
 import { useProjectState } from "@/hooks/store/use-project-state";
+import { useWorkItemType } from "@/hooks/store/use-work-item-type";
 import { useUserProfile } from "@/hooks/store/user";
 import { usePlatformOS } from "@/hooks/use-platform-os";
+
+type TWorkflowInitialStateProps = {
+  stateId: string;
+  value: string | null | undefined;
+  onChange: (stateId: string) => void;
+  projectId: string | undefined;
+  tabIndex: number | undefined;
+};
+
+// Keeps the form value on the initial state while the type changes, and shows it read-only.
+function WorkflowInitialState({ stateId, value, onChange, projectId, tabIndex }: TWorkflowInitialStateProps) {
+  const { t } = useTranslation();
+  useEffect(() => {
+    if (value !== stateId) onChange(stateId);
+  }, [stateId, value, onChange]);
+  return (
+    <StateSelect
+      testId="create-work-item-state-select"
+      value={stateId}
+      onChange={() => undefined}
+      projectId={projectId}
+      variant="pill-md"
+      tabIndex={tabIndex}
+      disabled
+      tooltip={{ heading: t("workflows.creation.initial_state") }}
+    />
+  );
+}
 
 type TIssueDefaultPropertiesProps = {
   control: Control<TIssue>;
@@ -71,13 +101,25 @@ export const IssueDefaultProperties = observer(function IssueDefaultProperties(p
   const { t } = useTranslation();
   const { areEstimateEnabledByProjectId } = useProjectEstimates();
   const { getProjectById } = useProject();
-  const { getProjectDefaultStateId } = useProjectState();
+  const { getProjectDefaultStateId, getProjectStates } = useProjectState();
+  const { getProjectDefaultTypeId } = useWorkItemType();
   const { isMobile } = usePlatformOS();
   const { data: userProfile } = useUserProfile();
   // derived values
   const projectDetails = getProjectById(projectId);
 
   const { getIndex } = getTabIndex(ETabIndices.ISSUE_FORM, isMobile);
+  const typeId = useWatch({ control, name: "type_id" });
+  const scheme = useProjectWorkflowScheme(projectId ?? undefined);
+  // T1: a new item enters its workflow's initial state; the server refuses any other.
+  const workflowInitialStateId =
+    !id || isDraft
+      ? getInitialStateId(
+          scheme,
+          (projectId && getProjectStates(projectId)) || [],
+          getEffectiveTypeId(typeId, projectId ? getProjectDefaultTypeId(projectId) : null)
+        )
+      : undefined;
 
   const minDate = getDate(startDate);
   minDate?.setDate(minDate.getDate());
@@ -90,20 +132,30 @@ export const IssueDefaultProperties = observer(function IssueDefaultProperties(p
       <Controller
         control={control}
         name="state_id"
-        render={({ field: { value, onChange } }) => (
-          <StateSelect
-            testId="create-work-item-state-select"
-            // an empty state shows the project's default state, as the legacy dropdown did
-            value={value || getProjectDefaultStateId(projectId)}
-            onChange={(stateId) => {
-              onChange(stateId);
-              handleFormChange();
-            }}
-            projectId={projectId ?? undefined}
-            variant="pill-md"
-            tabIndex={getIndex("state_id")}
-          />
-        )}
+        render={({ field: { value, onChange } }) =>
+          workflowInitialStateId ? (
+            <WorkflowInitialState
+              stateId={workflowInitialStateId}
+              value={value}
+              onChange={onChange}
+              projectId={projectId ?? undefined}
+              tabIndex={getIndex("state_id")}
+            />
+          ) : (
+            <StateSelect
+              testId="create-work-item-state-select"
+              // an empty state shows the project's default state, as the legacy dropdown did
+              value={value || getProjectDefaultStateId(projectId)}
+              onChange={(stateId) => {
+                onChange(stateId);
+                handleFormChange();
+              }}
+              projectId={projectId ?? undefined}
+              variant="pill-md"
+              tabIndex={getIndex("state_id")}
+            />
+          )
+        }
       />
       <Controller
         control={control}

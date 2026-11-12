@@ -14,6 +14,7 @@ import { getDate, getIssueDueDateClassName, renderFormattedPayloadDate } from "@
 import { MemberSelect } from "@/components/dropdowns/member/member-select";
 import { PrioritySelect } from "@/components/dropdowns/priority/priority-select";
 import { StateSelect } from "@/components/dropdowns/state/state-select";
+import { useAllowedStateIds } from "@/components/workflow";
 // hooks
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 import { useProjectState } from "@/hooks/store/use-project-state";
@@ -48,6 +49,7 @@ export const IssueDetailMetaRow = observer(function IssueDetailMetaRow(props: Pr
   const { data: userProfile } = useUserProfile();
   // derived values
   const issue = getIssueById(issueId);
+  const allowedStateIds = useAllowedStateIds(workspaceSlug, projectId, issue);
   if (!issue) return null;
 
   const stateDetails = getStateById(issue.state_id);
@@ -66,6 +68,7 @@ export const IssueDetailMetaRow = observer(function IssueDetailMetaRow(props: Pr
             disabled={disabled}
             variant="select-ghost-lg"
             tooltip
+            allowedStateIds={allowedStateIds}
           />
         </div>
 

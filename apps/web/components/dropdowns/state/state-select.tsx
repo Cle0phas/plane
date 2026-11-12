@@ -35,6 +35,8 @@ type StateSelectWebProps = {
   testId?: string;
   /** Tab order of the trigger, for forms that sequence focus explicitly (`ETabIndices`). */
   tabIndex?: number;
+  /** Spec 7.4: states the workflow lets this user pick (current state included); null or absent shows all. */
+  allowedStateIds?: Set<string> | null;
 };
 
 const toOption = (state: IState): StateOption => ({
@@ -52,7 +54,7 @@ const toOption = (state: IState): StateOption => ({
  *
  * CE change: EE reads a paginated state "lite" resource with workflow gating (`typeId`,
  * `isForWorkItemCreation`, `scopedProjectIds`); CE has neither, so the whole project list is served
- * as one page and `allowedStateIds` stays unset.
+ * as one page. Workflows pass `allowedStateIds` (spec 7.4); a free project leaves it unset.
  */
 export const StateSelect = observer(function StateSelect(props: StateSelectWebProps) {
   const {
@@ -68,6 +70,7 @@ export const StateSelect = observer(function StateSelect(props: StateSelectWebPr
     appendElement,
     testId,
     tabIndex,
+    allowedStateIds,
   } = props;
   // router params
   const { workspaceSlug } = useParams();
@@ -121,6 +124,7 @@ export const StateSelect = observer(function StateSelect(props: StateSelectWebPr
       appendElement={appendElement}
       testId={testId}
       tabIndex={tabIndex}
+      allowedStateIds={allowedStateIds}
     />
   );
 });

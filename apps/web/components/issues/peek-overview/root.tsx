@@ -15,6 +15,7 @@ import { setPromiseToast, setToast } from "@plane/blocks/toast";
 import type { IWorkItemPeekOverview, TIssue } from "@plane/types";
 import { EIssueServiceType, EIssuesStoreType } from "@plane/types";
 // hooks
+import { getWorkflowRefusalKey } from "@/components/workflow";
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 import { useIssues } from "@/hooks/store/use-issues";
 import { useUserPermissions } from "@/hooks/store/user";
@@ -57,7 +58,7 @@ export const IssuePeekOverview = observer(function IssuePeekOverview(props: IWor
     storeType === EIssuesStoreType.EPIC ? EIssueServiceType.EPICS : EIssueServiceType.ISSUES
   );
   // state
-  const [error, setError] = useState(false);
+  const [hasError, setError] = useState(false);
 
   const removeRoutePeekId = useCallback(() => {
     setPeekIssue(undefined);
@@ -83,11 +84,13 @@ export const IssuePeekOverview = observer(function IssuePeekOverview(props: IWor
               fetchActivities(workspaceSlug, projectId, issueId);
               return;
             })
-            .catch((_error) => {
+            .catch((updateError) => {
               setToast({
                 title: t("toast.error"),
                 type: "error",
-                message: t("entity.update.failed", { entity: t("issue.label", { count: 1 }) }),
+                message: t(getWorkflowRefusalKey(updateError) ?? "entity.update.failed", {
+                  entity: t("issue.label", { count: 1 }),
+                }),
               });
             });
         }
@@ -241,7 +244,7 @@ export const IssuePeekOverview = observer(function IssuePeekOverview(props: IWor
       projectId={peekIssue.projectId}
       issueId={peekIssue.issueId}
       isLoading={isLoading}
-      isError={error}
+      isError={hasError}
       is_archived={!!peekIssue.isArchived}
       disabled={!isEditable}
       embedIssue={embedIssue}

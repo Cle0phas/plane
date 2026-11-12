@@ -19,6 +19,7 @@ import { EstimateSelect } from "@/components/dropdowns/estimate/estimate-select"
 import { MemberSelect } from "@/components/dropdowns/member/member-select";
 import { PrioritySelect } from "@/components/dropdowns/priority/priority-select";
 import { StateSelect } from "@/components/dropdowns/state/state-select";
+import { useAllowedStateIds } from "@/components/workflow";
 // hooks
 import { WithDisplayPropertiesHOC } from "@/components/issues/issue-layouts/properties/with-display-properties-HOC";
 import { useProjectEstimates } from "@/hooks/store/estimates";
@@ -42,17 +43,18 @@ type Props = {
   issue: TIssue;
 };
 
+const handleEventPropagation = (e: SyntheticEvent<HTMLDivElement>) => {
+  e.stopPropagation();
+  e.preventDefault();
+};
+
 export const SubIssuesListItemProperties = observer(function SubIssuesListItemProperties(props: Props) {
   const { workspaceSlug, parentIssueId, issueId, canEdit, updateSubIssue, displayProperties, issue } = props;
   const { t } = useTranslation();
   const { getStateById } = useProjectState();
   const { areEstimateEnabledByProjectId } = useProjectEstimates();
   const { data: userProfile } = useUserProfile();
-
-  const handleEventPropagation = (e: SyntheticEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-    e.preventDefault();
-  };
+  const allowedStateIds = useAllowedStateIds(workspaceSlug, issue.project_id ?? undefined, issue);
 
   const handleStartDate = (date: Date | null) => {
     if (issue.project_id) {
@@ -117,6 +119,7 @@ export const SubIssuesListItemProperties = observer(function SubIssuesListItemPr
           disabled={!canEdit}
           variant="pill-sm"
           tooltip
+          allowedStateIds={allowedStateIds}
         />
       </WithDisplayPropertiesHOC>
 

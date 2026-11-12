@@ -96,6 +96,23 @@ export const getWorkflowStateIds = (
   return new Set(workflow.states.flatMap((node) => byStatus.get(node.status.id) ?? []));
 };
 
+/** The server resolves a null type to the project default type; pass the result to the type-based helpers. */
+export const getEffectiveTypeId = (
+  typeId: string | null | undefined,
+  projectDefaultTypeId: string | null | undefined
+) => typeId ?? projectDefaultTypeId ?? null;
+
+/** W9: the states to choose from when the type change leaves the current state outside the new workflow; null when no choice is needed. */
+export const getArrivalStateIds = (
+  scheme: TProjectWorkflowScheme | undefined,
+  projectStates: IState[],
+  newEffectiveTypeId: string | null | undefined,
+  currentStateId: string | null | undefined
+): Set<string> | null => {
+  const stateIds = getWorkflowStateIds(scheme, projectStates, newEffectiveTypeId);
+  return stateIds && (!currentStateId || !stateIds.has(currentStateId)) ? stateIds : null;
+};
+
 export const getWorkflowRefusalKey = (error: unknown): string | undefined => {
   if (!isRecord(error) || !Array.isArray(error.workflow)) return undefined;
   const code = error.workflow[0];

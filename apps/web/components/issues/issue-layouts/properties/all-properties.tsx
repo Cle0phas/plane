@@ -51,6 +51,7 @@ import { MemberSelect } from "@/components/dropdowns/member/member-select";
 import { ModuleSelect } from "@/components/dropdowns/module/module-select";
 import { PrioritySelect } from "@/components/dropdowns/priority/priority-select";
 import { StateSelect } from "@/components/dropdowns/state/state-select";
+import { useAllowedStateIds } from "@/components/workflow";
 // hooks
 import { useProjectEstimates } from "@/hooks/store/estimates";
 import { useEstimate } from "@/hooks/store/estimates/use-estimate";
@@ -127,6 +128,7 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
   // router
   const router = useAppRouter();
   const { workspaceSlug, projectId } = useParams();
+  const allowedStateIds = useAllowedStateIds(workspaceSlug?.toString(), issue.project_id ?? undefined, issue);
 
   // derived values
   const stateDetails = getStateById(issue.state_id);
@@ -265,6 +267,7 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
         projectId={issue.project_id ?? undefined}
         disabled={isReadOnly}
         variant="pill-md"
+        allowedStateIds={allowedStateIds}
         {...extra}
       />
     );

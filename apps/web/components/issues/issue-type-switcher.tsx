@@ -4,15 +4,24 @@
  * See the LICENSE file for details.
  */
 
+import { useState } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 // plane imports
 import { setToast } from "@plane/blocks/toast";
 import { useTranslation } from "@plane/i18n";
+import type { TIssue } from "@plane/types";
 // hooks
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
+import { useProjectState } from "@/hooks/store/use-project-state";
 // components
 import { IssueIdentifier } from "@/components/issues/issue-detail/issue-identifier";
+import {
+  ArrivalStateDialog,
+  getArrivalStateIds,
+  getWorkflowRefusalKey,
+  useProjectWorkflowScheme,
+} from "@/components/workflow";
 import { getWorkItemTypeChange } from "@/components/work-item-types/helpers";
 import { WorkItemTypeSelect } from "@/components/work-item-types/work-item-type-select";
 
@@ -30,25 +39,39 @@ export const IssueTypeSwitcher = observer(function IssueTypeSwitcher(props: TIss
     issue: { getIssueById },
     updateIssue,
   } = useIssueDetail();
+  const { getProjectStates } = useProjectState();
+  const [pending, setPending] = useState<{ typeId: string; stateIds: Set<string> } | null>(null);
   // derived values
   const issue = getIssueById(issueId);
+  const scheme = useProjectWorkflowScheme(issue?.project_id ?? undefined);
 
   if (!issue || !issue.project_id) return <></>;
   const projectId = issue.project_id;
 
-  const handleChange = async (typeId: string) => {
-    const change = getWorkItemTypeChange(issue.type_id, typeId);
-    if (!change || !workspaceSlug) return;
+  const submitChange = async (change: Partial<TIssue>) => {
+    if (!workspaceSlug) return;
     try {
       // The store applies the change optimistically and reverts it when the request fails.
       await updateIssue(workspaceSlug.toString(), projectId, issueId, change);
-    } catch {
+    } catch (error) {
       setToast({
         type: "error",
         title: t("common.error.label"),
-        message: t("entity.update.failed", { entity: t("issue.label", { count: 1 }) }),
+        message: t(getWorkflowRefusalKey(error) ?? "entity.update.failed", { entity: t("issue.label", { count: 1 }) }),
       });
     }
+  };
+
+  const handleChange = async (typeId: string) => {
+    const change = getWorkItemTypeChange(issue.type_id, typeId);
+    if (!change) return;
+    // W9: the current state must exist in the new workflow, otherwise the user picks the arrival state.
+    const stateIds = getArrivalStateIds(scheme, getProjectStates(projectId) ?? [], typeId, issue.state_id);
+    if (stateIds) {
+      setPending({ typeId, stateIds });
+      return;
+    }
+    await submitChange(change);
   };
 
   return (
@@ -69,6 +92,18 @@ export const IssueTypeSwitcher = observer(function IssueTypeSwitcher(props: TIss
         enableClickToCopyIdentifier
         displayProperties={{ key: true, issue_type: false }}
       />
+      {pending && (
+        <ArrivalStateDialog
+          isOpen
+          projectId={projectId}
+          stateIds={pending.stateIds}
+          onClose={() => setPending(null)}
+          onSubmit={(stateId) => {
+            setPending(null);
+            void submitChange({ type_id: pending.typeId, state_id: stateId });
+          }}
+        />
+      )}
     </div>
   );
 });
