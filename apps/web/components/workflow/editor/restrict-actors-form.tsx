@@ -38,8 +38,8 @@ export const RestrictActorsForm = observer(function RestrictActorsForm({ params,
     <fieldset className="space-y-2" disabled={readOnly}>
       <legend className="text-body-sm-medium text-primary">{t("workflows.editor.restrict.title")}</legend>
       <p className="text-caption-sm-regular text-tertiary">{t("workflows.editor.restrict.description")}</p>
-      <div className="space-y-1">
-        <span className="text-body-xs-medium text-secondary">{t("workflows.editor.restrict.roles")}</span>
+      <fieldset className="space-y-1">
+        <legend className="text-body-xs-medium text-secondary">{t("workflows.editor.restrict.roles")}</legend>
         {ROLES.map((role) => (
           <label key={role.value} className="flex items-center gap-2 text-body-xs-regular">
             <input
@@ -50,9 +50,9 @@ export const RestrictActorsForm = observer(function RestrictActorsForm({ params,
             {t(`workflows.roles.${role.key}`)}
           </label>
         ))}
-      </div>
-      <div className="max-h-40 space-y-1 overflow-y-auto">
-        <span className="text-body-xs-medium text-secondary">{t("workflows.editor.restrict.users")}</span>
+      </fieldset>
+      <fieldset className="max-h-40 space-y-1 overflow-y-auto">
+        <legend className="text-body-xs-medium text-secondary">{t("workflows.editor.restrict.users")}</legend>
         {(workspaceMemberIds ?? []).map((memberId) => {
           const member = getWorkspaceMemberDetails(memberId)?.member;
           if (!member) return null;
@@ -67,7 +67,7 @@ export const RestrictActorsForm = observer(function RestrictActorsForm({ params,
             </label>
           );
         })}
-      </div>
+      </fieldset>
       {(["assignee", "creator"] as const).map((flag) => (
         <label key={flag} className="flex items-center gap-2 text-body-xs-regular">
           <input

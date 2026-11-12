@@ -20,7 +20,7 @@ type Props = {
   readOnly: boolean;
   selection: TEditorSelection;
   onSelect: (selection: TEditorSelection) => void;
-  onMove: (key: string, x: number, y: number) => void;
+  onMove: (moves: { key: string; x: number; y: number }[]) => void;
   onConnect: (sourceKey: string, targetKey: string) => void;
 };
 
@@ -79,19 +79,26 @@ export function WorkflowCanvas({ draft, readOnly, selection, onSelect, onMove, o
   );
 
   return (
-    <div className="h-[560px] w-full rounded-md border border-subtle" aria-label={t("workflows.editor.diagram_label")}>
+    <div
+      role="group"
+      className="h-[560px] w-full rounded-md border border-subtle"
+      aria-label={t("workflows.editor.diagram_label")}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={NODE_TYPES}
         onNodesChange={(changes) => setNodes((current) => applyNodeChanges(changes, current))}
         fitView
+        deleteKeyCode={null}
         nodesDraggable={!readOnly}
         nodesConnectable={!readOnly}
         onNodeClick={(_, node) => onSelect({ kind: "state", key: node.id })}
         onEdgeClick={(_, edge) => onSelect({ kind: "transition", key: String(edge.data?.transitionKey) })}
         onPaneClick={() => onSelect(null)}
-        onNodeDragStop={(_, node) => onMove(node.id, node.position.x, node.position.y)}
+        onNodeDragStop={(_, __, dragged) =>
+          onMove(dragged.map((node) => ({ key: node.id, x: node.position.x, y: node.position.y })))
+        }
         onConnect={(connection) => {
           if (connection.source && connection.target && connection.source !== connection.target)
             onConnect(connection.source, connection.target);

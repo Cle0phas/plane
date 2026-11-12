@@ -4,6 +4,7 @@
  * See the LICENSE file for details.
  */
 
+import { useEffect, useRef } from "react";
 import { observer } from "mobx-react";
 import { Button } from "@makeplane/propel/components/button";
 import { InputField } from "@makeplane/propel/components/input-field";
@@ -30,6 +31,8 @@ type Props = {
   readOnly: boolean;
   onChange: (draft: TDraftGraph) => void;
   onClose: () => void;
+  // Bumped by the element list so keyboard users land in the panel; mouse selection keeps focus where it is.
+  focusSignal: number;
 };
 
 export const WorkflowSidePanel = observer(function WorkflowSidePanel({
@@ -38,8 +41,16 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
   readOnly,
   onChange,
   onClose,
+  focusSignal,
 }: Props) {
   const { t } = useTranslation();
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const handledSignal = useRef(0);
+  useEffect(() => {
+    if (focusSignal === handledSignal.current) return;
+    handledSignal.current = focusSignal;
+    headingRef.current?.focus();
+  }, [focusSignal]);
   if (!selection) return null;
   const state = selection.kind === "state" ? draft.states.find((item) => item.key === selection.key) : undefined;
   const transition =
@@ -52,7 +63,7 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
       aria-label={t(state ? "workflows.editor.panel.state" : "workflows.editor.panel.transition")}
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-body-sm-medium text-primary">
+        <h3 ref={headingRef} tabIndex={-1} className="text-body-sm-medium text-primary">
           {t(state ? "workflows.editor.panel.state" : "workflows.editor.panel.transition")}
         </h3>
         <Button variant="ghost" size="sm" stretch="auto" label={t("workflows.editor.panel.close")} onClick={onClose} />

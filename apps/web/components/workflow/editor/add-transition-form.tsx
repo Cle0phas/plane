@@ -26,10 +26,12 @@ export function AddTransitionForm({ draft, onAdd }: Props) {
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     if (!target || (!fromAny && sources.length === 0)) return;
+    const sourceKeys = sources.filter((key) => key !== target);
+    if (!fromAny && sourceKeys.length === 0) return;
     onAdd({
       name,
       from_any: fromAny,
-      source_keys: fromAny ? [] : sources.filter((key) => key !== target),
+      source_keys: fromAny ? [] : sourceKeys,
       target_key: target,
       rules: [],
     });

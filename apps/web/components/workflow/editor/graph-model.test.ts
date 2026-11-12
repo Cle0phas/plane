@@ -16,6 +16,7 @@ import {
   moveState,
   removeState,
   setInitial,
+  shouldResetDraft,
   updateTransition,
   setRestriction,
   toPayload,
@@ -174,5 +175,21 @@ describe("graph model", () => {
   it("maps draft codes to i18n keys", () => {
     expect(getDraftErrorKey("status_name_required")).toBe("work_item_types.create_update.form.name.required");
     expect(getDraftErrorKey("invalid_rule")).toBe("workflows.editor.errors.invalid_rule");
+  });
+});
+
+describe("shouldResetDraft", () => {
+  const saved = fromDetail(detail, []);
+  const refreshed = updateStatus(saved, saved.states[0].key, { color: "#123456" });
+
+  it("takes a changed saved graph when the draft is clean", () => {
+    expect(shouldResetDraft(saved, refreshed, saved)).toBe(true);
+  });
+  it("keeps unsaved edits when the saved graph changed", () => {
+    const edited = moveState(saved, saved.states[0].key, 999, 999);
+    expect(shouldResetDraft(saved, refreshed, edited)).toBe(false);
+  });
+  it("ignores an unchanged saved graph", () => {
+    expect(shouldResetDraft(saved, fromDetail(detail, []), saved)).toBe(false);
   });
 });

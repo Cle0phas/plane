@@ -106,6 +106,10 @@ export const toPayload = (draft: TDraftGraph): TWorkflowGraphPayload => ({
 export const isDraftDirty = (draft: TDraftGraph, saved: TDraftGraph) =>
   JSON.stringify(toPayload(draft)) !== JSON.stringify(toPayload(saved));
 
+// Take a refreshed saved graph only when its content changed and the user holds no unsaved edit.
+export const shouldResetDraft = (previousSaved: TDraftGraph, saved: TDraftGraph, draft: TDraftGraph) =>
+  JSON.stringify(previousSaved) !== JSON.stringify(saved) && !isDraftDirty(draft, previousSaved);
+
 export const addState = (draft: TDraftGraph, key: string, status: TDraftStatus): TDraftGraph => {
   const index = draft.states.length;
   return {

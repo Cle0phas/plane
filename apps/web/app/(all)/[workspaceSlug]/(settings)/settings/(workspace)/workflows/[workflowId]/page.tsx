@@ -32,8 +32,14 @@ function WorkflowEditorPage({ params }: Route.ComponentProps) {
   const { allowPermissions } = useUserPermissions();
   const { fetchWorkflowDetail, fetchStatuses, getWorkflowDetail, getWorkspaceStatuses } = useWorkflow();
   const isWorkspaceAdmin = allowPermissions([EUserPermissions.ADMIN], EUserPermissionsLevel.WORKSPACE);
-  const detail = useSWR(WORKFLOW_DETAIL(workflowId), () => fetchWorkflowDetail(workspaceSlug, workflowId));
-  const statuses = useSWR(WORKSPACE_WORKFLOW_STATUSES(workspaceSlug), () => fetchStatuses(workspaceSlug));
+  const detail = useSWR(WORKFLOW_DETAIL(workflowId), () => fetchWorkflowDetail(workspaceSlug, workflowId), {
+    revalidateOnFocus: false,
+    revalidateIfStale: false,
+  });
+  const statuses = useSWR(WORKSPACE_WORKFLOW_STATUSES(workspaceSlug), () => fetchStatuses(workspaceSlug), {
+    revalidateOnFocus: false,
+    revalidateIfStale: false,
+  });
   const workflow = getWorkflowDetail(workflowId);
 
   return (
@@ -49,6 +55,7 @@ function WorkflowEditorPage({ params }: Route.ComponentProps) {
         </Loader>
       ) : (
         <WorkflowEditor
+          key={workflow.id}
           workspaceSlug={workspaceSlug}
           workflow={workflow}
           statuses={getWorkspaceStatuses(workspaceSlug)}

@@ -4,12 +4,13 @@
  * See the LICENSE file for details.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import Link from "next/link";
 import { Button } from "@makeplane/propel/components/button";
 import { setToast } from "@plane/blocks/toast";
 import { useTranslation } from "@plane/i18n";
+import { v4 as uuidv4 } from "uuid";
 import type { TWorkflowDetail, TWorkflowStatus, TWorkflowStatusUsage } from "@plane/types";
 // hooks
 import { useWorkflow } from "@/hooks/store/use-workflow";
@@ -24,11 +25,13 @@ import {
   getGraphErrorKey,
   isDraftDirty,
   moveState,
+  shouldResetDraft,
   toPayload,
   validateDraft,
   type TDraftGraph,
 } from "./graph-model";
 import { WorkflowSidePanel } from "./side-panel";
+import { WorkflowElementList } from "./workflow-element-list";
 import { WorkflowCanvas, type TEditorSelection } from "./workflow-canvas";
 
 type Props = {
@@ -40,14 +43,39 @@ type Props = {
 
 export const WorkflowEditor = observer(function WorkflowEditor({ workspaceSlug, workflow, statuses, readOnly }: Props) {
   const { t } = useTranslation();
-  const { saveGraph } = useWorkflow();
+  const { saveGraph, getWorkspaceStatuses } = useWorkflow();
   const saved = useMemo(() => fromDetail(workflow, statuses), [workflow, statuses]);
   const [draft, setDraft] = useState<TDraftGraph>(saved);
   const [selection, setSelection] = useState<TEditorSelection>(null);
   const [serverError, setServerError] = useState<{ key: string; projects: TWorkflowStatusUsage[] } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => setDraft(saved), [saved]);
+  const [focusSignal, setFocusSignal] = useState(0);
+  const [returnSignal, setReturnSignal] = useState(0);
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const savedRef = useRef(saved);
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
+
+  // A refresh (focus revalidation, status counts) must never wipe unsaved edits.
+  useEffect(() => {
+    const previous = savedRef.current;
+    savedRef.current = saved;
+    if (shouldResetDraft(previous, saved, draftRef.current)) setDraft(saved);
+  }, [saved]);
+
+  // Back to the button that opened the panel, or to the list when that element is gone (removed).
+  useEffect(() => {
+    if (returnSignal === 0) return;
+    const trigger = triggerRef.current;
+    (trigger?.isConnected ? trigger : listRef.current)?.focus();
+  }, [returnSignal]);
+
+  const closePanel = () => {
+    setSelection(null);
+    setReturnSignal((value) => value + 1);
+  };
 
   const errors = validateDraft(draft);
   const dirty = isDraftDirty(draft, saved);
@@ -57,7 +85,9 @@ export const WorkflowEditor = observer(function WorkflowEditor({ workspaceSlug, 
     setServerError(null);
     setIsSaving(true);
     try {
-      await saveGraph(workspaceSlug, workflow.id, toPayload(draft));
+      const result = await saveGraph(workspaceSlug, workflow.id, toPayload(draft));
+      setDraft(fromDetail(result, getWorkspaceStatuses(workspaceSlug)));
+      setSelection(null);
       setToast({ type: "success", title: t("workflows.editor.saved"), message: "" });
     } catch (error) {
       setServerError(getGraphErrorKey(error));
@@ -101,22 +131,25 @@ export const WorkflowEditor = observer(function WorkflowEditor({ workspaceSlug, 
       </div>
       {readOnly && <p className="text-body-sm-regular text-secondary">{t("workflows.editor.read_only")}</p>}
       {(errors.length > 0 || serverError) && (
-        <div
-          role="alert"
-          className="rounded-md border border-danger-subtle bg-danger-subtle p-3 text-body-sm-regular text-danger-primary"
-        >
-          {errors.map((code) => (
-            <p key={code}>{t(getDraftErrorKey(code))}</p>
-          ))}
-          {serverError && <p>{t(serverError.key)}</p>}
-          {serverError?.projects.map((project) => (
-            <p key={project.project_id}>
-              {t("workflows.editor.errors.status_in_use_project", {
-                project: project.project_name,
-                count: project.issue_count,
-              })}
-            </p>
-          ))}
+        <div className="space-y-2 rounded-md border border-danger-subtle bg-danger-subtle p-3 text-body-sm-regular text-danger-primary">
+          <div aria-live="polite">
+            {errors.map((code) => (
+              <p key={code}>{t(getDraftErrorKey(code))}</p>
+            ))}
+          </div>
+          {serverError && (
+            <div role="alert">
+              <p>{t(serverError.key)}</p>
+              {serverError.projects.map((project) => (
+                <p key={project.project_id}>
+                  {t("workflows.editor.errors.status_in_use_project", {
+                    project: project.project_name,
+                    count: project.issue_count,
+                  })}
+                </p>
+              ))}
+            </div>
+          )}
         </div>
       )}
       <div className="flex gap-4">
@@ -126,11 +159,13 @@ export const WorkflowEditor = observer(function WorkflowEditor({ workspaceSlug, 
             readOnly={readOnly}
             selection={selection}
             onSelect={setSelection}
-            onMove={(key, x, y) => setDraft((current) => moveState(current, key, x, y))}
+            onMove={(moves) =>
+              setDraft((current) => moves.reduce((acc, move) => moveState(acc, move.key, move.x, move.y), current))
+            }
             onConnect={(source, target) =>
               setDraft((current) =>
                 addTransition(current, {
-                  key: `new-${crypto.randomUUID()}`,
+                  key: `new-${uuidv4()}`,
                   name: "",
                   from_any: false,
                   source_keys: [source],
@@ -146,19 +181,30 @@ export const WorkflowEditor = observer(function WorkflowEditor({ workspaceSlug, 
           selection={selection}
           readOnly={readOnly}
           onChange={setDraft}
-          onClose={() => setSelection(null)}
+          onClose={closePanel}
+          focusSignal={focusSignal}
         />
       </div>
+      <WorkflowElementList
+        draft={draft}
+        selection={selection}
+        containerRef={listRef}
+        onOpen={(next, trigger) => {
+          triggerRef.current = trigger;
+          setSelection(next);
+          setFocusSignal((value) => value + 1);
+        }}
+      />
       {!readOnly && (
         <div className="grid gap-6 md:grid-cols-2">
           <AddStateForm
             availableStatuses={statuses.filter((status) => !usedStatusIds.has(status.id))}
-            onAdd={(status) => setDraft((current) => addState(current, `new-${crypto.randomUUID()}`, status))}
+            onAdd={(status) => setDraft((current) => addState(current, `new-${uuidv4()}`, status))}
           />
           <AddTransitionForm
             draft={draft}
             onAdd={(transition) =>
-              setDraft((current) => addTransition(current, { ...transition, key: `new-${crypto.randomUUID()}` }))
+              setDraft((current) => addTransition(current, { ...transition, key: `new-${uuidv4()}` }))
             }
           />
         </div>
