@@ -66,7 +66,9 @@ def state_in_workflow(state, workflow_id, project_id):
 def initial_state(project_id, workflow_id):
     """The project state mirroring the workflow's initial status (W7)."""
     status_id = (
-        WorkflowState.objects.filter(workflow_id=workflow_id, is_initial=True).values_list("status_id", flat=True).first()
+        WorkflowState.objects.filter(workflow_id=workflow_id, is_initial=True)
+        .values_list("status_id", flat=True)
+        .first()
     )
     if status_id is None:
         return None
@@ -83,12 +85,19 @@ def _actor_allowed(params, issue, actor):
         return True
     if params.get("creator") is True and str(issue.created_by_id) == actor_id:
         return True
-    if params.get("assignee") is True and IssueAssignee.objects.filter(issue_id=issue.id, assignee_id=actor.id).exists():
+    if (
+        params.get("assignee") is True
+        and IssueAssignee.objects.filter(issue_id=issue.id, assignee_id=actor.id).exists()
+    ):
         return True
     roles = params.get("roles")
-    return isinstance(roles, list) and bool(roles) and ProjectMember.objects.filter(
-        project_id=issue.project_id, member_id=actor.id, is_active=True, role__in=roles
-    ).exists()
+    return (
+        isinstance(roles, list)
+        and bool(roles)
+        and ProjectMember.objects.filter(
+            project_id=issue.project_id, member_id=actor.id, is_active=True, role__in=roles
+        ).exists()
+    )
 
 
 def _rule_allows(rule, issue, actor):
@@ -113,7 +122,9 @@ def check_transition(issue, from_state, to_state, actor, workflow_id=None):
     if from_state is not None and from_state.workflow_status_id is not None:
         sources |= Q(sources__source__status_id=from_state.workflow_status_id)
     transitions = (
-        WorkflowTransition.objects.filter(sources, workflow_id=workflow_id, target__status_id=to_state.workflow_status_id)
+        WorkflowTransition.objects.filter(
+            sources, workflow_id=workflow_id, target__status_id=to_state.workflow_status_id
+        )
         .distinct()
         .prefetch_related("rules")
     )
@@ -122,9 +133,15 @@ def check_transition(issue, from_state, to_state, actor, workflow_id=None):
 
 def resolve_workflow_state(*, project_id, instance, state, state_given, type_id):
     """State a written work item must take (T1, T2, 4.1), None to keep the request as is; raises one refusal."""
-    if state is not None and state.group == StateGroup.TRIAGE.value:
-        # Intake items stay in triage outside any workflow (invariant 6).
+    if instance is not None and not state_given and type_id is None:
         return None
+    if state is not None and state.group == StateGroup.TRIAGE.value:
+        # Intake items stay in triage outside any workflow (invariant 6), but a managed item cannot re-enter it.
+        if instance is None or instance.state.group == StateGroup.TRIAGE.value:
+            return None
+        if workflow_id_for(project_id, instance.type_id) is None:
+            return None
+        raise refusal(TRANSITION_NOT_ALLOWED)
     if instance is None:
         workflow_id = workflow_id_for(project_id, type_id or project_default_type_id(project_id))
         if workflow_id is None:

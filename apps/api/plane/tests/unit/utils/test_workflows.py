@@ -77,7 +77,9 @@ def bug(workspace, project):
 
 def _link(project, default_workflow, items=None):
     """Attach a scheme and one project state per status, as Task 3's service will do."""
-    scheme = ProjectWorkflowScheme.objects.create(project=project, workspace=project.workspace, default_workflow=default_workflow)
+    scheme = ProjectWorkflowScheme.objects.create(
+        project=project, workspace=project.workspace, default_workflow=default_workflow
+    )
     for issue_type, workflow in (items or {}).items():
         ProjectWorkflowSchemeItem.objects.create(scheme=scheme, issue_type=issue_type, workflow=workflow)
     for workflow in [default_workflow, *(items or {}).values()]:
@@ -214,38 +216,95 @@ class TestResolveWorkflowState:
 
     def test_creation_without_state_takes_the_initial_state(self, project, software):
         states = _link(project, software)
-        resolved = resolve_workflow_state(project_id=project.id, instance=None, state=None, state_given=False, type_id=None)
+        resolved = resolve_workflow_state(
+            project_id=project.id, instance=None, state=None, state_given=False, type_id=None
+        )
         assert resolved == states["To do"]
 
     def test_creation_in_another_state_is_refused(self, project, software):
         states = _link(project, software)
         with pytest.raises(serializers.ValidationError) as error:
-            resolve_workflow_state(project_id=project.id, instance=None, state=states["Doing"], state_given=True, type_id=None)
+            resolve_workflow_state(
+                project_id=project.id, instance=None, state=states["Doing"], state_given=True, type_id=None
+            )
         assert _code(error) == TRANSITION_NOT_ALLOWED
 
     def test_creation_uses_the_workflow_of_the_requested_type(self, project, software, support, bug):
         states = _link(project, software, {bug: support})
-        resolved = resolve_workflow_state(project_id=project.id, instance=None, state=None, state_given=False, type_id=bug.id)
+        resolved = resolve_workflow_state(
+            project_id=project.id, instance=None, state=None, state_given=False, type_id=bug.id
+        )
         assert resolved == states["New"]
 
     def test_creation_in_triage_is_left_alone(self, project, software):
         _link(project, software)
         triage = State.objects.create(name="Triage", project=project, group="triage")
-        assert resolve_workflow_state(project_id=project.id, instance=None, state=triage, state_given=True, type_id=None) is None
+        assert (
+            resolve_workflow_state(project_id=project.id, instance=None, state=triage, state_given=True, type_id=None)
+            is None
+        )
+
+    def test_a_managed_item_cannot_be_moved_into_triage(self, project, software):
+        states = _link(project, software)
+        triage = State.objects.create(name="Triage", project=project, group="triage")
+        with pytest.raises(serializers.ValidationError) as error:
+            resolve_workflow_state(
+                project_id=project.id,
+                instance=_issue(project, states["Doing"]),
+                state=triage,
+                state_given=True,
+                type_id=None,
+            )
+        assert _code(error) == TRANSITION_NOT_ALLOWED
+
+    def test_an_item_already_in_triage_stays_free_to_move_in_triage(self, project, software):
+        _link(project, software)
+        triage = State.objects.create(name="Triage", project=project, group="triage")
+        other = State.objects.create(name="Other triage", project=project, group="triage")
+        resolved = resolve_workflow_state(
+            project_id=project.id, instance=_issue(project, triage), state=other, state_given=True, type_id=None
+        )
+        assert resolved is None
+
+    def test_a_free_project_may_move_an_item_into_triage(self, project):
+        a = State.objects.create(name="A", project=project)
+        triage = State.objects.create(name="Triage", project=project, group="triage")
+        resolved = resolve_workflow_state(
+            project_id=project.id, instance=_issue(project, a), state=triage, state_given=True, type_id=None
+        )
+        assert resolved is None
+
+    def test_an_update_touching_neither_state_nor_type_is_left_alone(self, project, software):
+        states = _link(project, software)
+        resolved = resolve_workflow_state(
+            project_id=project.id,
+            instance=_issue(project, states["Doing"]),
+            state=None,
+            state_given=False,
+            type_id=None,
+        )
+        assert resolved is None
 
     def test_a_free_project_is_left_alone(self, project):
         state = State.objects.create(name="A", project=project)
-        assert resolve_workflow_state(project_id=project.id, instance=None, state=state, state_given=True, type_id=None) is None
+        assert (
+            resolve_workflow_state(project_id=project.id, instance=None, state=state, state_given=True, type_id=None)
+            is None
+        )
 
     def test_an_allowed_move_passes_and_a_forbidden_one_is_refused(self, project, software):
         states = _link(project, software)
         issue = _issue(project, states["To do"])
         assert (
-            resolve_workflow_state(project_id=project.id, instance=issue, state=states["Doing"], state_given=True, type_id=None)
+            resolve_workflow_state(
+                project_id=project.id, instance=issue, state=states["Doing"], state_given=True, type_id=None
+            )
             is None
         )
         with pytest.raises(serializers.ValidationError) as error:
-            resolve_workflow_state(project_id=project.id, instance=issue, state=states["Done"], state_given=True, type_id=None)
+            resolve_workflow_state(
+                project_id=project.id, instance=issue, state=states["Done"], state_given=True, type_id=None
+            )
         assert _code(error) == TRANSITION_NOT_ALLOWED
 
     def test_clearing_the_state_is_refused(self, project, software):
@@ -258,7 +317,10 @@ class TestResolveWorkflowState:
     def test_type_change_keeps_a_state_present_in_the_new_workflow(self, project, software, support, bug):
         states = _link(project, software, {bug: support})
         issue = _issue(project, states["Doing"])
-        assert resolve_workflow_state(project_id=project.id, instance=issue, state=None, state_given=False, type_id=bug.id) is None
+        assert (
+            resolve_workflow_state(project_id=project.id, instance=issue, state=None, state_given=False, type_id=bug.id)
+            is None
+        )
 
     def test_type_change_requires_an_arrival_state_otherwise(self, project, software, support, bug):
         states = _link(project, software, {bug: support})
@@ -271,7 +333,9 @@ class TestResolveWorkflowState:
         states = _link(project, software, {bug: support})
         issue = _issue(project, states["To do"])
         assert (
-            resolve_workflow_state(project_id=project.id, instance=issue, state=states["Closed"], state_given=True, type_id=bug.id)
+            resolve_workflow_state(
+                project_id=project.id, instance=issue, state=states["Closed"], state_given=True, type_id=bug.id
+            )
             is None
         )
 
@@ -279,20 +343,29 @@ class TestResolveWorkflowState:
         states = _link(project, software, {bug: support})
         issue = _issue(project, states["To do"])
         with pytest.raises(serializers.ValidationError) as error:
-            resolve_workflow_state(project_id=project.id, instance=issue, state=states["Done"], state_given=True, type_id=bug.id)
+            resolve_workflow_state(
+                project_id=project.id, instance=issue, state=states["Done"], state_given=True, type_id=bug.id
+            )
         assert _code(error) == TRANSITION_NOT_ALLOWED
 
     def test_type_change_inside_the_same_workflow_is_a_normal_move(self, project, software, bug):
         states = _link(project, software)
         issue = _issue(project, states["To do"])
         with pytest.raises(serializers.ValidationError) as error:
-            resolve_workflow_state(project_id=project.id, instance=issue, state=states["Done"], state_given=True, type_id=bug.id)
+            resolve_workflow_state(
+                project_id=project.id, instance=issue, state=states["Done"], state_given=True, type_id=bug.id
+            )
         assert _code(error) == TRANSITION_NOT_ALLOWED
         assert (
-            resolve_workflow_state(project_id=project.id, instance=issue, state=states["Doing"], state_given=True, type_id=bug.id)
+            resolve_workflow_state(
+                project_id=project.id, instance=issue, state=states["Doing"], state_given=True, type_id=bug.id
+            )
             is None
         )
-        assert resolve_workflow_state(project_id=project.id, instance=issue, state=None, state_given=False, type_id=bug.id) is None
+        assert (
+            resolve_workflow_state(project_id=project.id, instance=issue, state=None, state_given=False, type_id=bug.id)
+            is None
+        )
 
 
 class TestActorThroughResolution:
