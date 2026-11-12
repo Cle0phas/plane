@@ -103,7 +103,7 @@ class IssueManager(SoftDeletionManager):
 
 
 class Issue(ChangeTrackerMixin, ProjectBaseModel):
-    TRACKED_FIELDS = ["state_id", "project_id", "type_id"]
+    TRACKED_FIELDS = ["state_id", "project_id"]
 
     PRIORITY_CHOICES = (
         ("urgent", "Urgent"),
