@@ -290,6 +290,10 @@ export const coreRoutes: RouteConfigEntry[] = [
             ":workspaceSlug/settings/workflows",
             "./(all)/[workspaceSlug]/(settings)/settings/(workspace)/workflows/page.tsx"
           ),
+          route(
+            ":workspaceSlug/settings/workflows/:workflowId",
+            "./(all)/[workspaceSlug]/(settings)/settings/(workspace)/workflows/[workflowId]/page.tsx"
+          ),
         ]),
 
         // --------------------------------------------------------------------
