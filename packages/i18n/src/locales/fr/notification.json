@@ -30,12 +30,12 @@
         "description": "Sélectionnez une notification pour en voir les détails."
       },
       "all": {
-        "title": "Aucun élément de travail assigné",
-        "description": "Les mises à jour des éléments de travail qui vous sont assignés peuvent être\n vues ici"
+        "title": "Aucun ticket assigné",
+        "description": "Les mises à jour des tickets qui vous sont assignés peuvent être\n vues ici"
       },
       "mentions": {
-        "title": "Aucun élément de travail assigné",
-        "description": "Les mises à jour des éléments de travail qui vous sont assignés peuvent être\n vues ici"
+        "title": "Aucun ticket assigné",
+        "description": "Les mises à jour des tickets qui vous sont assignés peuvent être\n vues ici"
       }
     },
     "tabs": {

@@ -1,54 +1,54 @@
 {
   "issue": {
-    "label": "{count, plural, one {Élément de travail} other {Éléments de travail}}",
-    "all": "Tous les éléments de travail",
-    "edit": "Modifier l’élément de travail",
+    "label": "{count, plural, one {Ticket} other {Tickets}}",
+    "all": "Tous les tickets",
+    "edit": "Modifier le ticket",
     "properties_overflow": {
       "trigger_aria_label": "{count, plural, one {# propriété supplémentaire} many {# propriétés supplémentaires} other {# propriétés supplémentaires}}",
       "label_overflow_indicator": "{count, plural, one {+# étiquette} many {+# étiquettes} other {+# étiquettes}}"
     },
     "title": {
-      "label": "Titre de l’élément de travail",
-      "required": "Le titre de l’élément de travail est requis."
+      "label": "Titre du ticket",
+      "required": "Le titre du ticket est requis."
     },
     "add": {
-      "press_enter": "Appuyez sur 'Entrée' pour ajouter un autre élément de travail",
-      "label": "Ajouter un élément de travail",
+      "press_enter": "Appuyez sur 'Entrée' pour ajouter un autre ticket",
+      "label": "Ajouter un ticket",
       "cycle": {
-        "failed": "L’élément de travail n’a pas pu être ajouté au cycle. Veuillez réessayer.",
-        "success": "{count, plural, one {Élément de travail} other {Éléments de travail}} ajouté(s) au cycle avec succès.",
-        "loading": "Ajout de {count, plural, one {l’élément de travail} other {éléments de travail}} au cycle"
+        "failed": "Le ticket n’a pas pu être ajouté au cycle. Veuillez réessayer.",
+        "success": "{count, plural, one {Ticket} other {Tickets}} ajouté(s) au cycle avec succès.",
+        "loading": "Ajout de {count, plural, one {le ticket} other {tickets}} au cycle"
       },
       "assignee": "Ajouter des assignés",
       "start_date": "Ajouter une date de début",
       "due_date": "Ajouter une date d’échéance",
-      "parent": "Ajouter un élément de travail parent",
-      "sub_issue": "Ajouter un sous-élément de travail",
+      "parent": "Ajouter un ticket parent",
+      "sub_issue": "Ajouter un sous-ticket",
       "dependency": "Ajouter une dépendance",
       "relation": "Ajouter une relation",
       "link": "Ajouter un lien",
-      "existing": "Ajouter un élément de travail existant"
+      "existing": "Ajouter un ticket existant"
     },
     "remove": {
-      "label": "Supprimer l’élément de travail",
+      "label": "Supprimer le ticket",
       "cycle": {
-        "loading": "Suppression de l’élément de travail du cycle",
-        "success": "Élément de travail supprimé du cycle avec succès.",
-        "failed": "L’élément de travail n’a pas pu être supprimé du cycle. Veuillez réessayer."
+        "loading": "Suppression du ticket du cycle",
+        "success": "Ticket supprimé du cycle avec succès.",
+        "failed": "Le ticket n’a pas pu être supprimé du cycle. Veuillez réessayer."
       },
       "module": {
-        "loading": "Suppression de l’élément de travail du module",
-        "success": "Élément de travail supprimé du module avec succès.",
-        "failed": "L’élément de travail n’a pas pu être supprimé du module. Veuillez réessayer."
+        "loading": "Suppression du ticket du module",
+        "success": "Ticket supprimé du module avec succès.",
+        "failed": "Le ticket n’a pas pu être supprimé du module. Veuillez réessayer."
       },
       "parent": {
-        "label": "Supprimer l’élément de travail parent"
+        "label": "Supprimer le ticket parent"
       }
     },
-    "new": "Nouvel élément de travail",
-    "adding": "Ajout d’un élément de travail",
+    "new": "Nouveau ticket",
+    "adding": "Ajout d’un ticket",
     "create": {
-      "success": "Élément de travail créé avec succès"
+      "success": "Ticket créé avec succès"
     },
     "priority": {
       "urgent": "Urgent",
@@ -60,15 +60,15 @@
       "properties": {
         "label": "Propriétés d’affichage",
         "id": "ID",
-        "issue_type": "Type d’élément de travail",
-        "sub_issue_count": "Nombre de sous-éléments",
+        "issue_type": "Type de ticket",
+        "sub_issue_count": "Nombre de sous-tickets",
         "attachment_count": "Nombre de pièces jointes",
         "created_on": "Créé le",
-        "sub_issue": "Sous-élément de travail",
-        "work_item_count": "Nombre d’éléments de travail"
+        "sub_issue": "Sous-ticket",
+        "work_item_count": "Nombre de tickets"
       },
       "extra": {
-        "show_sub_issues": "Afficher les sous-éléments",
+        "show_sub_issues": "Afficher les sous-tickets",
         "show_empty_groups": "Afficher les groupes vides"
       }
     },
@@ -156,44 +156,44 @@
     },
     "empty_state": {
       "issue_detail": {
-        "title": "L’élément de travail n’existe pas",
-        "description": "L’élément de travail que vous recherchez n’existe pas, a été archivé ou a été supprimé.",
+        "title": "Le ticket n’existe pas",
+        "description": "Le ticket que vous recherchez n’existe pas, a été archivé ou a été supprimé.",
         "primary_button": {
-          "text": "Voir les autres éléments de travail"
+          "text": "Voir les autres tickets"
         }
       },
       "no_access": {
-        "title": "Vous n’avez pas accès à cet élément de travail",
+        "title": "Vous n’avez pas accès à ce ticket",
         "description": "Contactez un administrateur du projet pour demander l’accès."
       }
     },
     "sibling": {
-      "label": "Éléments de travail frères"
+      "label": "Tickets frères"
     },
     "archive": {
-      "description": "Seuls les éléments de travail\nterminés ou annulés peuvent être archivés",
-      "label": "Archiver l’élément de travail",
-      "confirm_message": "Êtes-vous sûr de vouloir archiver l’élément de travail ? Tous vos éléments archivés peuvent être restaurés ultérieurement.",
+      "description": "Seuls les tickets\nterminés ou annulés peuvent être archivés",
+      "label": "Archiver le ticket",
+      "confirm_message": "Êtes-vous sûr de vouloir archiver le ticket ? Tous vos tickets archivés peuvent être restaurés ultérieurement.",
       "success": {
         "label": "Archivage réussi",
         "message": "Vos archives se trouvent dans les archives du projet."
       },
       "failed": {
-        "message": "L’élément de travail n’a pas pu être archivé. Veuillez réessayer."
+        "message": "Le ticket n’a pas pu être archivé. Veuillez réessayer."
       },
-      "banner_message": "Cet élément de travail a été archivé. Accédez à la section Archives pour le restaurer.",
+      "banner_message": "Ce ticket a été archivé. Accédez à la section Archives pour le restaurer.",
       "go_to_archives": "Accéder aux archives"
     },
     "restore": {
       "success": {
         "title": "Restauration réussie",
-        "message": "Votre élément de travail se trouve dans les éléments de travail du projet."
+        "message": "Votre ticket se trouve dans les tickets du projet."
       },
       "failed": {
-        "message": "L’élément de travail n’a pas pu être restauré. Veuillez réessayer."
+        "message": "Le ticket n’a pas pu être restauré. Veuillez réessayer."
       }
     },
-    "archived_banner": "Cet élément de travail est archivé. Restaurez-le pour le modifier.",
+    "archived_banner": "Ce ticket est archivé. Restaurez-le pour le modifier.",
     "updated_time_ago": "Mis à jour {time}",
     "description_load_failed": "Impossible de charger la description.",
     "assignee_count": "{count, plural, one {# acteur} many {# acteurs} other {# acteurs}}",
@@ -209,29 +209,29 @@
       "implements": "Implémente",
       "implemented_by": "Implémenté par"
     },
-    "copy_link": "Copier le lien de l’élément de travail",
+    "copy_link": "Copier le lien du ticket",
     "delete": {
-      "label": "Supprimer l’élément de travail",
-      "error": "Erreur lors de la suppression de l’élément de travail"
+      "label": "Supprimer le ticket",
+      "error": "Erreur lors de la suppression du ticket"
     },
     "subscription": {
       "actions": {
-        "subscribed": "Abonnement à l’élément de travail réussi",
-        "unsubscribed": "Désabonnement de l’élément de travail réussi"
+        "subscribed": "Abonnement au ticket réussi",
+        "unsubscribed": "Désabonnement du ticket réussi"
       }
     },
     "select": {
-      "error": "Veuillez sélectionner au moins un élément de travail",
-      "empty": "Aucun élément de travail sélectionné",
-      "add_selected": "Ajouter les éléments de travail sélectionnés",
+      "error": "Veuillez sélectionner au moins un ticket",
+      "empty": "Aucun ticket sélectionné",
+      "add_selected": "Ajouter les tickets sélectionnés",
       "select_all": "Sélectionner tout",
       "deselect_all": "Tout désélectionner"
     },
-    "open_in_full_screen": "Ouvrir l’élément de travail en plein écran",
+    "open_in_full_screen": "Ouvrir le ticket en plein écran",
     "duplicate": {
       "modal": {
         "title": "Faire une copie vers un autre projet",
-        "description1": "Cela crée une copie de l’élément de travail.",
+        "description1": "Cela crée une copie du ticket.",
         "description2": "Toutes les données de propriétés seront supprimées lors de la duplication.",
         "placeholder": "Sélectionner un projet"
       }
@@ -239,10 +239,10 @@
     "toast": {
       "duplicate": {
         "success": {
-          "message": "Élément de travail dupliqué avec succès"
+          "message": "Ticket dupliqué avec succès"
         },
         "error": {
-          "message": "Échec de la duplication de l’élément de travail"
+          "message": "Échec de la duplication du ticket"
         }
       }
     },
@@ -289,22 +289,22 @@
   },
   "sub_work_item": {
     "update": {
-      "success": "Sous-élément de travail mis à jour avec succès",
-      "error": "Erreur lors de la mise à jour du sous-élément de travail"
+      "success": "Sous-ticket mis à jour avec succès",
+      "error": "Erreur lors de la mise à jour du sous-ticket"
     },
     "remove": {
-      "success": "Sous-élément de travail supprimé avec succès",
-      "error": "Erreur lors de la suppression du sous-élément de travail"
+      "success": "Sous-ticket supprimé avec succès",
+      "error": "Erreur lors de la suppression du sous-ticket"
     },
     "empty_state": {
       "sub_list_filters": {
-        "title": "Vous n’avez pas de sous-éléments de travail qui correspondent aux filtres que vous avez appliqués.",
-        "description": "Pour voir tous les sous-éléments de travail, effacer tous les filtres appliqués.",
+        "title": "Vous n’avez pas de sous-tickets qui correspondent aux filtres que vous avez appliqués.",
+        "description": "Pour voir tous les sous-tickets, effacer tous les filtres appliqués.",
         "action": "Effacer les filtres"
       },
       "list_filters": {
-        "title": "Vous n’avez pas d’éléments de travail qui correspondent aux filtres que vous avez appliqués.",
-        "description": "Pour voir tous les éléments de travail, effacer tous les filtres appliqués.",
+        "title": "Vous n’avez pas de tickets qui correspondent aux filtres que vous avez appliqués.",
+        "description": "Pour voir tous les tickets, effacer tous les filtres appliqués.",
         "action": "Effacer les filtres"
       }
     }
@@ -312,10 +312,10 @@
   "issue_relation": {
     "empty_state": {
       "search": {
-        "title": "Aucun élément de travail correspondant trouvé"
+        "title": "Aucun ticket correspondant trouvé"
       },
       "no_issues": {
-        "title": "Aucun élément de travail trouvé"
+        "title": "Aucun ticket trouvé"
       }
     }
   },
@@ -323,40 +323,40 @@
     "empty_state": {
       "general": {
         "title": "Pas encore de commentaires",
-        "description": "Les commentaires peuvent être utilisés comme espace de discussion et de suivi pour les éléments de travail"
+        "description": "Les commentaires peuvent être utilisés comme espace de discussion et de suivi pour les tickets"
       }
     }
   },
   "bulk_operations": {
     "error_details": {
       "invalid_archive_state_group": {
-        "title": "Impossible d'archiver les éléments de travail",
-        "message": "Seuls les éléments de travail appartenant aux groupes d'états Terminé ou Annulé peuvent être archivés."
+        "title": "Impossible d'archiver les tickets",
+        "message": "Seuls les tickets appartenant aux groupes d'états Terminé ou Annulé peuvent être archivés."
       },
       "invalid_issue_start_date": {
-        "title": "Impossible de mettre à jour les éléments de travail",
-        "message": "La date de début sélectionnée est postérieure à la date d'échéance pour certains éléments de travail. Assurez-vous que la date de début soit antérieure à la date d'échéance."
+        "title": "Impossible de mettre à jour les tickets",
+        "message": "La date de début sélectionnée est postérieure à la date d'échéance pour certains tickets. Assurez-vous que la date de début soit antérieure à la date d'échéance."
       },
       "invalid_issue_target_date": {
-        "title": "Impossible de mettre à jour les éléments de travail",
-        "message": "La date d'échéance sélectionnée est antérieure à la date de début pour certains éléments de travail. Assurez-vous que la date d'échéance soit postérieure à la date de début."
+        "title": "Impossible de mettre à jour les tickets",
+        "message": "La date d'échéance sélectionnée est antérieure à la date de début pour certains tickets. Assurez-vous que la date d'échéance soit postérieure à la date de début."
       },
       "invalid_state_transition": {
-        "title": "Impossible de mettre à jour les éléments de travail",
-        "message": "Le changement d'état n'est pas autorisé pour certains éléments de travail. Assurez-vous que le changement d'état est autorisé."
+        "title": "Impossible de mettre à jour les tickets",
+        "message": "Le changement d'état n'est pas autorisé pour certains tickets. Assurez-vous que le changement d'état est autorisé."
       }
     },
     "upgrade_banner": {
-      "message": "Modifiez l’état, la priorité et bien plus pour plusieurs éléments de travail à la fois. Économisez en moyenne trois minutes par opération.",
+      "message": "Modifiez l’état, la priorité et bien plus pour plusieurs tickets à la fois. Économisez en moyenne trois minutes par opération.",
       "cta": "Mettre à niveau vers One"
     }
   },
   "recurring_work_items": {
     "settings": {
-      "heading": "Éléments de travail récurrents",
+      "heading": "Tickets récurrents",
       "description": "Configurez votre travail récurrent une fois, et nous nous occuperons des répétitions. Vous verrez tout ici lorsque c'est le moment.",
-      "new_recurring_work_item": "Nouvel élément de travail récurrent",
-      "update_recurring_work_item": "Mettre à jour l'élément de travail récurrent",
+      "new_recurring_work_item": "Nouveau ticket récurrent",
+      "update_recurring_work_item": "Mettre à jour le ticket récurrent",
       "form": {
         "interval": {
           "title": "Planification",
@@ -372,13 +372,13 @@
           }
         },
         "button": {
-          "create": "Créer un élément de travail récurrent",
-          "update": "Mettre à jour l'élément de travail récurrent"
+          "create": "Créer un ticket récurrent",
+          "update": "Mettre à jour le ticket récurrent"
         }
       },
       "create_button": {
-        "label": "Créer un élément de travail récurrent",
-        "no_permission": "Contactez votre administrateur de projet pour créer des éléments de travail récurrents"
+        "label": "Créer un ticket récurrent",
+        "no_permission": "Contactez votre administrateur de projet pour créer des tickets récurrents"
       }
     },
     "empty_state": {
@@ -387,46 +387,46 @@
         "description": "Configurez-le une fois. Nous vous le rappellerons quand il sera dû. Passez à Business pour rendre le travail récurrent sans effort."
       },
       "no_templates": {
-        "button": "Créez votre premier élément de travail récurrent"
+        "button": "Créez votre premier ticket récurrent"
       }
     },
     "toasts": {
       "create": {
         "success": {
-          "title": "Élément de travail récurrent créé",
-          "message": "{name}, l'élément de travail récurrent, est maintenant disponible dans votre espace de travail."
+          "title": "Ticket récurrent créé",
+          "message": "{name}, le ticket récurrent, est maintenant disponible dans votre espace de travail."
         },
         "error": {
-          "title": "Nous n'avons pas pu créer cet élément de travail récurrent cette fois.",
-          "message": "Essayez d'enregistrer vos informations à nouveau ou copiez-les dans un nouvel élément de travail récurrent, de préférence dans un autre onglet."
+          "title": "Nous n'avons pas pu créer ce ticket récurrent cette fois.",
+          "message": "Essayez d'enregistrer vos informations à nouveau ou copiez-les dans un nouveau ticket récurrent, de préférence dans un autre onglet."
         }
       },
       "update": {
         "success": {
-          "title": "Élément de travail récurrent modifié",
-          "message": "{name}, l'élément de travail récurrent, a été modifié."
+          "title": "Ticket récurrent modifié",
+          "message": "{name}, le ticket récurrent, a été modifié."
         },
         "error": {
-          "title": "Nous n'avons pas pu enregistrer les modifications de cet élément de travail récurrent.",
-          "message": "Essayez d'enregistrer vos informations à nouveau ou revenez à cet élément de travail récurrent plus tard. Si le problème persiste, contactez-nous."
+          "title": "Nous n'avons pas pu enregistrer les modifications de ce ticket récurrent.",
+          "message": "Essayez d'enregistrer vos informations à nouveau ou revenez à ce ticket récurrent plus tard. Si le problème persiste, contactez-nous."
         }
       },
       "delete": {
         "success": {
-          "title": "Élément de travail récurrent supprimé",
-          "message": "{name}, l'élément de travail récurrent, a été supprimé de votre espace de travail."
+          "title": "Ticket récurrent supprimé",
+          "message": "{name}, le ticket récurrent, a été supprimé de votre espace de travail."
         },
         "error": {
-          "title": "Nous n'avons pas pu supprimer cet élément de travail récurrent.",
+          "title": "Nous n'avons pas pu supprimer ce ticket récurrent.",
           "message": "Essayez de le supprimer à nouveau ou revenez plus tard. Si vous ne pouvez toujours pas le supprimer, contactez-nous."
         }
       }
     },
     "delete_confirmation": {
-      "title": "Supprimer l'élément de travail récurrent",
+      "title": "Supprimer le ticket récurrent",
       "description": {
-        "prefix": "Êtes-vous sûr de vouloir supprimer l'élément de travail récurrent-",
-        "suffix": "? Toutes les données liées à l'élément de travail récurrent seront définitivement supprimées. Cette action ne peut pas être annulée."
+        "prefix": "Êtes-vous sûr de vouloir supprimer le ticket récurrent-",
+        "suffix": "? Toutes les données liées au ticket récurrent seront définitivement supprimées. Cette action ne peut pas être annulée."
       }
     }
   },

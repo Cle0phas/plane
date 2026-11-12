@@ -24,30 +24,30 @@
     },
     "modals": {
       "decline": {
-        "title": "Refuser l’élément de travail",
-        "content": "Êtes-vous sûr de vouloir refuser l’élément de travail {value} ?"
+        "title": "Refuser le ticket",
+        "content": "Êtes-vous sûr de vouloir refuser le ticket {value} ?"
       },
       "delete": {
-        "title": "Supprimer l’élément de travail",
-        "content": "Êtes-vous sûr de vouloir supprimer l’élément de travail {value} ?",
-        "success": "Élément de travail supprimé avec succès"
+        "title": "Supprimer le ticket",
+        "content": "Êtes-vous sûr de vouloir supprimer le ticket {value} ?",
+        "success": "Ticket supprimé avec succès"
       }
     },
     "errors": {
-      "snooze_permission": "Seuls les administrateurs du projet peuvent reporter/annuler le report des éléments de travail",
-      "accept_permission": "Seuls les administrateurs du projet peuvent accepter les éléments de travail",
-      "decline_permission": "Seuls les administrateurs du projet peuvent refuser les éléments de travail"
+      "snooze_permission": "Seuls les administrateurs du projet peuvent reporter/annuler le report des tickets",
+      "accept_permission": "Seuls les administrateurs du projet peuvent accepter les tickets",
+      "decline_permission": "Seuls les administrateurs du projet peuvent refuser les tickets"
     },
     "actions": {
       "accept": "Accepter",
       "decline": "Refuser",
       "snooze": "Reporter",
       "unsnooze": "Annuler le report",
-      "copy": "Copier le lien de l’élément de travail",
+      "copy": "Copier le lien du ticket",
       "delete": "Supprimer",
-      "open": "Ouvrir l’élément de travail",
+      "open": "Ouvrir le ticket",
       "mark_as_duplicate": "Marquer comme doublon",
-      "move": "Déplacer {value} vers les éléments de travail du projet"
+      "move": "Déplacer {value} vers les tickets du projet"
     },
     "source": {
       "in-app": "in-app"
@@ -60,7 +60,7 @@
     "label": "Intake",
     "page_label": "{workspace} - Intake",
     "modal": {
-      "title": "Créer un élément de travail Intake"
+      "title": "Créer un ticket Intake"
     },
     "tabs": {
       "open": "Ouvert",
@@ -68,19 +68,19 @@
     },
     "empty_state": {
       "sidebar_open_tab": {
-        "title": "Aucun élément de travail ouvert",
-        "description": "Trouvez les éléments de travail ouverts ici. Créez un nouvel élément de travail."
+        "title": "Aucun ticket ouvert",
+        "description": "Trouvez les tickets ouverts ici. Créez un nouveau ticket."
       },
       "sidebar_closed_tab": {
-        "title": "Aucun élément de travail fermé",
-        "description": "Tous les éléments de travail, qu’ils soient acceptés ou refusés, peuvent être trouvés ici."
+        "title": "Aucun ticket fermé",
+        "description": "Tous les tickets, qu’ils soient acceptés ou refusés, peuvent être trouvés ici."
       },
       "sidebar_filter": {
-        "title": "Aucun élément de travail correspondant",
-        "description": "Aucun élément de travail ne correspond au filtre appliqué dans Intake. Créez un nouvel élément de travail."
+        "title": "Aucun ticket correspondant",
+        "description": "Aucun ticket ne correspond au filtre appliqué dans Intake. Créez un nouveau ticket."
       },
       "detail": {
-        "title": "Sélectionnez un élément de travail pour voir ses détails."
+        "title": "Sélectionnez un ticket pour voir ses détails."
       }
     }
   }
