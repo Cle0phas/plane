@@ -48,6 +48,7 @@ from plane.utils.content_validator import (
     validate_binary_data,
 )
 from plane.utils.issue_types import StrictUUIDField, validate_work_item_type_id
+from plane.utils.workflows import resolve_workflow_state
 
 
 class IssueFlatSerializer(BaseSerializer):
@@ -214,6 +215,17 @@ class IssueCreateSerializer(BaseSerializer):
                 current_type_id=self.instance.type_id if self.instance else None,
                 allow_null=self.instance is None,
             )
+
+        # Workflow last: it needs the validated state and type (spec 4.2).
+        state = resolve_workflow_state(
+            project_id=self.context.get("project_id"),
+            instance=self.instance,
+            state=attrs.get("state"),
+            state_given="state" in attrs,
+            type_id=attrs.get("type_id"),
+        )
+        if state is not None:
+            attrs["state"] = state
 
         return attrs
 
