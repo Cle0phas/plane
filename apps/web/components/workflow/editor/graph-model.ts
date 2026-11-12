@@ -77,7 +77,7 @@ export const fromDetail = (detail: TWorkflowDetail, statuses: TWorkflowStatus[])
     from_any: transition.from_any,
     source_keys: [...transition.source_ids],
     target_key: transition.target_id,
-    rules: transition.rules,
+    rules: transition.rules.map((rule) => ({ ...rule, params: { ...rule.params } })),
   })),
 });
 
@@ -113,7 +113,13 @@ export const addState = (draft: TDraftGraph, key: string, status: TDraftStatus):
     states: [
       ...draft.states,
       // A new box lands on a 4-column grid; the admin can drag it afterwards.
-      { key, status, position_x: (index % 4) * 240, position_y: Math.floor(index / 4) * 160, is_initial: index === 0 },
+      {
+        key,
+        status,
+        position_x: (index % 4) * 240,
+        position_y: Math.floor(index / 4) * 160,
+        is_initial: !draft.states.some((state) => state.is_initial),
+      },
     ],
   };
 };
@@ -175,7 +181,9 @@ export const setRestriction = (
   transitionKey: string,
   params: TWorkflowRestrictActorsParams | null
 ): TDraftGraph =>
-  updateTransition(draft, transitionKey, { rules: params ? [{ type: "restrict_actors", params }] : [] });
+  updateTransition(draft, transitionKey, {
+    rules: params ? [{ type: "restrict_actors", params: { ...params } }] : [],
+  });
 
 const isRuleComplete = ({ params }: TWorkflowRule) =>
   (params.roles?.length ?? 0) > 0 ||
@@ -188,7 +196,7 @@ export const validateDraft = (draft: TDraftGraph): string[] => {
   const errors = new Set<string>();
   const keys = new Set(draft.states.map((state) => state.key));
   const names = draft.states.map((state) => state.status.name.trim().toLowerCase());
-  if (names.some((name) => name === "")) errors.add("invalid_status");
+  if (names.some((name) => name === "")) errors.add("status_name_required");
   if (names.some((name) => RESERVED_STATUS_NAMES.has(name))) errors.add("reserved_status_name");
   if (new Set(names).size !== names.length) errors.add("duplicate_status_name");
   const ids = draft.states.flatMap((state) => (state.status.id ? [state.status.id] : []));
@@ -199,11 +207,12 @@ export const validateDraft = (draft: TDraftGraph): string[] => {
     const sources = transition.from_any ? [] : transition.source_keys;
     if (
       !keys.has(transition.target_key) ||
+      new Set(sources).size !== sources.length ||
       sources.some((source) => !keys.has(source) || source === transition.target_key) ||
       (!transition.from_any && sources.length === 0)
     )
       errors.add("invalid_transition");
-    if (!transition.rules.every(isRuleComplete)) errors.add("invalid_rule");
+    if (transition.rules.length > 1 || !transition.rules.every(isRuleComplete)) errors.add("invalid_rule");
   }
   return [...errors];
 };
@@ -216,3 +225,10 @@ export const getGraphErrorKey = (error: unknown): { key: string; projects: TWork
     return { key: `workflows.editor.errors.${code}`, projects };
   return { key: "workflows.editor.errors.default", projects: [] };
 };
+
+const DRAFT_ERROR_KEYS: Record<string, string> = {
+  status_name_required: "work_item_types.create_update.form.name.required",
+};
+
+/** i18n key for a validateDraft code; status_name_required is client only. */
+export const getDraftErrorKey = (code: string): string => DRAFT_ERROR_KEYS[code] ?? `workflows.editor.errors.${code}`;

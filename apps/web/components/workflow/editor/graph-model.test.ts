@@ -10,11 +10,13 @@ import {
   addState,
   addTransition,
   fromDetail,
+  getDraftErrorKey,
   getGraphErrorKey,
   isDraftDirty,
   moveState,
   removeState,
   setInitial,
+  updateTransition,
   setRestriction,
   toPayload,
   updateStatus,
@@ -130,7 +132,7 @@ describe("graph model", () => {
     const draft = fromDetail(detail, statuses);
     expect(moveState(draft, "a", Number.NaN, 5)).toBe(draft);
     expect(moveState(draft, "a", 10, 20).states[0]).toMatchObject({ position_x: 10, position_y: 20 });
-    expect(validateDraft(updateStatus(draft, "b", { name: "  " }))).toContain("invalid_status");
+    expect(validateDraft(updateStatus(draft, "b", { name: "  " }))).toContain("status_name_required");
   });
 
   it("maps server errors to i18n keys", () => {
@@ -141,5 +143,36 @@ describe("graph model", () => {
     });
     expect(getGraphErrorKey({ graph: ["<b>"] })).toEqual({ key: "workflows.editor.errors.default", projects: [] });
     expect(getGraphErrorKey(undefined).key).toBe("workflows.editor.errors.default");
+  });
+
+  it("flags duplicate sources and several rules like the server", () => {
+    const draft = fromDetail(detail, statuses);
+    const dup = updateTransition(draft, "t", { source_keys: ["a", "a"] });
+    expect(validateDraft(dup)).toContain("invalid_transition");
+    const rule = { type: "restrict_actors" as const, params: { creator: true as const } };
+    expect(validateDraft(updateTransition(draft, "t", { rules: [rule, rule] }))).toContain("invalid_rule");
+  });
+
+  it("makes a new state initial when none is", () => {
+    const base = setInitial(fromDetail(detail, statuses), "none");
+    expect(addState(base, "n", newStatus).states[2].is_initial).toBe(true);
+    expect(addState(fromDetail(detail, statuses), "n", newStatus).states[2].is_initial).toBe(false);
+  });
+
+  it("does not alias rules of the store data", () => {
+    const withRule: TWorkflowDetail = {
+      ...detail,
+      transitions: [{ ...detail.transitions[0], rules: [{ type: "restrict_actors", params: { roles: [20] } }] }],
+    };
+    const draft = fromDetail(withRule, statuses);
+    expect(draft.transitions[0].rules[0]).not.toBe(withRule.transitions[0].rules[0]);
+    expect(draft.transitions[0].rules[0].params).not.toBe(withRule.transitions[0].rules[0].params);
+    const params = { roles: [10] };
+    expect(setRestriction(draft, "t", params).transitions[0].rules[0].params).not.toBe(params);
+  });
+
+  it("maps draft codes to i18n keys", () => {
+    expect(getDraftErrorKey("status_name_required")).toBe("work_item_types.create_update.form.name.required");
+    expect(getDraftErrorKey("invalid_rule")).toBe("workflows.editor.errors.invalid_rule");
   });
 });
