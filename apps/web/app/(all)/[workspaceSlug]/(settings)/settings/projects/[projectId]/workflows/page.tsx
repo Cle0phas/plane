@@ -40,11 +40,13 @@ function WorkflowsProjectSettingsPage({ params }: Route.ComponentProps) {
   const canManage = allowPermissions([EUserPermissions.ADMIN], EUserPermissionsLevel.PROJECT, workspaceSlug, projectId);
   const workflows = useSWR(
     canManage ? WORKSPACE_WORKFLOWS(workspaceSlug) : null,
-    canManage ? () => fetchWorkflows(workspaceSlug) : null
+    canManage ? () => fetchWorkflows(workspaceSlug) : null,
+    { revalidateOnFocus: false, revalidateIfStale: false }
   );
   const scheme = useSWR(
     canManage ? PROJECT_WORKFLOW_SCHEME(projectId) : null,
-    canManage ? () => fetchProjectScheme(workspaceSlug, projectId) : null
+    canManage ? () => fetchProjectScheme(workspaceSlug, projectId) : null,
+    { revalidateOnFocus: false, revalidateIfStale: false }
   );
   const pageTitle = currentProjectDetails?.name ? `${currentProjectDetails.name} - ${t("workflows.label")}` : undefined;
   const loader = (

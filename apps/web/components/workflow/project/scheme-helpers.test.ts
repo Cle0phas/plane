@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { buildSchemePayload, getSchemeErrorKey, pendingNeeds } from "./scheme-helpers";
+import { buildSchemePayload, getSchemeErrorKey, getSchemeNeeds, mergeArrivals, pendingNeeds } from "./scheme-helpers";
 
 describe("scheme helpers", () => {
   it("drops types that follow the default and builds mappings", () => {
@@ -19,6 +19,24 @@ describe("scheme helpers", () => {
       ],
       mappings: [{ state_id: "s1", workflow_id: "support", status_id: "st-new" }],
     });
+  });
+
+  it("ignores types that are no longer assignable", () => {
+    expect(buildSchemePayload("software", { bug: "support", gone: "support" }, {}, ["bug"]).items).toEqual([
+      { issue_type_id: "bug", workflow_id: "support" },
+    ]);
+  });
+
+  it("keeps the arrivals whose need is still present", () => {
+    const need = { state_id: "s1", state_name: "A", workflow_id: "w", issue_count: 1, auto_status_id: null };
+    expect(mergeArrivals({ "s1:w": "x", "s2:w": "y" }, [need])).toEqual({ "s1:w": "x" });
+  });
+
+  it("reads the pending needs out of a refusal", () => {
+    const need = { state_id: "s1", state_name: "A", workflow_id: "w", issue_count: 1, auto_status_id: null };
+    expect(getSchemeNeeds({ scheme: ["mapping_incomplete"], needs: [need] })).toEqual([need]);
+    expect(getSchemeNeeds({ scheme: ["invalid_scheme"] })).toBeNull();
+    expect(getSchemeNeeds(null)).toBeNull();
   });
 
   it("keeps only the needs the server cannot map by name", () => {

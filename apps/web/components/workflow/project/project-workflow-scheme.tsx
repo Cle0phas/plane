@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { Button } from "@makeplane/propel/components/button";
 import { ConfirmDialog } from "@plane/blocks/dialog";
@@ -16,7 +16,14 @@ import { useProjectState } from "@/hooks/store/use-project-state";
 import { useWorkItemType } from "@/hooks/store/use-work-item-type";
 import { useWorkflow } from "@/hooks/store/use-workflow";
 // local imports
-import { buildSchemePayload, getSchemeErrorKey, needKey, pendingNeeds } from "./scheme-helpers";
+import {
+  buildSchemePayload,
+  getSchemeErrorKey,
+  getSchemeNeeds,
+  mergeArrivals,
+  needKey,
+  pendingNeeds,
+} from "./scheme-helpers";
 
 type Props = { workspaceSlug: string; projectId: string };
 
@@ -25,6 +32,7 @@ const SELECT_CLASS = "rounded-md border border-subtle bg-layer-1 px-2 py-1.5 tex
 export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ workspaceSlug, projectId }: Props) {
   const { t } = useTranslation();
   const {
+    fetchWorkflows,
     getWorkspaceWorkflows,
     getProjectScheme,
     fetchWorkflowDetail,
@@ -47,14 +55,24 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
   const [isBusy, setIsBusy] = useState(false);
   const [isDetachOpen, setIsDetachOpen] = useState(false);
 
+  // A revalidated scheme must not overwrite what the user is editing.
+  const isPristine = useRef(true);
   useEffect(() => {
+    if (!isPristine.current || needs !== null) return;
     setDefaultWorkflowId(scheme?.default_workflow_id ?? "");
     setTypeChoices(Object.fromEntries((scheme?.items ?? []).map((item) => [item.issue_type_id, item.workflow_id])));
-  }, [scheme]);
+  }, [scheme, needs]);
 
-  const payload = () => buildSchemePayload(defaultWorkflowId, typeChoices, arrivals);
+  const payload = (arrivalsOverride = arrivals) =>
+    buildSchemePayload(
+      defaultWorkflowId,
+      typeChoices,
+      arrivalsOverride,
+      types.map((type) => type.id as string)
+    );
 
-  const refresh = () => Promise.allSettled([fetchProjectStates(workspaceSlug, projectId)]);
+  const refresh = () =>
+    Promise.allSettled([fetchProjectStates(workspaceSlug, projectId), fetchWorkflows(workspaceSlug)]);
 
   const goToMapping = async () => {
     setErrorKey(null);
@@ -62,8 +80,9 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
     try {
       const chosen = new Set([defaultWorkflowId, ...Object.values(typeChoices).filter(Boolean)]);
       await Promise.all([...chosen].map((workflowId) => fetchWorkflowDetail(workspaceSlug, workflowId)));
-      setArrivals({});
-      setNeeds(pendingNeeds(await previewProjectScheme(workspaceSlug, projectId, payload())));
+      const pending = pendingNeeds(await previewProjectScheme(workspaceSlug, projectId, payload()));
+      setArrivals((current) => mergeArrivals(current, pending));
+      setNeeds(pending);
     } catch (error) {
       setErrorKey(getSchemeErrorKey(error));
     } finally {
@@ -76,10 +95,16 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
     setIsBusy(true);
     try {
       await applyProjectScheme(workspaceSlug, projectId, payload());
+      isPristine.current = true;
       await refresh();
       setNeeds(null);
       setToast({ type: "success", title: t("workflows.scheme.applied"), message: "" });
     } catch (error) {
+      const refreshed = getSchemeNeeds(error);
+      if (refreshed) {
+        setNeeds(refreshed);
+        setArrivals((current) => mergeArrivals(current, refreshed));
+      }
       setErrorKey(getSchemeErrorKey(error));
     } finally {
       setIsBusy(false);
@@ -90,10 +115,12 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
     setIsBusy(true);
     try {
       await detachProjectScheme(workspaceSlug, projectId);
+      isPristine.current = true;
       await refresh();
       setIsDetachOpen(false);
       setToast({ type: "success", title: t("workflows.scheme.detached"), message: "" });
     } catch (error) {
+      setIsDetachOpen(false);
       setErrorKey(getSchemeErrorKey(error));
     } finally {
       setIsBusy(false);
@@ -119,7 +146,10 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
             <select
               className={SELECT_CLASS}
               value={defaultWorkflowId}
-              onChange={(event) => setDefaultWorkflowId(event.target.value)}
+              onChange={(event) => {
+                isPristine.current = false;
+                setDefaultWorkflowId(event.target.value);
+              }}
             >
               <option value="" disabled>
                 {t("workflows.scheme.choose")}
@@ -137,7 +167,10 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
               <select
                 className={SELECT_CLASS}
                 value={typeChoices[type.id] ?? ""}
-                onChange={(event) => setTypeChoices((current) => ({ ...current, [type.id]: event.target.value }))}
+                onChange={(event) => {
+                  isPristine.current = false;
+                  setTypeChoices((current) => ({ ...current, [type.id]: event.target.value }));
+                }}
               >
                 <option value="">{t("workflows.scheme.same_as_default")}</option>
                 {workflows.map((workflow) => (

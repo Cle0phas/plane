@@ -14,11 +14,14 @@ export const needKey = (need: Pick<TWorkflowMappingNeed, "state_id" | "workflow_
 export const buildSchemePayload = (
   defaultWorkflowId: string,
   typeChoices: Record<string, string>,
-  arrivals: Record<string, string>
+  arrivals: Record<string, string>,
+  allowedTypeIds?: string[]
 ): TProjectWorkflowSchemePayload => ({
   default_workflow_id: defaultWorkflowId,
   items: Object.entries(typeChoices)
-    .filter(([, workflowId]) => workflowId !== "")
+    .filter(
+      ([issueTypeId, workflowId]) => workflowId !== "" && (!allowedTypeIds || allowedTypeIds.includes(issueTypeId))
+    )
     .map(([issueTypeId, workflowId]) => ({ issue_type_id: issueTypeId, workflow_id: workflowId })),
   mappings: Object.entries(arrivals).map(([key, statusId]) => {
     const [stateId, workflowId] = key.split(":");
@@ -27,6 +30,16 @@ export const buildSchemePayload = (
 });
 
 export const pendingNeeds = (needs: TWorkflowMappingNeed[]) => needs.filter((need) => need.auto_status_id === null);
+
+export const mergeArrivals = (arrivals: Record<string, string>, needs: TWorkflowMappingNeed[]) => {
+  const keys = new Set(needs.map(needKey));
+  return Object.fromEntries(Object.entries(arrivals).filter(([key]) => keys.has(key)));
+};
+
+export const getSchemeNeeds = (error: unknown) => {
+  const needs = (error as { needs?: unknown } | null)?.needs;
+  return Array.isArray(needs) ? pendingNeeds(needs as TWorkflowMappingNeed[]) : null;
+};
 
 export const getSchemeErrorKey = (error: unknown) => {
   const code =
