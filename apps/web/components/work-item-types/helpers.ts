@@ -44,17 +44,31 @@ export const getDeleteState = (workItemType: TIssueType): TWorkItemTypeActionSta
   return ALLOWED;
 };
 
-const firstString = (value: unknown): string | undefined => {
-  if (typeof value === "string") return value;
-  if (Array.isArray(value) && typeof value[0] === "string") return value[0];
-  return undefined;
-};
-
 const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object";
 
-/** Server refusals arrive as {"error": "..."} or DRF field errors {"field": ["..."]}. */
-export const getApiErrorMessage = (error: unknown): string | undefined =>
-  isRecord(error) ? Object.values(error).map(firstString).find(Boolean) : undefined;
+type TWorkItemTypeFormField = "name" | "description";
 
-export const getApiFieldError = (error: unknown, field: string): string | undefined =>
-  isRecord(error) ? firstString(error[field]) : undefined;
+/**
+ * Maps DRF field errors to localized keys; server text is never shown. The client already blocks an empty or
+ * too long name, so a server name error is the duplicate rule.
+ */
+export const getFormFieldErrorKeys = (
+  error: unknown,
+  mode: "create" | "update"
+): Partial<Record<TWorkItemTypeFormField, string>> => {
+  if (!isRecord(error)) return {};
+  const keys: Partial<Record<TWorkItemTypeFormField, string>> = {};
+  if (Array.isArray(error.name)) keys.name = `work_item_types.${mode}.toast.error.message.conflict`;
+  if (Array.isArray(error.description)) keys.description = "work_item_types.create_update.form.description.max_length";
+  return keys;
+};
+
+export type TWorkItemTypeRowAction = "set_default" | "deactivate" | "reactivate" | "delete";
+
+// Only set default has a single possible refusal (inactive type); the others fall back to the default message.
+const ACTION_REFUSAL_KEYS: Partial<Record<TWorkItemTypeRowAction, string>> = {
+  set_default: "work_item_types.settings.cant_set_default_inactive_message",
+};
+
+export const getActionRefusalKey = (error: unknown, action: TWorkItemTypeRowAction): string | undefined =>
+  isRecord(error) && typeof error.error === "string" ? ACTION_REFUSAL_KEYS[action] : undefined;

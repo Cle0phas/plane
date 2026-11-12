@@ -26,7 +26,7 @@ import { setToast } from "@plane/blocks/toast";
 import { useTranslation } from "@plane/i18n";
 import type { TIssueType, TIssueTypeFormData } from "@plane/types";
 // components
-import { getApiErrorMessage, getApiFieldError } from "@/components/work-item-types/helpers";
+import { getFormFieldErrorKeys } from "@/components/work-item-types/helpers";
 import { WorkItemTypeIcon } from "@/components/work-item-types/work-item-type-icon";
 // hooks
 import { useWorkItemType } from "@/hooks/store/use-work-item-type";
@@ -80,14 +80,15 @@ export const WorkItemTypeFormModal = observer(function WorkItemTypeFormModal(pro
       });
       onClose();
     } catch (error) {
-      for (const field of ["name", "description"] as const) {
-        const message = getApiFieldError(error, field);
-        if (message) setError(field, { message });
-      }
+      const fieldErrorKeys = getFormFieldErrorKeys(error, toastKey);
+      if (fieldErrorKeys.name) setError("name", { message: t(fieldErrorKeys.name, { name: payload.name }) });
+      if (fieldErrorKeys.description) setError("description", { message: t(fieldErrorKeys.description) });
+      const hasFieldError = Object.keys(fieldErrorKeys).length > 0;
+      // A field error is already shown under its field, so the toast only signals the failure.
       setToast({
         type: "error",
         title: t(`work_item_types.${toastKey}.toast.error.title`),
-        message: getApiErrorMessage(error) ?? t(`work_item_types.${toastKey}.toast.error.message.default`),
+        message: hasFieldError ? undefined : t(`work_item_types.${toastKey}.toast.error.message.default`),
       });
     }
   };
@@ -157,9 +158,13 @@ export const WorkItemTypeFormModal = observer(function WorkItemTypeFormModal(pro
                   control={control}
                   name="name"
                   rules={{
-                    validate: (value) =>
-                      value.trim().length > 0 || t("work_item_types.create_update.form.name.required"),
-                    maxLength: { value: 255, message: t("work_item_types.create_update.form.name.max_length") },
+                    // trimmed, like the server
+                    validate: {
+                      required: (value) =>
+                        value.trim().length > 0 || t("work_item_types.create_update.form.name.required"),
+                      maxLength: (value) =>
+                        value.trim().length <= 255 || t("work_item_types.create_update.form.name.max_length"),
+                    },
                   }}
                   render={({ field: { value, onChange, ref } }) => (
                     <InputField
@@ -182,7 +187,8 @@ export const WorkItemTypeFormModal = observer(function WorkItemTypeFormModal(pro
                   control={control}
                   name="description"
                   rules={{
-                    maxLength: { value: 1000, message: t("work_item_types.create_update.form.description.max_length") },
+                    validate: (value) =>
+                      value.trim().length <= 1000 || t("work_item_types.create_update.form.description.max_length"),
                   }}
                   render={({ field: { value, onChange } }) => (
                     <TextAreaField

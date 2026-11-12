@@ -7,10 +7,10 @@
 import { describe, expect, it } from "vitest";
 import type { TIssueType } from "@plane/types";
 import {
-  getApiErrorMessage,
-  getApiFieldError,
+  getActionRefusalKey,
   getDeactivateState,
   getDeleteState,
+  getFormFieldErrorKeys,
   getSetDefaultState,
 } from "./helpers";
 
@@ -85,23 +85,45 @@ describe("workspace work item type actions", () => {
   });
 });
 
-describe("api error reading", () => {
-  it("reads a refusal message", () => {
-    expect(getApiErrorMessage({ error: "The project default work item type cannot be removed." })).toBe(
-      "The project default work item type cannot be removed."
+describe("form refusal mapping", () => {
+  it("maps a server name error to the localized duplicate message", () => {
+    expect(getFormFieldErrorKeys({ name: ["A work item type with this name already exists."] }, "create")).toEqual({
+      name: "work_item_types.create.toast.error.message.conflict",
+    });
+    expect(getFormFieldErrorKeys({ name: ["x"] }, "update")).toEqual({
+      name: "work_item_types.update.toast.error.message.conflict",
+    });
+  });
+
+  it("maps a server description error to the localized length message", () => {
+    expect(getFormFieldErrorKeys({ description: ["Too long."] }, "create")).toEqual({
+      description: "work_item_types.create_update.form.description.max_length",
+    });
+  });
+
+  it("maps nothing for other shapes, so the localized default is shown", () => {
+    expect(getFormFieldErrorKeys({ logo_props: ["bad"] }, "create")).toEqual({});
+    expect(getFormFieldErrorKeys({ detail: "Not found." }, "create")).toEqual({});
+    expect(getFormFieldErrorKeys(undefined, "update")).toEqual({});
+  });
+});
+
+describe("row action refusal mapping", () => {
+  it("names the reason of a refused set default", () => {
+    expect(getActionRefusalKey({ error: "An inactive work item type cannot be the default." }, "set_default")).toBe(
+      "work_item_types.settings.cant_set_default_inactive_message"
     );
   });
 
-  it("reads the first field error", () => {
-    expect(getApiErrorMessage({ name: ["A work item type with this name already exists."] })).toBe(
-      "A work item type with this name already exists."
-    );
-    expect(getApiFieldError({ name: ["Duplicate."] }, "name")).toBe("Duplicate.");
+  it("falls back to the default message when the action has several possible refusals", () => {
+    expect(
+      getActionRefusalKey({ error: "This work item type is the default of a project." }, "delete")
+    ).toBeUndefined();
+    expect(getActionRefusalKey({ error: "x" }, "deactivate")).toBeUndefined();
   });
 
-  it("returns nothing for an unknown shape", () => {
-    expect(getApiErrorMessage(undefined)).toBeUndefined();
-    expect(getApiErrorMessage({ detail: 3 })).toBeUndefined();
-    expect(getApiFieldError({ error: "x" }, "name")).toBeUndefined();
+  it("ignores anything that is not a refusal", () => {
+    expect(getActionRefusalKey({ detail: "Not found." }, "set_default")).toBeUndefined();
+    expect(getActionRefusalKey(undefined, "set_default")).toBeUndefined();
   });
 });

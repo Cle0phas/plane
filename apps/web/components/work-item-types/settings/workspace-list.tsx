@@ -24,11 +24,12 @@ import { useTranslation } from "@plane/i18n";
 import type { TIssueType, TIssueTypeUpdatePayload } from "@plane/types";
 // components
 import {
-  getApiErrorMessage,
+  getActionRefusalKey,
   getDeactivateState,
   getDeleteState,
   getSetDefaultState,
 } from "@/components/work-item-types/helpers";
+import type { TWorkItemTypeRowAction } from "@/components/work-item-types/helpers";
 import { WorkItemTypeIcon } from "@/components/work-item-types/work-item-type-icon";
 // hooks
 import { useWorkItemType } from "@/hooks/store/use-work-item-type";
@@ -51,7 +52,7 @@ const WorkspaceWorkItemTypeRow = observer(function WorkspaceWorkItemTypeRow(prop
   // The reason is visible row text, so assistive tech reads it with the disabled item (spec 6.6).
   const reason = (reasonKey?: string) => (reasonKey ? t(reasonKey) : undefined);
 
-  const runUpdate = async (payload: TIssueTypeUpdatePayload) => {
+  const runUpdate = async (payload: TIssueTypeUpdatePayload, action: TWorkItemTypeRowAction) => {
     try {
       await updateType(workspaceSlug, workItemType.id, payload);
       setToast({
@@ -63,7 +64,7 @@ const WorkspaceWorkItemTypeRow = observer(function WorkspaceWorkItemTypeRow(prop
       setToast({
         type: "error",
         title: t("work_item_types.update.toast.error.title"),
-        message: getApiErrorMessage(error) ?? t("work_item_types.update.toast.error.message.default"),
+        message: t(getActionRefusalKey(error, action) ?? "work_item_types.update.toast.error.message.default"),
       });
     }
   };
@@ -82,8 +83,10 @@ const WorkspaceWorkItemTypeRow = observer(function WorkspaceWorkItemTypeRow(prop
       setToast({
         type: "error",
         title: t("work_item_types.settings.item_delete_confirmation.toast.error.title"),
-        message:
-          getApiErrorMessage(error) ?? t("work_item_types.settings.item_delete_confirmation.toast.error.message"),
+        message: t(
+          getActionRefusalKey(error, "delete") ??
+            "work_item_types.settings.item_delete_confirmation.toast.error.message"
+        ),
       });
     } finally {
       setIsDeleting(false);
@@ -92,7 +95,7 @@ const WorkspaceWorkItemTypeRow = observer(function WorkspaceWorkItemTypeRow(prop
 
   return (
     <li className="flex items-center gap-3 px-4 py-3">
-      <WorkItemTypeIcon workItemType={workItemType} size={18} />
+      <WorkItemTypeIcon workItemType={workItemType} size={18} decorative />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="truncate text-body-sm-medium text-primary">{workItemType.name}</span>
@@ -132,7 +135,7 @@ const WorkspaceWorkItemTypeRow = observer(function WorkspaceWorkItemTypeRow(prop
               label={t("work_item_types.settings.set_as_default")}
               description={reason(setDefaultState.reasonKey)}
               disabled={setDefaultState.disabled}
-              onClick={() => void runUpdate({ is_default: true })}
+              onClick={() => void runUpdate({ is_default: true }, "set_default")}
             />
           )}
           {workItemType.is_active ? (
@@ -141,13 +144,13 @@ const WorkspaceWorkItemTypeRow = observer(function WorkspaceWorkItemTypeRow(prop
               label={t("work_item_types.settings.actions.deactivate")}
               description={reason(deactivateState.reasonKey)}
               disabled={deactivateState.disabled}
-              onClick={() => void runUpdate({ is_active: false })}
+              onClick={() => void runUpdate({ is_active: false }, "deactivate")}
             />
           ) : (
             <MenuItem
               icon={<Icon icon={ToggleOnOutline} />}
               label={t("work_item_types.settings.actions.reactivate")}
-              onClick={() => void runUpdate({ is_active: true })}
+              onClick={() => void runUpdate({ is_active: true }, "reactivate")}
             />
           )}
           <MenuSeparator />

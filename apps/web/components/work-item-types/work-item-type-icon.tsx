@@ -13,18 +13,17 @@ type TWorkItemTypeIconProps = {
   workItemType: Pick<TIssueType, "name" | "logo_props">;
   size?: number;
   showTooltip?: boolean;
+  /** Set when the type name is visible next to the icon, so screen readers do not read it twice. */
+  decorative?: boolean;
   className?: string;
 };
 
 export function WorkItemTypeIcon(props: TWorkItemTypeIconProps) {
-  const { workItemType, size = 14, showTooltip = false, className } = props;
+  const { workItemType, size = 14, showTooltip = false, decorative = false, className } = props;
   // The type name is the accessible text of the glyph (spec 6.6).
+  const a11yProps = decorative ? { "aria-hidden": true } : { role: "img", "aria-label": workItemType.name };
   const icon = (
-    <span
-      role="img"
-      aria-label={workItemType.name}
-      className={cn("flex shrink-0 items-center justify-center", className)}
-    >
+    <span {...a11yProps} className={cn("flex shrink-0 items-center justify-center", className)}>
       <Logo logo={workItemType.logo_props} size={size} />
     </span>
   );

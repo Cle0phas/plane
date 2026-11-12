@@ -43,7 +43,17 @@ function WorkItemTypesSettingsPage({ params }: Route.ComponentProps) {
   const workItemTypes = getWorkspaceTypes(workspaceSlug);
   const pageTitle = currentWorkspace?.name ? `${currentWorkspace.name} - ${t("work_item_types.label")}` : undefined;
 
-  if (workspaceUserInfo && !isWorkspaceAdmin) return <NotAuthorizedView section="settings" className="h-auto" />;
+  const loader = (
+    <Loader className="space-y-3">
+      <Loader.Item height="56px" />
+      <Loader.Item height="56px" />
+    </Loader>
+  );
+
+  // Until the role is known, show neither the list nor the create button.
+  if (!workspaceUserInfo)
+    return <SettingsContentWrapper header={<WorkItemTypesWorkspaceSettingsHeader />}>{loader}</SettingsContentWrapper>;
+  if (!isWorkspaceAdmin) return <NotAuthorizedView section="settings" className="h-auto" />;
 
   return (
     <SettingsContentWrapper header={<WorkItemTypesWorkspaceSettingsHeader />}>
@@ -73,10 +83,7 @@ function WorkItemTypesSettingsPage({ params }: Route.ComponentProps) {
             {t("work_item_types.settings.list.load_error")}
           </p>
         ) : isLoading && workItemTypes.length === 0 ? (
-          <Loader className="space-y-3">
-            <Loader.Item height="56px" />
-            <Loader.Item height="56px" />
-          </Loader>
+          loader
         ) : (
           <WorkspaceWorkItemTypeList
             workspaceSlug={workspaceSlug}
