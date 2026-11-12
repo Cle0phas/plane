@@ -46,6 +46,11 @@ const WorkflowRow = observer(function WorkflowRow({ workspaceSlug, workflow }: R
         >
           {workflow.name}
         </Link>
+        {inUse && (
+          <p id={deleteReasonId} className="text-body-xs-regular text-tertiary">
+            {t("workflows.settings.delete.in_use")}
+          </p>
+        )}
         {workflow.projects && workflow.projects.length > 0 && (
           <p className="truncate text-caption-sm-regular text-tertiary">
             {workflow.projects.map((project) => project.name).join(", ")}
@@ -67,11 +72,6 @@ const WorkflowRow = observer(function WorkflowRow({ workspaceSlug, workflow }: R
         aria-describedby={inUse ? deleteReasonId : undefined}
         onClick={() => setIsDeleteOpen(true)}
       />
-      {inUse && (
-        <span id={deleteReasonId} className="sr-only">
-          {t("workflows.settings.delete.in_use")}
-        </span>
-      )}
       <ConfirmDialog
         handleClose={() => setIsDeleteOpen(false)}
         handleSubmit={handleDelete}

@@ -72,7 +72,7 @@ export const WorkflowCreateModal = observer(function WorkflowCreateModal(props: 
     <Dialog
       open={isOpen}
       onOpenChange={(open) => {
-        if (!open) onClose();
+        if (!open && !isSubmitting) onClose();
       }}
     >
       <DialogContent size="md">
@@ -88,7 +88,15 @@ export const WorkflowCreateModal = observer(function WorkflowCreateModal(props: 
                 <Controller
                   control={control}
                   name="name"
-                  rules={{ validate: (value) => (value.trim().length > 0 && value.trim().length <= 255) || " " }}
+                  rules={{
+                    // trimmed, like the server
+                    validate: {
+                      required: (value) =>
+                        (value ?? "").trim().length > 0 || t("work_item_types.create_update.form.name.required"),
+                      maxLength: (value) =>
+                        (value ?? "").trim().length <= 255 || t("work_item_types.create_update.form.name.max_length"),
+                    },
+                  }}
                   render={({ field: { value, onChange, ref } }) => (
                     <InputField
                       size="lg"
@@ -101,13 +109,18 @@ export const WorkflowCreateModal = observer(function WorkflowCreateModal(props: 
                       value={value}
                       onChange={onChange}
                       ref={ref}
-                      error={errors.name?.message?.trim() || undefined}
+                      error={errors.name?.message}
                     />
                   )}
                 />
                 <Controller
                   control={control}
                   name="description"
+                  rules={{
+                    validate: (value) =>
+                      (value ?? "").trim().length <= 1000 ||
+                      t("work_item_types.create_update.form.description.max_length"),
+                  }}
                   render={({ field: { value, onChange } }) => (
                     <TextAreaField
                       size="lg"
@@ -119,6 +132,7 @@ export const WorkflowCreateModal = observer(function WorkflowCreateModal(props: 
                       label={t("workflows.settings.form.description")}
                       value={value ?? ""}
                       onChange={onChange}
+                      error={errors.description?.message}
                     />
                   )}
                 />
@@ -131,6 +145,7 @@ export const WorkflowCreateModal = observer(function WorkflowCreateModal(props: 
               size="md"
               stretch="auto"
               onClick={onClose}
+              disabled={isSubmitting}
               label={t("workflows.settings.form.cancel")}
             />
             <Button
