@@ -130,7 +130,12 @@ from .webhook import WebhookSerializer, WebhookLogSerializer
 
 from .issue_type import IssueTypeSerializer, ProjectIssueTypeSerializer
 
-from .workflow import WorkflowGraphInputSerializer, WorkflowSerializer, WorkflowStatusSerializer
+from .workflow import (
+    ProjectWorkflowSchemeInputSerializer,
+    WorkflowGraphInputSerializer,
+    WorkflowSerializer,
+    WorkflowStatusSerializer,
+)
 
 from .favorite import UserFavoriteSerializer
 

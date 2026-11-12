@@ -12,12 +12,33 @@ from rest_framework.response import Response
 
 # Module imports
 from plane.app.permissions import ROLE, allow_permission
-from plane.app.serializers import WorkflowGraphInputSerializer, WorkflowSerializer, WorkflowStatusSerializer
+from plane.app.serializers import (
+    ProjectWorkflowSchemeInputSerializer,
+    WorkflowGraphInputSerializer,
+    WorkflowSerializer,
+    WorkflowStatusSerializer,
+)
 from plane.app.serializers.workflow import DUPLICATE_WORKFLOW_NAME_MESSAGE
-from plane.db.models import Workflow, WorkflowState, WorkflowStatus, Workspace, WorkspaceMember
+from plane.app.views.issue_type.base import can_manage_project_issue_types
+from plane.db.models import (
+    Project,
+    ProjectWorkflowScheme,
+    Workflow,
+    WorkflowState,
+    WorkflowStatus,
+    Workspace,
+    WorkspaceMember,
+)
 from plane.utils.audit import record_audit
 from plane.utils.workflow_graph import GraphError, save_workflow_graph, workflow_graph
-from plane.utils.workflow_sync import projects_using
+from plane.utils.workflow_sync import (
+    SchemeError,
+    apply_scheme,
+    detach_scheme,
+    mapping_needs,
+    projects_using,
+    validate_scheme,
+)
 from ..base import BaseAPIView
 
 METHOD_NOT_ALLOWED = {"error": "Method not allowed on this route."}
@@ -198,3 +219,107 @@ class WorkflowGraphEndpoint(BaseAPIView):
             return Response({"graph": ["duplicate_status_name"]}, status=status.HTTP_400_BAD_REQUEST)
         workflow.refresh_from_db()
         return Response(workflow_detail(workflow, True), status=status.HTTP_200_OK)
+
+
+FORBIDDEN = {"error": "You don't have the required permissions."}
+
+
+def _require_project_manager(request, slug, project_id):
+    """A4 is the same rule as R3 of the work item types: workspace admins and project admins."""
+    if can_manage_project_issue_types(request.user, slug, project_id):
+        return None
+    return Response(FORBIDDEN, status=status.HTTP_403_FORBIDDEN)
+
+
+def _writable_project(slug, project_id):
+    return Project.objects.get(workspace__slug=slug, pk=project_id, archived_at__isnull=True)
+
+
+def _scheme_input(request):
+    if not isinstance(request.data, dict):
+        return None, Response(NOT_AN_OBJECT, status=status.HTTP_400_BAD_REQUEST)
+    serializer = ProjectWorkflowSchemeInputSerializer(data=request.data)
+    if not serializer.is_valid():
+        return None, Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    data = serializer.validated_data
+    items = {item["issue_type_id"]: item["workflow_id"] for item in data["items"]}
+    mappings = {(mapping["state_id"], mapping["workflow_id"]): mapping["status_id"] for mapping in data["mappings"]}
+    return (data["default_workflow_id"], items, mappings), None
+
+
+def _scheme_refusal(error):
+    body = {"scheme": [error.code]}
+    if error.details:
+        body["needs"] = error.details
+    return Response(body, status=status.HTTP_400_BAD_REQUEST)
+
+
+def scheme_body(project):
+    scheme = ProjectWorkflowScheme.objects.filter(project_id=project.id).first()
+    if scheme is None:
+        return {"default_workflow_id": None, "items": [], "workflows": []}
+    items = list(scheme.items.order_by("created_at").values_list("issue_type_id", "workflow_id"))
+    workflow_ids = {scheme.default_workflow_id, *(workflow_id for _, workflow_id in items)}
+    return {
+        "default_workflow_id": str(scheme.default_workflow_id),
+        "items": [{"issue_type_id": str(type_id), "workflow_id": str(workflow_id)} for type_id, workflow_id in items],
+        # Embedded so the web app computes reachable states without another round trip (P10).
+        "workflows": [
+            workflow_graph(workflow) for workflow in Workflow.objects.filter(pk__in=workflow_ids).order_by("name")
+        ],
+    }
+
+
+class ProjectWorkflowSchemeEndpoint(BaseAPIView):
+    @allow_permission(allowed_roles=[ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST], level="WORKSPACE")
+    def get(self, request, slug, project_id):
+        project = Project.objects.get(workspace__slug=slug, pk=project_id)
+        return Response(scheme_body(project), status=status.HTTP_200_OK)
+
+    @allow_permission(allowed_roles=[ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST], level="WORKSPACE")
+    def put(self, request, slug, project_id):
+        refusal = _require_project_manager(request, slug, project_id)
+        if refusal:
+            return refusal
+        scheme_input, error_response = _scheme_input(request)
+        if error_response:
+            return error_response
+        default_workflow_id, items, mappings = scheme_input
+        project = _writable_project(slug, project_id)
+        try:
+            apply_scheme(
+                project=project,
+                default_workflow_id=default_workflow_id,
+                items=items,
+                mappings=mappings,
+                actor_id=request.user.id,
+            )
+        except SchemeError as error:
+            return _scheme_refusal(error)
+        return Response(scheme_body(project), status=status.HTTP_200_OK)
+
+    @allow_permission(allowed_roles=[ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST], level="WORKSPACE")
+    def delete(self, request, slug, project_id):
+        refusal = _require_project_manager(request, slug, project_id)
+        if refusal:
+            return refusal
+        detach_scheme(project=_writable_project(slug, project_id), actor_id=request.user.id)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ProjectWorkflowSchemePreviewEndpoint(BaseAPIView):
+    @allow_permission(allowed_roles=[ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST], level="WORKSPACE")
+    def post(self, request, slug, project_id):
+        refusal = _require_project_manager(request, slug, project_id)
+        if refusal:
+            return refusal
+        scheme_input, error_response = _scheme_input(request)
+        if error_response:
+            return error_response
+        default_workflow_id, items, _ = scheme_input
+        project = _writable_project(slug, project_id)
+        try:
+            validate_scheme(project, default_workflow_id, items)
+        except SchemeError as error:
+            return _scheme_refusal(error)
+        return Response({"needs": mapping_needs(project, default_workflow_id, items)}, status=status.HTTP_200_OK)

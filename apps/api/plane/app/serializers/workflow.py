@@ -148,9 +148,7 @@ class GraphTransitionInputSerializer(serializers.Serializer):
 
 class WorkflowGraphInputSerializer(serializers.Serializer):
     states = serializers.ListField(child=GraphStateInputSerializer(), max_length=MAX_STATES_PER_WORKFLOW)
-    transitions = serializers.ListField(
-        child=GraphTransitionInputSerializer(), max_length=MAX_TRANSITIONS_PER_WORKFLOW
-    )
+    transitions = serializers.ListField(child=GraphTransitionInputSerializer(), max_length=MAX_TRANSITIONS_PER_WORKFLOW)
 
     def validate(self, attrs):
         states = attrs["states"]
@@ -185,3 +183,28 @@ class WorkflowGraphInputSerializer(serializers.Serializer):
             ):
                 raise graph_error("invalid_transition")
         return attrs
+
+
+class SchemeItemInputSerializer(serializers.Serializer):
+    issue_type_id = StrictUUIDField()
+    workflow_id = StrictUUIDField()
+
+
+class SchemeMappingInputSerializer(serializers.Serializer):
+    state_id = StrictUUIDField()
+    workflow_id = StrictUUIDField()
+    status_id = StrictUUIDField()
+
+
+class ProjectWorkflowSchemeInputSerializer(serializers.Serializer):
+    default_workflow_id = StrictUUIDField()
+    items = serializers.ListField(child=SchemeItemInputSerializer(), required=False, default=list, max_length=200)
+    mappings = serializers.ListField(
+        child=SchemeMappingInputSerializer(), required=False, default=list, max_length=MAX_STATES_PER_WORKFLOW * 5
+    )
+
+    def validate_items(self, items):
+        type_ids = [item["issue_type_id"] for item in items]
+        if len(set(type_ids)) != len(type_ids):
+            raise serializers.ValidationError("Each work item type appears once.")
+        return items

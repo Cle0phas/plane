@@ -239,7 +239,13 @@ from .issue_type.base import (
     ProjectIssueTypeDetailEndpoint,
 )
 
-from .workflow.base import WorkflowEndpoint, WorkflowGraphEndpoint, WorkflowStatusEndpoint
+from .workflow.base import (
+    ProjectWorkflowSchemeEndpoint,
+    ProjectWorkflowSchemePreviewEndpoint,
+    WorkflowEndpoint,
+    WorkflowGraphEndpoint,
+    WorkflowStatusEndpoint,
+)
 
 from .error_404 import custom_404_view
 
