@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import type { TIssueType, TProjectIssueType } from "@plane/types";
 import {
   getActionRefusalKey,
+  canChooseTypeInForm,
   getDeactivateState,
   getDeleteState,
   getFormFieldErrorKeys,
@@ -315,5 +316,15 @@ describe("quick add in a type column", () => {
     expect(getQuickAddTypeData("None", assignable)).toEqual({});
     expect(getQuickAddTypeData("deleted-id", assignable)).toEqual({});
     expect(getQuickAddTypeData("bug", [])).toEqual({});
+  });
+});
+
+describe("type choice in the work item form", () => {
+  it("is offered at creation and when editing a draft, never when editing a work item", () => {
+    expect(canChooseTypeInForm({ isEditing: false, isDraft: false })).toBe(true);
+    expect(canChooseTypeInForm({ isEditing: false, isDraft: true })).toBe(true);
+    // Converting a draft is a creation (spec 6.3): a stale stored type must be replaceable.
+    expect(canChooseTypeInForm({ isEditing: true, isDraft: true })).toBe(true);
+    expect(canChooseTypeInForm({ isEditing: true, isDraft: false })).toBe(false);
   });
 });

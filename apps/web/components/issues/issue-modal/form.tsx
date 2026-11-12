@@ -43,7 +43,7 @@ import {
   IssueProjectSelect,
   IssueTitleInput,
 } from "@/components/issues/issue-modal/components";
-import { getTypeIdAfterProjectChange } from "@/components/work-item-types/helpers";
+import { canChooseTypeInForm, getTypeIdAfterProjectChange } from "@/components/work-item-types/helpers";
 import { WorkItemTypeSelect } from "@/components/work-item-types/work-item-type-select";
 // helpers
 // hooks
@@ -166,6 +166,7 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
       : undefined;
 
   const isDisabled = isSubmitting || isApplyingTemplate;
+  const canChooseType = canChooseTypeInForm({ isEditing: !!data?.id, isDraft });
 
   const { getIndex } = getTabIndex(ETabIndices.ISSUE_FORM, isMobile);
 
@@ -196,8 +197,8 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
 
   // Update the issue type id when the project id changes
   useEffect(() => {
-    // The type is only chosen at creation (spec 6.3); an update never sends a silently filled one.
-    if (!projectId || data?.id) return;
+    // An update of a work item never sends a silently filled type; a draft edit does, so a stale type is replaced.
+    if (!projectId || !canChooseType) return;
     const isProjectChange = previousProjectIdRef.current !== projectId;
     previousProjectIdRef.current = projectId;
     const issueTypeId = watch("type_id");
@@ -207,7 +208,9 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
       assignableTypeIds: assignableTypes?.map((workItemType) => workItemType.id),
       projectDefaultTypeId: getIssueTypeIdOnProjectChange(projectId),
     });
-    if (nextIssueTypeId !== issueTypeId) setValue("type_id", nextIssueTypeId, { shouldValidate: true });
+    // Dirty on a draft edit, so saving the draft persists the replacement too.
+    if (nextIssueTypeId !== issueTypeId)
+      setValue("type_id", nextIssueTypeId, { shouldValidate: true, shouldDirty: !!data?.id });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, projectId, assignableTypes]);
@@ -386,7 +389,7 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
                     disabled={!!data?.id || !!data?.sourceIssueId || isProjectSelectionDisabled}
                     handleFormChange={handleFormChange}
                   />
-                  {!data?.id && (
+                  {canChooseType && (
                     <Controller
                       control={control}
                       name="type_id"

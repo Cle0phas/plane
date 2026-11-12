@@ -96,6 +96,10 @@ export const getTypeIdAfterProjectChange = (params: {
   return projectDefaultTypeId;
 };
 
+/** The type is chosen at creation only (spec 6.3); converting a draft is a creation, so editing a draft offers it too. */
+export const canChooseTypeInForm = (params: { isEditing: boolean; isDraft: boolean }): boolean =>
+  !params.isEditing || params.isDraft;
+
 export const getWorkItemTypeChange = (currentTypeId: string | null | undefined, nextTypeId: string) =>
   currentTypeId === nextTypeId ? null : { type_id: nextTypeId };
 

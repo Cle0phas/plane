@@ -5,6 +5,7 @@
 """R9: a work item only takes an active type of its own workspace that is enabled in its project."""
 
 from types import SimpleNamespace
+from unittest import mock
 from uuid import uuid4
 
 import pytest
@@ -213,6 +214,46 @@ class TestDraftWorkItemType:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         draft.refresh_from_db()
         assert draft.type_id != ctx.foreign.id
+
+
+@pytest.mark.contract
+@pytest.mark.django_db
+class TestDraftConversionWorkItemType:
+    """Converting a draft is a creation (spec 6.3): its stored type gets no "keep current" exemption."""
+
+    @pytest.fixture(autouse=True)
+    def _no_side_effects(self, mock_celery):
+        with mock.patch("plane.app.views.workspace.draft.base_host", return_value="http://testserver"):
+            yield
+
+    def _convert(self, ctx, draft, type_id):
+        return ctx.client.post(
+            f"/api/workspaces/{ctx.workspace.slug}/draft-to-issue/{draft.id}/",
+            {"name": draft.name, "type_id": str(type_id)},
+            format="json",
+        )
+
+    def _stale_draft(self, ctx, name):
+        draft = DraftIssue(name=name, project=ctx.project, workspace=ctx.workspace, type=ctx.bug)
+        draft.save(created_by_id=ctx.user.id)
+        return draft
+
+    @pytest.mark.parametrize("staleness", ["deactivated", "disabled_in_project"])
+    def test_a_stale_type_is_refused_and_the_project_default_is_accepted(self, ctx, staleness):
+        draft = self._stale_draft(ctx, f"Stale {staleness}")
+        if staleness == "deactivated":
+            IssueType.objects.filter(pk=ctx.bug.pk).update(is_active=False)
+        else:
+            ProjectIssueType.objects.filter(project=ctx.project, issue_type=ctx.bug).delete()
+
+        refused = self._convert(ctx, draft, ctx.bug.id)
+        assert refused.status_code == status.HTTP_400_BAD_REQUEST
+        assert refused.data == {"type_id": ["Work item type is not valid for this project."]}
+        assert DraftIssue.objects.filter(pk=draft.pk).exists()
+
+        accepted = self._convert(ctx, draft, ctx.default_type.id)
+        assert accepted.status_code == status.HTTP_201_CREATED, accepted.data
+        assert Issue.objects.get(pk=accepted.data["id"]).type_id == ctx.default_type.id
 
 
 @pytest.mark.contract
