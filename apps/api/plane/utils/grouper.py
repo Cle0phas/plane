@@ -21,6 +21,7 @@ from plane.db.models import (
     IssueAssignee,
     ModuleIssue,
     IssueLabel,
+    IssueType,
 )
 from typing import Optional, Dict, Tuple, Any, Union, List
 
@@ -189,6 +190,9 @@ def issue_group_values(
 
     if field == "project_id":
         return list(Project.objects.filter(workspace__slug=slug, id__in=project_ids).values_list("id", flat=True))
+
+    if field == "type_id":
+        return list(IssueType.objects.filter(workspace__slug=slug).values_list("id", flat=True))
 
     if field == "priority":
         return ["low", "medium", "high", "urgent", "none"]

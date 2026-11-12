@@ -130,6 +130,15 @@ def filter_priority(params, issue_filter, method, prefix=""):
     return issue_filter
 
 
+def filter_issue_type(params, issue_filter, method, prefix=""):
+    raw = params.get("issue_type")
+    values = raw.split(",") if isinstance(raw, str) else (raw or [])
+    issue_types = filter_valid_uuids([str(value) for value in values if value not in ("", "null")])
+    if issue_types:
+        issue_filter[f"{prefix}type__in"] = issue_types
+    return issue_filter
+
+
 def filter_parent(params, issue_filter, method, prefix=""):
     if method == "GET":
         parents = [item for item in params.get("parent").split(",") if item != "null"]
@@ -433,6 +442,7 @@ def issue_filters(query_params, method, prefix=""):
         "state_group": filter_state_group,
         "estimate_point": filter_estimate_point,
         "priority": filter_priority,
+        "issue_type": filter_issue_type,
         "parent": filter_parent,
         "labels": filter_labels,
         "assignees": filter_assignees,
