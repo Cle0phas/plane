@@ -55,6 +55,7 @@ export * from "./views";
 export * from "./waitlist";
 export * from "./webhook";
 export * from "./workspace";
+export * from "./work-item-type";
 export * from "./workspace-draft-issues/base";
 export * from "./workspace-notifications";
 export * from "./workspace-views";

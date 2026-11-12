@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "デフォルトの作業項目タイプは削除できません",
           "cannot_delete_work_item_type_with_associated_work_items": "関連する作業項目がある作業項目タイプは削除できません"
         }
+      },
+      "list": {
+        "description": "このワークスペースのプロジェクトで使用できる作業項目タイプを作成します。",
+        "inactive_badge": "無効",
+        "work_item_count": "{count, plural, one {#件の作業項目} other {#件の作業項目}}",
+        "load_error": "作業項目タイプを読み込めませんでした。",
+        "more_actions": "{name}の操作"
+      },
+      "actions": {
+        "deactivate": "無効にする",
+        "reactivate": "再度有効にする"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "デフォルトのタイプは無効にできません。",
+        "project_default_cannot_be_deactivated": "このタイプは、少なくとも1つのプロジェクトのデフォルトタイプです。",
+        "project_default_cannot_be_deleted": "このタイプはプロジェクトのデフォルトタイプであるため、削除できません。"
+      },
+      "project": {
+        "description": "このプロジェクトで使用する作業項目タイプと、そのデフォルトタイプを選択します。",
+        "used_in_project": "このプロジェクトで使用中",
+        "set_default": "デフォルトにする",
+        "toast_error": "このプロジェクトの作業項目タイプを更新できませんでした。",
+        "disabled_reasons": {
+          "project_default": "プロジェクトのデフォルトタイプは削除できません。",
+          "in_use": "このプロジェクトの作業項目がこのタイプを使用しています。",
+          "not_enabled": "先にこのタイプをプロジェクトで使用してください。"
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "この作業項目タイプに一意の名前を付けてください"
+          "placeholder": "この作業項目タイプに一意の名前を付けてください",
+          "label": "名前",
+          "required": "名前は必須です。",
+          "max_length": "名前は255文字以内で入力してください。"
         },
         "description": {
-          "placeholder": "この作業項目タイプの目的と使用時期について説明してください。"
+          "placeholder": "この作業項目タイプの目的と使用時期について説明してください。",
+          "label": "説明",
+          "max_length": "説明は1000文字以内で入力してください。"
+        },
+        "icon": {
+          "label": "アイコン"
         }
       }
     },
@@ -388,6 +423,26 @@
           "text": "アップグレード"
         }
       }
+    },
+    "select": {
+      "label": "タイプ"
+    },
+    "switcher": {
+      "label": "作業項目タイプを変更"
+    },
+    "activity": {
+      "changed_from": "タイプを変更しました:",
+      "to": "→"
+    },
+    "filter": {
+      "label": "作業項目タイプ"
+    },
+    "group_by": {
+      "label": "作業項目タイプ",
+      "unknown_type": "不明なタイプ"
+    },
+    "display_property": {
+      "label": "作業項目タイプ"
     }
   },
   "work_item_type_hierarchy": {

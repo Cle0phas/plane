@@ -23,6 +23,7 @@ export const ISSUE_FORM_TAB_INDICES = [
   "draft_button",
   "submit_button",
   "project_id",
+  "type_id",
   "remove_parent",
 ];
 

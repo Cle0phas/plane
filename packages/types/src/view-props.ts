@@ -14,6 +14,7 @@ export type TIssueLayouts = "list" | "kanban" | "calendar" | "spreadsheet" | "ga
 export type TIssueGroupByOptions =
   | "state"
   | "priority"
+  | "issue_type"
   | "labels"
   | "created_by"
   | "state_detail.group"
@@ -96,6 +97,7 @@ export type TCalendarLayouts = "month" | "week";
 export const WORK_ITEM_FILTER_PROPERTY_KEYS = [
   "state_group",
   "priority",
+  "type_id",
   "start_date",
   "target_date",
   "assignee_id",

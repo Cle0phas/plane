@@ -29,6 +29,7 @@ from plane.utils.content_validator import (
     validate_html_content,
     validate_binary_data,
 )
+from plane.utils.issue_types import StrictUUIDField, validate_work_item_type_id
 from plane.app.permissions import ROLE
 
 
@@ -50,6 +51,7 @@ class DraftIssueCreateSerializer(BaseSerializer):
         write_only=True,
         required=False,
     )
+    type_id = StrictUUIDField(required=False, allow_null=True)
 
     class Meta:
         model = DraftIssue
@@ -62,6 +64,7 @@ class DraftIssueCreateSerializer(BaseSerializer):
             "updated_by",
             "created_at",
             "updated_at",
+            "type",
         ]
 
     def to_representation(self, instance):
@@ -146,6 +149,14 @@ class DraftIssueCreateSerializer(BaseSerializer):
             project_id, workspace_id = self.instance.project_id, self.instance.workspace_id
         else:
             project_id, workspace_id = self.context.get("project_id"), self.context.get("workspace_id")
+
+        if "type_id" in attrs:
+            attrs["type_id"] = validate_work_item_type_id(
+                attrs["type_id"],
+                project_id=project_id,
+                workspace_id=workspace_id,
+                current_type_id=self.instance.type_id if self.instance else None,
+            )
 
         self.check_cycle_and_modules(
             self.initial_data.get("cycle_id"), self.initial_data.get("module_ids"), project_id, workspace_id

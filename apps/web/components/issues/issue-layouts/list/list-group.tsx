@@ -8,6 +8,7 @@ import type { MutableRefObject } from "react";
 import { useEffect, useRef, useState } from "react";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { useParams } from "next/navigation";
 import { observer } from "mobx-react";
 // plane imports
 import { DRAG_ALLOWED_GROUPS } from "@plane/constants";
@@ -30,6 +31,8 @@ import { ListLoaderItemRow } from "@/components/ui/loader/layouts/list-layout-lo
 import { useWorkFlowFDragNDrop } from "@/components/workflow";
 // hooks
 import { useProjectState } from "@/hooks/store/use-project-state";
+import { useWorkItemType } from "@/hooks/store/use-work-item-type";
+import { getQuickAddTypeData } from "@/components/work-item-types/helpers";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { useIssuesStore } from "@/hooks/use-issue-layout-store";
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
@@ -106,6 +109,10 @@ export const ListGroup = observer(function ListGroup(props: Props) {
   const groupRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslation();
   const projectState = useProjectState();
+  const { workspaceSlug, projectId } = useParams();
+  const { getProjectAssignableTypes } = useWorkItemType();
+  const assignableTypes =
+    workspaceSlug && projectId ? getProjectAssignableTypes(workspaceSlug.toString(), projectId.toString()) : [];
 
   const {
     issues: { getGroupIssueCount, getPaginationData, getIssueLoader },
@@ -166,6 +173,8 @@ export const ListGroup = observer(function ListGroup(props: Props) {
         preloadedData = { ...preloadedData, cycle_id: value };
       } else if (groupByKey === "module" && value != "None") {
         preloadedData = { ...preloadedData, module_ids: [value] };
+      } else if (groupByKey === "issue_type") {
+        preloadedData = { ...preloadedData, ...getQuickAddTypeData(value, assignableTypes) };
       } else if (groupByKey === "created_by") {
         preloadedData = { ...preloadedData };
       } else {

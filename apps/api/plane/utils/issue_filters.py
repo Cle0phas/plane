@@ -130,6 +130,17 @@ def filter_priority(params, issue_filter, method, prefix=""):
     return issue_filter
 
 
+def filter_issue_type(params, issue_filter, method, prefix=""):
+    raw = params.get("issue_type")
+    values = raw.split(",") if isinstance(raw, str) else (raw if isinstance(raw, list) else [])
+    candidates = [value for value in values if isinstance(value, str) and value not in ("", "null")]
+    issue_types = filter_valid_uuids(candidates)
+    if issue_types:
+        # POST output is stored in a JSONField (saved views), so it must hold strings, not UUID objects
+        issue_filter[f"{prefix}type__in"] = issue_types if method == "GET" else [str(value) for value in issue_types]
+    return issue_filter
+
+
 def filter_parent(params, issue_filter, method, prefix=""):
     if method == "GET":
         parents = [item for item in params.get("parent").split(",") if item != "null"]
@@ -433,6 +444,7 @@ def issue_filters(query_params, method, prefix=""):
         "state_group": filter_state_group,
         "estimate_point": filter_estimate_point,
         "priority": filter_priority,
+        "issue_type": filter_issue_type,
         "parent": filter_parent,
         "labels": filter_labels,
         "assignees": filter_assignees,

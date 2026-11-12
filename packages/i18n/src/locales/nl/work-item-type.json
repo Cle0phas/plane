@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "Kan standaard werkitemtype niet verwijderen",
           "cannot_delete_work_item_type_with_associated_work_items": "Kan werkitemtype met bijbehorende werkitems niet verwijderen"
         }
+      },
+      "list": {
+        "description": "Maak de werkitemtypes aan die projecten in deze werkruimte kunnen gebruiken.",
+        "inactive_badge": "Inactief",
+        "work_item_count": "{count, plural, one {# werkitem} other {# werkitems}}",
+        "load_error": "De werkitemtypes konden niet worden geladen.",
+        "more_actions": "Acties voor {name}"
+      },
+      "actions": {
+        "deactivate": "Deactiveren",
+        "reactivate": "Opnieuw activeren"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "Het standaardtype kan niet worden gedeactiveerd.",
+        "project_default_cannot_be_deactivated": "Dit type is het standaardtype van minstens één project.",
+        "project_default_cannot_be_deleted": "Dit type is het standaardtype van een project en kan niet worden verwijderd."
+      },
+      "project": {
+        "description": "Kies de werkitemtypes die dit project gebruikt en het standaardtype.",
+        "used_in_project": "Gebruikt in dit project",
+        "set_default": "Als standaard instellen",
+        "toast_error": "De werkitemtypes van dit project konden niet worden bijgewerkt.",
+        "disabled_reasons": {
+          "project_default": "Het standaardtype van het project kan niet worden verwijderd.",
+          "in_use": "Werkitems van dit project gebruiken dit type.",
+          "not_enabled": "Gebruik dit type eerst in het project."
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "Geef dit werkitemtype een unieke naam"
+          "placeholder": "Geef dit werkitemtype een unieke naam",
+          "label": "Naam",
+          "required": "Naam is verplicht.",
+          "max_length": "De naam mag maximaal 255 tekens bevatten."
         },
         "description": {
-          "placeholder": "Beschrijf waar dit werkitemtype voor bedoeld is en wanneer je het gebruikt."
+          "placeholder": "Beschrijf waar dit werkitemtype voor bedoeld is en wanneer je het gebruikt.",
+          "label": "Omschrijving",
+          "max_length": "De omschrijving mag maximaal 1000 tekens bevatten."
+        },
+        "icon": {
+          "label": "Pictogram"
         }
       }
     },
@@ -388,6 +423,26 @@
           "text": "Upgraden"
         }
       }
+    },
+    "select": {
+      "label": "Type"
+    },
+    "switcher": {
+      "label": "Werkitemtype wijzigen"
+    },
+    "activity": {
+      "changed_from": "heeft het type gewijzigd van",
+      "to": "naar"
+    },
+    "filter": {
+      "label": "Werkitemtype"
+    },
+    "group_by": {
+      "label": "Werkitemtype",
+      "unknown_type": "Onbekend type"
+    },
+    "display_property": {
+      "label": "Werkitemtype"
     }
   },
   "work_item_type_hierarchy": {

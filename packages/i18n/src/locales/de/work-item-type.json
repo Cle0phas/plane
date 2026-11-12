@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "Der Standard-Arbeitselementtyp kann nicht gelöscht werden",
           "cannot_delete_work_item_type_with_associated_work_items": "Arbeitselementtyp mit zugeordneten Arbeitselementen kann nicht gelöscht werden"
         }
+      },
+      "list": {
+        "description": "Erstellen Sie die Arbeitselementtypen, die Projekte in diesem Arbeitsbereich verwenden können.",
+        "inactive_badge": "Inaktiv",
+        "work_item_count": "{count, plural, one {# Arbeitselement} other {# Arbeitselemente}}",
+        "load_error": "Die Arbeitselementtypen konnten nicht geladen werden.",
+        "more_actions": "Aktionen für {name}"
+      },
+      "actions": {
+        "deactivate": "Deaktivieren",
+        "reactivate": "Reaktivieren"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "Der Standardtyp kann nicht deaktiviert werden.",
+        "project_default_cannot_be_deactivated": "Dieser Typ ist der Standardtyp mindestens eines Projekts.",
+        "project_default_cannot_be_deleted": "Dieser Typ ist der Standardtyp eines Projekts und kann nicht gelöscht werden."
+      },
+      "project": {
+        "description": "Wählen Sie die Arbeitselementtypen, die dieses Projekt verwendet, und den Standardtyp aus.",
+        "used_in_project": "In diesem Projekt verwendet",
+        "set_default": "Als Standard festlegen",
+        "toast_error": "Die Arbeitselementtypen dieses Projekts konnten nicht aktualisiert werden.",
+        "disabled_reasons": {
+          "project_default": "Der Standardtyp des Projekts kann nicht entfernt werden.",
+          "in_use": "Arbeitselemente dieses Projekts verwenden diesen Typ.",
+          "not_enabled": "Verwenden Sie diesen Typ zuerst im Projekt."
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "Geben Sie diesem Arbeitsaufgabentyp einen eindeutigen Namen"
+          "placeholder": "Geben Sie diesem Arbeitsaufgabentyp einen eindeutigen Namen",
+          "label": "Name",
+          "required": "Der Name ist erforderlich.",
+          "max_length": "Der Name darf höchstens 255 Zeichen lang sein."
         },
         "description": {
-          "placeholder": "Beschreiben Sie, wofür dieser Arbeitsaufgabentyp gedacht ist und wann er verwendet werden soll."
+          "placeholder": "Beschreiben Sie, wofür dieser Arbeitsaufgabentyp gedacht ist und wann er verwendet werden soll.",
+          "label": "Beschreibung",
+          "max_length": "Die Beschreibung darf höchstens 1000 Zeichen lang sein."
+        },
+        "icon": {
+          "label": "Symbol"
         }
       }
     },
@@ -388,6 +423,26 @@
           "text": "Upgrade"
         }
       }
+    },
+    "select": {
+      "label": "Typ"
+    },
+    "switcher": {
+      "label": "Arbeitselementtyp ändern"
+    },
+    "activity": {
+      "changed_from": "änderte den Typ von",
+      "to": "zu"
+    },
+    "filter": {
+      "label": "Arbeitselementtyp"
+    },
+    "group_by": {
+      "label": "Arbeitselementtyp",
+      "unknown_type": "Unbekannter Typ"
+    },
+    "display_property": {
+      "label": "Arbeitselementtyp"
     }
   },
   "work_item_type_hierarchy": {

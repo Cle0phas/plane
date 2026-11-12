@@ -2,7 +2,7 @@
   "common_empty_state": {
     "progress": {
       "title": "Il n’y a pas encore de métriques de progression à afficher.",
-      "description": "Commencez à définir des valeurs de propriété dans les éléments de travail pour voir les métriques de progression ici."
+      "description": "Commencez à définir des valeurs de propriété dans les tickets pour voir les métriques de progression ici."
     },
     "updates": {
       "title": "Pas encore de mises à jour.",
@@ -36,9 +36,9 @@
       "description": "Le projet que vous recherchez n’existe pas."
     },
     "work_items": {
-      "title": "Commencez avec votre premier élément de travail.",
-      "description": "Les éléments de travail sont les éléments constitutifs de votre projet — attribuez des propriétaires, définissez des priorités et suivez facilement les progrès.",
-      "cta_primary": "Créer votre premier élément de travail"
+      "title": "Commencez avec votre premier ticket.",
+      "description": "Les tickets sont les éléments constitutifs de votre projet — attribuez des propriétaires, définissez des priorités et suivez facilement les progrès.",
+      "cta_primary": "Créer votre premier ticket"
     },
     "cycles": {
       "title": "Regroupez et définissez des délais pour votre travail dans les Cycles.",
@@ -46,21 +46,21 @@
       "cta_primary": "Définir votre premier cycle"
     },
     "cycle_work_items": {
-      "title": "Aucun élément de travail à afficher dans ce cycle",
-      "description": "Créez des éléments de travail pour commencer à suivre la progression de votre équipe dans ce cycle et atteindre vos objectifs à temps.",
-      "cta_primary": "Créer un élément de travail",
-      "cta_secondary": "Ajouter un élément de travail existant"
+      "title": "Aucun ticket à afficher dans ce cycle",
+      "description": "Créez des tickets pour commencer à suivre la progression de votre équipe dans ce cycle et atteindre vos objectifs à temps.",
+      "cta_primary": "Créer un ticket",
+      "cta_secondary": "Ajouter un ticket existant"
     },
     "modules": {
       "title": "Associez vos objectifs de projet aux Modules et suivez-les facilement.",
-      "description": "Les modules sont composés d’éléments de travail interconnectés. Ils aident à suivre les progrès à travers les phases du projet, chacune avec des délais spécifiques et des analyses pour indiquer à quel point vous êtes proche de la réalisation de ces phases.",
+      "description": "Les modules sont composés de tickets interconnectés. Ils aident à suivre les progrès à travers les phases du projet, chacune avec des délais spécifiques et des analyses pour indiquer à quel point vous êtes proche de la réalisation de ces phases.",
       "cta_primary": "Définir votre premier module"
     },
     "module_work_items": {
-      "title": "Aucun élément de travail à afficher dans ce Module",
-      "description": "Créez des éléments de travail pour commencer à suivre ce module.",
-      "cta_primary": "Créer un élément de travail",
-      "cta_secondary": "Ajouter un élément de travail existant"
+      "title": "Aucun ticket à afficher dans ce Module",
+      "description": "Créez des tickets pour commencer à suivre ce module.",
+      "cta_primary": "Créer un ticket",
+      "cta_secondary": "Ajouter un ticket existant"
     },
     "views": {
       "title": "Enregistrez des vues personnalisées pour votre projet",
@@ -68,18 +68,18 @@
       "cta_primary": "Créer une vue"
     },
     "no_work_items_in_project": {
-      "title": "Aucun élément de travail dans le projet pour le moment",
-      "description": "Ajoutez des éléments de travail à votre projet et découpez votre travail en éléments traçables avec des vues.",
-      "cta_primary": "Ajouter un élément de travail"
+      "title": "Aucun ticket dans le projet pour le moment",
+      "description": "Ajoutez des tickets à votre projet et découpez votre travail en éléments traçables avec des vues.",
+      "cta_primary": "Ajouter un ticket"
     },
     "work_item_filter": {
-      "title": "Aucun élément de travail trouvé",
+      "title": "Aucun ticket trouvé",
       "description": "Votre filtre actuel n’a renvoyé aucun résultat. Essayez de modifier les filtres.",
-      "cta_primary": "Ajouter un élément de travail"
+      "cta_primary": "Ajouter un ticket"
     },
     "pages": {
       "title": "Documentez tout — des notes aux PRD",
-      "description": "Les pages vous permettent de capturer et d’organiser des informations en un seul endroit. Rédigez des notes de réunion, de la documentation de projet et des PRD, intégrez des éléments de travail et structurez-les avec des composants prêts à l'emploi.",
+      "description": "Les pages vous permettent de capturer et d’organiser des informations en un seul endroit. Rédigez des notes de réunion, de la documentation de projet et des PRD, intégrez des tickets et structurez-les avec des composants prêts à l'emploi.",
       "cta_primary": "Créer votre première Page"
     },
     "archive_pages": {
@@ -92,7 +92,7 @@
       "cta_primary": "Créer une demande d’Intake"
     },
     "intake_main": {
-      "title": "Sélectionnez un élément de travail Intake pour voir ses détails"
+      "title": "Sélectionnez un ticket Intake pour voir ses détails"
     },
     "epics": {
       "title": "Transformez des projets complexes en épiques structurées.",
@@ -101,9 +101,9 @@
       "cta_secondary": "Documentation"
     },
     "epic_work_items": {
-      "title": "Vous n'avez pas encore ajouté d'éléments de travail à cette épique.",
-      "description": "Commencez par ajouter quelques éléments de travail à cette épique et suivez-les ici.",
-      "cta_secondary": "Ajouter des éléments de travail"
+      "title": "Vous n'avez pas encore ajouté de tickets à cette épique.",
+      "description": "Commencez par ajouter quelques tickets à cette épique et suivez-les ici.",
+      "cta_secondary": "Ajouter des tickets"
     }
   },
   "workspace_empty_state": {
@@ -112,8 +112,8 @@
       "description": "Vous pouvez archiver les épiques terminées ou annulées. Retrouvez-les ici une fois archivées."
     },
     "archive_work_items": {
-      "title": "Aucun élément de travail archivé pour le moment",
-      "description": "Manuellement ou par automatisation, vous pouvez archiver des éléments de travail qui sont terminés ou annulés. Retrouvez-les ici une fois archivés.",
+      "title": "Aucun ticket archivé pour le moment",
+      "description": "Manuellement ou par automatisation, vous pouvez archiver des tickets qui sont terminés ou annulés. Retrouvez-les ici une fois archivés.",
       "cta_primary": "Définir l’automatisation"
     },
     "archive_cycles": {
@@ -128,26 +128,26 @@
       "title": "Gardez les références, ressources ou documents importants à portée de main pour votre travail"
     },
     "inbox_sidebar_all": {
-      "title": "Les mises à jour pour vos éléments de travail auxquels vous êtes abonné apparaîtront ici"
+      "title": "Les mises à jour pour vos tickets auxquels vous êtes abonné apparaîtront ici"
     },
     "inbox_sidebar_mentions": {
-      "title": "Les mentions pour vos éléments de travail apparaîtront ici"
+      "title": "Les mentions pour vos tickets apparaîtront ici"
     },
     "your_work_by_priority": {
-      "title": "Aucun élément de travail attribué pour le moment"
+      "title": "Aucun ticket attribué pour le moment"
     },
     "your_work_by_state": {
-      "title": "Aucun élément de travail attribué pour le moment"
+      "title": "Aucun ticket attribué pour le moment"
     },
     "views": {
       "title": "Aucune vue pour le moment",
-      "description": "Ajoutez des éléments de travail à votre projet et utilisez les vues pour filtrer, trier et suivre les progrès sans effort.",
-      "cta_primary": "Ajouter un élément de travail"
+      "description": "Ajoutez des tickets à votre projet et utilisez les vues pour filtrer, trier et suivre les progrès sans effort.",
+      "cta_primary": "Ajouter un ticket"
     },
     "drafts": {
-      "title": "Éléments de travail à moitié écrits",
-      "description": "Pour l’essayer, commencez à ajouter un élément de travail et laissez-le à mi-chemin ou créez votre premier brouillon ci-dessous. 😉",
-      "cta_primary": "Créer un brouillon d’élément de travail"
+      "title": "Tickets à moitié écrits",
+      "description": "Pour l’essayer, commencez à ajouter un ticket et laissez-le à mi-chemin ou créez votre premier brouillon ci-dessous. 😉",
+      "cta_primary": "Créer un brouillon de ticket"
     },
     "projects_archived": {
       "title": "Aucun projet archivé",
@@ -157,7 +157,7 @@
       "title": "Créez des projets pour visualiser les métriques de projet ici."
     },
     "analytics_work_items": {
-      "title": "Créez des projets avec des éléments de travail et des personnes assignées pour commencer à suivre les performances, les progrès et l’impact de l’équipe ici."
+      "title": "Créez des projets avec des tickets et des personnes assignées pour commencer à suivre les performances, les progrès et l’impact de l’équipe ici."
     },
     "analytics_no_cycle": {
       "title": "Créez des cycles pour organiser le travail en phases délimitées dans le temps et suivre les progrès à travers les sprints."
@@ -188,7 +188,7 @@
     },
     "wiki": {
       "title": "Écrivez une note, un document ou une base de connaissances complète.",
-      "description": "Les pages sont un espace de repérage de pensées dans Plane. Prenez des notes de réunion, formatez-les facilement, intégrez des éléments de travail, organisez-les à l'aide d'une bibliothèque de composants, et gardez-les tous dans le contexte de votre projet.",
+      "description": "Les pages sont un espace de repérage de pensées dans Plane. Prenez des notes de réunion, formatez-les facilement, intégrez des tickets, organisez-les à l'aide d'une bibliothèque de composants, et gardez-les tous dans le contexte de votre projet.",
       "cta_primary": "Créer votre page"
     },
     "project_overview_state_sidebar": {
@@ -199,12 +199,12 @@
   "settings_empty_state": {
     "estimates": {
       "title": "Aucune estimation pour le moment",
-      "description": "Définissez comment votre équipe mesure l’effort et suivez-le de manière cohérente sur tous les éléments de travail.",
+      "description": "Définissez comment votre équipe mesure l’effort et suivez-le de manière cohérente sur tous les tickets.",
       "cta_primary": "Ajouter un système d’estimation"
     },
     "labels": {
       "title": "Aucune étiquette pour le moment",
-      "description": "Créez des étiquettes personnalisées pour catégoriser et gérer efficacement vos éléments de travail.",
+      "description": "Créez des étiquettes personnalisées pour catégoriser et gérer efficacement vos tickets.",
       "cta_primary": "Créer votre première étiquette"
     },
     "exports": {
@@ -227,43 +227,43 @@
       "cta_primary": "Ajouter un webhook"
     },
     "work_item_types": {
-      "title": "Créer et personnaliser les types d'éléments de travail",
-      "description": "Définissez des types d'éléments de travail uniques pour votre projet. Chaque type peut avoir ses propres propriétés, flux de travail et champs - adaptés aux besoins de votre projet et de votre équipe.",
+      "title": "Créer et personnaliser les types de tickets",
+      "description": "Définissez des types de tickets uniques pour votre projet. Chaque type peut avoir ses propres propriétés, flux de travail et champs - adaptés aux besoins de votre projet et de votre équipe.",
       "cta_primary": "Activer"
     },
     "work_item_type_properties": {
-      "title": "Définissez la propriété et les détails que vous souhaitez capturer pour ce type d'élément de travail. Personnalisez-le pour correspondre au flux de travail de votre projet.",
+      "title": "Définissez la propriété et les détails que vous souhaitez capturer pour ce type de ticket. Personnalisez-le pour correspondre au flux de travail de votre projet.",
       "cta_secondary": "Ajouter une propriété"
     },
     "templates": {
       "title": "Aucun modèle pour le moment",
-      "description": "Réduisez le temps de configuration en créant des modèles pour les éléments de travail et les pages — et démarrez un nouveau travail en quelques secondes.",
+      "description": "Réduisez le temps de configuration en créant des modèles pour les tickets et les pages — et démarrez un nouveau travail en quelques secondes.",
       "cta_primary": "Créer votre premier modèle"
     },
     "recurring_work_items": {
-      "title": "Aucun élément de travail récurrent pour le moment",
-      "description": "Configurez des éléments de travail récurrents pour automatiser les tâches répétitives et rester à l'heure sans effort.",
-      "cta_primary": "Créer un élément de travail récurrent"
+      "title": "Aucun ticket récurrent pour le moment",
+      "description": "Configurez des tickets récurrents pour automatiser les tâches répétitives et rester à l'heure sans effort.",
+      "cta_primary": "Créer un ticket récurrent"
     },
     "worklogs": {
       "title": "Suivez les feuilles de temps pour tous les membres",
-      "description": "Enregistrez le temps sur les éléments de travail pour afficher des feuilles de temps détaillées pour tout membre de l'équipe à travers les projets."
+      "description": "Enregistrez le temps sur les tickets pour afficher des feuilles de temps détaillées pour tout membre de l'équipe à travers les projets."
     },
     "group_syncing": {
       "title": "Aucun mappage de groupe pour le moment"
     },
     "template_setting": {
       "title": "Aucun modèle pour le moment",
-      "description": "Réduisez le temps de configuration en créant des modèles pour les projets, les éléments de travail et les pages — et démarrez un nouveau travail en quelques secondes.",
+      "description": "Réduisez le temps de configuration en créant des modèles pour les projets, les tickets et les pages — et démarrez un nouveau travail en quelques secondes.",
       "cta_primary": "Créer un modèle"
     },
     "workflows": {
       "title": "Aucun flux de travail pour le moment",
-      "description": "Créez des flux de travail pour gérer la progression de vos éléments de travail.",
+      "description": "Créez des flux de travail pour gérer la progression de vos tickets.",
       "cta_primary": "Ajouter un nouveau flux de travail",
       "states": {
         "title": "Ajouter des états",
-        "description": "Sélectionnez les états par lesquels passe l’élément de travail."
+        "description": "Sélectionnez les états par lesquels passe le ticket."
       }
     }
   }

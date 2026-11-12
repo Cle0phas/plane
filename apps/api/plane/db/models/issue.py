@@ -24,6 +24,7 @@ from .project import ProjectBaseModel
 from plane.utils.uuid import convert_uuid_to_integer
 from .description import Description
 from .state import StateGroup
+from .issue_type import ProjectIssueType
 
 
 def get_default_properties():
@@ -102,7 +103,7 @@ class IssueManager(SoftDeletionManager):
 
 
 class Issue(ChangeTrackerMixin, ProjectBaseModel):
-    TRACKED_FIELDS = ["state_id"]
+    TRACKED_FIELDS = ["state_id", "project_id"]
 
     PRIORITY_CHOICES = (
         ("urgent", "Urgent"),
@@ -179,6 +180,7 @@ class Issue(ChangeTrackerMixin, ProjectBaseModel):
 
     def save(self, *args, **kwargs):
         self._ensure_default_state()
+        kwargs = self._ensure_default_type(kwargs)
         kwargs = self._sync_completed_at(kwargs)
 
         if self._state.adding:
@@ -236,6 +238,30 @@ class Issue(ChangeTrackerMixin, ProjectBaseModel):
             self.state = default_state or State.objects.filter(~models.Q(is_triage=True), project=self.project).first()
         except ImportError as e:
             log_exception(e)
+
+    def _ensure_default_type(self, kwargs):
+        """Use the project default type when the type is missing or not enabled in the project. Returns kwargs."""
+        if self.type_id is not None and not self._state.adding and not self.has_changed("project_id"):
+            return kwargs
+        if (
+            self.type_id is not None
+            and ProjectIssueType.objects.filter(
+                project_id=self.project_id, issue_type_id=self.type_id, issue_type__deleted_at__isnull=True
+            ).exists()
+        ):
+            return kwargs
+        default_type_id = (
+            ProjectIssueType.objects.filter(project_id=self.project_id, is_default=True)
+            .values_list("issue_type_id", flat=True)
+            .first()
+        )
+        if default_type_id is None:
+            return kwargs
+        self.type_id = default_type_id
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None:
+            kwargs["update_fields"] = list(set(update_fields) | {"type"})
+        return kwargs
 
     def _sync_completed_at(self, kwargs):
         """Update completed_at when state changes. Returns kwargs."""

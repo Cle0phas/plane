@@ -25,6 +25,7 @@ from plane.db.models import (
     IssueComment,
     IssueReaction,
     IssueSubscriber,
+    IssueType,
     Label,
     Module,
     Project,
@@ -193,6 +194,51 @@ def track_priority(
                 epoch=epoch,
             )
         )
+
+
+# Track changes in the type of the issue (R11)
+def track_type(
+    requested_data,
+    current_instance,
+    issue_id,
+    project_id,
+    workspace_id,
+    actor_id,
+    issue_activities,
+    epoch,
+):
+    current_type_id = current_instance.get("type_id") or current_instance.get("type")
+    requested_type_id = requested_data.get("type_id")
+    if current_type_id is not None and not is_valid_uuid(str(current_type_id)):
+        current_type_id = None
+    if requested_type_id is None or not is_valid_uuid(str(requested_type_id)):
+        return
+    if str(current_type_id) == str(requested_type_id):
+        return
+
+    new_type = IssueType.objects.filter(pk=requested_type_id, workspace_id=workspace_id).first()
+    if new_type is None:
+        return
+    old_type = (
+        IssueType.all_objects.filter(pk=current_type_id, workspace_id=workspace_id).first() if current_type_id else None
+    )
+
+    issue_activities.append(
+        IssueActivity(
+            issue_id=issue_id,
+            actor_id=actor_id,
+            verb="updated",
+            old_value=old_type.name if old_type else None,
+            new_value=new_type.name,
+            field="type",
+            project_id=project_id,
+            workspace_id=workspace_id,
+            comment="updated the type to",
+            old_identifier=old_type.id if old_type else None,
+            new_identifier=new_type.id,
+            epoch=epoch,
+        )
+    )
 
 
 # Track changes in state of the issue
@@ -637,6 +683,7 @@ def update_issue_activity(
         "name": track_name,
         "parent_id": track_parent,
         "priority": track_priority,
+        "type_id": track_type,
         "state_id": track_state,
         "description_html": track_description,
         "target_date": track_target_date,

@@ -6,7 +6,7 @@ import factory
 from uuid import uuid4
 from django.utils import timezone
 
-from plane.db.models import User, Workspace, WorkspaceMember, Project, ProjectMember
+from plane.db.models import IssueType, ProjectIssueType, User, Workspace, WorkspaceMember, Project, ProjectMember
 
 
 class UserFactory(factory.django.DjangoModelFactory):
@@ -84,3 +84,29 @@ class ProjectMemberFactory(factory.django.DjangoModelFactory):
     role = 20  # Admin role by default
     created_at = factory.LazyFunction(timezone.now)
     updated_at = factory.LazyFunction(timezone.now)
+
+
+class IssueTypeFactory(factory.django.DjangoModelFactory):
+    """Factory for creating IssueType instances"""
+
+    class Meta:
+        model = IssueType
+
+    id = factory.LazyFunction(uuid4)
+    workspace = factory.SubFactory(WorkspaceFactory)
+    name = factory.Sequence(lambda n: f"Type {n}")
+    is_default = False
+    is_active = True
+
+
+class ProjectIssueTypeFactory(factory.django.DjangoModelFactory):
+    """Factory for creating ProjectIssueType instances"""
+
+    class Meta:
+        model = ProjectIssueType
+
+    id = factory.LazyFunction(uuid4)
+    project = factory.SubFactory(ProjectFactory)
+    workspace = factory.SelfAttribute("project.workspace")
+    issue_type = factory.SubFactory(IssueTypeFactory, workspace=factory.SelfAttribute("..project.workspace"))
+    is_default = False

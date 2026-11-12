@@ -9,6 +9,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { autoScrollForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-scroll/element";
+import { useParams } from "next/navigation";
 import { observer } from "mobx-react";
 // plane constants
 import { DRAG_ALLOWED_GROUPS } from "@plane/constants";
@@ -39,6 +40,8 @@ import { KanbanIssueBlockLoader } from "@/components/ui/loader/layouts/kanban-la
 import { useWorkFlowFDragNDrop } from "@/components/workflow";
 // hooks
 import { useProjectState } from "@/hooks/store/use-project-state";
+import { useWorkItemType } from "@/hooks/store/use-work-item-type";
+import { getQuickAddTypeData } from "@/components/work-item-types/helpers";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { useIssuesStore } from "@/hooks/use-issue-layout-store";
 // local imports
@@ -99,6 +102,10 @@ export const KanbanGroup = observer(function KanbanGroup(props: IKanbanGroup) {
   const { t } = useTranslation();
   // hooks
   const projectState = useProjectState();
+  const { workspaceSlug, projectId } = useParams();
+  const { getProjectAssignableTypes } = useWorkItemType();
+  const assignableTypes =
+    workspaceSlug && projectId ? getProjectAssignableTypes(workspaceSlug.toString(), projectId.toString()) : [];
 
   const {
     issues: { getGroupIssueCount, getPaginationData, getIssueLoader },
@@ -218,6 +225,8 @@ export const KanbanGroup = observer(function KanbanGroup(props: IKanbanGroup) {
         preloadedData = { ...preloadedData, label_ids: [groupValue] };
       } else if (groupByKey === "assignees" && groupValue != "None") {
         preloadedData = { ...preloadedData, assignee_ids: [groupValue] };
+      } else if (groupByKey === "issue_type") {
+        preloadedData = { ...preloadedData, ...getQuickAddTypeData(groupValue, assignableTypes) };
       } else if (groupByKey === "created_by") {
         preloadedData = { ...preloadedData };
       } else {
@@ -238,6 +247,8 @@ export const KanbanGroup = observer(function KanbanGroup(props: IKanbanGroup) {
         preloadedData = { ...preloadedData, label_ids: [subGroupValue] };
       } else if (subGroupByKey === "assignees" && subGroupValue != "None") {
         preloadedData = { ...preloadedData, assignee_ids: [subGroupValue] };
+      } else if (subGroupByKey === "issue_type") {
+        preloadedData = { ...preloadedData, ...getQuickAddTypeData(subGroupValue, assignableTypes) };
       } else if (subGroupByKey === "created_by") {
         preloadedData = { ...preloadedData };
       } else {

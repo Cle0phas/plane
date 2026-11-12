@@ -3,23 +3,23 @@
     "workitems": {
       "step_zero": {
         "title": "Bienvenue dans votre espace de travail",
-        "description": "Pour vous aider à démarrer, nous avons créé un Projet Démo pour vous. Ajoutons votre premier élément de travail."
+        "description": "Pour vous aider à démarrer, nous avons créé un Projet Démo pour vous. Ajoutons votre premier ticket."
       },
       "step_one": {
-        "title": "Cliquez sur \"+ Ajouter un élément de travail\"",
-        "description": "Commencez en cliquant sur le bouton \"+ Nouvel élément de travail\". Vous pouvez créer des tâches, des bugs ou un type personnalisé qui correspond à vos besoins."
+        "title": "Cliquez sur \"+ Ajouter un ticket\"",
+        "description": "Commencez en cliquant sur le bouton \"+ Nouveau ticket\". Vous pouvez créer des tâches, des bugs ou un type personnalisé qui correspond à vos besoins."
       },
       "step_two": {
-        "title": "Filtrez vos éléments de travail",
+        "title": "Filtrez vos tickets",
         "description": "Utilisez des filtres pour réduire rapidement votre liste. Vous pouvez filtrer par statut, priorité ou membres de l équipe. "
       },
       "step_three": {
-        "title": "Affichez, regroupez et ordonnez les éléments de travail selon vos besoins.",
-        "description": "Voir les propriétés requises et regrouper ou ordonner les éléments de travail selon vos besoins."
+        "title": "Affichez, regroupez et ordonnez les tickets selon vos besoins.",
+        "description": "Voir les propriétés requises et regrouper ou ordonner les tickets selon vos besoins."
       },
       "step_four": {
         "title": "Visualisez comme vous le souhaitez",
-        "description": "Sélectionnez les propriétés que vous souhaitez voir dans la liste. Vous pouvez également regrouper et trier les éléments de travail à votre manière."
+        "description": "Sélectionnez les propriétés que vous souhaitez voir dans la liste. Vous pouvez également regrouper et trier les tickets à votre manière."
       }
     },
     "cycle": {
@@ -33,29 +33,29 @@
       },
       "step_two": {
         "title": "Cliquez sur \"+\"",
-        "description": "Commencez en cliquant sur le bouton \"+\". Ajoutez des éléments de travail nouveaux ou existants directement depuis la page Cycle."
+        "description": "Commencez en cliquant sur le bouton \"+\". Ajoutez des tickets nouveaux ou existants directement depuis la page Cycle."
       },
       "step_three": {
         "title": "Résumé du cycle",
         "description": "Suivez la progression du cycle, la productivité de l équipe et les priorités—et enquêtez si quelque chose prend du retard."
       },
       "step_four": {
-        "title": "Transférer les éléments de travail",
+        "title": "Transférer les tickets",
         "description": "Après la date d échéance, un cycle se termine automatiquement. Déplacez le travail non terminé vers un autre cycle."
       }
     },
     "module": {
       "step_zero": {
         "title": "Divisez votre projet en Modules",
-        "description": "Les modules sont des projets plus petits et ciblés qui aident les utilisateurs à regrouper et organiser les éléments de travail dans des délais spécifiques."
+        "description": "Les modules sont des projets plus petits et ciblés qui aident les utilisateurs à regrouper et organiser les tickets dans des délais spécifiques."
       },
       "step_one": {
         "title": "Créer un Module",
-        "description": "Les modules sont des projets plus petits et ciblés qui aident les utilisateurs à regrouper et organiser les éléments de travail dans des délais spécifiques."
+        "description": "Les modules sont des projets plus petits et ciblés qui aident les utilisateurs à regrouper et organiser les tickets dans des délais spécifiques."
       },
       "step_two": {
         "title": "Cliquez sur \"+\"",
-        "description": "Commencez en cliquant sur le bouton \"+\". Ajoutez des éléments de travail nouveaux ou existants directement depuis la page Module."
+        "description": "Commencez en cliquant sur le bouton \"+\". Ajoutez des tickets nouveaux ou existants directement depuis la page Module."
       },
       "step_three": {
         "title": "États du module",
@@ -95,7 +95,7 @@
     "intake": {
       "step_zero": {
         "title": "Rationalisez les demandes avec la réception",
-        "description": "Une fonctionnalité exclusive de Plane qui permet aux Invités de créer des éléments de travail pour les bugs, demandes ou tickets."
+        "description": "Une fonctionnalité exclusive de Plane qui permet aux invités de créer des tickets pour les bugs ou les demandes."
       },
       "step_one": {
         "title": "Demandes de réception ouvertes/fermées",
@@ -103,11 +103,11 @@
       },
       "step_two": {
         "title": "Accepter/refuser une demande en attente",
-        "description": "Acceptez pour modifier et déplacer l élément de travail vers votre projet, ou refusez-le pour le marquer comme Annulé."
+        "description": "Acceptez pour modifier et déplacer le ticket vers votre projet, ou refusez-le pour le marquer comme Annulé."
       },
       "step_three": {
         "title": "Reporter pour l instant",
-        "description": "Un élément de travail peut être reporté pour le réviser plus tard. Il sera déplacé au bas de votre liste de demandes ouvertes."
+        "description": "Un ticket peut être reporté pour le réviser plus tard. Il sera déplacé au bas de votre liste de demandes ouvertes."
       }
     },
     "mcp_connectors": {
@@ -163,7 +163,7 @@
           "title": "Créer un projet"
         },
         "item_2": {
-          "title": "Créer un élément de travail"
+          "title": "Créer un ticket"
         },
         "item_3": {
           "title": "Inviter des membres de l équipe"

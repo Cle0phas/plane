@@ -19,6 +19,7 @@ import type {
   TIssueOrderByOptions,
 } from "@plane/types";
 // constants
+import { useTranslation } from "@plane/i18n";
 import { ContentWrapper } from "@plane/blocks/layout";
 import { cn } from "@plane/utils";
 // components
@@ -32,6 +33,7 @@ import { useIssueStoreType } from "@/hooks/use-issue-layout-store";
 import { useWorkFlowFDragNDrop } from "@/components/workflow";
 import type { TRenderQuickActions } from "../list/list-view-types";
 import type { GroupDropLocation } from "../utils";
+import { getLoadedGroupIds } from "@/components/work-item-types/helpers";
 import { getGroupByColumns, isWorkspaceLevel, getApproximateCardHeight } from "../utils";
 // components
 import {
@@ -109,6 +111,7 @@ export const KanBan = observer(function KanBan(props: IKanBan) {
   // i18n
   // store hooks
   const storeType = useIssueStoreType();
+  const { t } = useTranslation();
   const issueKanBanView = useKanbanView();
   // derived values
   const isDragDisabled = !issueKanBanView?.getCanUserDragDrop(group_by, sub_group_by);
@@ -120,6 +123,8 @@ export const KanBan = observer(function KanBan(props: IKanBan) {
     includeNone: true,
     isWorkspaceLevel: isWorkspaceLevel(storeType),
     isEpic: isEpic,
+    t,
+    groupIds: getLoadedGroupIds(groupedIssueIds),
   });
 
   if (!list) return null;

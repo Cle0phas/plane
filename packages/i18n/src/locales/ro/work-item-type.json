@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "Nu se poate șterge tipul implicit de element de lucru",
           "cannot_delete_work_item_type_with_associated_work_items": "Nu se poate șterge tipul de element de lucru cu elemente de lucru asociate"
         }
+      },
+      "list": {
+        "description": "Creează tipurile de element de lucru pe care le pot folosi proiectele din acest spațiu de lucru.",
+        "inactive_badge": "Inactiv",
+        "work_item_count": "{count, plural, one {# element de lucru} few {# elemente de lucru} other {# de elemente de lucru}}",
+        "load_error": "Tipurile de element de lucru nu au putut fi încărcate.",
+        "more_actions": "Acțiuni pentru {name}"
+      },
+      "actions": {
+        "deactivate": "Dezactivează",
+        "reactivate": "Reactivează"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "Tipul implicit nu poate fi dezactivat.",
+        "project_default_cannot_be_deactivated": "Acest tip este tipul implicit al cel puțin unui proiect.",
+        "project_default_cannot_be_deleted": "Acest tip este tipul implicit al unui proiect și nu poate fi șters."
+      },
+      "project": {
+        "description": "Alege tipurile de element de lucru folosite de acest proiect și tipul lui implicit.",
+        "used_in_project": "Folosit în acest proiect",
+        "set_default": "Setează ca implicit",
+        "toast_error": "Tipurile de element de lucru ale acestui proiect nu au putut fi actualizate.",
+        "disabled_reasons": {
+          "project_default": "Tipul implicit al proiectului nu poate fi eliminat.",
+          "in_use": "Elemente de lucru ale acestui proiect folosesc acest tip.",
+          "not_enabled": "Folosește mai întâi acest tip în proiect."
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "Dă acestui tip de element de lucru un nume unic"
+          "placeholder": "Dă acestui tip de element de lucru un nume unic",
+          "label": "Nume",
+          "required": "Numele este obligatoriu.",
+          "max_length": "Numele trebuie să aibă cel mult 255 de caractere."
         },
         "description": {
-          "placeholder": "Descrie pentru ce este destinat acest tip de element de lucru și când trebuie utilizat."
+          "placeholder": "Descrie pentru ce este destinat acest tip de element de lucru și când trebuie utilizat.",
+          "label": "Descriere",
+          "max_length": "Descrierea trebuie să aibă cel mult 1000 de caractere."
+        },
+        "icon": {
+          "label": "Pictogramă"
         }
       }
     },
@@ -388,6 +423,26 @@
           "text": "Actualizează"
         }
       }
+    },
+    "select": {
+      "label": "Tip"
+    },
+    "switcher": {
+      "label": "Schimbă tipul elementului de lucru"
+    },
+    "activity": {
+      "changed_from": "a schimbat tipul din",
+      "to": "în"
+    },
+    "filter": {
+      "label": "Tip de element de lucru"
+    },
+    "group_by": {
+      "label": "Tip de element de lucru",
+      "unknown_type": "Tip necunoscut"
+    },
+    "display_property": {
+      "label": "Tip de element de lucru"
     }
   },
   "work_item_type_hierarchy": {

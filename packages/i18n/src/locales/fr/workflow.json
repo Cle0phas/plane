@@ -1,9 +1,9 @@
 {
   "workflows": {
     "workflow_states": {
-      "work_item_creation": "Autoriser les nouveaux éléments de travail",
-      "work_item_creation_disable_tooltip": "La création d'éléments de travail est désactivée pour cet état",
-      "default_state": "L'état par défaut permet à tous les membres de créer de nouveaux éléments de travail. Cela ne peut pas être changé",
+      "work_item_creation": "Autoriser les nouveaux tickets",
+      "work_item_creation_disable_tooltip": "La création de tickets est désactivée pour cet état",
+      "default_state": "L'état par défaut permet à tous les membres de créer de nouveaux tickets. Cela ne peut pas être changé",
       "state_change_count": "{count, plural, one {1 changement d'état autorisé} other {{count} changements d'état autorisés}}",
       "movers_count": "{count, plural, one {1 réviseur listé} other {{count} réviseurs listés}}",
       "state_changes": {
@@ -14,19 +14,19 @@
         "move_to": "Changer l'état vers",
         "movers": {
           "label": "Lorsqu'il est révisé par",
-          "tooltip": "Les réviseurs sont des personnes qui sont autorisées à changer l'état des éléments de travail d'un état à un autre.",
+          "tooltip": "Les réviseurs sont des personnes qui sont autorisées à changer l'état des tickets d'un état à un autre.",
           "add": "Ajouter des réviseurs"
         }
       }
     },
     "workflow_disabled": {
-      "title": "Vous ne pouvez pas déplacer cet élément de travail ici."
+      "title": "Vous ne pouvez pas déplacer ce ticket ici."
     },
     "workflow_enabled": {
       "label": "Changement d'état"
     },
     "workflow_tree": {
-      "label": "Pour les éléments de travail dans",
+      "label": "Pour les tickets dans",
       "state_change_label": "peuvent le déplacer vers"
     },
     "empty_state": {

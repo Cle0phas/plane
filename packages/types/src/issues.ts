@@ -123,6 +123,7 @@ export type GroupByColumnTypes =
   | "state"
   | "state_detail.group"
   | "priority"
+  | "issue_type"
   | "labels"
   | "assignees"
   | "created_by"
