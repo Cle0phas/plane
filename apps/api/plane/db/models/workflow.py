@@ -50,9 +50,11 @@ class WorkflowStatus(BaseModel):
                 Lower("name"),
                 "workspace",
                 condition=Q(deleted_at__isnull=True),
-                name="workflow_status_unique_lower_name_workspace_when_deleted_at_null",
+                name="workflow_status_unique_lower_name_ws_when_deleted_at_null",
             ),
-            models.CheckConstraint(condition=~Q(group=StateGroup.TRIAGE.value), name="workflow_status_group_not_triage"),
+            models.CheckConstraint(
+                condition=~Q(group=StateGroup.TRIAGE.value), name="workflow_status_group_not_triage"
+            ),
         ]
 
     def __str__(self):

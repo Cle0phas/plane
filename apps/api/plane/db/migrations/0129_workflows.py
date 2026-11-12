@@ -182,7 +182,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='workflowstatus',
-            constraint=models.UniqueConstraint(django.db.models.functions.text.Lower('name'), models.F('workspace'), condition=models.Q(('deleted_at__isnull', True)), name='workflow_status_unique_lower_name_workspace_when_deleted_at_null'),
+            constraint=models.UniqueConstraint(django.db.models.functions.text.Lower('name'), models.F('workspace'), condition=models.Q(('deleted_at__isnull', True)), name='workflow_status_unique_lower_name_ws_when_deleted_at_null'),
         ),
         migrations.AddConstraint(
             model_name='workflowstatus',

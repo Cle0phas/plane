@@ -223,3 +223,26 @@ class TestGraph:
     def test_a_non_object_body_is_refused(self, workspace, users, software):
         response = _client(users["admin"]).put(GRAPH_URL.format(slug=workspace.slug, pk=software.id), [], format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.contract
+@pytest.mark.django_db
+class TestIsolationAndVisibility:
+    def test_write_routes_of_another_workspace_look_missing(self, workspace, users):
+        foreign = build_workflow(WorkspaceFactory(), "Foreign", ["A"])
+        client = _client(users["admin"])
+        foreign_status = foreign.states_by_name["A"].status_id
+        responses = [
+            client.patch(WORKFLOW_URL.format(slug=workspace.slug, pk=foreign.id), {"name": "X"}, format="json"),
+            client.delete(WORKFLOW_URL.format(slug=workspace.slug, pk=foreign.id)),
+            client.delete(STATUS_URL.format(slug=workspace.slug, pk=foreign_status)),
+        ]
+        assert {response.status_code for response in responses} == {status.HTTP_404_NOT_FOUND}
+        assert Workflow.objects.filter(pk=foreign.id).exists()
+        assert WorkflowStatus.objects.filter(pk=foreign_status).exists()
+
+    def test_detail_hides_project_names_from_members(self, workspace, users, project, software):
+        link_project(project, software)
+        url = WORKFLOW_URL.format(slug=workspace.slug, pk=software.id)
+        assert "projects" not in _client(users["member"]).get(url).data
+        assert _client(users["admin"]).get(url).data["projects"] == [{"id": str(project.id), "name": "Secret"}]

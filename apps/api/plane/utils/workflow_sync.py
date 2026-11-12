@@ -249,6 +249,12 @@ def apply_scheme(*, project, default_workflow_id, items, mappings, actor_id):
     }
     with transaction.atomic():
         project = Project.objects.select_for_update(of=("self",)).get(pk=project.pk)
+        # Serialises with a workflow DELETE, which locks the same row.
+        list(
+            Workflow.objects.select_for_update(of=("self",))
+            .filter(pk__in={default_workflow_id, *items.values()})
+            .order_by("id")
+        )
         validate_scheme(project, default_workflow_id, items)
         statuses = _statuses_by_workflow({default_workflow_id, *items.values()})
         planned, missing = [], []

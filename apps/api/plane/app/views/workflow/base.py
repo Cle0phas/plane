@@ -23,8 +23,7 @@ from ..base import BaseAPIView
 METHOD_NOT_ALLOWED = {"error": "Method not allowed on this route."}
 NOT_AN_OBJECT = {"error": "The payload must be an object."}
 WORKFLOW_NAME_CONSTRAINT = "workflow_unique_lower_name_workspace_when_deleted_at_null"
-# PostgreSQL truncates identifiers to 63 bytes and this name has 64, so diag reports the truncated form.
-STATUS_NAME_CONSTRAINT = "workflow_status_unique_lower_name_workspace_when_deleted_at_null"[:63]
+STATUS_NAME_CONSTRAINT = "workflow_status_unique_lower_name_ws_when_deleted_at_null"
 
 
 def _constraint_name(error):
