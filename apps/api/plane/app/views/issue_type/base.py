@@ -89,15 +89,16 @@ def _issue_type_delete_error(issue_type):
     return None
 
 
+UNIQUE_NAME_CONSTRAINT = "issue_type_unique_lower_name_workspace_when_deleted_at_null"
+METHOD_NOT_ALLOWED = {"error": "Method not allowed on this route."}
+NOT_AN_OBJECT = {"error": "The payload must be an object."}
+
+
 def _duplicate_name_response(error):
     """Turn a lost race on the case-insensitive name constraint into the serializer's 400."""
     if getattr(getattr(error.__cause__, "diag", None), "constraint_name", None) != UNIQUE_NAME_CONSTRAINT:
         raise error
     return Response({"name": [DUPLICATE_NAME_MESSAGE]}, status=status.HTTP_400_BAD_REQUEST)
-
-
-UNIQUE_NAME_CONSTRAINT = "issue_type_unique_lower_name_workspace_when_deleted_at_null"
-METHOD_NOT_ALLOWED = {"error": "Method not allowed on this route."}
 
 
 class WorkspaceIssueTypeEndpoint(BaseAPIView):
@@ -142,7 +143,7 @@ class WorkspaceIssueTypeEndpoint(BaseAPIView):
         if pk is None:
             return Response(METHOD_NOT_ALLOWED, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         if not isinstance(request.data, dict):
-            return Response({"error": "The payload must be an object."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(NOT_AN_OBJECT, status=status.HTTP_400_BAD_REQUEST)
         # Identity check: JSON 1 equals True and must not slip past the R5 checks.
         if "is_default" in request.data and request.data["is_default"] is not True:
             return Response(
@@ -217,7 +218,6 @@ class WorkspaceIssueTypeEndpoint(BaseAPIView):
 
 
 FORBIDDEN = {"error": "You don't have the required permissions."}
-NOT_AN_OBJECT = {"error": "The payload must be an object."}
 DEFAULT_CONSTRAINT_ERROR = {"error": "The project default work item type changed concurrently, retry."}
 
 
@@ -325,7 +325,7 @@ class ProjectIssueTypeDetailEndpoint(BaseAPIView):
                 link = next((item for item in links if item.issue_type_id == issue_type_id), None)
                 if link is None:
                     raise ProjectIssueType.DoesNotExist
-                # Lock the type after the links (Task 5 locks types only), then read is_active from the locked row.
+                # Links then type: the workspace type routes lock types only, so this order cannot deadlock with them.
                 issue_type = IssueType.objects.select_for_update(of=("self",)).get(pk=link.issue_type_id)
                 if not issue_type.is_active:
                     return Response(
