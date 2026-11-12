@@ -6,7 +6,17 @@ import factory
 from uuid import uuid4
 from django.utils import timezone
 
-from plane.db.models import IssueType, ProjectIssueType, User, Workspace, WorkspaceMember, Project, ProjectMember
+from plane.db.models import (
+    IssueType,
+    ProjectIssueType,
+    User,
+    Workflow,
+    WorkflowStatus,
+    Workspace,
+    WorkspaceMember,
+    Project,
+    ProjectMember,
+)
 
 
 class UserFactory(factory.django.DjangoModelFactory):
@@ -110,3 +120,21 @@ class ProjectIssueTypeFactory(factory.django.DjangoModelFactory):
     workspace = factory.SelfAttribute("project.workspace")
     issue_type = factory.SubFactory(IssueTypeFactory, workspace=factory.SelfAttribute("..project.workspace"))
     is_default = False
+
+
+class WorkflowStatusFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = WorkflowStatus
+
+    workspace = factory.SubFactory(WorkspaceFactory)
+    name = factory.Sequence(lambda n: f"Status {n}")
+    color = "#3A3A3A"
+    group = "started"
+
+
+class WorkflowFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Workflow
+
+    workspace = factory.SubFactory(WorkspaceFactory)
+    name = factory.Sequence(lambda n: f"Workflow {n}")

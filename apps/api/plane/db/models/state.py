@@ -92,6 +92,11 @@ class State(ProjectBaseModel):
     external_source = models.CharField(max_length=255, null=True, blank=True)
     external_id = models.CharField(max_length=255, blank=True, null=True)
 
+    # Set when the project follows workflows: the state mirrors this workspace status (W4).
+    workflow_status = models.ForeignKey(
+        "db.WorkflowStatus", on_delete=models.SET_NULL, null=True, blank=True, related_name="project_states"
+    )
+
     objects = StateManager()
     all_state_objects = models.Manager()
     triage_objects = TriageStateManager()
@@ -107,7 +112,12 @@ class State(ProjectBaseModel):
                 fields=["name", "project"],
                 condition=Q(deleted_at__isnull=True),
                 name="state_unique_name_project_when_deleted_at_null",
-            )
+            ),
+            models.UniqueConstraint(
+                fields=["project", "workflow_status"],
+                condition=Q(deleted_at__isnull=True, workflow_status__isnull=False),
+                name="state_unique_project_workflow_status_when_deleted_at_null",
+            ),
         ]
         verbose_name = "State"
         verbose_name_plural = "States"
