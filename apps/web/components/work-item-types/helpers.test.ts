@@ -12,6 +12,7 @@ import {
   getDeleteState,
   getFormFieldErrorKeys,
   getProjectDefaultState,
+  getProjectListTypes,
   getProjectToggleState,
   getSetDefaultState,
 } from "./helpers";
@@ -163,11 +164,28 @@ describe("project work item type actions", () => {
   });
 
   it("only offers the default choice for an enabled type", () => {
-    expect(getProjectDefaultState(undefined)).toEqual({
+    expect(getProjectDefaultState(undefined, buildType())).toEqual({
       disabled: true,
       reasonKey: "work_item_types.settings.project.disabled_reasons.not_enabled",
     });
-    expect(getProjectDefaultState(buildLink())).toEqual({ disabled: false });
+    expect(getProjectDefaultState(buildLink(), buildType())).toEqual({ disabled: false });
+  });
+
+  it("refuses the default choice for an inactive type that is still linked", () => {
+    expect(getProjectDefaultState(buildLink(), buildType({ is_active: false }))).toEqual({
+      disabled: true,
+      reasonKey: "work_item_types.settings.cant_set_default_inactive_message",
+    });
+  });
+
+  it("lists inactive types only while the project still uses them", () => {
+    const active = buildType({ id: "a" });
+    const inactiveLinked = buildType({ id: "b", is_active: false });
+    const inactiveFree = buildType({ id: "c", is_active: false });
+    expect(getProjectListTypes([active, inactiveLinked, inactiveFree], (id) => id === "b")).toEqual([
+      active,
+      inactiveLinked,
+    ]);
   });
 });
 

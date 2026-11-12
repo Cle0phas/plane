@@ -15,6 +15,7 @@ import type { TIssueType } from "@plane/types";
 import {
   getActionRefusalKey,
   getProjectDefaultState,
+  getProjectListTypes,
   getProjectToggleState,
 } from "@/components/work-item-types/helpers";
 import type { TWorkItemTypeRowAction } from "@/components/work-item-types/helpers";
@@ -36,7 +37,7 @@ const ProjectWorkItemTypeRow = observer(function ProjectWorkItemTypeRow(props: T
   const { getProjectTypeLink, enableInProject, disableInProject } = useWorkItemType();
   const link = getProjectTypeLink(projectId, workItemType.id);
   const toggleState = getProjectToggleState(link);
-  const defaultState = getProjectDefaultState(link);
+  const defaultState = getProjectDefaultState(link, workItemType);
   const baseId = `work-item-type-${workItemType.id}`;
   const nameId = `${baseId}-name`;
   const reasonId = `${baseId}-reason`;
@@ -95,10 +96,11 @@ export const ProjectWorkItemTypeList = observer(function ProjectWorkItemTypeList
   const { workspaceSlug, projectId } = props;
   const [isPending, setIsPending] = useState(false);
   const { t } = useTranslation();
-  const { getWorkspaceTypes, getProjectTypeLink, getProjectDefaultTypeId, setProjectDefault } = useWorkItemType();
-  // Active types can be added; inactive ones stay listed while the project still uses them (R7).
-  const workItemTypes = getWorkspaceTypes(workspaceSlug).filter(
-    (workItemType) => workItemType.is_active || !!getProjectTypeLink(projectId, workItemType.id)
+  const { getWorkspaceTypes, getProjectTypeLink, getProjectDefaultTypeId, setProjectDefault, fetchProjectTypes } =
+    useWorkItemType();
+  const workItemTypes = getProjectListTypes(
+    getWorkspaceTypes(workspaceSlug),
+    (typeId) => !!getProjectTypeLink(projectId, typeId)
   );
 
   // One write at a time: a default switch and a toggle must not race on the same project.
@@ -112,6 +114,8 @@ export const ProjectWorkItemTypeList = observer(function ProjectWorkItemTypeList
         title: t("common.error.label"),
         message: t(getActionRefusalKey(error, action) ?? "work_item_types.settings.project.toast_error"),
       });
+      // A refusal means the server state differs from the screen: reload it so the real reason shows.
+      await fetchProjectTypes(workspaceSlug, projectId).catch(() => undefined);
     } finally {
       setIsPending(false);
     }

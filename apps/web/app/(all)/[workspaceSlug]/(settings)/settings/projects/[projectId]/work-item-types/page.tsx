@@ -38,14 +38,24 @@ function WorkItemTypesProjectSettingsPage({ params }: Route.ComponentProps) {
   // The store already maps a workspace admin to the project admin role; the server checks R3 again on every call.
   const isRoleKnown = getProjectRoleByWorkspaceSlugAndProjectId(workspaceSlug, projectId) !== undefined;
   const canManage = allowPermissions([EUserPermissions.ADMIN], EUserPermissionsLevel.PROJECT, workspaceSlug, projectId);
-  const { error: typesError, isLoading: isTypesLoading } = useSWR(
+  const {
+    data: types,
+    error: typesError,
+    isLoading: isTypesLoading,
+  } = useSWR(
     canManage ? WORKSPACE_WORK_ITEM_TYPES(workspaceSlug) : null,
     canManage ? () => fetchWorkspaceTypes(workspaceSlug) : null
   );
-  const { error: linksError, isLoading: isLinksLoading } = useSWR(
+  const {
+    data: links,
+    error: linksError,
+    isLoading: isLinksLoading,
+  } = useSWR(
     canManage ? PROJECT_WORK_ITEM_TYPES(projectId) : null,
     canManage ? () => fetchProjectTypes(workspaceSlug, projectId) : null
   );
+  // A failed background revalidation must not hide a list that loaded fine.
+  const hasLoadError = (!!typesError && !types) || (!!linksError && !links);
   const pageTitle = currentProjectDetails?.name
     ? `${currentProjectDetails.name} - ${t("work_item_types.label")}`
     : undefined;
@@ -70,7 +80,7 @@ function WorkItemTypesProjectSettingsPage({ params }: Route.ComponentProps) {
         description={t("work_item_types.settings.project.description")}
       />
       <div className="mt-4">
-        {typesError || linksError ? (
+        {hasLoadError ? (
           <p role="alert" className="text-body-sm-regular text-danger-primary">
             {t("work_item_types.settings.list.load_error")}
           </p>

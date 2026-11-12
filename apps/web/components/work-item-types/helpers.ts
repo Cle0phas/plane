@@ -53,8 +53,20 @@ export const getProjectToggleState = (link: TProjectIssueType | undefined): TWor
   return ALLOWED;
 };
 
-export const getProjectDefaultState = (link: TProjectIssueType | undefined): TWorkItemTypeActionState =>
-  link ? ALLOWED : { disabled: true, reasonKey: "work_item_types.settings.project.disabled_reasons.not_enabled" };
+export const getProjectDefaultState = (
+  link: TProjectIssueType | undefined,
+  workItemType: Pick<TIssueType, "is_active">
+): TWorkItemTypeActionState => {
+  if (!link) return { disabled: true, reasonKey: "work_item_types.settings.project.disabled_reasons.not_enabled" };
+  // R7: an inactive type stays linked but cannot become the default.
+  if (!workItemType.is_active)
+    return { disabled: true, reasonKey: "work_item_types.settings.cant_set_default_inactive_message" };
+  return ALLOWED;
+};
+
+/** R7: inactive types cannot be added, but stay listed while the project still uses them. */
+export const getProjectListTypes = (workItemTypes: TIssueType[], hasLink: (typeId: string) => boolean): TIssueType[] =>
+  workItemTypes.filter((workItemType) => workItemType.is_active || hasLink(workItemType.id));
 
 const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object";
 
