@@ -28,14 +28,20 @@ import { MemberSelect } from "@/components/dropdowns/member/member-select";
 import { ModuleSelect } from "@/components/dropdowns/module/module-select";
 import { PrioritySelect } from "@/components/dropdowns/priority/priority-select";
 import { StateSelect } from "@/components/dropdowns/state/state-select";
-import { getEffectiveTypeId, getInitialStateId, useProjectWorkflowScheme } from "@/components/workflow";
+import {
+  getEffectiveTypeId,
+  getInitialStateId,
+  useAllowedStateIds,
+  useProjectDefaultTypeId,
+  useProjectWorkflowScheme,
+} from "@/components/workflow";
 import { ParentIssuesListModal } from "@/components/issues/parent-issues-list-modal";
 import { IssueIdentifier } from "@/components/issues/issue-detail/issue-identifier";
 // hooks
 import { useProjectEstimates } from "@/hooks/store/estimates";
 import { useProject } from "@/hooks/store/use-project";
 import { useProjectState } from "@/hooks/store/use-project-state";
-import { useWorkItemType } from "@/hooks/store/use-work-item-type";
+import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 import { useUserProfile } from "@/hooks/store/user";
 import { usePlatformOS } from "@/hooks/use-platform-os";
 
@@ -102,7 +108,9 @@ export const IssueDefaultProperties = observer(function IssueDefaultProperties(p
   const { areEstimateEnabledByProjectId } = useProjectEstimates();
   const { getProjectById } = useProject();
   const { getProjectDefaultStateId, getProjectStates } = useProjectState();
-  const { getProjectDefaultTypeId } = useWorkItemType();
+  const {
+    issue: { getIssueById },
+  } = useIssueDetail();
   const { isMobile } = usePlatformOS();
   const { data: userProfile } = useUserProfile();
   // derived values
@@ -111,13 +119,20 @@ export const IssueDefaultProperties = observer(function IssueDefaultProperties(p
   const { getIndex } = getTabIndex(ETabIndices.ISSUE_FORM, isMobile);
   const typeId = useWatch({ control, name: "type_id" });
   const scheme = useProjectWorkflowScheme(projectId ?? undefined);
+  const projectDefaultTypeId = useProjectDefaultTypeId(projectId ?? undefined);
+  // editing an existing item: it moves through its workflow like anywhere else
+  const allowedStateIds = useAllowedStateIds(
+    workspaceSlug,
+    projectId ?? undefined,
+    id && !isDraft ? getIssueById(id) : undefined
+  );
   // T1: a new item enters its workflow's initial state; the server refuses any other.
   const workflowInitialStateId =
     !id || isDraft
       ? getInitialStateId(
           scheme,
           (projectId && getProjectStates(projectId)) || [],
-          getEffectiveTypeId(typeId, projectId ? getProjectDefaultTypeId(projectId) : null)
+          getEffectiveTypeId(typeId, projectDefaultTypeId)
         )
       : undefined;
 
@@ -153,6 +168,7 @@ export const IssueDefaultProperties = observer(function IssueDefaultProperties(p
               projectId={projectId ?? undefined}
               variant="pill-md"
               tabIndex={getIndex("state_id")}
+              allowedStateIds={allowedStateIds}
             />
           )
         }

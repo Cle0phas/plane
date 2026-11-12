@@ -16,7 +16,7 @@ import { PriorityIcon } from "@plane/blocks/icons";
 import { Tabs, TabsList, Tab, TabsPanel } from "@makeplane/propel/components/tabs";
 import { Tooltip } from "@makeplane/propel/components/tooltip";
 import type { TWorkItemFilterCondition } from "@plane/shared-state";
-import type { ICycle } from "@plane/types";
+import type { ICycle, TIssue } from "@plane/types";
 import { EIssuesStoreType } from "@plane/types";
 // ui
 import { Loader } from "@plane/blocks/skeleton";
@@ -32,6 +32,7 @@ import userImage from "@/app/assets/user.png?url";
 // components
 import { SingleProgressStats } from "@/components/core/sidebar/single-progress-stats";
 import { StateSelect } from "@/components/dropdowns/state/state-select";
+import { useAllowedStateIds } from "@/components/workflow";
 import { SimpleEmptyState } from "@/components/empty-state/simple-empty-state-root";
 import { IssueIdentifier } from "@/components/issues/issue-detail/issue-identifier";
 // hooks
@@ -41,6 +42,28 @@ import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import useLocalStorage from "@/hooks/use-local-storage";
 // store
 import type { ActiveCycleIssueDetails } from "@/store/issue/cycle";
+
+// A component of its own: the allowed states of a work item come from a hook, which cannot run inside the list map.
+const ActiveCycleIssueState = observer(function ActiveCycleIssueState(props: {
+  workspaceSlug: string;
+  projectId: string;
+  issue: TIssue;
+}) {
+  const { workspaceSlug, projectId, issue } = props;
+  const allowedStateIds = useAllowedStateIds(workspaceSlug, projectId, issue);
+  return (
+    <StateSelect
+      value={issue.state_id}
+      onChange={() => {}}
+      projectId={projectId}
+      disabled
+      variant="pill-sm"
+      className="max-w-24"
+      tooltip
+      allowedStateIds={allowedStateIds}
+    />
+  );
+});
 
 export type ActiveCycleStatsProps = {
   workspaceSlug: string;
@@ -119,41 +142,36 @@ export const ActiveCycleStats = observer(function ActiveCycleStats(props: Active
 
                       if (!issue) return null;
 
+                      const openPeek = () => {
+                        if (issue.id) {
+                          setPeekIssue({
+                            workspaceSlug,
+                            projectId,
+                            issueId: issue.id,
+                            isArchived: !!issue.archived_at,
+                          });
+                          handleFiltersUpdate([{ property: "priority", operator: "in", value: ["urgent", "high"] }]);
+                        }
+                      };
+
                       return (
                         <div
                           key={issue.id}
                           className="group flex cursor-pointer items-center justify-between gap-2 rounded-md p-1 hover:bg-layer-1"
-                          onClick={() => {
-                            if (issue.id) {
-                              setPeekIssue({
-                                workspaceSlug,
-                                projectId,
-                                issueId: issue.id,
-                                isArchived: !!issue.archived_at,
-                              });
-                              handleFiltersUpdate([
-                                { property: "priority", operator: "in", value: ["urgent", "high"] },
-                              ]);
-                            }
-                          }}
                         >
-                          <div className="flex w-full min-w-24 flex-grow items-center gap-1.5 truncate">
+                          <button
+                            type="button"
+                            onClick={openPeek}
+                            className="flex w-full min-w-24 flex-grow items-center gap-1.5 truncate text-left"
+                          >
                             <IssueIdentifier issueId={issue.id} projectId={projectId} size="xs" variant="secondary" />
                             <Tooltip label={`Title: ${issue.name}`} layout="stacked" align="start">
                               <span className="truncate text-body-xs-regular text-primary">{issue.name}</span>
                             </Tooltip>
-                          </div>
+                          </button>
                           <PriorityIcon priority={issue.priority} />
                           <div className="flex flex-shrink-0 items-center gap-1.5">
-                            <StateSelect
-                              value={issue.state_id}
-                              onChange={() => {}}
-                              projectId={projectId?.toString() ?? ""}
-                              disabled
-                              variant="pill-sm"
-                              className="max-w-24"
-                              tooltip
-                            />
+                            <ActiveCycleIssueState workspaceSlug={workspaceSlug} projectId={projectId} issue={issue} />
                             {issue.target_date && (
                               <Tooltip label={`Target Date: ${renderFormattedDate(issue.target_date) ?? ""}`}>
                                 <div className="flex h-full cursor-pointer items-center gap-1.5 truncate rounded-sm bg-layer-1 px-2 py-0.5 text-caption-md-regular group-hover:bg-layer-1-hover">
@@ -196,7 +214,7 @@ export const ActiveCycleStats = observer(function ActiveCycleStats(props: Active
           <div className="vertical-scrollbar scrollbar-sm flex h-52 w-full flex-col gap-1 overflow-y-auto text-secondary">
             {cycle && !isEmpty(cycle.distribution) ? (
               cycle?.distribution?.assignees && cycle.distribution.assignees.length > 0 ? (
-                cycle.distribution?.assignees?.map((assignee, index) => {
+                cycle.distribution?.assignees?.map((assignee) => {
                   if (assignee.assignee_id)
                     return (
                       <SingleProgressStats
@@ -227,7 +245,7 @@ export const ActiveCycleStats = observer(function ActiveCycleStats(props: Active
                   else
                     return (
                       <SingleProgressStats
-                        key={`unassigned-${index}`}
+                        key="unassigned"
                         title={
                           <div className="flex items-center gap-2">
                             <div className="h-5 w-5 rounded-full border-2 border-subtle bg-layer-1">
@@ -259,9 +277,9 @@ export const ActiveCycleStats = observer(function ActiveCycleStats(props: Active
           <div className="vertical-scrollbar scrollbar-sm flex h-52 w-full flex-col gap-1 overflow-y-auto text-secondary">
             {cycle && !isEmpty(cycle.distribution) ? (
               cycle?.distribution?.labels && cycle.distribution.labels.length > 0 ? (
-                cycle.distribution.labels?.map((label, index) => (
+                cycle.distribution.labels?.map((label) => (
                   <SingleProgressStats
-                    key={label.label_id ?? `no-label-${index}`}
+                    key={label.label_id ?? "no-label"}
                     title={
                       <div className="flex items-center gap-2 truncate">
                         <span

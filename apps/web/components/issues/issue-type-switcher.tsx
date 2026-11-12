@@ -19,7 +19,9 @@ import { IssueIdentifier } from "@/components/issues/issue-detail/issue-identifi
 import {
   ArrivalStateDialog,
   getArrivalStateIds,
+  getEffectiveTypeId,
   getWorkflowRefusalKey,
+  useProjectDefaultTypeId,
   useProjectWorkflowScheme,
 } from "@/components/workflow";
 import { getWorkItemTypeChange } from "@/components/work-item-types/helpers";
@@ -44,6 +46,7 @@ export const IssueTypeSwitcher = observer(function IssueTypeSwitcher(props: TIss
   // derived values
   const issue = getIssueById(issueId);
   const scheme = useProjectWorkflowScheme(issue?.project_id ?? undefined);
+  const projectDefaultTypeId = useProjectDefaultTypeId(issue?.project_id ?? undefined);
 
   if (!issue || !issue.project_id) return <></>;
   const projectId = issue.project_id;
@@ -66,7 +69,13 @@ export const IssueTypeSwitcher = observer(function IssueTypeSwitcher(props: TIss
     const change = getWorkItemTypeChange(issue.type_id, typeId);
     if (!change) return;
     // W9: the current state must exist in the new workflow, otherwise the user picks the arrival state.
-    const stateIds = getArrivalStateIds(scheme, getProjectStates(projectId) ?? [], typeId, issue.state_id);
+    const stateIds = getArrivalStateIds(
+      scheme,
+      getProjectStates(projectId) ?? [],
+      getEffectiveTypeId(issue.type_id, projectDefaultTypeId),
+      typeId,
+      issue.state_id
+    );
     if (stateIds) {
       setPending({ typeId, stateIds });
       return;

@@ -228,16 +228,20 @@ describe("getEffectiveTypeId", () => {
 });
 
 describe("getArrivalStateIds", () => {
-  it("asks for an arrival state only when the current state is outside the new workflow", () => {
-    expect(new Set(getArrivalStateIds(scheme, states, "bug", "s-todo"))).toEqual(new Set(["s-doing", "s-new"]));
-    expect(getArrivalStateIds(scheme, states, "bug", "s-doing")).toBeNull();
-    expect(getArrivalStateIds(scheme, states, "bug", null)).not.toBeNull();
+  it("asks for an arrival state only when the workflow changes and lacks the current state", () => {
+    expect(new Set(getArrivalStateIds(scheme, states, "task", "bug", "s-todo"))).toEqual(new Set(["s-doing", "s-new"]));
+    expect(getArrivalStateIds(scheme, states, "task", "bug", "s-doing")).toBeNull();
+    expect(getArrivalStateIds(scheme, states, "task", "bug", null)).not.toBeNull();
+  });
+
+  it("never asks inside the same workflow, even when the state is unmanaged", () => {
+    expect(getArrivalStateIds(scheme, states, "task", "story", "s-todo")).toBeNull();
+    expect(getArrivalStateIds(scheme, states, "task", "story", "s-unknown")).toBeNull();
   });
 
   it("never asks in a free project", () => {
-    expect(
-      getArrivalStateIds({ default_workflow_id: null, items: [], workflows: [] }, states, "bug", "s-todo")
-    ).toBeNull();
+    const free = { default_workflow_id: null, items: [], workflows: [] };
+    expect(getArrivalStateIds(free, states, "task", "bug", "s-todo")).toBeNull();
   });
 });
 

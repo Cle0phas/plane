@@ -102,13 +102,18 @@ export const getEffectiveTypeId = (
   projectDefaultTypeId: string | null | undefined
 ) => typeId ?? projectDefaultTypeId ?? null;
 
-/** W9: the states to choose from when the type change leaves the current state outside the new workflow; null when no choice is needed. */
+/**
+ * W9: the states to choose from when the type change moves the item to another workflow that lacks its current state,
+ * which is exactly when the server answers arrival_state_required; null when no choice is needed.
+ */
 export const getArrivalStateIds = (
   scheme: TProjectWorkflowScheme | undefined,
   projectStates: IState[],
+  oldEffectiveTypeId: string | null | undefined,
   newEffectiveTypeId: string | null | undefined,
   currentStateId: string | null | undefined
 ): Set<string> | null => {
+  if (getIssueWorkflow(scheme, oldEffectiveTypeId) === getIssueWorkflow(scheme, newEffectiveTypeId)) return null;
   const stateIds = getWorkflowStateIds(scheme, projectStates, newEffectiveTypeId);
   return stateIds && (!currentStateId || !stateIds.has(currentStateId)) ? stateIds : null;
 };

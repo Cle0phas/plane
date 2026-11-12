@@ -11,6 +11,7 @@ import type { IIssueDisplayProperties, TIssue } from "@plane/types";
 // constants
 import { SPREADSHEET_COLUMNS } from "../utils";
 // components
+import { useWorkflowRefusalHandler } from "@/components/workflow";
 import { shouldRenderColumn } from "@/helpers/issue-filter.helper";
 import { WithDisplayPropertiesHOC } from "../properties/with-display-properties-HOC";
 
@@ -25,6 +26,7 @@ type Props = {
 
 export const IssueColumn = observer(function IssueColumn(props: Props) {
   const { displayProperties, issueDetail, disableUserActions, property, updateIssue } = props;
+  const handleRefusal = useWorkflowRefusalHandler();
   // router
   const tableCellRef = useRef<HTMLTableCellElement | null>(null);
 
@@ -35,7 +37,11 @@ export const IssueColumn = observer(function IssueColumn(props: Props) {
   if (!Column) return null;
 
   const handleUpdateIssue = async (issue: TIssue, data: Partial<TIssue>) => {
-    if (updateIssue) await updateIssue(issue.project_id, issue.id, data);
+    try {
+      if (updateIssue) await updateIssue(issue.project_id, issue.id, data);
+    } catch (error) {
+      handleRefusal(error);
+    }
   };
 
   return (

@@ -12,6 +12,7 @@ import type { TIssueServiceType, TSubIssueOperations } from "@plane/types";
 import { EIssueServiceType } from "@plane/types";
 import { copyUrlToClipboard } from "@plane/utils";
 // hooks
+import { getWorkflowRefusalKey } from "@/components/workflow";
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 
 export const useSubIssueOperations = (issueServiceType: TIssueServiceType): TSubIssueOperations => {
@@ -102,11 +103,11 @@ export const useSubIssueOperations = (issueServiceType: TIssueServiceType): TSub
             message: t("sub_work_item.update.success"),
           });
           setSubIssueHelpers(parentIssueId, "issue_loader", issueId);
-        } catch (_error) {
+        } catch (error) {
           setToast({
             type: "error",
             title: t("toast.error"),
-            message: t("sub_work_item.update.error"),
+            message: t(getWorkflowRefusalKey(error) ?? "sub_work_item.update.error"),
           });
         }
       },
