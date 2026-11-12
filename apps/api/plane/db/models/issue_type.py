@@ -8,6 +8,7 @@ import copy
 # Django imports
 from django.db import models, transaction
 from django.db.models import Q
+from django.db.models.functions import Lower
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -35,6 +36,19 @@ class IssueType(BaseModel):
         verbose_name = "Issue Type"
         verbose_name_plural = "Issue Types"
         db_table = "issue_types"
+        constraints = [
+            models.UniqueConstraint(
+                Lower("name"),
+                "workspace",
+                condition=Q(deleted_at__isnull=True),
+                name="issue_type_unique_lower_name_workspace_when_deleted_at_null",
+            ),
+            models.UniqueConstraint(
+                fields=["workspace"],
+                condition=Q(is_default=True, deleted_at__isnull=True),
+                name="issue_type_unique_default_workspace_when_deleted_at_null",
+            ),
+        ]
 
     def __str__(self):
         return self.name
@@ -52,7 +66,12 @@ class ProjectIssueType(ProjectBaseModel):
                 fields=["project", "issue_type"],
                 condition=Q(deleted_at__isnull=True),
                 name="project_issue_type_unique_project_issue_type_when_deleted_at_null",
-            )
+            ),
+            models.UniqueConstraint(
+                fields=["project"],
+                condition=Q(is_default=True, deleted_at__isnull=True),
+                name="project_issue_type_unique_default_project_when_deleted_at_null",
+            ),
         ]
         verbose_name = "Project Issue Type"
         verbose_name_plural = "Project Issue Types"
