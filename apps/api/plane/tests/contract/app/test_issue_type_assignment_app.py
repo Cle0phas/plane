@@ -123,6 +123,14 @@ class TestUpdateWorkItemType:
         issue.refresh_from_db()
         assert issue.type_id == ctx.default_type.id
 
+    def test_a_null_type_is_rejected_on_update(self, ctx, mock_celery):
+        issue = Issue.objects.create(name="Item", project=ctx.project, type=ctx.bug)
+        response = ctx.client.patch(_issue_url(ctx, issue), {"type_id": None}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "type_id" in response.data
+        issue.refresh_from_db()
+        assert issue.type_id == ctx.bug.id
+
     def test_a_work_item_keeps_its_type_once_deactivated(self, ctx, mock_celery):
         issue = Issue.objects.create(name="Item", project=ctx.project, type=ctx.bug)
         IssueType.objects.filter(pk=ctx.bug.pk).update(is_active=False)

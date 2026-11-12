@@ -104,3 +104,16 @@ class TestApiV1WorkItemType:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         issue.refresh_from_db()
         assert issue.type_id == ctx.default_type.id
+
+    def test_a_null_type_is_rejected_on_update(self, api_key_client, ctx, mock_celery):
+        issue = Issue.objects.create(name="Item", project=ctx.project, type=ctx.bug)
+        url = ISSUE_URL.format(slug=ctx.workspace.slug, project_id=ctx.project.id, issue_id=issue.id)
+        response = api_key_client.patch(url, {"type_id": None}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        issue.refresh_from_db()
+        assert issue.type_id == ctx.bug.id
+
+    def test_a_null_type_at_creation_means_the_project_default(self, api_key_client, ctx, mock_celery):
+        response = api_key_client.post(ctx.issues_url, {"name": "Null", "type_id": None}, format="json")
+        assert response.status_code == status.HTTP_201_CREATED, response.data
+        assert Issue.objects.get(pk=response.data["id"]).type_id == ctx.default_type.id

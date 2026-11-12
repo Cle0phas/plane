@@ -22,8 +22,11 @@ class StrictUUIDField(serializers.UUIDField):
         return super().to_internal_value(data)
 
 
-def validate_work_item_type_id(type_id, *, project_id, workspace_id=None, current_type_id=None):
+def validate_work_item_type_id(type_id, *, project_id, workspace_id=None, current_type_id=None, allow_null=True):
     """Return type_id when a work item may take it (R7, R9), else raise one message whatever the cause."""
+    # Null means "project default" at creation only; on update the model would reset it silently, unlogged (R11).
+    if type_id is None and not allow_null:
+        raise serializers.ValidationError({"type_id": [INVALID_WORK_ITEM_TYPE_MESSAGE]})
     # Keeping the current type stays allowed so items keep a type deactivated since (R7).
     if type_id is None or type_id == current_type_id:
         return type_id

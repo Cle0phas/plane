@@ -183,6 +183,7 @@ class IssueSerializer(BaseSerializer):
                 data["type_id"],
                 project_id=self.context.get("project_id"),
                 current_type_id=self.instance.type_id if self.instance else None,
+                allow_null=self.instance is None,
             )
 
         return data
