@@ -128,6 +128,8 @@ from .exporter import ExporterHistorySerializer
 
 from .webhook import WebhookSerializer, WebhookLogSerializer
 
+from .issue_type import IssueTypeSerializer
+
 from .favorite import UserFavoriteSerializer
 
 from .draft import (
