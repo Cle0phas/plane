@@ -2,13 +2,21 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # See the LICENSE file for details.
 
+# Python imports
+import copy
+
 # Django imports
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Module imports
 from .project import ProjectBaseModel
 from .base import BaseModel
+
+DEFAULT_ISSUE_TYPE_NAME = "Tâche"
+DEFAULT_ISSUE_TYPE_LOGO_PROPS = {"in_use": "icon", "icon": {"name": "check_box", "color": "#6d7b8a"}}
 
 
 class IssueType(BaseModel):
@@ -53,3 +61,49 @@ class ProjectIssueType(ProjectBaseModel):
 
     def __str__(self):
         return f"{self.project} - {self.issue_type}"
+
+
+def get_or_create_workspace_default_issue_type(workspace_id):
+    """Return the workspace default type, creating it when missing (invariant 1)."""
+    issue_type = IssueType.objects.filter(workspace_id=workspace_id, is_default=True).first()
+    if issue_type is not None:
+        return issue_type
+    issue_type = IssueType.objects.filter(workspace_id=workspace_id, name__iexact=DEFAULT_ISSUE_TYPE_NAME).first()
+    if issue_type is None:
+        return IssueType.objects.create(
+            workspace_id=workspace_id,
+            name=DEFAULT_ISSUE_TYPE_NAME,
+            logo_props=copy.deepcopy(DEFAULT_ISSUE_TYPE_LOGO_PROPS),
+            is_default=True,
+            is_active=True,
+        )
+    issue_type.is_default = True
+    issue_type.is_active = True
+    issue_type.save(update_fields=["is_default", "is_active", "updated_at"])
+    return issue_type
+
+
+def ensure_project_default_issue_type(project):
+    """Make the workspace default type the project default when the project has none (invariant 2)."""
+    with transaction.atomic():
+        if ProjectIssueType.objects.filter(project_id=project.id, is_default=True).exists():
+            return
+        issue_type = get_or_create_workspace_default_issue_type(project.workspace_id)
+        link, created = ProjectIssueType.objects.get_or_create(
+            project=project, issue_type=issue_type, defaults={"is_default": True}
+        )
+        if not created:
+            link.is_default = True
+            link.save(update_fields=["is_default", "updated_at"])
+
+
+@receiver(post_save, sender="db.Workspace")
+def create_workspace_default_issue_type(sender, instance, created, **kwargs):
+    if created:
+        get_or_create_workspace_default_issue_type(instance.id)
+
+
+@receiver(post_save, sender="db.Project")
+def create_project_default_issue_type(sender, instance, created, **kwargs):
+    if created:
+        ensure_project_default_issue_type(instance)
