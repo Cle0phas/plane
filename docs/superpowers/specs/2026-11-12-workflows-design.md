@@ -11,56 +11,59 @@ La livraison 1 a introduit les types de ticket. Cette livraison permet de défin
 
 Vocabulaire :
 
-- **État** : une étape d'un ticket (À faire, En cours, En recette, Livré...).
+- **Statut** : une étape d'un ticket (À faire, En cours, En recette, Livré...), définie une fois pour tout le workspace et utilisable par plusieurs workflows.
+- **État** : le statut tel qu'il existe dans un projet (une colonne du Kanban) ; dans un projet relié, chaque état est lié à un statut.
 - **Transition** : une flèche autorisée d'un ou plusieurs états source vers un état cible. Sans flèche, le passage est refusé.
 - **Transition globale** : une flèche « depuis n'importe quel état » vers un état cible, dessinée explicitement par l'admin.
 - **Système de workflow d'un projet** : le workflow par défaut du projet, plus un workflow par type de ticket.
 
 ## 2. Décisions de cadrage
 
-| #   | Décision                                                                                                                                                                                                                                                                                           |
-| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| W1  | Le groupe de tickets qui suit un workflow est le type de ticket (livraison 1, D1).                                                                                                                                                                                                                 |
-| W2  | Les workflows sont définis au niveau du workspace et peuvent être reliés à plusieurs projets ; une modification s'applique à tous les projets reliés.                                                                                                                                              |
-| W3  | Chaque projet a un système de workflow : un workflow par défaut et, éventuellement, un workflow par type.                                                                                                                                                                                          |
-| W4  | Les états d'un projet relié sont exactement l'union des états de ses workflows ; ils sont créés et synchronisés automatiquement et deviennent non modifiables depuis Paramètres du projet > States.                                                                                                |
-| W5  | Les états sont illimités et nommés librement. Chaque état porte en interne un groupe Plane (backlog, unstarted, started, completed, cancelled ; jamais triage), déduit automatiquement et modifiable : état initial vers unstarted, état sans flèche sortante vers completed, autres vers started. |
-| W6  | Règles de transition de la v1 : la flèche elle-même, plus une seule règle, « limiter qui » : liste de rôles (extensible), personnes nommées, responsable du ticket, créateur du ticket. Sans règle, la transition est ouverte à quiconque peut modifier le ticket.                                 |
-| W7  | Un seul état initial par workflow ; tout ticket créé y entre.                                                                                                                                                                                                                                      |
-| W8  | Le workflow est optionnel : sans système, le projet reste libre. Avec un système, le serveur refuse toute transition non autorisée, quel que soit le chemin.                                                                                                                                       |
-| W9  | Au changement de type d'un ticket, si l'état actuel existe dans le workflow du nouveau type il est gardé, sinon un état d'arrivée doit être choisi ; sans ce choix, le changement est refusé.                                                                                                      |
-| W10 | Relier un projet passe par une étape de correspondance : chaque état contenant des tickets et absent du workflow de leur type reçoit un état d'arrivée ; rien ne bouge avant confirmation.                                                                                                         |
-| W11 | Retirer un état d'un workflow est refusé tant qu'un ticket s'y trouve dans un projet relié ; une migration guidée viendra plus tard et le modèle doit la permettre sans refonte.                                                                                                                   |
-| W12 | Créer ou modifier un workflow : admins du workspace. Choisir le système d'un projet : admin du projet ou admin du workspace.                                                                                                                                                                       |
-| W13 | Éditeur en diagramme (React Flow, `@xyflow/react`, version épinglée via le catalogue pnpm), avec formulaires équivalents au clavier et panneau latéral.                                                                                                                                            |
-| W14 | Toute modification de configuration est tracée dans le journal d'audit de la livraison 1.                                                                                                                                                                                                          |
-| W15 | Les nouveaux textes passent par `packages/i18n`, en anglais et en français (« ticket »), puis les 20 autres langues avec le skill `translate`. Les clés `workflows.*` déjà présentes dans Plane sont réutilisées.                                                                                  |
-| W16 | Approche A retenue : des états de workflow propres au workspace, synchronisés vers des états de projet ordinaires liés. Écartées : workflows pointant sur les états d'un projet (pas de partage, contraire à W2) ; workflow stocké en JSON (pas d'intégrité, synchronisation fragile).             |
+| #   | Décision                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| W1  | Le groupe de tickets qui suit un workflow est le type de ticket (livraison 1, D1).                                                                                                                                                                                                                                                                                                                                                                                                      |
+| W2  | Les workflows sont définis au niveau du workspace et peuvent être reliés à plusieurs projets ; une modification s'applique à tous les projets reliés.                                                                                                                                                                                                                                                                                                                                   |
+| W3  | Chaque projet a un système de workflow : un workflow par défaut et, éventuellement, un workflow par type.                                                                                                                                                                                                                                                                                                                                                                               |
+| W4  | Les états d'un projet relié correspondent exactement à l'union des statuts de ses workflows, un état par statut ; ils sont créés et synchronisés automatiquement et deviennent non modifiables depuis Paramètres du projet > States.                                                                                                                                                                                                                                                    |
+| W5  | Les statuts sont illimités et nommés librement. Chaque statut porte en interne un groupe Plane (backlog, unstarted, started, completed, cancelled ; jamais triage), déduit automatiquement et modifiable : statut initial vers unstarted, statut sans flèche sortante (hors transitions globales) vers completed, autres vers started. La déduction n'est recalculée que tant que le groupe n'a pas été choisi à la main et que le statut n'est utilisé que par le workflow enregistré. |
+| W6  | Règles de transition de la v1 : la flèche elle-même, plus une seule règle, « limiter qui » : liste de rôles (extensible), personnes nommées, responsable du ticket, créateur du ticket. Sans règle, la transition est ouverte à quiconque peut modifier le ticket.                                                                                                                                                                                                                      |
+| W7  | Un seul état initial par workflow ; tout ticket créé y entre.                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| W8  | Le workflow est optionnel : sans système, le projet reste libre. Avec un système, le serveur refuse toute transition non autorisée, quel que soit le chemin.                                                                                                                                                                                                                                                                                                                            |
+| W9  | Au changement de type d'un ticket, si l'état actuel existe dans le workflow du nouveau type il est gardé, sinon un état d'arrivée doit être choisi ; sans ce choix, le changement est refusé.                                                                                                                                                                                                                                                                                           |
+| W10 | Relier un projet passe par une étape de correspondance : chaque état contenant des tickets et absent du workflow de leur type reçoit un état d'arrivée ; rien ne bouge avant confirmation.                                                                                                                                                                                                                                                                                              |
+| W11 | Retirer un état d'un workflow est refusé tant qu'un ticket s'y trouve dans un projet relié ; une migration guidée viendra plus tard et le modèle doit la permettre sans refonte.                                                                                                                                                                                                                                                                                                        |
+| W12 | Créer ou modifier un workflow : admins du workspace. Choisir le système d'un projet : admin du projet ou admin du workspace.                                                                                                                                                                                                                                                                                                                                                            |
+| W13 | Éditeur en diagramme (React Flow, `@xyflow/react`, version épinglée via le catalogue pnpm), avec formulaires équivalents au clavier et panneau latéral.                                                                                                                                                                                                                                                                                                                                 |
+| W14 | Toute modification de configuration est tracée dans le journal d'audit de la livraison 1.                                                                                                                                                                                                                                                                                                                                                                                               |
+| W15 | Les nouveaux textes passent par `packages/i18n`, en anglais et en français (« ticket »), puis les 20 autres langues avec le skill `translate`. Les clés `workflows.*` déjà présentes dans Plane sont réutilisées.                                                                                                                                                                                                                                                                       |
+| W16 | Approche A retenue : des statuts propres au workspace, synchronisés vers des états de projet ordinaires liés. Écartées : workflows pointant sur les états d'un projet (pas de partage, contraire à W2) ; workflow stocké en JSON (pas d'intégrité, synchronisation fragile).                                                                                                                                                                                                            |
+| W17 | Statuts partagés, comme Jira : un statut est défini au niveau du workspace (nom unique sans tenir compte de la casse, couleur, groupe) et chaque workflow choisit ses statuts. Deux workflows d'un même projet qui utilisent « À faire » donnent un seul état, donc une seule colonne. Renommer un statut, changer sa couleur ou son groupe s'applique à tous les workflows et projets qui l'utilisent.                                                                                 |
 
 ## 3. Données
 
 ### 3.1 Nouvelles tables (rattachées au workspace, suppression logique comme le reste de Plane)
 
-| Table                       | Champs principaux                                                                                                                                                                                                           |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Workflow`                  | workspace, nom (unique dans le workspace, sans tenir compte de la casse), description                                                                                                                                       |
-| `WorkflowState`             | workflow, nom (unique dans le workflow, sans tenir compte de la casse), couleur, groupe Plane, `group_is_auto` (vrai tant que le groupe est déduit automatiquement), position x et y dans le diagramme, ordre, `is_initial` |
-| `WorkflowTransition`        | workflow, état cible, nom facultatif, `from_any` (transition globale)                                                                                                                                                       |
-| `WorkflowTransitionSource`  | transition, état source (vide si `from_any`)                                                                                                                                                                                |
-| `WorkflowTransitionRule`    | transition, type de règle (`restrict_actors` en v1), paramètres JSON validés à la frontière : rôles, identifiants d'utilisateurs, `assignee`, `creator`                                                                     |
-| `ProjectWorkflowScheme`     | projet (un seul système par projet), workflow par défaut                                                                                                                                                                    |
-| `ProjectWorkflowSchemeItem` | système, type de ticket, workflow                                                                                                                                                                                           |
+| Table                       | Champs principaux                                                                                                                                                            |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WorkflowStatus`            | workspace, nom (unique dans le workspace, sans tenir compte de la casse), couleur, groupe Plane, `group_is_auto` (vrai tant que le groupe est déduit automatiquement), ordre |
+| `Workflow`                  | workspace, nom (unique dans le workspace, sans tenir compte de la casse), description                                                                                        |
+| `WorkflowState`             | workflow, statut (unique dans le workflow), position x et y dans le diagramme, `is_initial`                                                                                  |
+| `WorkflowTransition`        | workflow, état de workflow cible, nom facultatif, `from_any` (transition globale)                                                                                            |
+| `WorkflowTransitionSource`  | transition, état de workflow source (aucune ligne si `from_any`)                                                                                                             |
+| `WorkflowTransitionRule`    | transition, type de règle (`restrict_actors` en v1), paramètres JSON validés à la frontière : rôles, identifiants d'utilisateurs, `assignee`, `creator`                      |
+| `ProjectWorkflowScheme`     | projet (un seul système par projet), workflow par défaut                                                                                                                     |
+| `ProjectWorkflowSchemeItem` | système, type de ticket, workflow                                                                                                                                            |
 
-Ajout sur l'existant : `State.workflow_state`, clé étrangère facultative vers `WorkflowState`. Un état lié est **géré**.
+Ajout sur l'existant : `State.workflow_status`, clé étrangère facultative vers `WorkflowStatus`. Un état lié est **géré**.
 
 ### 3.2 Invariants
 
 1. Un workflow a exactement un état initial dès qu'il a au moins un état (contrainte d'unicité partielle en base).
 2. Une transition et ses sources ne référencent que des états de son propre workflow.
-3. Dans un projet, un `WorkflowState` correspond à au plus un `State` non supprimé.
+3. Dans un projet, un `WorkflowStatus` correspond à au plus un `State` non supprimé.
 4. Un système de projet ne référence que des workflows et des types de ticket du workspace du projet ; le type doit être activé dans le projet.
-5. Dans un projet doté d'un système, tout ticket non supprimé est dans un état géré appartenant au workflow de son type.
-6. Le groupe `triage` n'est jamais utilisé par un état de workflow ; les tickets de l'intake restent en triage jusqu'à leur acceptation.
+5. Dans un projet doté d'un système, tout ticket non supprimé hors triage est dans un état géré dont le statut appartient au workflow de son type.
+6. Le groupe `triage` n'est jamais utilisé par un statut ; les tickets de l'intake restent en triage jusqu'à leur acceptation.
 
 ### 3.3 Résolution du workflow d'un ticket
 
@@ -73,8 +76,8 @@ Ajout sur l'existant : `State.workflow_state`, clé étrangère facultative vers
 Service `check_transition(issue, from_state, to_state, actor)` (dans `apps/api/plane/utils/workflows.py`) :
 
 1. sans workflow (3.3), tout est permis ;
-2. `to_state` doit être un état géré du workflow du ticket ;
-3. il faut une transition du workflow dont la cible est l'état de workflow de `to_state` et dont une source est celui de `from_state`, ou qui est globale ;
+2. `to_state` doit être un état géré dont le statut appartient au workflow du ticket ;
+3. il faut une transition du workflow dont la cible porte le statut de `to_state` et dont une source porte celui de `from_state`, ou qui est globale ;
 4. si la transition porte une règle `restrict_actors`, l'acteur doit satisfaire au moins un critère : rôle de projet dans la liste, utilisateur nommé, responsable du ticket, créateur du ticket. Les admins du workspace ne sont pas exemptés implicitement : pour les autoriser, la règle les liste.
 5. un passage d'un état vers lui-même n'est pas un changement d'état et n'est pas contrôlé.
 
@@ -107,9 +110,9 @@ Réponse 400 avec un code et un message uniques (« transition non autorisée »
 ### 5.1 Assistant de rattachement (onglet Paramètres du projet > Workflows)
 
 1. Choix du workflow par défaut et des workflows par type (types activés dans le projet).
-2. Correspondance (W10), calculée par le serveur : pour chaque couple (état actuel, workflow cible) contenant des tickets, un état d'arrivée du workflow cible à choisir. Un état actuel de même nom (sans tenir compte de la casse) qu'un état du workflow est réutilisé et ne demande pas de choix.
+2. Correspondance (W10), calculée par le serveur : pour chaque couple (état actuel, workflow cible) contenant des tickets, un état d'arrivée du workflow cible à choisir. Un état actuel de même nom (sans tenir compte de la casse) qu'un statut du workflow est réutilisé et ne demande pas de choix.
 3. Application, en une transaction par lots :
-   - création ou réutilisation et liaison des états de projet pour chaque état des workflows du système ;
+   - création ou réutilisation et liaison d'un état de projet pour chaque statut des workflows du système ;
    - déplacement des tickets selon la correspondance, avec une entrée d'historique par ticket ;
    - suppression logique des anciens états devenus vides et hors workflow ;
    - état par défaut du projet : l'état initial du workflow par défaut ;
@@ -118,18 +121,19 @@ Réponse 400 avec un code et un message uniques (« transition non autorisée »
 
 ### 5.2 Modifier un workflow partagé
 
-| Modification                                           | Effet                                                                                                                                |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Ajouter un état                                        | Créé dans tous les projets reliés                                                                                                    |
-| Renommer, changer couleur ou groupe                    | Répercuté sur les états de projet liés                                                                                               |
-| Ajouter, modifier, retirer une transition ou une règle | Effet immédiat sur les changements d'état suivants                                                                                   |
-| Retirer un état                                        | Refusé (400) tant qu'un ticket non supprimé s'y trouve dans un projet relié ; le message donne le nombre de tickets par projet (W11) |
-| Changer l'état initial                                 | Effet sur les créations suivantes                                                                                                    |
-| Supprimer un workflow                                  | Refusé tant qu'un projet l'utilise                                                                                                   |
+| Modification                                           | Effet                                                                                                                                                                                                                  |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ajouter un statut au workflow                          | État créé (ou réutilisé s'il existe déjà par un autre workflow) dans tous les projets reliés                                                                                                                           |
+| Renommer un statut, changer sa couleur ou son groupe   | Répercuté sur tous les workflows et les états de projet liés (W17)                                                                                                                                                     |
+| Ajouter, modifier, retirer une transition ou une règle | Effet immédiat sur les changements d'état suivants                                                                                                                                                                     |
+| Retirer un statut du workflow                          | Refusé (400) tant qu'un ticket non supprimé qui suit ce workflow s'y trouve dans un projet relié ; le message donne le nombre de tickets par projet (W11) ; l'état de projet devenu inutilisé est supprimé logiquement |
+| Supprimer un statut                                    | Refusé tant qu'un workflow l'utilise                                                                                                                                                                                   |
+| Changer l'état initial                                 | Effet sur les créations suivantes                                                                                                                                                                                      |
+| Supprimer un workflow                                  | Refusé tant qu'un projet l'utilise                                                                                                                                                                                     |
 
 ### 5.3 Détacher un projet
 
-Suppression du système : les états restent mais perdent leur lien (`workflow_state` vide), redeviennent modifiables, et le projet revient au fonctionnement libre.
+Suppression du système : les états restent mais perdent leur lien (`workflow_status` vide), redeviennent modifiables, et le projet revient au fonctionnement libre.
 
 ### 5.4 Paramètres du projet > States
 
@@ -140,7 +144,7 @@ Pour un projet doté d'un système : lecture seule, bandeau « géré par le wor
 | Réf. | Règle                                                                                                                  |
 | ---- | ---------------------------------------------------------------------------------------------------------------------- |
 | A1   | Lire les workflows du workspace : tout membre du workspace (le diagramme sert à comprendre les passages).              |
-| A2   | Créer, modifier, supprimer un workflow, ses états, transitions et règles : admin du workspace.                         |
+| A2   | Créer, modifier, supprimer un statut ou un workflow, ses états, transitions et règles : admin du workspace.            |
 | A3   | Lire le système d'un projet : tout membre du workspace.                                                                |
 | A4   | Définir, modifier ou retirer le système d'un projet, lancer le rattachement : admin du projet ou admin du workspace.   |
 | A5   | Tout objet est résolu dans le workspace de l'URL ; un objet absent ou d'un autre workspace reçoit la même réponse 404. |
@@ -154,7 +158,7 @@ Liste : nom, nombre d'états, projets qui l'utilisent ; bouton « Créer un work
 ### 7.2 Éditeur de workflow (plein écran)
 
 - Diagramme : une boîte par état, colorée selon le groupe, marque « DÉBUT » sur l'état initial, flèches entre boîtes, badge pour les transitions globales.
-- Formulaires équivalents au clavier : « Ajouter un état » (nom, couleur, catégorie facultative), « Ajouter une transition » (états source ou « n'importe quel état », état cible, nom).
+- Formulaires équivalents au clavier : « Ajouter un état » (choisir un statut existant du workspace, ou en créer un : nom, couleur, catégorie facultative ; le panneau signale quand un statut est partagé par d'autres workflows), « Ajouter une transition » (états source ou « n'importe quel état », état cible, nom).
 - Panneau latéral au clic : modifier ou supprimer un état ou une flèche, définir l'état initial, régler « limiter qui ».
 - Enregistrement explicite (« Enregistrer », « Annuler les changements ») ; un refus s'affiche dans un bandeau avec les projets concernés.
 - Lecture seule pour les non-admins.
@@ -181,7 +185,7 @@ Toutes les actions de l'éditeur sont réalisables sans souris ; les éléments 
 | Altération              | Contourner un workflow (autre chemin d'écriture, autre état, transition vers un état d'un autre workspace) | Contrôle unique sur chaque chemin (4.2), filet dans le modèle (4.4), références limitées au workspace (invariants 2 et 4)                |
 | Répudiation             | Nier une modification de configuration ou un déplacement en masse                                          | Journal d'audit (W14), historique par ticket (T6)                                                                                        |
 | Divulgation             | Déduire la configuration ou des tickets d'autres projets via les refus ou la correspondance                | Message de refus unique (4.5) ; correspondance limitée au projet concerné ; comptes du refus de retrait réservés aux admins du workspace |
-| Déni de service         | Rattachement d'un gros projet, workflow très grand                                                         | Opérations par lots ; bornes : 200 états et 1 000 transitions par workflow, noms 255 caractères                                          |
+| Déni de service         | Rattachement d'un gros projet, workflow très grand                                                         | Opérations par lots ; bornes : 1 000 statuts par workspace, 200 états et 1 000 transitions par workflow, noms 255 caractères             |
 | Élévation de privilèges | Un membre modifie un workflow ou contourne « limiter qui »                                                 | A2, A4 côté serveur ; « limiter qui » évalué côté serveur avec l'acteur de la requête                                                    |
 
 Entrées validées à la frontière : identifiants en chaînes UUID strictes, paramètres de règle limités aux clés attendues, rôles parmi les valeurs connues, utilisateurs membres du workspace.
@@ -193,7 +197,7 @@ Entrées validées à la frontière : identifiants en chaînes UUID strictes, pa
 - Droits : chaque route jouée par admin du workspace, admin du projet, membre, invité, non-membre.
 - Contrôle des transitions sur chaque chemin de 4.2 et chaque cas de 4.3 (création, changement de type, intake, automatisation).
 - « Limiter qui » : chaque critère, seul et combiné.
-- Synchronisation et rattachement : réutilisation par nom, correspondance, rejeu, état par défaut.
+- Synchronisation et rattachement : réutilisation par nom, correspondance, rejeu, état par défaut, statut partagé par deux workflows d'un projet (un seul état).
 - Modification de workflow partagé : propagation, refus de retrait d'un état utilisé, refus de suppression d'un workflow utilisé.
 - Filet du modèle.
 - Frontend (vitest) : logique du sélecteur filtré et du glisser-déposer.
