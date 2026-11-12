@@ -142,33 +142,31 @@ export const ActiveCycleStats = observer(function ActiveCycleStats(props: Active
 
                       if (!issue) return null;
 
-                      const openPeek = () => {
-                        if (issue.id) {
-                          setPeekIssue({
-                            workspaceSlug,
-                            projectId,
-                            issueId: issue.id,
-                            isArchived: !!issue.archived_at,
-                          });
-                          handleFiltersUpdate([{ property: "priority", operator: "in", value: ["urgent", "high"] }]);
-                        }
-                      };
-
                       return (
+                        // oxlint-disable-next-line jsx_a11y/click-events-have-key-events, jsx_a11y/no-static-element-interactions
                         <div
                           key={issue.id}
                           className="group flex cursor-pointer items-center justify-between gap-2 rounded-md p-1 hover:bg-layer-1"
+                          onClick={() => {
+                            if (issue.id) {
+                              setPeekIssue({
+                                workspaceSlug,
+                                projectId,
+                                issueId: issue.id,
+                                isArchived: !!issue.archived_at,
+                              });
+                              handleFiltersUpdate([
+                                { property: "priority", operator: "in", value: ["urgent", "high"] },
+                              ]);
+                            }
+                          }}
                         >
-                          <button
-                            type="button"
-                            onClick={openPeek}
-                            className="flex w-full min-w-24 flex-grow items-center gap-1.5 truncate text-left"
-                          >
+                          <div className="flex w-full min-w-24 flex-grow items-center gap-1.5 truncate">
                             <IssueIdentifier issueId={issue.id} projectId={projectId} size="xs" variant="secondary" />
                             <Tooltip label={`Title: ${issue.name}`} layout="stacked" align="start">
                               <span className="truncate text-body-xs-regular text-primary">{issue.name}</span>
                             </Tooltip>
-                          </button>
+                          </div>
                           <PriorityIcon priority={issue.priority} />
                           <div className="flex flex-shrink-0 items-center gap-1.5">
                             <ActiveCycleIssueState workspaceSlug={workspaceSlug} projectId={projectId} issue={issue} />
@@ -214,7 +212,7 @@ export const ActiveCycleStats = observer(function ActiveCycleStats(props: Active
           <div className="vertical-scrollbar scrollbar-sm flex h-52 w-full flex-col gap-1 overflow-y-auto text-secondary">
             {cycle && !isEmpty(cycle.distribution) ? (
               cycle?.distribution?.assignees && cycle.distribution.assignees.length > 0 ? (
-                cycle.distribution?.assignees?.map((assignee) => {
+                cycle.distribution?.assignees?.map((assignee, index) => {
                   if (assignee.assignee_id)
                     return (
                       <SingleProgressStats
@@ -245,7 +243,8 @@ export const ActiveCycleStats = observer(function ActiveCycleStats(props: Active
                   else
                     return (
                       <SingleProgressStats
-                        key="unassigned"
+                        // oxlint-disable-next-line react/no-array-index-key
+                        key={`unassigned-${index}`}
                         title={
                           <div className="flex items-center gap-2">
                             <div className="h-5 w-5 rounded-full border-2 border-subtle bg-layer-1">
@@ -277,9 +276,10 @@ export const ActiveCycleStats = observer(function ActiveCycleStats(props: Active
           <div className="vertical-scrollbar scrollbar-sm flex h-52 w-full flex-col gap-1 overflow-y-auto text-secondary">
             {cycle && !isEmpty(cycle.distribution) ? (
               cycle?.distribution?.labels && cycle.distribution.labels.length > 0 ? (
-                cycle.distribution.labels?.map((label) => (
+                cycle.distribution.labels?.map((label, index) => (
                   <SingleProgressStats
-                    key={label.label_id ?? "no-label"}
+                    // oxlint-disable-next-line react/no-array-index-key
+                    key={label.label_id ?? `no-label-${index}`}
                     title={
                       <div className="flex items-center gap-2 truncate">
                         <span
