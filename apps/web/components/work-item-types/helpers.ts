@@ -90,6 +90,9 @@ export const getTypeIdAfterProjectChange = (params: {
   return projectDefaultTypeId;
 };
 
+export const getWorkItemTypeChange = (currentTypeId: string | null | undefined, nextTypeId: string) =>
+  currentTypeId === nextTypeId ? null : { type_id: nextTypeId };
+
 const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object";
 
 type TWorkItemTypeFormField = "name" | "description";

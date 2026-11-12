@@ -25,22 +25,29 @@ type TWorkItemTypeSelectProps = {
   /** Property name; the trigger announces it with the selected type, so no separate label element is needed. */
   label: string;
   disabled?: boolean;
+  /** Keeps the current type listed and selected even when it is no longer assignable (R7); it vanishes once changed away. */
+  keepCurrent?: boolean;
   tabIndex?: number;
   testId?: string;
 };
 
 export const WorkItemTypeSelect = observer(function WorkItemTypeSelect(props: TWorkItemTypeSelectProps) {
-  const { projectId, value, onChange, variant, label, disabled = false, tabIndex, testId } = props;
+  const { projectId, value, onChange, variant, label, disabled = false, keepCurrent = false, tabIndex, testId } = props;
   const { workspaceSlug: routeWorkspaceSlug } = useParams();
   const workspaceSlug = routeWorkspaceSlug?.toString() ?? "";
-  const { getProjectAssignableTypes, getProjectDefaultTypeId, fetchProjectTypes } = useWorkItemType();
+  const { getProjectAssignableTypes, getProjectDefaultTypeId, getTypeById, fetchProjectTypes } = useWorkItemType();
   // The modal can target a project other than the route one, whose links the project wrapper did not load.
   useSWR(
     workspaceSlug && projectId ? PROJECT_WORK_ITEM_TYPES(projectId) : null,
     workspaceSlug && projectId ? () => fetchProjectTypes(workspaceSlug, projectId) : null,
     { revalidateIfStale: false, revalidateOnFocus: false }
   );
-  const options = projectId ? getProjectAssignableTypes(workspaceSlug, projectId) : [];
+  const assignableTypes = projectId ? getProjectAssignableTypes(workspaceSlug, projectId) : [];
+  const currentType = keepCurrent ? getTypeById(workspaceSlug, value) : undefined;
+  const options =
+    currentType && !assignableTypes.some((option) => option.id === currentType.id)
+      ? [currentType, ...assignableTypes]
+      : assignableTypes;
   // An empty value is shown as the project default, which the server assigns on save (R9); a type the project does not
   // allow is never shown as selected.
   const selectedTypeId = value || (projectId ? getProjectDefaultTypeId(projectId) : null);

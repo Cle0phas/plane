@@ -17,6 +17,7 @@ import {
   getProjectToggleState,
   getSetDefaultState,
   getTypeIdAfterProjectChange,
+  getWorkItemTypeChange,
 } from "./helpers";
 
 const buildType = (overrides: Partial<TIssueType> = {}): TIssueType => ({
@@ -249,5 +250,16 @@ describe("type id after a project change", () => {
 
   it("clears the type when the new project links are not loaded, so the server assigns the default", () => {
     expect(resolve({ isProjectChange: true, assignableTypeIds: undefined, projectDefaultTypeId: null })).toBeNull();
+  });
+});
+
+describe("work item type change", () => {
+  it("sends nothing when the type does not change", () => {
+    expect(getWorkItemTypeChange("bug", "bug")).toBeNull();
+  });
+
+  it("sends the new type id otherwise", () => {
+    expect(getWorkItemTypeChange("task", "bug")).toEqual({ type_id: "bug" });
+    expect(getWorkItemTypeChange(null, "bug")).toEqual({ type_id: "bug" });
   });
 });
