@@ -5,12 +5,14 @@
  */
 
 import { describe, expect, it } from "vitest";
-import type { TIssueType } from "@plane/types";
+import type { TIssueType, TProjectIssueType } from "@plane/types";
 import {
   getActionRefusalKey,
   getDeactivateState,
   getDeleteState,
   getFormFieldErrorKeys,
+  getProjectDefaultState,
+  getProjectToggleState,
   getSetDefaultState,
 } from "./helpers";
 
@@ -125,5 +127,55 @@ describe("row action refusal mapping", () => {
   it("ignores anything that is not a refusal", () => {
     expect(getActionRefusalKey({ detail: "Not found." }, "set_default")).toBeUndefined();
     expect(getActionRefusalKey(undefined, "set_default")).toBeUndefined();
+  });
+});
+
+const buildLink = (overrides: Partial<TProjectIssueType> = {}): TProjectIssueType => ({
+  id: "link",
+  project_id: "p1",
+  issue_type_id: "bug",
+  is_default: false,
+  issue_count: 0,
+  ...overrides,
+});
+
+describe("project work item type actions", () => {
+  it("lets an admin enable a type that is not used yet", () => {
+    expect(getProjectToggleState(undefined)).toEqual({ disabled: false });
+  });
+
+  it("refuses to remove the project default", () => {
+    expect(getProjectToggleState(buildLink({ is_default: true }))).toEqual({
+      disabled: true,
+      reasonKey: "work_item_types.settings.project.disabled_reasons.project_default",
+    });
+  });
+
+  it("refuses to remove a type used by work items of the project", () => {
+    expect(getProjectToggleState(buildLink({ issue_count: 1 }))).toEqual({
+      disabled: true,
+      reasonKey: "work_item_types.settings.project.disabled_reasons.in_use",
+    });
+  });
+
+  it("allows removing an unused type", () => {
+    expect(getProjectToggleState(buildLink())).toEqual({ disabled: false });
+  });
+
+  it("only offers the default choice for an enabled type", () => {
+    expect(getProjectDefaultState(undefined)).toEqual({
+      disabled: true,
+      reasonKey: "work_item_types.settings.project.disabled_reasons.not_enabled",
+    });
+    expect(getProjectDefaultState(buildLink())).toEqual({ disabled: false });
+  });
+});
+
+describe("project refusal keys", () => {
+  it("maps an inactive default refusal and leaves other refusals to the default message", () => {
+    expect(getActionRefusalKey({ error: "x" }, "project_set_default")).toBe(
+      "work_item_types.settings.cant_set_default_inactive_message"
+    );
+    expect(getActionRefusalKey({ error: "x" }, "project_disable")).toBeUndefined();
   });
 });

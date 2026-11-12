@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import type { TIssueType } from "@plane/types";
+import type { TIssueType, TProjectIssueType } from "@plane/types";
 
 /** A disabled action carries the i18n key of its reason, shown to every user (spec 6.1, 6.6). */
 export type TWorkItemTypeActionState = { disabled: boolean; reasonKey?: string };
@@ -44,6 +44,18 @@ export const getDeleteState = (workItemType: TIssueType): TWorkItemTypeActionSta
   return ALLOWED;
 };
 
+export const getProjectToggleState = (link: TProjectIssueType | undefined): TWorkItemTypeActionState => {
+  if (!link) return ALLOWED;
+  if (link.is_default)
+    return { disabled: true, reasonKey: "work_item_types.settings.project.disabled_reasons.project_default" };
+  if (link.issue_count > 0)
+    return { disabled: true, reasonKey: "work_item_types.settings.project.disabled_reasons.in_use" };
+  return ALLOWED;
+};
+
+export const getProjectDefaultState = (link: TProjectIssueType | undefined): TWorkItemTypeActionState =>
+  link ? ALLOWED : { disabled: true, reasonKey: "work_item_types.settings.project.disabled_reasons.not_enabled" };
+
 const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object";
 
 type TWorkItemTypeFormField = "name" | "description";
@@ -63,11 +75,19 @@ export const getFormFieldErrorKeys = (
   return keys;
 };
 
-export type TWorkItemTypeRowAction = "set_default" | "deactivate" | "reactivate" | "delete";
+export type TWorkItemTypeRowAction =
+  | "set_default"
+  | "deactivate"
+  | "reactivate"
+  | "delete"
+  | "project_enable"
+  | "project_disable"
+  | "project_set_default";
 
-// Only set default has a single possible refusal (inactive type); the others fall back to the default message.
+// Only the set default actions have a single possible refusal (inactive type); the others fall back to the default message.
 const ACTION_REFUSAL_KEYS: Partial<Record<TWorkItemTypeRowAction, string>> = {
   set_default: "work_item_types.settings.cant_set_default_inactive_message",
+  project_set_default: "work_item_types.settings.cant_set_default_inactive_message",
 };
 
 export const getActionRefusalKey = (error: unknown, action: TWorkItemTypeRowAction): string | undefined =>
