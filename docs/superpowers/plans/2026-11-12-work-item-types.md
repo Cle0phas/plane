@@ -3751,6 +3751,103 @@ git commit -m "feat(i18n): add work item type texts"
 
 ---
 
+### Task 11b: « ticket » au lieu de « élément de travail » en français (D9)
+
+**Files**
+
+- Modify : `packages/i18n/src/locales/fr/*.json` (environ 470 occurrences, dont les clés ajoutées par la tâche 11)
+- Create (hors dépôt) : `$SCRATCH/fr_ticket_wording.py`, où `$SCRATCH` est le dossier temporaire de la session
+
+**Interfaces**
+
+- Consumes : les fichiers `fr` après la tâche 11.
+- Produces : aucun nom ; les tâches 12 à 16 affichent « ticket » via les clés existantes.
+
+Seules les valeurs changent, jamais les clés. « élément » et « ticket » sont masculins : les accords qui suivent restent justes. Les contractions sont traitées avant la règle générale, sinon « de l'élément de travail » donnerait « de le ticket ».
+
+- [ ] **Step 1 : constater les occurrences (le contrôle échoue)**
+
+Run : `grep -rioE "éléments? de travail" packages/i18n/src/locales/fr | wc -l`
+Expected : un nombre proche de 470 (le contrôle attend 0).
+
+- [ ] **Step 2 : écrire le script de remplacement**
+
+`$SCRATCH/fr_ticket_wording.py` :
+
+```python
+import json
+import pathlib
+import re
+import sys
+
+# Ordered: contractions and determiners first, the generic rule last.
+RULES = [
+    (r"de l['’]élément de travail", "du ticket"),
+    (r"De l['’]élément de travail", "Du ticket"),
+    (r"à l['’]élément de travail", "au ticket"),
+    (r"À l['’]élément de travail", "Au ticket"),
+    (r"l['’]élément de travail", "le ticket"),
+    (r"L['’]élément de travail", "Le ticket"),
+    (r"d['’]éléments de travail", "de tickets"),
+    (r"D['’]éléments de travail", "De tickets"),
+    (r"d['’]élément de travail", "de ticket"),
+    (r"D['’]élément de travail", "De ticket"),
+    (r"nouvel élément de travail", "nouveau ticket"),
+    (r"Nouvel élément de travail", "Nouveau ticket"),
+    (r"cet élément de travail", "ce ticket"),
+    (r"Cet élément de travail", "Ce ticket"),
+    (r"éléments de travail", "tickets"),
+    (r"Éléments de travail", "Tickets"),
+    (r"élément de travail", "ticket"),
+    (r"Élément de travail", "Ticket"),
+]
+
+
+def rewrite(value):
+    if isinstance(value, str):
+        for pattern, replacement in RULES:
+            value = re.sub(pattern, replacement, value)
+        return value
+    if isinstance(value, dict):
+        return {key: rewrite(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [rewrite(item) for item in value]
+    return value
+
+
+for path in sorted(pathlib.Path(sys.argv[1]).glob("*.json")):
+    data = json.loads(path.read_text(encoding="utf-8"))
+    path.write_text(json.dumps(rewrite(data), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+```
+
+- [ ] **Step 3 : appliquer le script**
+
+Run : `python3 -I "$SCRATCH/fr_ticket_wording.py" packages/i18n/src/locales/fr && pnpm exec oxfmt packages/i18n/src/locales/fr`
+
+- [ ] **Step 4 : vérifier qu'il ne reste rien et que les clés n'ont pas bougé**
+
+Run : `grep -rioE "éléments? de travail" packages/i18n/src/locales/fr | wc -l`
+Expected : `0`
+
+Run : `git diff --stat packages/i18n/src/locales/fr && pnpm --filter=@plane/i18n check:sync`
+Expected : seuls des fichiers `fr` modifiés, synchronisation des clés OK.
+
+- [ ] **Step 5 : relire le reste à la main**
+
+Run : `grep -rnoiE "[^ \"]{0,20}élément[^\"]{0,30}" packages/i18n/src/locales/fr`
+Relire chaque ligne affichée : un « élément » seul qui désigne un ticket devient « ticket » (accords compris) ; un « élément » qui désigne autre chose (élément d'interface, de liste) reste tel quel. Parcourir aussi `git diff packages/i18n/src/locales/fr` pour repérer une phrase devenue bancale.
+
+- [ ] **Step 6 : vérifier dans l'interface**
+
+Lancer `pnpm dev`, passer le profil en français, et contrôler le menu de création, une fiche de ticket, la liste vide d'un projet et l'onglet « Types de ticket ».
+
+- [ ] **Step 7 : commit**
+
+```bash
+git add packages/i18n/src/locales/fr
+git commit -m "feat(i18n): say ticket instead of work item in french"
+```
+
 ### Task 12: Onglet « Types de ticket » des paramètres du workspace (spec 6.1)
 
 **Files**
@@ -5645,6 +5742,7 @@ En membre puis en invité : 9. L'entrée « Types de ticket » n'apparaît pas d
 | Élément de la spec                                                  | Tâche(s)    | Test(s)                                                                                                                                                                                                                                      |
 | ------------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | D1 à D3, D8 (modèle existant, types du workspace, choix par projet) | 3, 5, 6     | `test_issue_type_defaults.py`, `test_workspace_issue_types_app.py`, `test_project_issue_types_app.py`                                                                                                                                        |
+| D9 (« ticket » en français)                                         | 11b         | contrôle `grep` à 0, `check:sync`, relecture manuelle                                                                                                                                                                                        |
 | D4 (« Tâche » seul type créé)                                       | 3, 4        | `test_workspace_creation_creates_the_default_type`, `test_backfill_restores_the_invariants`                                                                                                                                                  |
 | D5 (tout ticket a un type, `is_issue_type_enabled` ignoré)          | 3, 4, 7     | `test_work_item_without_type_gets_the_project_default`, `test_partial_save_backfills_a_missing_type`                                                                                                                                         |
 | D6 (filtre et regroupement)                                         | 9, 16       | `test_issue_type_filters.py`, `test_issue_type_grouping_app.py`, `filters.test.ts`                                                                                                                                                           |
