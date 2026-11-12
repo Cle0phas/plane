@@ -66,6 +66,18 @@ class TestApiV1WorkItemType:
     def test_a_malformed_type_id_is_a_400(self, api_key_client, ctx, mock_celery, bad):
         response = api_key_client.post(ctx.issues_url, {"name": "Bad", "type_id": bad}, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "valid UUID" in str(response.data["type_id"][0])
+
+    def test_the_integer_form_of_an_enabled_type_is_rejected(self, api_key_client, ctx, mock_celery):
+        response = api_key_client.post(ctx.issues_url, {"name": "Int", "type_id": ctx.bug.id.int}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert not Issue.objects.filter(name="Int").exists()
+        issue = Issue.objects.create(name="Item", project=ctx.project)
+        url = ISSUE_URL.format(slug=ctx.workspace.slug, project_id=ctx.project.id, issue_id=issue.id)
+        response = api_key_client.patch(url, {"type_id": ctx.bug.id.int}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        issue.refresh_from_db()
+        assert issue.type_id == ctx.default_type.id
 
     def test_an_inactive_type_is_rejected(self, api_key_client, ctx, mock_celery):
         IssueType.objects.filter(pk=ctx.bug.pk).update(is_active=False)

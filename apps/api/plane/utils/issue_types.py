@@ -14,6 +14,14 @@ from plane.db.models import IssueType, ProjectIssueType
 INVALID_WORK_ITEM_TYPE_MESSAGE = "Work item type is not valid for this project."
 
 
+class StrictUUIDField(serializers.UUIDField):
+    # DRF turns an int into UUID(int=...), so only the string form is accepted.
+    def to_internal_value(self, data):
+        if not isinstance(data, str):
+            self.fail("invalid", value=data)
+        return super().to_internal_value(data)
+
+
 def validate_work_item_type_id(type_id, *, project_id, workspace_id=None, current_type_id=None):
     """Return type_id when a work item may take it (R7, R9), else raise one message whatever the cause."""
     # Keeping the current type stays allowed so items keep a type deactivated since (R7).

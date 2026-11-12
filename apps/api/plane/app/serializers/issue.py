@@ -47,7 +47,7 @@ from plane.utils.content_validator import (
     validate_html_content,
     validate_binary_data,
 )
-from plane.utils.issue_types import validate_work_item_type_id
+from plane.utils.issue_types import StrictUUIDField, validate_work_item_type_id
 
 
 class IssueFlatSerializer(BaseSerializer):
@@ -100,7 +100,7 @@ class IssueCreateSerializer(BaseSerializer):
     )
     project_id = serializers.UUIDField(source="project.id", read_only=True)
     workspace_id = serializers.UUIDField(source="workspace.id", read_only=True)
-    type_id = serializers.UUIDField(required=False, allow_null=True)
+    type_id = StrictUUIDField(required=False, allow_null=True)
 
     class Meta:
         model = Issue

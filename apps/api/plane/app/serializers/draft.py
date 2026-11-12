@@ -29,7 +29,7 @@ from plane.utils.content_validator import (
     validate_html_content,
     validate_binary_data,
 )
-from plane.utils.issue_types import validate_work_item_type_id
+from plane.utils.issue_types import StrictUUIDField, validate_work_item_type_id
 from plane.app.permissions import ROLE
 
 
@@ -51,7 +51,7 @@ class DraftIssueCreateSerializer(BaseSerializer):
         write_only=True,
         required=False,
     )
-    type_id = serializers.UUIDField(required=False, allow_null=True)
+    type_id = StrictUUIDField(required=False, allow_null=True)
 
     class Meta:
         model = DraftIssue

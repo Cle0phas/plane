@@ -84,7 +84,13 @@ class TestCreateWorkItemType:
     def test_a_malformed_type_id_is_a_400(self, ctx, mock_celery, bad):
         response = ctx.client.post(ctx.issues_url, {"name": "Bad", "type_id": bad}, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "type_id" in response.data
+        assert "valid UUID" in str(response.data["type_id"][0])
+
+    def test_the_integer_form_of_an_enabled_type_is_rejected(self, ctx, mock_celery):
+        response = ctx.client.post(ctx.issues_url, {"name": "Int", "type_id": ctx.bug.id.int}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "valid UUID" in str(response.data["type_id"][0])
+        assert not Issue.objects.filter(name="Int").exists()
 
     def test_the_model_field_name_cannot_bypass_the_check(self, ctx, mock_celery):
         response = ctx.client.post(ctx.issues_url, {"name": "Sneaky", "type": str(ctx.foreign.id)}, format="json")
@@ -105,6 +111,13 @@ class TestUpdateWorkItemType:
     def test_changing_to_a_type_of_another_workspace_is_rejected(self, ctx, mock_celery):
         issue = Issue.objects.create(name="Item", project=ctx.project)
         response = ctx.client.patch(_issue_url(ctx, issue), {"type_id": str(ctx.foreign.id)}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        issue.refresh_from_db()
+        assert issue.type_id == ctx.default_type.id
+
+    def test_changing_to_the_integer_form_of_an_enabled_type_is_rejected(self, ctx, mock_celery):
+        issue = Issue.objects.create(name="Item", project=ctx.project)
+        response = ctx.client.patch(_issue_url(ctx, issue), {"type_id": ctx.bug.id.int}, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         issue.refresh_from_db()
         assert issue.type_id == ctx.default_type.id
@@ -156,6 +169,15 @@ class TestDraftWorkItemType:
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert not DraftIssue.objects.filter(name="Draft").exists()
+
+    def test_a_draft_rejects_the_integer_form_of_an_enabled_type(self, ctx):
+        response = ctx.client.post(
+            DRAFTS_URL.format(slug=ctx.workspace.slug),
+            {"name": "Int draft", "project_id": str(ctx.project.id), "type_id": ctx.bug.id.int},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert not DraftIssue.objects.filter(name="Int draft").exists()
 
     def test_a_draft_keeps_an_enabled_type(self, ctx):
         response = ctx.client.post(
