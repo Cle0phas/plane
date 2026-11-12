@@ -42,6 +42,7 @@ import type {
   IIssueFilterOptions,
   IIssueFilters,
   TGroupedIssues,
+  TSubGroupedIssues,
   IIssueDisplayFilterOptions,
   TGetColumns,
   TSpreadsheetColumn,
@@ -52,6 +53,7 @@ import { EIssuesStoreType } from "@plane/types";
 import { renderFormattedDate, getFileURL } from "@plane/utils";
 // store
 import { store } from "@/lib/store-context";
+import { WorkItemTypeIcon } from "@/components/work-item-types/work-item-type-icon";
 import { ISSUE_FILTER_DEFAULT_DATA } from "@/store/issue/helpers/base-issues.store";
 import { DEFAULT_DISPLAY_PROPERTIES } from "@/store/issue/issue-details/sub_issues_filter.store";
 // constants
@@ -111,6 +113,9 @@ type TGetGroupByColumns = {
   isWorkspaceLevel: boolean;
   isEpic?: boolean;
   projectId?: string;
+  t: (key: string) => string;
+  // Group ids present in the loaded data, so a group of a type missing from the store still gets a column.
+  groupIds?: string[];
 };
 
 // NOTE: Type of groupBy is different compared to what's being passed from the components.
@@ -122,6 +127,8 @@ export const getGroupByColumns = ({
   isWorkspaceLevel,
   isEpic = false,
   projectId,
+  t,
+  groupIds,
 }: TGetGroupByColumns): IGroupByColumn[] | undefined => {
   // If no groupBy is specified and includeNone is true, return "All Issues" group
   if (!groupBy && includeNone) {
@@ -149,6 +156,7 @@ export const getGroupByColumns = ({
     state: getStateColumns,
     "state_detail.group": getStateGroupColumns,
     priority: getPriorityColumns,
+    issue_type: () => getWorkItemTypeColumns(t, groupIds),
     labels: getLabelsColumns,
     assignees: getAssigneeColumns,
     created_by: getCreatedByColumns,
@@ -280,6 +288,39 @@ const getPriorityColumns = (): IGroupByColumn[] => {
     icon: <PriorityIcon priority={priority?.key} />,
     payload: { priority: priority.key },
   }));
+};
+
+// Inactive types stay listed: existing work items keep them (R7).
+const getWorkItemTypeColumns = (t: (key: string) => string, groupIds: string[] = []): IGroupByColumn[] => {
+  const workspaceSlug = store.router.workspaceSlug;
+  const workItemTypes = workspaceSlug ? store.workspaceRoot.workItemType.getWorkspaceTypes(workspaceSlug) : [];
+  const knownIds = new Set(workItemTypes.map((workItemType) => workItemType.id));
+  const columns: IGroupByColumn[] = workItemTypes.map((workItemType) => ({
+    id: workItemType.id,
+    name: workItemType.name,
+    icon: <WorkItemTypeIcon workItemType={workItemType} size={16} decorative />,
+    payload: { type_id: workItemType.id },
+  }));
+  // A deleted or unknown type must not vanish its work items, nor show its raw id.
+  groupIds
+    .filter((groupId) => groupId !== "None" && !knownIds.has(groupId))
+    .forEach((groupId) =>
+      columns.push({
+        id: groupId,
+        name: t("work_item_types.group_by.unknown_type"),
+        icon: <WorkItemsOutline className="size-4" aria-hidden />,
+        payload: {},
+        isDropDisabled: true,
+      })
+    );
+  columns.push({
+    id: "None",
+    name: t("common.none"),
+    icon: <WorkItemsOutline className="size-4" aria-hidden />,
+    payload: {},
+    isDropDisabled: true,
+  });
+  return columns;
 };
 
 const getLabelsColumns = ({ isWorkspaceLevel }: TGetColumns): IGroupByColumn[] => {
@@ -654,6 +695,17 @@ export const isSubGrouped = (groupedIssueIds: TGroupedIssues) => {
   }
 
   return true;
+};
+
+/** Group ids (or sub group ids) that hold work items in the loaded data. */
+export const getLoadedGroupIds = (
+  groupedIssueIds: TGroupedIssues | TSubGroupedIssues | undefined,
+  level: "group" | "subGroup" = "group"
+): string[] => {
+  if (!groupedIssueIds) return [];
+  if (!isSubGrouped(groupedIssueIds as TGroupedIssues)) return level === "group" ? Object.keys(groupedIssueIds) : [];
+  const subGrouped = groupedIssueIds as TSubGroupedIssues;
+  return level === "subGroup" ? Object.keys(subGrouped) : uniq(Object.values(subGrouped).flatMap(Object.keys));
 };
 
 /**

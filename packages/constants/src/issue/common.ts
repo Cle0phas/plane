@@ -27,12 +27,14 @@ export type TIssueFilterPriorityObject = {
 export enum EIssueGroupByToServerOptions {
   "state" = "state_id",
   "priority" = "priority",
+  "issue_type" = "type_id",
   "labels" = "labels__id",
   "state_detail.group" = "state__group",
   "assignees" = "assignees__id",
   "cycle" = "cycle_id",
   "module" = "issue_module__module_id",
   "target_date" = "target_date",
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   "project" = "project_id",
   "created_by" = "created_by",
   // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
@@ -42,6 +44,7 @@ export enum EIssueGroupByToServerOptions {
 export enum EIssueGroupBYServerToProperty {
   "state_id" = "state_id",
   "priority" = "priority",
+  "type_id" = "type_id",
   "labels__id" = "label_ids",
   "state__group" = "state__group",
   "assignees__id" = "assignee_ids",
@@ -117,6 +120,7 @@ export const ISSUE_GROUP_BY_OPTIONS: {
   { key: "state", titleTranslationKey: "common.states" },
   { key: "state_detail.group", titleTranslationKey: "common.state_groups" },
   { key: "priority", titleTranslationKey: "common.priority" },
+  { key: "issue_type", titleTranslationKey: "work_item_types.group_by.label" },
   { key: "team_project", titleTranslationKey: "common.team_project" }, // required this on team issues
   { key: "project", titleTranslationKey: "common.project" }, // required this on my issues
   { key: "cycle", titleTranslationKey: "common.cycle" }, // required this on my issues
@@ -175,6 +179,7 @@ export const ISSUE_DISPLAY_PROPERTIES: {
     key: "key",
     titleTranslationKey: "issue.display.properties.id",
   },
+  { key: "issue_type", titleTranslationKey: "work_item_types.display_property.label" },
   {
     key: "assignee",
     titleTranslationKey: "common.assignee",

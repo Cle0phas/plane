@@ -438,7 +438,8 @@
       "label": "Arbeitselementtyp"
     },
     "group_by": {
-      "label": "Arbeitselementtyp"
+      "label": "Arbeitselementtyp",
+      "unknown_type": "Unbekannter Typ"
     },
     "display_property": {
       "label": "Arbeitselementtyp"

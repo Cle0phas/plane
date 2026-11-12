@@ -438,7 +438,8 @@
       "label": "İş öğesi tipi"
     },
     "group_by": {
-      "label": "İş öğesi tipi"
+      "label": "İş öğesi tipi",
+      "unknown_type": "Bilinmeyen tip"
     },
     "display_property": {
       "label": "İş öğesi tipi"

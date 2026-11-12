@@ -438,7 +438,8 @@
       "label": "Werkitemtype"
     },
     "group_by": {
-      "label": "Werkitemtype"
+      "label": "Werkitemtype",
+      "unknown_type": "Onbekend type"
     },
     "display_property": {
       "label": "Werkitemtype"

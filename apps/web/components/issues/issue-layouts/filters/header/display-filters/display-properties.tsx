@@ -48,11 +48,6 @@ export const FilterDisplayProperties = observer(function FilterDisplayProperties
       default:
         return true;
     }
-  }).map((property) => {
-    if (isEpic && property.key === "sub_issue_count") {
-      return { ...property, titleTranslationKey: "issue.display.properties.work_item_count" };
-    }
-    return property;
   });
 
   return (
@@ -61,7 +56,11 @@ export const FilterDisplayProperties = observer(function FilterDisplayProperties
       {/* The toggle pills wrap, so this section fixes the menu's width instead of following it. */}
       <div className="flex w-72 flex-wrap items-center gap-2 px-2 pt-0.5 pb-1.5">
         {filteredDisplayProperties.map((displayProperty) => {
-          const isSelected = !!displayProperties?.[displayProperty.key];
+          // The type icon shows unless explicitly turned off, so a missing value counts as on (spec 6.5).
+          const isSelected =
+            displayProperty.key === "issue_type"
+              ? displayProperties?.issue_type !== false
+              : !!displayProperties?.[displayProperty.key];
 
           return (
             <BaseMenu.CheckboxItem
@@ -71,7 +70,13 @@ export const FilterDisplayProperties = observer(function FilterDisplayProperties
               onCheckedChange={(checked) => handleUpdate({ [displayProperty.key]: checked })}
               render={<Toggle size="sm" render={<div />} data-pressed={isSelected ? "" : undefined} />}
             >
-              <ToggleLabel>{t(displayProperty.titleTranslationKey)}</ToggleLabel>
+              <ToggleLabel>
+                {t(
+                  isEpic && displayProperty.key === "sub_issue_count"
+                    ? "issue.display.properties.work_item_count"
+                    : displayProperty.titleTranslationKey
+                )}
+              </ToggleLabel>
             </BaseMenu.CheckboxItem>
           );
         })}

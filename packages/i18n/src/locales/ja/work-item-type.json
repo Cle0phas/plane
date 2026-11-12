@@ -438,7 +438,8 @@
       "label": "作業項目タイプ"
     },
     "group_by": {
-      "label": "作業項目タイプ"
+      "label": "作業項目タイプ",
+      "unknown_type": "不明なタイプ"
     },
     "display_property": {
       "label": "作業項目タイプ"

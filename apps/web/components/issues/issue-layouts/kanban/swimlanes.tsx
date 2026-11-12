@@ -6,6 +6,7 @@
 
 import type { MutableRefObject } from "react";
 import { observer } from "mobx-react";
+import { useTranslation } from "@plane/i18n";
 // plane imports
 import type {
   GroupByColumnTypes,
@@ -28,7 +29,7 @@ import { useWorkFlowFDragNDrop } from "@/components/workflow";
 // local imports
 import type { TRenderQuickActions } from "../list/list-view-types";
 import type { GroupDropLocation } from "../utils";
-import { getGroupByColumns, isWorkspaceLevel } from "../utils";
+import { getGroupByColumns, getLoadedGroupIds, isWorkspaceLevel } from "../utils";
 import {
   KANBAN_SWIMLANE_COLLAPSED_COLUMN_WIDTH,
   KANBAN_SWIMLANES_ATTRIBUTE,
@@ -386,18 +387,23 @@ export const KanBanSwimLanes = observer(function KanBanSwimLanes(props: IKanBanS
   } = props;
   // store hooks
   const storeType = useIssueStoreType();
+  const { t } = useTranslation();
   // derived values
   const groupByList = getGroupByColumns({
     groupBy: group_by as GroupByColumnTypes,
     includeNone: true,
     isWorkspaceLevel: isWorkspaceLevel(storeType),
     isEpic: isEpic,
+    t,
+    groupIds: getLoadedGroupIds(groupedIssueIds),
   });
   const subGroupByList = getGroupByColumns({
     groupBy: sub_group_by as GroupByColumnTypes,
     includeNone: true,
     isWorkspaceLevel: isWorkspaceLevel(storeType),
     isEpic: isEpic,
+    t,
+    groupIds: getLoadedGroupIds(groupedIssueIds, "subGroup"),
   });
 
   if (!groupByList || !subGroupByList) return null;

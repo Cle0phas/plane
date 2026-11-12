@@ -438,7 +438,8 @@
       "label": "Type de ticket"
     },
     "group_by": {
-      "label": "Type de ticket"
+      "label": "Type de ticket",
+      "unknown_type": "Type inconnu"
     },
     "display_property": {
       "label": "Type de ticket"

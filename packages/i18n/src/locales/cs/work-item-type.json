@@ -438,7 +438,8 @@
       "label": "Typ pracovní položky"
     },
     "group_by": {
-      "label": "Typ pracovní položky"
+      "label": "Typ pracovní položky",
+      "unknown_type": "Neznámý typ"
     },
     "display_property": {
       "label": "Typ pracovní položky"

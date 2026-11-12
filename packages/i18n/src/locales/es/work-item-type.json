@@ -438,7 +438,8 @@
       "label": "Tipo de elemento de trabajo"
     },
     "group_by": {
-      "label": "Tipo de elemento de trabajo"
+      "label": "Tipo de elemento de trabajo",
+      "unknown_type": "Tipo desconocido"
     },
     "display_property": {
       "label": "Tipo de elemento de trabajo"

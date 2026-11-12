@@ -438,7 +438,8 @@
       "label": "Work item type"
     },
     "group_by": {
-      "label": "Work item type"
+      "label": "Work item type",
+      "unknown_type": "Unknown type"
     },
     "display_property": {
       "label": "Work item type"

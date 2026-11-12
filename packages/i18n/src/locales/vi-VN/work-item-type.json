@@ -438,7 +438,8 @@
       "label": "Loại mục công việc"
     },
     "group_by": {
-      "label": "Loại mục công việc"
+      "label": "Loại mục công việc",
+      "unknown_type": "Loại không xác định"
     },
     "display_property": {
       "label": "Loại mục công việc"

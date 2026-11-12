@@ -438,7 +438,8 @@
       "label": "작업 항목 유형"
     },
     "group_by": {
-      "label": "작업 항목 유형"
+      "label": "작업 항목 유형",
+      "unknown_type": "알 수 없는 유형"
     },
     "display_property": {
       "label": "작업 항목 유형"

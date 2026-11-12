@@ -438,7 +438,8 @@
       "label": "工作项类型"
     },
     "group_by": {
-      "label": "工作项类型"
+      "label": "工作项类型",
+      "unknown_type": "未知类型"
     },
     "display_property": {
       "label": "工作项类型"

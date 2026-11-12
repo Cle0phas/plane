@@ -438,7 +438,8 @@
       "label": "Tip de element de lucru"
     },
     "group_by": {
-      "label": "Tip de element de lucru"
+      "label": "Tip de element de lucru",
+      "unknown_type": "Tip necunoscut"
     },
     "display_property": {
       "label": "Tip de element de lucru"

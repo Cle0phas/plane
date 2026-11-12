@@ -438,7 +438,8 @@
       "label": "Tipe item kerja"
     },
     "group_by": {
-      "label": "Tipe item kerja"
+      "label": "Tipe item kerja",
+      "unknown_type": "Tipe tidak dikenal"
     },
     "display_property": {
       "label": "Tipe item kerja"

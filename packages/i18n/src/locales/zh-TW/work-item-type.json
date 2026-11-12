@@ -438,7 +438,8 @@
       "label": "工作項目類型"
     },
     "group_by": {
-      "label": "工作項目類型"
+      "label": "工作項目類型",
+      "unknown_type": "未知類型"
     },
     "display_property": {
       "label": "工作項目類型"
