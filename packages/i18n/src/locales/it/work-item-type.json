@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "Impossibile eliminare il tipo di elemento di lavoro predefinito",
           "cannot_delete_work_item_type_with_associated_work_items": "Impossibile eliminare il tipo di elemento di lavoro con elementi di lavoro associati"
         }
+      },
+      "list": {
+        "description": "Crea i tipi di elemento di lavoro che i progetti di questo spazio di lavoro possono usare.",
+        "inactive_badge": "Inattivo",
+        "work_item_count": "{count, plural, one {# elemento di lavoro} many {# elementi di lavoro} other {# elementi di lavoro}}",
+        "load_error": "Impossibile caricare i tipi di elemento di lavoro.",
+        "more_actions": "Azioni per {name}"
+      },
+      "actions": {
+        "deactivate": "Disattiva",
+        "reactivate": "Riattiva"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "Il tipo predefinito non può essere disattivato.",
+        "project_default_cannot_be_deactivated": "Questo tipo è il tipo predefinito di almeno un progetto.",
+        "project_default_cannot_be_deleted": "Questo tipo è il tipo predefinito di un progetto e non può essere eliminato."
+      },
+      "project": {
+        "description": "Scegli i tipi di elemento di lavoro usati da questo progetto e il suo tipo predefinito.",
+        "used_in_project": "Usato in questo progetto",
+        "set_default": "Imposta come predefinito",
+        "toast_error": "Impossibile aggiornare i tipi di elemento di lavoro di questo progetto.",
+        "disabled_reasons": {
+          "project_default": "Il tipo predefinito del progetto non può essere rimosso.",
+          "in_use": "Alcuni elementi di lavoro di questo progetto usano questo tipo.",
+          "not_enabled": "Usa prima questo tipo nel progetto."
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "Dà un nome unico a questo tipo di elemento di lavoro"
+          "placeholder": "Dà un nome unico a questo tipo di elemento di lavoro",
+          "label": "Nome",
+          "required": "Il nome è obbligatorio.",
+          "max_length": "Il nome può contenere al massimo 255 caratteri."
         },
         "description": {
-          "placeholder": "Descrivi cosa è destinato questo tipo di elemento di lavoro e quando deve essere utilizzato."
+          "placeholder": "Descrivi cosa è destinato questo tipo di elemento di lavoro e quando deve essere utilizzato.",
+          "label": "Descrizione",
+          "max_length": "La descrizione può contenere al massimo 1000 caratteri."
+        },
+        "icon": {
+          "label": "Icona"
         }
       }
     },
@@ -388,6 +423,25 @@
           "text": "Aggiorna"
         }
       }
+    },
+    "select": {
+      "label": "Tipo"
+    },
+    "switcher": {
+      "label": "Cambia il tipo di elemento di lavoro"
+    },
+    "activity": {
+      "changed_from": "ha cambiato il tipo da",
+      "to": "a"
+    },
+    "filter": {
+      "label": "Tipo di elemento di lavoro"
+    },
+    "group_by": {
+      "label": "Tipo di elemento di lavoro"
+    },
+    "display_property": {
+      "label": "Tipo di elemento di lavoro"
     }
   },
   "work_item_type_hierarchy": {

@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "Não é possível excluir o tipo de item de trabalho padrão",
           "cannot_delete_work_item_type_with_associated_work_items": "Não é possível excluir o tipo de item de trabalho com itens de trabalho associados"
         }
+      },
+      "list": {
+        "description": "Crie os tipos de item de trabalho que os projetos deste espaço de trabalho podem usar.",
+        "inactive_badge": "Inativo",
+        "work_item_count": "{count, plural, one {# item de trabalho} many {# itens de trabalho} other {# itens de trabalho}}",
+        "load_error": "Não foi possível carregar os tipos de item de trabalho.",
+        "more_actions": "Ações para {name}"
+      },
+      "actions": {
+        "deactivate": "Desativar",
+        "reactivate": "Reativar"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "O tipo padrão não pode ser desativado.",
+        "project_default_cannot_be_deactivated": "Este tipo é o tipo padrão de pelo menos um projeto.",
+        "project_default_cannot_be_deleted": "Este tipo é o tipo padrão de um projeto e não pode ser excluído."
+      },
+      "project": {
+        "description": "Escolha os tipos de item de trabalho que este projeto usa e o tipo padrão dele.",
+        "used_in_project": "Usado neste projeto",
+        "set_default": "Definir como padrão",
+        "toast_error": "Não foi possível atualizar os tipos de item de trabalho deste projeto.",
+        "disabled_reasons": {
+          "project_default": "O tipo padrão do projeto não pode ser removido.",
+          "in_use": "Itens de trabalho deste projeto usam este tipo.",
+          "not_enabled": "Use este tipo no projeto primeiro."
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "Dê a este tipo de item de trabalho um nome único"
+          "placeholder": "Dê a este tipo de item de trabalho um nome único",
+          "label": "Nome",
+          "required": "O nome é obrigatório.",
+          "max_length": "O nome deve ter no máximo 255 caracteres."
         },
         "description": {
-          "placeholder": "Descreva para que serve este tipo de item de trabalho e quando deve ser usado."
+          "placeholder": "Descreva para que serve este tipo de item de trabalho e quando deve ser usado.",
+          "label": "Descrição",
+          "max_length": "A descrição deve ter no máximo 1000 caracteres."
+        },
+        "icon": {
+          "label": "Ícone"
         }
       }
     },
@@ -388,6 +423,25 @@
           "text": "Fazer upgrade"
         }
       }
+    },
+    "select": {
+      "label": "Tipo"
+    },
+    "switcher": {
+      "label": "Alterar o tipo de item de trabalho"
+    },
+    "activity": {
+      "changed_from": "alterou o tipo de",
+      "to": "para"
+    },
+    "filter": {
+      "label": "Tipo de item de trabalho"
+    },
+    "group_by": {
+      "label": "Tipo de item de trabalho"
+    },
+    "display_property": {
+      "label": "Tipo de item de trabalho"
     }
   },
   "work_item_type_hierarchy": {

@@ -1,6 +1,6 @@
 {
   "work_item_types": {
-    "label": "Types d'éléments de travail",
+    "label": "Types de ticket",
     "label_lowercase": "types d'éléments de travail",
     "settings": {
       "description": "Personnalisez et ajoutez vos propres propriétés pour l’adapter aux besoins de votre équipe.",
@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "Impossible de supprimer le type d'élément de travail par défaut",
           "cannot_delete_work_item_type_with_associated_work_items": "Impossible de supprimer le type d'élément de travail avec des éléments de travail associés"
         }
+      },
+      "list": {
+        "description": "Créez les types de ticket que les projets de cet espace de travail peuvent utiliser.",
+        "inactive_badge": "Inactif",
+        "work_item_count": "{count, plural, one {# ticket} many {# tickets} other {# tickets}}",
+        "load_error": "Impossible de charger les types de ticket.",
+        "more_actions": "Actions pour {name}"
+      },
+      "actions": {
+        "deactivate": "Désactiver",
+        "reactivate": "Réactiver"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "Le type par défaut ne peut pas être désactivé.",
+        "project_default_cannot_be_deactivated": "Ce type est le type par défaut d'au moins un projet.",
+        "project_default_cannot_be_deleted": "Ce type est le type par défaut d'un projet et ne peut pas être supprimé."
+      },
+      "project": {
+        "description": "Choisissez les types de ticket utilisés par ce projet et son type par défaut.",
+        "used_in_project": "Utilisé dans ce projet",
+        "set_default": "Définir par défaut",
+        "toast_error": "Impossible de mettre à jour les types de ticket de ce projet.",
+        "disabled_reasons": {
+          "project_default": "Le type par défaut du projet ne peut pas être retiré.",
+          "in_use": "Des tickets de ce projet utilisent ce type.",
+          "not_enabled": "Utilisez d'abord ce type dans le projet."
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "Donnez à ce type d'élément de travail un nom unique"
+          "placeholder": "Donnez à ce type d'élément de travail un nom unique",
+          "label": "Nom",
+          "required": "Le nom est obligatoire.",
+          "max_length": "Le nom doit contenir 255 caractères au maximum."
         },
         "description": {
-          "placeholder": "Décrivez à quoi sert ce type d'élément de travail et quand il doit être utilisé."
+          "placeholder": "Décrivez à quoi sert ce type d'élément de travail et quand il doit être utilisé.",
+          "label": "Description",
+          "max_length": "La description doit contenir 1000 caractères au maximum."
+        },
+        "icon": {
+          "label": "Icône"
         }
       }
     },
@@ -388,6 +423,25 @@
           "text": "Mettre à niveau"
         }
       }
+    },
+    "select": {
+      "label": "Type"
+    },
+    "switcher": {
+      "label": "Changer le type du ticket"
+    },
+    "activity": {
+      "changed_from": "a changé le type de",
+      "to": "à"
+    },
+    "filter": {
+      "label": "Type de ticket"
+    },
+    "group_by": {
+      "label": "Type de ticket"
+    },
+    "display_property": {
+      "label": "Type de ticket"
     }
   },
   "work_item_type_hierarchy": {

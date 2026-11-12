@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "無法刪除預設工作項目類型",
           "cannot_delete_work_item_type_with_associated_work_items": "無法刪除具有關聯工作項目的工作項目類型"
         }
+      },
+      "list": {
+        "description": "建立此工作區中的專案可以使用的工作項目類型。",
+        "inactive_badge": "未啟用",
+        "work_item_count": "{count, plural, one {# 個工作項目} other {# 個工作項目}}",
+        "load_error": "無法載入工作項目類型。",
+        "more_actions": "{name} 的操作"
+      },
+      "actions": {
+        "deactivate": "停用",
+        "reactivate": "重新啟用"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "預設類型無法停用。",
+        "project_default_cannot_be_deactivated": "此類型是至少一個專案的預設類型。",
+        "project_default_cannot_be_deleted": "此類型是某個專案的預設類型，無法刪除。"
+      },
+      "project": {
+        "description": "選擇此專案使用的工作項目類型及其預設類型。",
+        "used_in_project": "在此專案中使用",
+        "set_default": "設為預設",
+        "toast_error": "無法更新此專案的工作項目類型。",
+        "disabled_reasons": {
+          "project_default": "無法移除專案的預設類型。",
+          "in_use": "此專案的工作項目正在使用此類型。",
+          "not_enabled": "請先在專案中使用此類型。"
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "為此工作項目類型提供一個獨特的名稱"
+          "placeholder": "為此工作項目類型提供一個獨特的名稱",
+          "label": "名稱",
+          "required": "名稱為必填項目。",
+          "max_length": "名稱不能超過 255 個字元。"
         },
         "description": {
-          "placeholder": "描述此工作項目類型的用途以及何時使用。"
+          "placeholder": "描述此工作項目類型的用途以及何時使用。",
+          "label": "說明",
+          "max_length": "說明不能超過 1000 個字元。"
+        },
+        "icon": {
+          "label": "圖示"
         }
       }
     },
@@ -388,6 +423,25 @@
           "text": "升級"
         }
       }
+    },
+    "select": {
+      "label": "類型"
+    },
+    "switcher": {
+      "label": "變更工作項目類型"
+    },
+    "activity": {
+      "changed_from": "將類型從",
+      "to": "變更為"
+    },
+    "filter": {
+      "label": "工作項目類型"
+    },
+    "group_by": {
+      "label": "工作項目類型"
+    },
+    "display_property": {
+      "label": "工作項目類型"
     }
   },
   "work_item_type_hierarchy": {

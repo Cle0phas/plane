@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "기본 작업 항목 유형은 삭제할 수 없습니다",
           "cannot_delete_work_item_type_with_associated_work_items": "연결된 작업 항목이 있는 작업 항목 유형은 삭제할 수 없습니다"
         }
+      },
+      "list": {
+        "description": "이 워크스페이스의 프로젝트에서 사용할 수 있는 작업 항목 유형을 만드세요.",
+        "inactive_badge": "비활성",
+        "work_item_count": "{count, plural, one {작업 항목 #개} other {작업 항목 #개}}",
+        "load_error": "작업 항목 유형을 불러오지 못했습니다.",
+        "more_actions": "{name} 작업"
+      },
+      "actions": {
+        "deactivate": "비활성화",
+        "reactivate": "다시 활성화"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "기본 유형은 비활성화할 수 없습니다.",
+        "project_default_cannot_be_deactivated": "이 유형은 하나 이상의 프로젝트의 기본 유형입니다.",
+        "project_default_cannot_be_deleted": "이 유형은 프로젝트의 기본 유형이므로 삭제할 수 없습니다."
+      },
+      "project": {
+        "description": "이 프로젝트에서 사용할 작업 항목 유형과 기본 유형을 선택하세요.",
+        "used_in_project": "이 프로젝트에서 사용 중",
+        "set_default": "기본값으로 설정",
+        "toast_error": "이 프로젝트의 작업 항목 유형을 업데이트하지 못했습니다.",
+        "disabled_reasons": {
+          "project_default": "프로젝트의 기본 유형은 제거할 수 없습니다.",
+          "in_use": "이 프로젝트의 작업 항목이 이 유형을 사용하고 있습니다.",
+          "not_enabled": "먼저 프로젝트에서 이 유형을 사용하세요."
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "이 워크 아이템 타입에 고유한 이름 지정"
+          "placeholder": "이 워크 아이템 타입에 고유한 이름 지정",
+          "label": "이름",
+          "required": "이름은 필수입니다.",
+          "max_length": "이름은 255자 이하여야 합니다."
         },
         "description": {
-          "placeholder": "이 워크 아이템 타입의 용도와 사용 시기를 설명하세요."
+          "placeholder": "이 워크 아이템 타입의 용도와 사용 시기를 설명하세요.",
+          "label": "설명",
+          "max_length": "설명은 1000자 이하여야 합니다."
+        },
+        "icon": {
+          "label": "아이콘"
         }
       }
     },
@@ -388,6 +423,25 @@
           "text": "업그레이드"
         }
       }
+    },
+    "select": {
+      "label": "유형"
+    },
+    "switcher": {
+      "label": "작업 항목 유형 변경"
+    },
+    "activity": {
+      "changed_from": "유형을 변경했습니다:",
+      "to": "→"
+    },
+    "filter": {
+      "label": "작업 항목 유형"
+    },
+    "group_by": {
+      "label": "작업 항목 유형"
+    },
+    "display_property": {
+      "label": "작업 항목 유형"
     }
   },
   "work_item_type_hierarchy": {

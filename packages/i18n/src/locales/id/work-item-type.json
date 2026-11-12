@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "Tidak dapat menghapus jenis item kerja default",
           "cannot_delete_work_item_type_with_associated_work_items": "Tidak dapat menghapus jenis item kerja yang memiliki item kerja terkait"
         }
+      },
+      "list": {
+        "description": "Buat tipe item kerja yang dapat digunakan oleh proyek di ruang kerja ini.",
+        "inactive_badge": "Tidak aktif",
+        "work_item_count": "{count, plural, one {# item kerja} other {# item kerja}}",
+        "load_error": "Tipe item kerja tidak dapat dimuat.",
+        "more_actions": "Tindakan untuk {name}"
+      },
+      "actions": {
+        "deactivate": "Nonaktifkan",
+        "reactivate": "Aktifkan kembali"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "Tipe default tidak dapat dinonaktifkan.",
+        "project_default_cannot_be_deactivated": "Tipe ini adalah tipe default dari setidaknya satu proyek.",
+        "project_default_cannot_be_deleted": "Tipe ini adalah tipe default dari sebuah proyek dan tidak dapat dihapus."
+      },
+      "project": {
+        "description": "Pilih tipe item kerja yang digunakan proyek ini beserta tipe defaultnya.",
+        "used_in_project": "Digunakan di proyek ini",
+        "set_default": "Jadikan default",
+        "toast_error": "Tipe item kerja proyek ini tidak dapat diperbarui.",
+        "disabled_reasons": {
+          "project_default": "Tipe default proyek tidak dapat dihapus.",
+          "in_use": "Item kerja proyek ini menggunakan tipe ini.",
+          "not_enabled": "Gunakan tipe ini di proyek terlebih dahulu."
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "Berikan nama unik untuk tipe item kerja ini"
+          "placeholder": "Berikan nama unik untuk tipe item kerja ini",
+          "label": "Nama",
+          "required": "Nama wajib diisi.",
+          "max_length": "Nama maksimal 255 karakter."
         },
         "description": {
-          "placeholder": "Jelaskan untuk apa tipe item kerja ini dimaksudkan dan kapan akan digunakan."
+          "placeholder": "Jelaskan untuk apa tipe item kerja ini dimaksudkan dan kapan akan digunakan.",
+          "label": "Deskripsi",
+          "max_length": "Deskripsi maksimal 1000 karakter."
+        },
+        "icon": {
+          "label": "Ikon"
         }
       }
     },
@@ -388,6 +423,25 @@
           "text": "Tingkatkan"
         }
       }
+    },
+    "select": {
+      "label": "Tipe"
+    },
+    "switcher": {
+      "label": "Ubah tipe item kerja"
+    },
+    "activity": {
+      "changed_from": "mengubah tipe dari",
+      "to": "menjadi"
+    },
+    "filter": {
+      "label": "Tipe item kerja"
+    },
+    "group_by": {
+      "label": "Tipe item kerja"
+    },
+    "display_property": {
+      "label": "Tipe item kerja"
     }
   },
   "work_item_type_hierarchy": {

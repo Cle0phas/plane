@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "Cannot delete default work item type",
           "cannot_delete_work_item_type_with_associated_work_items": "Cannot delete work item type with associated work items"
         }
+      },
+      "list": {
+        "description": "შექმენით სამუშაო ელემენტის ტიპები, რომლებსაც ამ სამუშაო სივრცის პროექტები გამოიყენებენ.",
+        "inactive_badge": "არააქტიური",
+        "work_item_count": "{count, plural, one {# სამუშაო ელემენტი} other {# სამუშაო ელემენტი}}",
+        "load_error": "სამუშაო ელემენტის ტიპების ჩატვირთვა ვერ მოხერხდა.",
+        "more_actions": "მოქმედებები: {name}"
+      },
+      "actions": {
+        "deactivate": "დეაქტივაცია",
+        "reactivate": "ხელახლა გააქტიურება"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "ნაგულისხმევი ტიპის დეაქტივაცია შეუძლებელია.",
+        "project_default_cannot_be_deactivated": "ეს ტიპი ნაგულისხმევი ტიპია მინიმუმ ერთი პროექტისთვის.",
+        "project_default_cannot_be_deleted": "ეს ტიპი პროექტის ნაგულისხმევი ტიპია და მისი წაშლა შეუძლებელია."
+      },
+      "project": {
+        "description": "აირჩიეთ სამუშაო ელემენტის ტიპები, რომლებსაც ეს პროექტი იყენებს, და მისი ნაგულისხმევი ტიპი.",
+        "used_in_project": "გამოიყენება ამ პროექტში",
+        "set_default": "ნაგულისხმევად დაყენება",
+        "toast_error": "ამ პროექტის სამუშაო ელემენტის ტიპების განახლება ვერ მოხერხდა.",
+        "disabled_reasons": {
+          "project_default": "პროექტის ნაგულისხმევი ტიპის ამოღება შეუძლებელია.",
+          "in_use": "ამ პროექტის სამუშაო ელემენტები ამ ტიპს იყენებენ.",
+          "not_enabled": "ჯერ გამოიყენეთ ეს ტიპი პროექტში."
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "Give this work item type a unique name"
+          "placeholder": "Give this work item type a unique name",
+          "label": "სახელი",
+          "required": "სახელი სავალდებულოა.",
+          "max_length": "სახელი არ უნდა აღემატებოდეს 255 სიმბოლოს."
         },
         "description": {
-          "placeholder": "Describe what this work item type is meant for and when it's to be used."
+          "placeholder": "Describe what this work item type is meant for and when it's to be used.",
+          "label": "აღწერა",
+          "max_length": "აღწერა არ უნდა აღემატებოდეს 1000 სიმბოლოს."
+        },
+        "icon": {
+          "label": "ხატულა"
         }
       }
     },
@@ -388,6 +423,25 @@
           "text": "Upgrade"
         }
       }
+    },
+    "select": {
+      "label": "ტიპი"
+    },
+    "switcher": {
+      "label": "სამუშაო ელემენტის ტიპის შეცვლა"
+    },
+    "activity": {
+      "changed_from": "შეცვალა ტიპი:",
+      "to": "→"
+    },
+    "filter": {
+      "label": "სამუშაო ელემენტის ტიპი"
+    },
+    "group_by": {
+      "label": "სამუშაო ელემენტის ტიპი"
+    },
+    "display_property": {
+      "label": "სამუშაო ელემენტის ტიპი"
     }
   },
   "work_item_type_hierarchy": {

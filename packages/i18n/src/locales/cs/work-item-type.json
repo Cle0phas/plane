@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "Výchozí typ pracovní položky nelze odstranit",
           "cannot_delete_work_item_type_with_associated_work_items": "Typ pracovní položky s přidruženými pracovními položkami nelze odstranit"
         }
+      },
+      "list": {
+        "description": "Vytvořte typy pracovních položek, které mohou projekty v tomto pracovním prostoru používat.",
+        "inactive_badge": "Neaktivní",
+        "work_item_count": "{count, plural, one {# pracovní položka} few {# pracovní položky} many {# pracovní položky} other {# pracovních položek}}",
+        "load_error": "Typy pracovních položek se nepodařilo načíst.",
+        "more_actions": "Akce pro {name}"
+      },
+      "actions": {
+        "deactivate": "Deaktivovat",
+        "reactivate": "Znovu aktivovat"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "Výchozí typ nelze deaktivovat.",
+        "project_default_cannot_be_deactivated": "Tento typ je výchozím typem alespoň jednoho projektu.",
+        "project_default_cannot_be_deleted": "Tento typ je výchozím typem projektu a nelze jej odstranit."
+      },
+      "project": {
+        "description": "Vyberte typy pracovních položek, které tento projekt používá, a jeho výchozí typ.",
+        "used_in_project": "Používá se v tomto projektu",
+        "set_default": "Nastavit jako výchozí",
+        "toast_error": "Typy pracovních položek tohoto projektu se nepodařilo aktualizovat.",
+        "disabled_reasons": {
+          "project_default": "Výchozí typ projektu nelze odebrat.",
+          "in_use": "Pracovní položky tohoto projektu používají tento typ.",
+          "not_enabled": "Nejprve tento typ v projektu použijte."
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "Dejte tomuto typu pracovních položek jedinečný název"
+          "placeholder": "Dejte tomuto typu pracovních položek jedinečný název",
+          "label": "Název",
+          "required": "Název je povinný.",
+          "max_length": "Název může mít nejvýše 255 znaků."
         },
         "description": {
-          "placeholder": "Popište, k čemu je tento typ pracovních položek určen a kdy se má používat."
+          "placeholder": "Popište, k čemu je tento typ pracovních položek určen a kdy se má používat.",
+          "label": "Popis",
+          "max_length": "Popis může mít nejvýše 1000 znaků."
+        },
+        "icon": {
+          "label": "Ikona"
         }
       }
     },
@@ -388,6 +423,25 @@
           "text": "Upgradovat"
         }
       }
+    },
+    "select": {
+      "label": "Typ"
+    },
+    "switcher": {
+      "label": "Změnit typ pracovní položky"
+    },
+    "activity": {
+      "changed_from": "změnil(a) typ z",
+      "to": "na"
+    },
+    "filter": {
+      "label": "Typ pracovní položky"
+    },
+    "group_by": {
+      "label": "Typ pracovní položky"
+    },
+    "display_property": {
+      "label": "Typ pracovní položky"
     }
   },
   "work_item_type_hierarchy": {

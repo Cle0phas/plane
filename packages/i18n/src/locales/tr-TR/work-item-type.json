@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "Varsayılan iş öğesi türü silinemez",
           "cannot_delete_work_item_type_with_associated_work_items": "İlişkili iş öğeleri olan iş öğesi türü silinemez"
         }
+      },
+      "list": {
+        "description": "Bu çalışma alanındaki projelerin kullanabileceği iş öğesi tiplerini oluşturun.",
+        "inactive_badge": "Pasif",
+        "work_item_count": "{count, plural, one {# iş öğesi} other {# iş öğesi}}",
+        "load_error": "İş öğesi tipleri yüklenemedi.",
+        "more_actions": "{name} için eylemler"
+      },
+      "actions": {
+        "deactivate": "Devre dışı bırak",
+        "reactivate": "Yeniden etkinleştir"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "Varsayılan tip devre dışı bırakılamaz.",
+        "project_default_cannot_be_deactivated": "Bu tip, en az bir projenin varsayılan tipidir.",
+        "project_default_cannot_be_deleted": "Bu tip bir projenin varsayılan tipidir ve silinemez."
+      },
+      "project": {
+        "description": "Bu projenin kullandığı iş öğesi tiplerini ve varsayılan tipini seçin.",
+        "used_in_project": "Bu projede kullanılıyor",
+        "set_default": "Varsayılan yap",
+        "toast_error": "Bu projenin iş öğesi tipleri güncellenemedi.",
+        "disabled_reasons": {
+          "project_default": "Projenin varsayılan tipi kaldırılamaz.",
+          "in_use": "Bu projenin iş öğeleri bu tipi kullanıyor.",
+          "not_enabled": "Önce bu tipi projede kullanın."
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "Bu iş öğesi tipine benzersiz bir isim verin"
+          "placeholder": "Bu iş öğesi tipine benzersiz bir isim verin",
+          "label": "Ad",
+          "required": "Ad zorunludur.",
+          "max_length": "Ad en fazla 255 karakter olmalıdır."
         },
         "description": {
-          "placeholder": "Bu iş öğesi tipinin ne için olduğunu ve ne zaman kullanılacağını açıklayın."
+          "placeholder": "Bu iş öğesi tipinin ne için olduğunu ve ne zaman kullanılacağını açıklayın.",
+          "label": "Açıklama",
+          "max_length": "Açıklama en fazla 1000 karakter olmalıdır."
+        },
+        "icon": {
+          "label": "Simge"
         }
       }
     },
@@ -388,6 +423,25 @@
           "text": "Yükselt"
         }
       }
+    },
+    "select": {
+      "label": "Tip"
+    },
+    "switcher": {
+      "label": "İş öğesi tipini değiştir"
+    },
+    "activity": {
+      "changed_from": "tipi değiştirdi:",
+      "to": "→"
+    },
+    "filter": {
+      "label": "İş öğesi tipi"
+    },
+    "group_by": {
+      "label": "İş öğesi tipi"
+    },
+    "display_property": {
+      "label": "İş öğesi tipi"
     }
   },
   "work_item_type_hierarchy": {
