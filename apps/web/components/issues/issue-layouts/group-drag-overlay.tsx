@@ -58,7 +58,7 @@ export function GroupDragOverlay(props: Props) {
       )}
     >
       {workflowDisabledSource && isDropDisabled ? (
-        <div className="my-8 flex items-center rounded-sm p-3 text-danger-secondary">
+        <div role="status" className="my-8 flex items-center rounded-sm p-3 text-danger-secondary">
           <WarningCircleOutline width={13} height={13} /> &nbsp;
           <span>{t("workflows.workflow_disabled.title")}</span>
         </div>

@@ -4,6 +4,7 @@
  * See the LICENSE file for details.
  */
 
+import { useMemo } from "react";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
 import { PROJECT_WORK_ITEM_TYPES, PROJECT_WORKFLOW_SCHEME } from "@plane/constants";
@@ -46,11 +47,11 @@ export const useProjectDefaultTypeId = (projectId: string | undefined) => {
 export const useWorkflowActor = (workspaceSlug: string | undefined, projectId: string | undefined): TWorkflowActor => {
   const { data: currentUser } = useUser();
   const { workspaceProjectsPermissions } = useUserPermissions();
-  return {
-    userId: currentUser?.id,
-    // Raw membership role: the getter elevates workspace admins to ADMIN, the server does not (W6).
-    projectRole: workspaceSlug && projectId ? workspaceProjectsPermissions[workspaceSlug]?.[projectId] : undefined,
-  };
+  const userId = currentUser?.id;
+  // Raw membership role: the getter elevates workspace admins to ADMIN, the server does not (W6).
+  const projectRole = workspaceSlug && projectId ? workspaceProjectsPermissions[workspaceSlug]?.[projectId] : undefined;
+  // Stable identity: consumers use it in effect deps.
+  return useMemo(() => ({ userId, projectRole }), [userId, projectRole]);
 };
 
 /** States offered to the actor for this item (7.4); null when the project is free or the item unknown. */

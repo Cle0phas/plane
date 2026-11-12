@@ -9,6 +9,7 @@ import { useParams } from "next/navigation";
 import type { TIssue, TIssueGroupByOptions } from "@plane/types";
 // hooks
 import { useProjectState } from "@/hooks/store/use-project-state";
+import { useWorkflow } from "@/hooks/store/use-workflow";
 // local imports
 import { isWorkflowDropForbidden } from "./drag-n-drop-helpers";
 import { getAllowedTargetStateIds, getEffectiveTypeId } from "./helpers";
@@ -21,6 +22,7 @@ export const useWorkFlowFDragNDrop = (groupBy: TIssueGroupByOptions | undefined,
   const projectDefaultTypeId = useProjectDefaultTypeId(projectId?.toString());
   const actor = useWorkflowActor(workspaceSlug?.toString(), projectId?.toString());
   const { getProjectStates } = useProjectState();
+  const { getProjectScheme } = useWorkflow();
   const [workflowDisabledSource, setWorkflowDisabledSource] = useState<string | undefined>(undefined);
 
   const handleWorkFlowState = useCallback(
@@ -33,7 +35,8 @@ export const useWorkFlowFDragNDrop = (groupBy: TIssueGroupByOptions | undefined,
     ) => {
       const allowed = issue?.project_id
         ? getAllowedTargetStateIds({
-            scheme,
+            // The item's own project, so workspace-level views block too once its scheme is loaded.
+            scheme: getProjectScheme(issue.project_id) ?? scheme,
             projectStates: getProjectStates(issue.project_id) ?? [],
             issue: { ...issue, type_id: getEffectiveTypeId(issue.type_id, projectDefaultTypeId) },
             actor,
@@ -48,8 +51,10 @@ export const useWorkFlowFDragNDrop = (groupBy: TIssueGroupByOptions | undefined,
       });
       setWorkflowDisabledSource(forbidden ? sourceGroupId : undefined);
     },
-    [scheme, projectDefaultTypeId, actor, getProjectStates, groupBy, subGroupBy]
+    [scheme, getProjectScheme, projectDefaultTypeId, actor, getProjectStates, groupBy, subGroupBy]
   );
+
+  const resetWorkFlowState = useCallback(() => setWorkflowDisabledSource(undefined), []);
 
   return {
     workflowDisabledSource,
@@ -57,5 +62,6 @@ export const useWorkFlowFDragNDrop = (groupBy: TIssueGroupByOptions | undefined,
     // Creation stays possible in any column: the server puts new items in the initial state (T1).
     getIsWorkflowWorkItemCreationDisabled: (_groupId: string, _subGroupId?: string) => false,
     handleWorkFlowState,
+    resetWorkFlowState,
   };
 };

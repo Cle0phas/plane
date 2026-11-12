@@ -98,16 +98,17 @@ export const useGroupIssuesDragNDrop = (
       delete data[moduleKey];
     }
 
-    // oxlint-disable-next-line no-unused-expressions
-    updateIssue &&
+    if (updateIssue) {
       updateIssue(projectId, issueId, data).catch((error: unknown) =>
         setToast({
           ...errorToastProps,
+          title: t("common.error.label"),
           message: t(getWorkflowRefusalKey(error) ?? "entity.update.failed", {
             entity: t("issue.label", { count: 1 }),
           }),
         })
       );
+    }
   };
 
   const handleOnDrop = async (source: GroupDropLocation, destination: GroupDropLocation) => {

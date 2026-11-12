@@ -120,8 +120,13 @@ export const ListGroup = observer(function ListGroup(props: Props) {
 
   const [intersectionElement, setIntersectionElement] = useState<HTMLDivElement | null>(null);
 
-  const { workflowDisabledSource, isWorkflowDropDisabled, handleWorkFlowState, getIsWorkflowWorkItemCreationDisabled } =
-    useWorkFlowFDragNDrop(group_by);
+  const {
+    workflowDisabledSource,
+    isWorkflowDropDisabled,
+    handleWorkFlowState,
+    resetWorkFlowState,
+    getIsWorkflowWorkItemCreationDisabled,
+  } = useWorkFlowFDragNDrop(group_by);
   const isWorkflowIssueCreationDisabled = getIsWorkflowWorkItemCreationDisabled(group.id);
 
   const groupIssueCount = getGroupIssueCount(group.id, undefined, false) ?? 0;
@@ -199,6 +204,7 @@ export const ListGroup = observer(function ListGroup(props: Props) {
         },
         onDragLeave: () => {
           setIsDraggingOverColumn(false);
+          resetWorkFlowState();
         },
         onDragStart: () => {
           setIsDraggingOverColumn(true);
@@ -229,6 +235,7 @@ export const ListGroup = observer(function ListGroup(props: Props) {
         },
         onDrop: (payload) => {
           setIsDraggingOverColumn(false);
+          resetWorkFlowState();
           const source = getSourceFromDropPayload(payload);
           const destination = getDestinationFromDropPayload(payload);
 
@@ -260,6 +267,7 @@ export const ListGroup = observer(function ListGroup(props: Props) {
     setIsDraggingOverColumn,
     isWorkflowDropDisabled,
     handleWorkFlowState,
+    resetWorkFlowState,
     issuesMap,
   ]);
 
