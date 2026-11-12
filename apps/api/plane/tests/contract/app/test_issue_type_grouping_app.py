@@ -3,6 +3,7 @@
 # See the LICENSE file for details.
 
 import pytest
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -46,3 +47,18 @@ def test_work_items_are_filtered_by_type(board):
 
     assert response.status_code == status.HTTP_200_OK, response.data
     assert [str(row["id"]) for row in response.data["results"]] == [str(defect.id)]
+
+
+@pytest.mark.contract
+@pytest.mark.django_db
+def test_untyped_and_soft_deleted_type_items_stay_in_groups(board):
+    client, url, bug, plain, defect, default_type = board
+    Issue.objects.filter(pk=plain.pk).update(type=None)
+    IssueType.objects.filter(pk=bug.pk).update(deleted_at=timezone.now())
+
+    response = client.get(url, {"group_by": "type_id"})
+
+    assert response.status_code == status.HTTP_200_OK, response.data
+    groups = response.data["results"]
+    assert [str(row["id"]) for row in groups["None"]["results"]] == [str(plain.id)]
+    assert [str(row["id"]) for row in groups[str(bug.id)]["results"]] == [str(defect.id)]

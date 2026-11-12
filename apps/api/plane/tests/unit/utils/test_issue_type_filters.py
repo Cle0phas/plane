@@ -75,4 +75,5 @@ def test_group_values_are_the_workspace_types_including_inactive_ones(workspace,
 
     values = issue_group_values(field="type_id", slug=workspace.slug, project_id=project.id)
 
-    assert {UUID(str(value)) for value in values} == {bug.id, default_id}
+    assert "None" in values
+    assert {UUID(str(value)) for value in values if value != "None"} == {bug.id, default_id}

@@ -192,7 +192,12 @@ def issue_group_values(
         return list(Project.objects.filter(workspace__slug=slug, id__in=project_ids).values_list("id", flat=True))
 
     if field == "type_id":
-        return list(IssueType.objects.filter(workspace__slug=slug).values_list("id", flat=True))
+        # Soft-deleted types still referenced by work items stay visible so those items do not vanish.
+        referenced = Issue.objects.filter(type__workspace__slug=slug).values("type_id")
+        queryset = IssueType.all_objects.filter(workspace__slug=slug).filter(
+            Q(deleted_at__isnull=True) | Q(id__in=referenced)
+        )
+        return list(queryset.values_list("id", flat=True)) + ["None"]
 
     if field == "priority":
         return ["low", "medium", "high", "urgent", "none"]
