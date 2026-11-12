@@ -402,7 +402,7 @@
         },
         "confirmation": {
           "title": "Une fois activés, les types de tickets ne peuvent pas être désactivés.",
-          "description": "Le ticket de Plane deviendra le type de ticket par défaut pour ce projet et apparaîtra avec son icône et son arrière-plan dans ce projet.",
+          "description": "Le type « Ticket Plane » deviendra le type de ticket par défaut pour ce projet et apparaîtra avec son icône et son arrière-plan dans ce projet.",
           "button": {
             "default": "Activer",
             "loading": "Configuration en cours"

@@ -95,7 +95,7 @@
     "intake": {
       "step_zero": {
         "title": "Rationalisez les demandes avec la réception",
-        "description": "Une fonctionnalité exclusive de Plane qui permet aux Invités de créer des tickets pour les bugs, demandes ou tickets."
+        "description": "Une fonctionnalité exclusive de Plane qui permet aux invités de créer des tickets pour les bugs ou les demandes."
       },
       "step_one": {
         "title": "Demandes de réception ouvertes/fermées",
@@ -103,7 +103,7 @@
       },
       "step_two": {
         "title": "Accepter/refuser une demande en attente",
-        "description": "Acceptez pour modifier et déplacer l ticket vers votre projet, ou refusez-le pour le marquer comme Annulé."
+        "description": "Acceptez pour modifier et déplacer le ticket vers votre projet, ou refusez-le pour le marquer comme Annulé."
       },
       "step_three": {
         "title": "Reporter pour l instant",
