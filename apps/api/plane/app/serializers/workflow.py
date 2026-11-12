@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # See the LICENSE file for details.
 
+import math
+
 # Third party imports
 from rest_framework import serializers
 
@@ -64,6 +66,19 @@ class StrictBooleanField(serializers.Field):
         return value
 
 
+class CoordinateField(serializers.Field):
+    # Finite JSON numbers only: no strings, booleans, NaN or infinities.
+    def to_internal_value(self, data):
+        if isinstance(data, bool) or not isinstance(data, (int, float)) or not math.isfinite(data):
+            raise serializers.ValidationError("Must be a finite number.")
+        if abs(data) > 1_000_000:
+            raise serializers.ValidationError("Out of range.")
+        return float(data)
+
+    def to_representation(self, value):
+        return value
+
+
 class RestrictActorsParamsSerializer(serializers.Serializer):
     roles = serializers.ListField(child=serializers.ChoiceField(choices=ROLE_VALUES), required=False, max_length=3)
     user_ids = serializers.ListField(child=StrictUUIDField(), required=False, max_length=200)
@@ -115,8 +130,8 @@ class GraphStatusInputSerializer(serializers.Serializer):
 class GraphStateInputSerializer(serializers.Serializer):
     key = serializers.CharField(max_length=64)
     status = GraphStatusInputSerializer()
-    position_x = serializers.FloatField(min_value=-1_000_000, max_value=1_000_000)
-    position_y = serializers.FloatField(min_value=-1_000_000, max_value=1_000_000)
+    position_x = CoordinateField()
+    position_y = CoordinateField()
     is_initial = StrictBooleanField()
 
 
@@ -127,7 +142,8 @@ class GraphTransitionInputSerializer(serializers.Serializer):
         child=serializers.CharField(max_length=64), required=False, default=list, max_length=MAX_STATES_PER_WORKFLOW
     )
     target_key = serializers.CharField(max_length=64)
-    rules = serializers.ListField(child=GraphRuleInputSerializer(), required=False, default=list, max_length=1)
+    # Rules are validated in WorkflowGraphInputSerializer.validate so their errors surface under `graph`.
+    rules = serializers.ListField(child=serializers.JSONField(), required=False, default=list, max_length=1)
 
 
 class WorkflowGraphInputSerializer(serializers.Serializer):
@@ -152,6 +168,13 @@ class WorkflowGraphInputSerializer(serializers.Serializer):
         if states and sum(1 for state in states if state["is_initial"]) != 1:
             raise graph_error("initial_state_required")
         for transition in attrs["transitions"]:
+            rules = []
+            for rule in transition["rules"]:
+                rule_serializer = GraphRuleInputSerializer(data=rule, context=self.context)
+                if not rule_serializer.is_valid():
+                    raise graph_error("invalid_rule")
+                rules.append(rule_serializer.validated_data)
+            transition["rules"] = rules
             sources = transition["source_keys"]
             if (
                 transition["target_key"] not in keys

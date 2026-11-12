@@ -12,7 +12,14 @@ from plane.db.models import (
 )
 from plane.db.models.workflow import MAX_STATUSES_PER_WORKSPACE
 from plane.utils.audit import record_audit
-from plane.utils.workflow_sync import deduce_groups, propagate_statuses, resync_workflow, status_usage
+from plane.utils.workflow_sync import (
+    SchemeError,
+    deduce_groups,
+    projects_using,
+    propagate_statuses,
+    resync_workflow,
+    status_usage,
+)
 
 
 class GraphError(Exception):
@@ -119,6 +126,9 @@ def _write_status(workflow, data, statuses):
 
 def save_workflow_graph(*, workflow, graph, actor_id):
     """P1: replace the graph of a locked workflow, then propagate to every linked project (5.2)."""
+    # An empty graph would leave linked projects without an initial state.
+    if not graph["states"] and projects_using(workflow.id).exists():
+        raise GraphError("initial_state_required")
     before = workflow_graph(workflow)
     existing = {str(state.id): state for state in WorkflowState.objects.filter(workflow_id=workflow.id)}
     statuses = _resolve_statuses(workflow, graph, existing)
@@ -165,7 +175,10 @@ def save_workflow_graph(*, workflow, graph, actor_id):
     for status in deduce_groups(workflow.id):
         edited[status.id] = status
     propagate_statuses(edited.values())
-    resync_workflow(workflow.id)
+    try:
+        resync_workflow(workflow.id)
+    except SchemeError as error:
+        raise GraphError(error.code, error.details) from error
     workflow.save(update_fields=["updated_at"])
     after = workflow_graph(workflow)
     record_audit(

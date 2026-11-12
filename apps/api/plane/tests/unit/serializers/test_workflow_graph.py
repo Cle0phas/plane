@@ -17,6 +17,7 @@ from plane.db.models import (
 )
 from plane.tests.factories import UserFactory, WorkspaceFactory
 from plane.tests.workflow_builders import build_workflow, link_project
+from plane.utils.workflow_sync import SchemeError
 from plane.utils.workflow_graph import GraphError, save_workflow_graph, workflow_graph
 
 pytestmark = [pytest.mark.unit, pytest.mark.django_db]
@@ -94,6 +95,14 @@ class TestGraphInput:
                 "transitions": [_transition(["a"], "b", [{"type": "restrict_actors", "params": params}])],
             },
         )
+        assert not valid
+        assert serializer.errors["graph"] == ["invalid_rule"]
+
+    @pytest.mark.parametrize("value", ["NaN", float("nan"), float("inf"), True, "1"])
+    def test_positions_are_finite_numbers(self, workspace, value):
+        state = _state("a", "Open", True)
+        state["position_x"] = value
+        valid, _ = _validate(workspace, {"states": [state], "transitions": []})
         assert not valid
 
     def test_named_users_must_be_active_members_of_the_workspace(self, workspace):
@@ -241,3 +250,35 @@ class TestSaveGraph:
         graph = workflow_graph(workflow)
         assert graph["transitions"][0]["rules"] == [{"type": "restrict_actors", "params": {"creator": True}}]
         assert graph["states"][0]["is_initial"] is True
+
+
+class TestEmptyAndResyncFailures:
+    def test_an_empty_graph_is_refused_for_a_linked_workflow(self, workspace, create_user):
+        project = Project.objects.create(name="Home", identifier="HOME", workspace=workspace, created_by=create_user)
+        workflow = build_workflow(workspace, "Flow", ["Open"])
+        link_project(project, workflow)
+        with pytest.raises(GraphError) as error:
+            save_workflow_graph(workflow=workflow, graph={"states": [], "transitions": []}, actor_id=create_user.id)
+        assert error.value.code == "initial_state_required"
+        assert WorkflowState.objects.filter(workflow=workflow).count() == 1
+
+    def test_an_empty_graph_is_saved_for_an_unlinked_workflow(self, workspace, create_user):
+        workflow = build_workflow(workspace, "Flow", ["Open"])
+        graph = save_workflow_graph(workflow=workflow, graph={"states": [], "transitions": []}, actor_id=create_user.id)
+        assert graph["states"] == []
+
+    def test_a_scheme_error_from_the_resync_becomes_a_graph_error(self, workspace, create_user, monkeypatch):
+        workflow = build_workflow(workspace, "Flow", ["Open"])
+        open_state = workflow.states_by_name["Open"]
+
+        def fail(workflow_id):
+            raise SchemeError("status_in_use", [])
+
+        monkeypatch.setattr("plane.utils.workflow_graph.resync_workflow", fail)
+        valid, serializer = _validate(
+            workspace, {"states": [_state(str(open_state.id), "Open", True, open_state.status_id)], "transitions": []}
+        )
+        assert valid
+        with pytest.raises(GraphError) as error:
+            save_workflow_graph(workflow=workflow, graph=serializer.validated_data, actor_id=create_user.id)
+        assert error.value.code == "status_in_use"
