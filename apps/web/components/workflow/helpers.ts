@@ -103,3 +103,6 @@ export const getWorkflowRefusalKey = (error: unknown): string | undefined => {
     ? WORKFLOW_REFUSAL_KEYS[code as keyof typeof WORKFLOW_REFUSAL_KEYS]
     : undefined;
 };
+
+/** Spec 5.4: a linked project's states mirror its workflows and are edited there only. */
+export const isProjectWorkflowManaged = (scheme: TProjectWorkflowScheme | undefined) => !!scheme?.default_workflow_id;

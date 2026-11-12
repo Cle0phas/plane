@@ -9,9 +9,11 @@ import { observer } from "mobx-react";
 import useSWR from "swr";
 // components
 import { EUserPermissionsLevel } from "@plane/constants";
+import { useTranslation } from "@plane/i18n";
 import type { IState, TStateOperationsCallbacks } from "@plane/types";
 import { EUserProjectRoles } from "@plane/types";
 import { ProjectStateLoader, GroupList } from "@/components/project-states";
+import { isProjectWorkflowManaged, useProjectWorkflowScheme } from "@/components/workflow";
 // hooks
 import { useProjectState } from "@/hooks/store/use-project-state";
 import { useUserPermissions } from "@/hooks/store/user";
@@ -34,6 +36,8 @@ export const ProjectStateRoot = observer(function ProjectStateRoot(props: TProje
     markStateAsDefault,
   } = useProjectState();
   const { allowPermissions } = useUserPermissions();
+  const { t } = useTranslation();
+  const isManaged = isProjectWorkflowManaged(useProjectWorkflowScheme(projectId));
   // derived values
   const isEditable = allowPermissions(
     [EUserProjectRoles.ADMIN],
@@ -67,10 +71,20 @@ export const ProjectStateRoot = observer(function ProjectStateRoot(props: TProje
   if (!groupedProjectStates) return <ProjectStateLoader />;
 
   return (
-    <GroupList
-      groupedStates={groupedProjectStates}
-      stateOperationsCallbacks={stateOperationsCallbacks}
-      isEditable={isEditable}
-    />
+    <>
+      {isManaged && (
+        <p
+          role="note"
+          className="mb-3 rounded-md border border-subtle bg-layer-2 p-3 text-body-sm-regular text-secondary"
+        >
+          {t("workflows.managed_states.banner")}
+        </p>
+      )}
+      <GroupList
+        groupedStates={groupedProjectStates}
+        stateOperationsCallbacks={stateOperationsCallbacks}
+        isEditable={isEditable && !isManaged}
+      />
+    </>
   );
 });

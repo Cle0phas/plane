@@ -11,6 +11,7 @@ import {
   getInitialStateId,
   getWorkflowRefusalKey,
   getWorkflowStateIds,
+  isProjectWorkflowManaged,
   type TWorkflowIssue,
 } from "./helpers";
 
@@ -226,5 +227,13 @@ describe("getWorkflowRefusalKey", () => {
     expect(getWorkflowRefusalKey({ detail: "x" })).toBeUndefined();
     expect(getWorkflowRefusalKey(undefined)).toBeUndefined();
     expect(getWorkflowRefusalKey(new Error("Network Error"))).toBeUndefined();
+  });
+});
+
+describe("isProjectWorkflowManaged", () => {
+  it("is true only when the project has a scheme", () => {
+    expect(isProjectWorkflowManaged(scheme)).toBe(true);
+    expect(isProjectWorkflowManaged({ default_workflow_id: null, items: [], workflows: [] })).toBe(false);
+    expect(isProjectWorkflowManaged(undefined)).toBe(false);
   });
 });
