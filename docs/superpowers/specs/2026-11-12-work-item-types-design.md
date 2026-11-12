@@ -175,3 +175,19 @@ Entrées validées à la frontière : nom et description nettoyés et bornés, `
 - Hiérarchie de types (Epic au-dessus, sous-tâche en dessous), avec `is_epic` et `level`.
 - Champs propres à chaque type.
 - Workflows par type : livraison 2, conçue séparément.
+
+## 10. Limites connues
+
+- **Suppression et affectation simultanées** : un ticket qui reçoit un type pendant que ce type est supprimé garde un type vide jusqu'à son prochain enregistrement, où il reçoit le type par défaut de son projet.
+- **Nombre de tickets par type visible de tous** : l'API de lecture des types (R2) renvoie, pour chaque type, le nombre de tickets qui l'utilisent, à tout membre du workspace, y compris les tickets des projets privés dont il n'est pas membre. À revoir en livraison 2.
+- **Journal d'audit en ajout seul côté application uniquement** : rien n'empêche, au niveau de la base, de modifier ou supprimer des lignes de `audit_logs` par `bulk_update` ou par SQL brut.
+- **Brouillons et R8** : retirer un type d'un projet ne tient pas compte des brouillons (privés à leur auteur, invisibles de l'admin qui retire le type). Un brouillon dont le type n'est plus utilisable le garde ; à l'édition ou au déplacement vers le projet, le formulaire le remplace par le type par défaut du projet, et le serveur refuse la conversion avec l'ancien type (400).
+- **Vérification avant déploiement** : la migration `0128_work_item_type_constraints` crée une contrainte d'unicité du nom sans tenir compte de la casse. Elle échoue si un workspace a déjà deux types dont les noms ne diffèrent que par la casse. Avant de déployer, lancer la requête suivante et renommer les doublons qu'elle renvoie :
+
+  ```sql
+  SELECT workspace_id, lower(name), count(*)
+  FROM issue_types
+  WHERE deleted_at IS NULL
+  GROUP BY 1, 2
+  HAVING count(*) > 1;
+  ```
