@@ -37,7 +37,8 @@ export const ProjectStateRoot = observer(function ProjectStateRoot(props: TProje
   } = useProjectState();
   const { allowPermissions } = useUserPermissions();
   const { t } = useTranslation();
-  const isManaged = isProjectWorkflowManaged(useProjectWorkflowScheme(projectId));
+  const scheme = useProjectWorkflowScheme(projectId);
+  const isManaged = isProjectWorkflowManaged(scheme);
   // derived values
   const isEditable = allowPermissions(
     [EUserProjectRoles.ADMIN],
@@ -83,7 +84,8 @@ export const ProjectStateRoot = observer(function ProjectStateRoot(props: TProje
       <GroupList
         groupedStates={groupedProjectStates}
         stateOperationsCallbacks={stateOperationsCallbacks}
-        isEditable={isEditable && !isManaged}
+        // fail closed: read-only until the scheme is known
+        isEditable={isEditable && scheme !== undefined && !isManaged}
       />
     </>
   );
