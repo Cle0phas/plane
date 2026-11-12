@@ -113,7 +113,9 @@ class TestProjectIssueTypeRead:
 @pytest.mark.django_db
 class TestProjectIssueTypeWrite:
     @pytest.mark.parametrize("role", ["member", "guest"])
-    def test_non_admins_cannot_change_project_types(self, workspace, users, project, default_type, bug, role, mock_celery):
+    def test_non_admins_cannot_change_project_types(
+        self, workspace, users, project, default_type, bug, role, mock_celery
+    ):
         ProjectIssueType.objects.create(project=project, issue_type=bug)
         client = _client(users[role])
 
@@ -268,3 +270,47 @@ class TestProjectIssueTypeWrite:
         assert not ProjectIssueType.objects.filter(pk=link.pk).exists()
         entry = AuditLog.objects.get(target_id=link.id, action="project_issue_type.disabled")
         assert entry.before["issue_type_id"] == str(bug.id) and entry.after is None
+
+
+@pytest.mark.contract
+@pytest.mark.django_db
+class TestProjectIssueTypeBoundaries:
+    @pytest.fixture
+    def other_project(self, workspace, users):
+        other = Project.objects.create(name="Other", identifier="OTH", workspace=workspace, created_by=users["admin"])
+        ProjectMember.objects.create(project=other, member=users["member"], role=20)
+        return other
+
+    def _assert_all_refused(self, client, workspace, project, bug):
+        enabled = client.post(_list_url(workspace, project), {"issue_type_id": str(bug.id)}, format="json")
+        defaulted = client.patch(_detail_url(workspace, project, bug), {"is_default": True}, format="json")
+        removed = client.delete(_detail_url(workspace, project, bug))
+        assert enabled.status_code == defaulted.status_code == removed.status_code == status.HTTP_403_FORBIDDEN
+        assert ProjectIssueType.objects.filter(project=project, issue_type=bug).exists()
+        assert not AuditLog.objects.exists()
+
+    def test_an_admin_of_another_project_cannot_change_this_one(
+        self, workspace, users, project, other_project, bug, mock_celery
+    ):
+        ProjectIssueType.objects.create(project=project, issue_type=bug)
+        self._assert_all_refused(_client(users["member"]), workspace, project, bug)
+
+    def test_an_inactive_project_admin_cannot_change_the_project(self, workspace, users, project, bug, mock_celery):
+        ProjectIssueType.objects.create(project=project, issue_type=bug)
+        ProjectMember.objects.filter(project=project, member=users["project_admin"]).update(is_active=False)
+        self._assert_all_refused(_client(users["project_admin"]), workspace, project, bug)
+
+    def test_a_soft_deleted_type_cannot_be_enabled(self, workspace, users, project, bug):
+        bug.delete()
+        response = _client(users["admin"]).post(
+            _list_url(workspace, project), {"issue_type_id": str(bug.id)}, format="json"
+        )
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_a_soft_deleted_work_item_does_not_block_removal(self, workspace, users, project, bug, mock_celery):
+        ProjectIssueType.objects.create(project=project, issue_type=bug)
+        Issue.objects.create(name="Gone", project=project, type=bug).delete()
+
+        response = _client(users["admin"]).delete(_detail_url(workspace, project, bug))
+
+        assert response.status_code == status.HTTP_204_NO_CONTENT

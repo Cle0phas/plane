@@ -275,13 +275,16 @@ class ProjectIssueTypeListEndpoint(BaseAPIView):
         if requested_type_id is None:
             return Response({"error": "issue_type_id must be a valid UUID."}, status=status.HTTP_400_BAD_REQUEST)
         project = Project.objects.get(workspace__slug=slug, pk=project_id)
-        issue_type = IssueType.objects.get(workspace__slug=slug, pk=requested_type_id)
-        if not issue_type.is_active:
-            return Response(
-                {"error": "An inactive work item type cannot be enabled in a project."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
         with transaction.atomic():
+            # Lock the type so a concurrent deactivation cannot slip past the is_active check (R7).
+            issue_type = IssueType.objects.select_for_update(of=("self",)).get(
+                workspace__slug=slug, pk=requested_type_id
+            )
+            if not issue_type.is_active:
+                return Response(
+                    {"error": "An inactive work item type cannot be enabled in a project."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             link, created = ProjectIssueType.objects.get_or_create(project=project, issue_type=issue_type)
             if created:
                 record_audit(
@@ -312,7 +315,7 @@ class ProjectIssueTypeDetailEndpoint(BaseAPIView):
         try:
             with transaction.atomic():
                 # Lock every link of the project in id order, so concurrent default switches queue
-                # instead of deadlocking (R7).
+                # instead of deadlocking (invariant 2, R5, R6).
                 links = list(
                     ProjectIssueType.objects.select_for_update(of=("self",))
                     .select_related("issue_type")
@@ -322,7 +325,9 @@ class ProjectIssueTypeDetailEndpoint(BaseAPIView):
                 link = next((item for item in links if item.issue_type_id == issue_type_id), None)
                 if link is None:
                     raise ProjectIssueType.DoesNotExist
-                if not link.issue_type.is_active:
+                # Lock the type after the links (Task 5 locks types only), then read is_active from the locked row.
+                issue_type = IssueType.objects.select_for_update(of=("self",)).get(pk=link.issue_type_id)
+                if not issue_type.is_active:
                     return Response(
                         {"error": "An inactive work item type cannot be the project default."},
                         status=status.HTTP_400_BAD_REQUEST,
