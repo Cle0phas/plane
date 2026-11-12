@@ -34,3 +34,18 @@ def build_workflow(workspace, name, statuses, transitions=(), initial=None):
             WorkflowTransitionRule.objects.create(transition=transition, rule_type=RULE_RESTRICT_ACTORS, params=rule_params)
     workflow.states_by_name = states
     return workflow
+
+
+def link_project(project, default_workflow, items=None, actor=None):
+    """Attach a scheme to a project holding no work item in a conflicting state; returns {state name: State}."""
+    from plane.utils.workflow_sync import apply_scheme
+
+    states = apply_scheme(
+        project=project,
+        default_workflow_id=default_workflow.id,
+        items={issue_type.id: workflow.id for issue_type, workflow in (items or {}).items()},
+        mappings={},
+        # The audit trail needs a real actor; tests default to the workspace owner.
+        actor_id=(actor.id if actor else project.workspace.owner_id),
+    )
+    return {state.name: state for state in states.values()}
