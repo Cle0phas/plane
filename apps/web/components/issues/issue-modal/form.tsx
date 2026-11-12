@@ -10,7 +10,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
-import { FormProvider, useForm } from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 // editor
 import { ETabIndices, DEFAULT_WORK_ITEM_FORM_VALUES } from "@plane/constants";
 import type { EditorRefApi } from "@plane/editor";
@@ -43,6 +43,8 @@ import {
   IssueProjectSelect,
   IssueTitleInput,
 } from "@/components/issues/issue-modal/components";
+import { getTypeIdAfterProjectChange } from "@/components/work-item-types/helpers";
+import { WorkItemTypeSelect } from "@/components/work-item-types/work-item-type-select";
 // helpers
 // hooks
 import { useIssueModal } from "@/hooks/context/use-issue-modal";
@@ -154,6 +156,7 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
   } = methods;
 
   const projectId = watch("project_id");
+  const previousProjectIdRef = useRef(projectId);
 
   const isDisabled = isSubmitting || isApplyingTemplate;
 
@@ -186,14 +189,16 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
 
   // Update the issue type id when the project id changes
   useEffect(() => {
+    if (!projectId) return;
+    const isProjectChange = previousProjectIdRef.current !== projectId;
+    previousProjectIdRef.current = projectId;
     const issueTypeId = watch("type_id");
-
-    // if issue type id is present or project not available, return
-    if (issueTypeId || !projectId) return;
-
-    // get issue type id on project change
-    const issueTypeIdOnProjectChange = getIssueTypeIdOnProjectChange(projectId);
-    if (issueTypeIdOnProjectChange) setValue("type_id", issueTypeIdOnProjectChange, { shouldValidate: true });
+    const nextIssueTypeId = getTypeIdAfterProjectChange({
+      typeId: issueTypeId,
+      isProjectChange,
+      projectDefaultTypeId: getIssueTypeIdOnProjectChange(projectId),
+    });
+    if (nextIssueTypeId !== issueTypeId) setValue("type_id", nextIssueTypeId, { shouldValidate: true });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, projectId]);
@@ -373,6 +378,25 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
                     disabled={!!data?.id || !!data?.sourceIssueId || isProjectSelectionDisabled}
                     handleFormChange={handleFormChange}
                   />
+                  {!data?.id && (
+                    <Controller
+                      control={control}
+                      name="type_id"
+                      render={({ field: { value, onChange } }) => (
+                        <WorkItemTypeSelect
+                          projectId={projectId}
+                          value={value}
+                          onChange={(typeId) => {
+                            onChange(typeId);
+                            handleFormChange();
+                          }}
+                          variant="pill-md"
+                          label={t("work_item_types.select.label")}
+                          testId="create-work-item-type-select"
+                        />
+                      )}
+                    />
+                  )}
                 </div>
               </div>
               {watch("parent_id") && selectedParentIssue && (

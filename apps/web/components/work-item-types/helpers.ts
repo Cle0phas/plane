@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import type { TIssueType, TProjectIssueType } from "@plane/types";
+import type { IIssueDisplayProperties, TIssueType, TProjectIssueType } from "@plane/types";
 
 /** A disabled action carries the i18n key of its reason, shown to every user (spec 6.1, 6.6). */
 export type TWorkItemTypeActionState = { disabled: boolean; reasonKey?: string };
@@ -67,6 +67,19 @@ export const getProjectDefaultState = (
 /** R7: inactive types cannot be added, but stay listed while the project still uses them. */
 export const getProjectListTypes = (workItemTypes: TIssueType[], hasLink: (typeId: string) => boolean): TIssueType[] =>
   workItemTypes.filter((workItemType) => workItemType.is_active || hasLink(workItemType.id));
+
+/** Only an explicit false hides the type icon: saved views predate the issue_type property (spec 6.5). */
+export const getIdentifierVisibility = (displayProperties: IIssueDisplayProperties | undefined) => ({
+  showKey: displayProperties ? !!displayProperties.key : true,
+  showType: displayProperties?.issue_type !== false,
+});
+
+/** A type is only valid in the projects that enable it, so a project change always resets it (R9). */
+export const getTypeIdAfterProjectChange = (params: {
+  typeId: string | null | undefined;
+  isProjectChange: boolean;
+  projectDefaultTypeId: string | null;
+}): string | null => (params.isProjectChange || !params.typeId ? params.projectDefaultTypeId : params.typeId);
 
 const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object";
 

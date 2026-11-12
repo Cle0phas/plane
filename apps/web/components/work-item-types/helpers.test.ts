@@ -11,10 +11,12 @@ import {
   getDeactivateState,
   getDeleteState,
   getFormFieldErrorKeys,
+  getIdentifierVisibility,
   getProjectDefaultState,
   getProjectListTypes,
   getProjectToggleState,
   getSetDefaultState,
+  getTypeIdAfterProjectChange,
 } from "./helpers";
 
 const buildType = (overrides: Partial<TIssueType> = {}): TIssueType => ({
@@ -195,5 +197,46 @@ describe("project refusal keys", () => {
       "work_item_types.settings.cant_set_default_inactive_message"
     );
     expect(getActionRefusalKey({ error: "x" }, "project_disable")).toBeUndefined();
+  });
+});
+
+describe("identifier visibility", () => {
+  it("shows the key and the type by default", () => {
+    expect(getIdentifierVisibility(undefined)).toEqual({ showKey: true, showType: true });
+  });
+
+  it("follows the display properties of the view", () => {
+    expect(getIdentifierVisibility({ key: true, issue_type: false })).toEqual({ showKey: true, showType: false });
+    expect(getIdentifierVisibility({ key: false, issue_type: true })).toEqual({ showKey: false, showType: true });
+  });
+
+  it("shows the type when the view does not set the property", () => {
+    expect(getIdentifierVisibility({ key: true })).toEqual({ showKey: true, showType: true });
+  });
+});
+
+describe("type id after a project change", () => {
+  it("keeps the chosen type while the project stays the same", () => {
+    expect(getTypeIdAfterProjectChange({ typeId: "bug", isProjectChange: false, projectDefaultTypeId: "task" })).toBe(
+      "bug"
+    );
+  });
+
+  it("fills an empty type with the project default", () => {
+    expect(getTypeIdAfterProjectChange({ typeId: null, isProjectChange: false, projectDefaultTypeId: "task" })).toBe(
+      "task"
+    );
+  });
+
+  it("resets a chosen type to the new project default", () => {
+    expect(getTypeIdAfterProjectChange({ typeId: "bug", isProjectChange: true, projectDefaultTypeId: "story" })).toBe(
+      "story"
+    );
+  });
+
+  it("clears the type when the new project default is not loaded, so the server assigns it", () => {
+    expect(
+      getTypeIdAfterProjectChange({ typeId: "bug", isProjectChange: true, projectDefaultTypeId: null })
+    ).toBeNull();
   });
 });
