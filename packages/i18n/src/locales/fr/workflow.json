@@ -95,6 +95,154 @@
           "message": "Les réviseurs de la règle de changement d'état ne pouvaient pas être modifiés. Veuillez réessayer."
         }
       }
+    },
+    "label": "Workflows",
+    "groups": {
+      "backlog": "Backlog",
+      "unstarted": "Non commencé",
+      "started": "En cours",
+      "completed": "Terminé",
+      "cancelled": "Annulé"
+    },
+    "roles": {
+      "admin": "Admin",
+      "member": "Membre",
+      "guest": "Invité"
+    },
+    "settings": {
+      "description": "Un workflow liste les états des tickets et les passages autorisés entre eux. Chaque projet choisit un workflow par type de ticket.",
+      "create": "Créer un workflow",
+      "empty": "Aucun workflow pour l’instant.",
+      "load_error": "Impossible de charger les workflows.",
+      "columns": {
+        "name": "Nom",
+        "states": "États",
+        "projects": "Projets"
+      },
+      "state_count": "{count, plural, one {# état} many {# états} other {# états}}",
+      "project_count": "{count, plural, one {# projet} many {# projets} other {# projets}}",
+      "open": "Ouvrir",
+      "delete": {
+        "action": "Supprimer",
+        "title": "Supprimer ce workflow ?",
+        "description": "Le workflow et son diagramme sont supprimés. Ses statuts restent disponibles pour les autres workflows.",
+        "in_use": "Des projets utilisent encore ce workflow."
+      },
+      "form": {
+        "create_title": "Créer un workflow",
+        "name": "Nom",
+        "description": "Description",
+        "duplicate": "Un workflow porte déjà ce nom.",
+        "submit": "Créer",
+        "cancel": "Annuler"
+      },
+      "error": "Impossible d’enregistrer le workflow. Réessayez."
+    },
+    "editor": {
+      "back": "Retour aux workflows",
+      "save": "Enregistrer",
+      "discard": "Annuler les changements",
+      "saved": "Workflow enregistré.",
+      "unsaved": "Modifications non enregistrées",
+      "read_only": "Seuls les admins de l’espace de travail peuvent modifier les workflows.",
+      "start": "DÉBUT",
+      "global": "Depuis n’importe quel état",
+      "diagram_label": "Diagramme du workflow",
+      "add_state": {
+        "title": "Ajouter un état",
+        "existing": "Statut existant",
+        "new": "Nouveau statut",
+        "name": "Nom",
+        "color": "Couleur",
+        "group": "Catégorie",
+        "group_auto": "Automatique",
+        "submit": "Ajouter l’état"
+      },
+      "add_transition": {
+        "title": "Ajouter une transition",
+        "sources": "Depuis",
+        "any_state": "N’importe quel état",
+        "target": "Vers",
+        "name": "Nom (facultatif)",
+        "submit": "Ajouter la transition"
+      },
+      "panel": {
+        "close": "Fermer",
+        "state": "État",
+        "transition": "Transition",
+        "set_initial": "En faire l’état initial",
+        "initial": "État initial",
+        "shared": "{count, plural, one {Partagé avec # autre workflow : les changements s’y appliquent aussi.} many {Partagé avec # autres workflows : les changements s’y appliquent aussi.} other {Partagé avec # autres workflows : les changements s’y appliquent aussi.}}",
+        "remove_state": "Retirer l’état",
+        "remove_transition": "Retirer la transition"
+      },
+      "restrict": {
+        "title": "Limiter qui peut passer",
+        "description": "Sans limite, toute personne qui peut modifier le ticket peut utiliser cette transition.",
+        "roles": "Rôles",
+        "users": "Personnes",
+        "assignee": "Responsable du ticket",
+        "creator": "Créateur du ticket",
+        "clear": "Retirer la limite"
+      },
+      "errors": {
+        "initial_state_required": "Choisissez exactement un état initial.",
+        "duplicate_state_key": "Un état apparaît deux fois. Rechargez la page.",
+        "duplicate_status": "Un statut apparaît deux fois dans ce workflow.",
+        "duplicate_status_name": "Deux états portent le même nom, ou un statut de ce nom existe déjà : choisissez-le parmi les statuts existants.",
+        "invalid_transition": "Une transition est incomplète.",
+        "reserved_status_name": "Le nom « Triage » est réservé à l’intake.",
+        "invalid_rule": "Une limite est incomplète.",
+        "invalid_status": "Un statut n’existe plus. Rechargez la page.",
+        "status_changed": "Un état a changé de statut. Rechargez la page.",
+        "status_limit": "L’espace de travail a atteint 1 000 statuts.",
+        "status_in_use": "Ces états contiennent encore des tickets, déplacez-les d’abord :",
+        "status_in_use_project": "{project} : {count, plural, one {# ticket} many {# tickets} other {# tickets}}",
+        "default": "Impossible d’enregistrer le workflow."
+      }
+    },
+    "scheme": {
+      "description": "Choisissez le workflow que suit chaque type de ticket dans ce projet.",
+      "free": "Ce projet n’utilise pas de workflow : tout changement d’état est permis.",
+      "default_workflow": "Workflow par défaut",
+      "per_type": "Workflow pour {type}",
+      "same_as_default": "Comme le workflow par défaut",
+      "choose": "Choisir un workflow",
+      "next": "Continuer",
+      "back": "Retour",
+      "apply": "Appliquer",
+      "detach": "Ne plus utiliser de workflow",
+      "detach_confirm": "Les états restent, redeviennent modifiables, et tout changement d’état est de nouveau permis.",
+      "mapping": {
+        "title": "Déplacer les tickets",
+        "description": "Ces états contiennent des tickets mais ne font pas partie du workflow choisi. Choisissez où vont les tickets.",
+        "row": "{state} dans {workflow} : {count, plural, one {# ticket} many {# tickets} other {# tickets}}",
+        "pick": "État d’arrivée",
+        "none": "Rien à déplacer."
+      },
+      "applied": "Le projet suit maintenant ses workflows.",
+      "detached": "Le projet n’utilise plus de workflow.",
+      "errors": {
+        "invalid_scheme": "Un workflow ou un type n’est plus valide. Rechargez la page.",
+        "mapping_incomplete": "Choisissez un état d’arrivée pour chaque ligne.",
+        "invalid_mapping": "Un état d’arrivée ne fait pas partie de son workflow.",
+        "default": "Impossible d’appliquer le changement."
+      }
+    },
+    "refusal": {
+      "arrival_state_required": "Choisissez l’état dans lequel ce ticket entre dans son nouveau workflow."
+    },
+    "managed_states": {
+      "banner": "Ces états viennent des workflows du projet. Modifiez-les dans Paramètres de l’espace de travail, Workflows."
+    },
+    "type_change": {
+      "title": "Choisir l’état d’arrivée",
+      "description": "L’état actuel ne fait pas partie du workflow de ce type.",
+      "submit": "Changer de type",
+      "cancel": "Annuler"
+    },
+    "creation": {
+      "initial_state": "Les nouveaux tickets commencent dans cet état."
     }
   }
 }

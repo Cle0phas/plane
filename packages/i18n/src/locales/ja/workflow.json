@@ -95,6 +95,154 @@
           "message": "状態変更ルールのレビューアが変更できませんでした。もう一度お試しください。"
         }
       }
+    },
+    "label": "ワークフロー",
+    "groups": {
+      "backlog": "バックログ",
+      "unstarted": "未着手",
+      "started": "進行中",
+      "completed": "完了",
+      "cancelled": "キャンセル"
+    },
+    "roles": {
+      "admin": "管理者",
+      "member": "メンバー",
+      "guest": "ゲスト"
+    },
+    "settings": {
+      "description": "ワークフローは、作業項目の状態と、状態間で許可される遷移を定義します。各プロジェクトは作業項目タイプごとにワークフローを選択します。",
+      "create": "ワークフローを作成",
+      "empty": "ワークフローはまだありません。",
+      "load_error": "ワークフローを読み込めませんでした。",
+      "columns": {
+        "name": "名前",
+        "states": "状態",
+        "projects": "プロジェクト"
+      },
+      "state_count": "{count, plural, one {#個の状態} other {#個の状態}}",
+      "project_count": "{count, plural, one {#件のプロジェクト} other {#件のプロジェクト}}",
+      "open": "開く",
+      "delete": {
+        "action": "削除",
+        "title": "このワークフローを削除しますか？",
+        "description": "ワークフローとその図が削除されます。ステータスは他のワークフローで引き続き使用できます。",
+        "in_use": "このワークフローを使用しているプロジェクトがあります。"
+      },
+      "form": {
+        "create_title": "ワークフローを作成",
+        "name": "名前",
+        "description": "説明",
+        "duplicate": "この名前のワークフローはすでに存在します。",
+        "submit": "作成",
+        "cancel": "キャンセル"
+      },
+      "error": "ワークフローを保存できませんでした。もう一度お試しください。"
+    },
+    "editor": {
+      "back": "ワークフローに戻る",
+      "save": "保存",
+      "discard": "変更を破棄",
+      "saved": "ワークフローを保存しました。",
+      "unsaved": "未保存の変更",
+      "read_only": "ワークフローを変更できるのはワークスペースの管理者のみです。",
+      "start": "開始",
+      "global": "任意の状態から",
+      "diagram_label": "ワークフロー図",
+      "add_state": {
+        "title": "状態を追加",
+        "existing": "既存のステータス",
+        "new": "新しいステータス",
+        "name": "名前",
+        "color": "色",
+        "group": "カテゴリー",
+        "group_auto": "自動",
+        "submit": "状態を追加"
+      },
+      "add_transition": {
+        "title": "遷移を追加",
+        "sources": "遷移元",
+        "any_state": "任意の状態",
+        "target": "遷移先",
+        "name": "名前（任意）",
+        "submit": "遷移を追加"
+      },
+      "panel": {
+        "close": "閉じる",
+        "state": "状態",
+        "transition": "遷移",
+        "set_initial": "初期状態にする",
+        "initial": "初期状態",
+        "shared": "{count, plural, one {他の#件のワークフローと共有されています。変更はそちらにも反映されます。} other {他の#件のワークフローと共有されています。変更はそちらにも反映されます。}}",
+        "remove_state": "状態を削除",
+        "remove_transition": "遷移を削除"
+      },
+      "restrict": {
+        "title": "移動できる人を制限",
+        "description": "制限しない場合、作業項目を編集できる人は誰でもこの遷移を使用できます。",
+        "roles": "ロール",
+        "users": "ユーザー",
+        "assignee": "作業項目の担当者",
+        "creator": "作業項目の作成者",
+        "clear": "制限を解除"
+      },
+      "errors": {
+        "initial_state_required": "初期状態をちょうど1つ選択してください。",
+        "duplicate_state_key": "状態が重複しています。ページを再読み込みしてください。",
+        "duplicate_status": "このワークフローでステータスが重複しています。",
+        "duplicate_status_name": "同じ名前の状態が2つあるか、この名前のステータスがすでに存在します。既存のステータスから選択してください。",
+        "invalid_transition": "遷移の設定が不完全です。",
+        "reserved_status_name": "「Triage」という名前は Intake 用に予約されています。",
+        "invalid_rule": "制限の設定が不完全です。",
+        "invalid_status": "ステータスが存在しなくなりました。ページを再読み込みしてください。",
+        "status_changed": "状態のステータスが変更されました。ページを再読み込みしてください。",
+        "status_limit": "ワークスペースのステータスが上限の1,000件に達しました。",
+        "status_in_use": "これらの状態にはまだ作業項目があります。先に移動してください：",
+        "status_in_use_project": "{project}：{count, plural, one {#件の作業項目} other {#件の作業項目}}",
+        "default": "ワークフローを保存できませんでした。"
+      }
+    },
+    "scheme": {
+      "description": "このプロジェクトで各作業項目タイプが従うワークフローを選択します。",
+      "free": "このプロジェクトはワークフローを使用していません。すべての状態変更が許可されます。",
+      "default_workflow": "デフォルトのワークフロー",
+      "per_type": "{type}のワークフロー",
+      "same_as_default": "デフォルトのワークフローと同じ",
+      "choose": "ワークフローを選択",
+      "next": "続行",
+      "back": "戻る",
+      "apply": "適用",
+      "detach": "ワークフローの使用を停止",
+      "detach_confirm": "状態は残り、再び編集できるようになり、すべての状態変更が再び許可されます。",
+      "mapping": {
+        "title": "作業項目を移動",
+        "description": "これらの状態には作業項目がありますが、選択したワークフローに含まれていません。作業項目の移動先を選択してください。",
+        "row": "{workflow}の{state}：{count, plural, one {#件の作業項目} other {#件の作業項目}}",
+        "pick": "移動先の状態",
+        "none": "移動するものはありません。"
+      },
+      "applied": "プロジェクトはワークフローに従うようになりました。",
+      "detached": "プロジェクトはワークフローを使用しなくなりました。",
+      "errors": {
+        "invalid_scheme": "ワークフローまたはタイプが無効になりました。ページを再読み込みしてください。",
+        "mapping_incomplete": "すべての行で移動先の状態を選択してください。",
+        "invalid_mapping": "移動先の状態がそのワークフローに含まれていません。",
+        "default": "変更を適用できませんでした。"
+      }
+    },
+    "refusal": {
+      "arrival_state_required": "この作業項目が新しいワークフローで入る状態を選択してください。"
+    },
+    "managed_states": {
+      "banner": "これらの状態はプロジェクトのワークフローから取得されます。ワークスペース設定のワークフローで変更してください。"
+    },
+    "type_change": {
+      "title": "移動先の状態を選択",
+      "description": "現在の状態は、このタイプのワークフローに含まれていません。",
+      "submit": "タイプを変更",
+      "cancel": "キャンセル"
+    },
+    "creation": {
+      "initial_state": "新しい作業項目はこの状態から始まります。"
     }
   }
 }

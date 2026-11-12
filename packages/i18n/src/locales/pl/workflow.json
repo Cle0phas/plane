@@ -95,6 +95,154 @@
           "message": "Recenzenci reguły zmiany stanu nie mogli zostać zmodyfikowani. Spróbuj ponownie."
         }
       }
+    },
+    "label": "Workflowy",
+    "groups": {
+      "backlog": "Backlog",
+      "unstarted": "Nierozpoczęte",
+      "started": "W toku",
+      "completed": "Ukończone",
+      "cancelled": "Anulowane"
+    },
+    "roles": {
+      "admin": "Administrator",
+      "member": "Członek",
+      "guest": "Gość"
+    },
+    "settings": {
+      "description": "Workflow wylicza stany elementów pracy i dozwolone przejścia między nimi. Każdy projekt wybiera jeden workflow dla każdego typu elementu pracy.",
+      "create": "Utwórz workflow",
+      "empty": "Brak workflow.",
+      "load_error": "Nie udało się wczytać workflowów.",
+      "columns": {
+        "name": "Nazwa",
+        "states": "Stany",
+        "projects": "Projekty"
+      },
+      "state_count": "{count, plural, one {# stan} few {# stany} many {# stanów} other {# stanu}}",
+      "project_count": "{count, plural, one {# projekt} few {# projekty} many {# projektów} other {# projektu}}",
+      "open": "Otwórz",
+      "delete": {
+        "action": "Usuń",
+        "title": "Usunąć ten workflow?",
+        "description": "Workflow i jego diagram zostaną usunięte. Jego statusy pozostają dostępne dla innych workflowów.",
+        "in_use": "Niektóre projekty nadal używają tego workflow."
+      },
+      "form": {
+        "create_title": "Utwórz workflow",
+        "name": "Nazwa",
+        "description": "Opis",
+        "duplicate": "Workflow o tej nazwie już istnieje.",
+        "submit": "Utwórz",
+        "cancel": "Anuluj"
+      },
+      "error": "Nie udało się zapisać workflow. Spróbuj ponownie."
+    },
+    "editor": {
+      "back": "Wróć do workflowów",
+      "save": "Zapisz",
+      "discard": "Odrzuć zmiany",
+      "saved": "Workflow zapisany.",
+      "unsaved": "Niezapisane zmiany",
+      "read_only": "Tylko administratorzy przestrzeni roboczej mogą zmieniać workflowy.",
+      "start": "START",
+      "global": "Z dowolnego stanu",
+      "diagram_label": "Diagram workflow",
+      "add_state": {
+        "title": "Dodaj stan",
+        "existing": "Istniejący status",
+        "new": "Nowy status",
+        "name": "Nazwa",
+        "color": "Kolor",
+        "group": "Kategoria",
+        "group_auto": "Automatyczna",
+        "submit": "Dodaj stan"
+      },
+      "add_transition": {
+        "title": "Dodaj przejście",
+        "sources": "Z",
+        "any_state": "Dowolny stan",
+        "target": "Do",
+        "name": "Nazwa (opcjonalnie)",
+        "submit": "Dodaj przejście"
+      },
+      "panel": {
+        "close": "Zamknij",
+        "state": "Stan",
+        "transition": "Przejście",
+        "set_initial": "Ustaw jako stan początkowy",
+        "initial": "Stan początkowy",
+        "shared": "{count, plural, one {Współdzielony z # innym workflow: zmiany obowiązują tam także.} few {Współdzielony z # innymi workflowami: zmiany obowiązują tam także.} many {Współdzielony z # innymi workflowami: zmiany obowiązują tam także.} other {Współdzielony z # innego workflow: zmiany obowiązują tam także.}}",
+        "remove_state": "Usuń stan",
+        "remove_transition": "Usuń przejście"
+      },
+      "restrict": {
+        "title": "Ogranicz, kto może przenosić",
+        "description": "Bez ograniczenia każdy, kto może edytować element pracy, może użyć tego przejścia.",
+        "roles": "Role",
+        "users": "Osoby",
+        "assignee": "Osoba przypisana do elementu pracy",
+        "creator": "Autor elementu pracy",
+        "clear": "Usuń ograniczenie"
+      },
+      "errors": {
+        "initial_state_required": "Wybierz dokładnie jeden stan początkowy.",
+        "duplicate_state_key": "Stan występuje dwa razy. Odśwież stronę.",
+        "duplicate_status": "Status występuje dwa razy w tym workflow.",
+        "duplicate_status_name": "Dwa stany mają tę samą nazwę albo status o tej nazwie już istnieje: wybierz go spośród istniejących statusów.",
+        "invalid_transition": "Przejście jest niekompletne.",
+        "reserved_status_name": "Nazwa „Triage” jest zarezerwowana dla Intake.",
+        "invalid_rule": "Ograniczenie jest niekompletne.",
+        "invalid_status": "Status już nie istnieje. Odśwież stronę.",
+        "status_changed": "Stan zmienił status. Odśwież stronę.",
+        "status_limit": "Przestrzeń robocza osiągnęła 1000 statusów.",
+        "status_in_use": "Te stany nadal zawierają elementy pracy, najpierw je przenieś:",
+        "status_in_use_project": "{project}: {count, plural, one {# element pracy} few {# elementy pracy} many {# elementów pracy} other {# elementu pracy}}",
+        "default": "Nie udało się zapisać workflow."
+      }
+    },
+    "scheme": {
+      "description": "Wybierz workflow, według którego działa każdy typ elementu pracy w tym projekcie.",
+      "free": "Ten projekt nie używa workflowów: dozwolona jest każda zmiana stanu.",
+      "default_workflow": "Domyślny workflow",
+      "per_type": "Workflow dla {type}",
+      "same_as_default": "Taki sam jak domyślny workflow",
+      "choose": "Wybierz workflow",
+      "next": "Dalej",
+      "back": "Wstecz",
+      "apply": "Zastosuj",
+      "detach": "Przestań używać workflowów",
+      "detach_confirm": "Stany zostają, znów można je edytować, a każda zmiana stanu jest ponownie dozwolona.",
+      "mapping": {
+        "title": "Przenieś elementy pracy",
+        "description": "Te stany zawierają elementy pracy, ale nie należą do wybranego workflow. Wybierz, dokąd trafią elementy pracy.",
+        "row": "{state} w {workflow}: {count, plural, one {# element pracy} few {# elementy pracy} many {# elementów pracy} other {# elementu pracy}}",
+        "pick": "Stan docelowy",
+        "none": "Nie ma nic do przeniesienia."
+      },
+      "applied": "Projekt działa teraz według swoich workflowów.",
+      "detached": "Projekt nie używa już workflowów.",
+      "errors": {
+        "invalid_scheme": "Workflow lub typ nie jest już prawidłowy. Odśwież stronę.",
+        "mapping_incomplete": "Wybierz stan docelowy dla każdego wiersza.",
+        "invalid_mapping": "Stan docelowy nie należy do swojego workflow.",
+        "default": "Nie udało się zastosować zmiany."
+      }
+    },
+    "refusal": {
+      "arrival_state_required": "Wybierz stan, w którym ten element pracy trafia do nowego workflow."
+    },
+    "managed_states": {
+      "banner": "Te stany pochodzą z workflowów projektu. Zmienisz je w Ustawieniach przestrzeni roboczej, Workflowy."
+    },
+    "type_change": {
+      "title": "Wybierz stan docelowy",
+      "description": "Bieżący stan nie należy do workflow tego typu.",
+      "submit": "Zmień typ",
+      "cancel": "Anuluj"
+    },
+    "creation": {
+      "initial_state": "Nowe elementy pracy zaczynają w tym stanie."
     }
   }
 }

@@ -95,6 +95,154 @@
           "message": "Reviewers van de statuswijzigingsregel konden niet worden gewijzigd. Probeer het opnieuw."
         }
       }
+    },
+    "label": "Workflows",
+    "groups": {
+      "backlog": "Backlog",
+      "unstarted": "Niet gestart",
+      "started": "Bezig",
+      "completed": "Klaar",
+      "cancelled": "Geannuleerd"
+    },
+    "roles": {
+      "admin": "Beheerder",
+      "member": "Lid",
+      "guest": "Gast"
+    },
+    "settings": {
+      "description": "Een workflow somt de statussen van werkitems op en de overgangen die ertussen zijn toegestaan. Elk project kiest een workflow per werkitemtype.",
+      "create": "Workflow maken",
+      "empty": "Nog geen workflow.",
+      "load_error": "De workflows konden niet worden geladen.",
+      "columns": {
+        "name": "Naam",
+        "states": "Statussen",
+        "projects": "Projecten"
+      },
+      "state_count": "{count, plural, one {# status} other {# statussen}}",
+      "project_count": "{count, plural, one {# project} other {# projecten}}",
+      "open": "Openen",
+      "delete": {
+        "action": "Verwijderen",
+        "title": "Deze workflow verwijderen?",
+        "description": "De workflow en het bijbehorende diagram worden verwijderd. De statussen blijven beschikbaar voor andere workflows.",
+        "in_use": "Projecten gebruiken deze workflow nog."
+      },
+      "form": {
+        "create_title": "Een workflow maken",
+        "name": "Naam",
+        "description": "Beschrijving",
+        "duplicate": "Er bestaat al een workflow met deze naam.",
+        "submit": "Maken",
+        "cancel": "Annuleren"
+      },
+      "error": "De workflow kon niet worden opgeslagen. Probeer het opnieuw."
+    },
+    "editor": {
+      "back": "Terug naar workflows",
+      "save": "Opslaan",
+      "discard": "Wijzigingen negeren",
+      "saved": "Workflow opgeslagen.",
+      "unsaved": "Niet-opgeslagen wijzigingen",
+      "read_only": "Alleen beheerders van de werkruimte kunnen workflows wijzigen.",
+      "start": "START",
+      "global": "Vanuit elke status",
+      "diagram_label": "Workflowdiagram",
+      "add_state": {
+        "title": "Een status toevoegen",
+        "existing": "Bestaande status",
+        "new": "Nieuwe status",
+        "name": "Naam",
+        "color": "Kleur",
+        "group": "Categorie",
+        "group_auto": "Automatisch",
+        "submit": "Status toevoegen"
+      },
+      "add_transition": {
+        "title": "Een overgang toevoegen",
+        "sources": "Van",
+        "any_state": "Elke status",
+        "target": "Naar",
+        "name": "Naam (optioneel)",
+        "submit": "Overgang toevoegen"
+      },
+      "panel": {
+        "close": "Sluiten",
+        "state": "Status",
+        "transition": "Overgang",
+        "set_initial": "Maak dit de beginstatus",
+        "initial": "Beginstatus",
+        "shared": "{count, plural, one {Gedeeld met # andere workflow: wijzigingen gelden daar ook.} other {Gedeeld met # andere workflows: wijzigingen gelden daar ook.}}",
+        "remove_state": "Status verwijderen",
+        "remove_transition": "Overgang verwijderen"
+      },
+      "restrict": {
+        "title": "Beperken wie mag verplaatsen",
+        "description": "Zonder beperking kan iedereen die het werkitem mag bewerken deze overgang gebruiken.",
+        "roles": "Rollen",
+        "users": "Personen",
+        "assignee": "Toegewezene van het werkitem",
+        "creator": "Maker van het werkitem",
+        "clear": "Beperking verwijderen"
+      },
+      "errors": {
+        "initial_state_required": "Kies precies één beginstatus.",
+        "duplicate_state_key": "Een status komt twee keer voor. Laad de pagina opnieuw.",
+        "duplicate_status": "Een status komt twee keer voor in deze workflow.",
+        "duplicate_status_name": "Twee statussen hebben dezelfde naam, of er bestaat al een status met deze naam: kies die uit de bestaande statussen.",
+        "invalid_transition": "Een overgang is onvolledig.",
+        "reserved_status_name": "De naam \"Triage\" is gereserveerd voor Intake.",
+        "invalid_rule": "Een beperking is onvolledig.",
+        "invalid_status": "Een status bestaat niet meer. Laad de pagina opnieuw.",
+        "status_changed": "Een status is gewijzigd. Laad de pagina opnieuw.",
+        "status_limit": "De werkruimte heeft 1.000 statussen bereikt.",
+        "status_in_use": "Deze statussen bevatten nog werkitems, verplaats ze eerst:",
+        "status_in_use_project": "{project}: {count, plural, one {# werkitem} other {# werkitems}}",
+        "default": "De workflow kon niet worden opgeslagen."
+      }
+    },
+    "scheme": {
+      "description": "Kies welke workflow elk werkitemtype in dit project volgt.",
+      "free": "Dit project gebruikt geen workflows: elke statuswijziging is toegestaan.",
+      "default_workflow": "Standaardworkflow",
+      "per_type": "Workflow voor {type}",
+      "same_as_default": "Hetzelfde als de standaardworkflow",
+      "choose": "Kies een workflow",
+      "next": "Doorgaan",
+      "back": "Terug",
+      "apply": "Toepassen",
+      "detach": "Geen workflows meer gebruiken",
+      "detach_confirm": "De statussen blijven bestaan, zijn weer te bewerken en elke statuswijziging is weer toegestaan.",
+      "mapping": {
+        "title": "Werkitems verplaatsen",
+        "description": "Deze statussen bevatten werkitems maar maken geen deel uit van de gekozen workflow. Kies waar de werkitems naartoe gaan.",
+        "row": "{state} in {workflow}: {count, plural, one {# werkitem} other {# werkitems}}",
+        "pick": "Doelstatus",
+        "none": "Niets te verplaatsen."
+      },
+      "applied": "Het project volgt nu zijn workflows.",
+      "detached": "Het project gebruikt geen workflows meer.",
+      "errors": {
+        "invalid_scheme": "Een workflow of type is niet meer geldig. Laad de pagina opnieuw.",
+        "mapping_incomplete": "Kies voor elke regel een doelstatus.",
+        "invalid_mapping": "Een doelstatus maakt geen deel uit van de bijbehorende workflow.",
+        "default": "De wijziging kon niet worden toegepast."
+      }
+    },
+    "refusal": {
+      "arrival_state_required": "Kies de status waarin dit werkitem terechtkomt in de nieuwe workflow."
+    },
+    "managed_states": {
+      "banner": "Deze statussen komen uit de projectworkflows. Wijzig ze in Werkruimte-instellingen, Workflows."
+    },
+    "type_change": {
+      "title": "Kies de doelstatus",
+      "description": "De huidige status maakt geen deel uit van de workflow van dit type.",
+      "submit": "Type wijzigen",
+      "cancel": "Annuleren"
+    },
+    "creation": {
+      "initial_state": "Nieuwe werkitems beginnen in deze status."
     }
   }
 }

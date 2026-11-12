@@ -95,6 +95,154 @@
           "message": "Người xem xét quy tắc thay đổi trạng thái không thể sửa đổi. Vui lòng thử lại."
         }
       }
+    },
+    "label": "Quy trình làm việc",
+    "groups": {
+      "backlog": "Backlog",
+      "unstarted": "Chưa bắt đầu",
+      "started": "Đang thực hiện",
+      "completed": "Hoàn thành",
+      "cancelled": "Đã hủy"
+    },
+    "roles": {
+      "admin": "Quản trị viên",
+      "member": "Thành viên",
+      "guest": "Khách"
+    },
+    "settings": {
+      "description": "Một quy trình làm việc liệt kê các trạng thái của mục công việc và các chuyển tiếp được phép giữa chúng. Mỗi dự án chọn một quy trình làm việc cho từng loại mục công việc.",
+      "create": "Tạo quy trình làm việc",
+      "empty": "Chưa có quy trình làm việc nào.",
+      "load_error": "Không thể tải các quy trình làm việc.",
+      "columns": {
+        "name": "Tên",
+        "states": "Trạng thái",
+        "projects": "Dự án"
+      },
+      "state_count": "{count, plural, one {# trạng thái} other {# trạng thái}}",
+      "project_count": "{count, plural, one {# dự án} other {# dự án}}",
+      "open": "Mở",
+      "delete": {
+        "action": "Xóa",
+        "title": "Xóa quy trình làm việc này?",
+        "description": "Quy trình làm việc và sơ đồ của nó sẽ bị xóa. Các trạng thái của nó vẫn khả dụng cho các quy trình làm việc khác.",
+        "in_use": "Vẫn còn dự án đang dùng quy trình làm việc này."
+      },
+      "form": {
+        "create_title": "Tạo một quy trình làm việc",
+        "name": "Tên",
+        "description": "Mô tả",
+        "duplicate": "Đã có một quy trình làm việc với tên này.",
+        "submit": "Tạo",
+        "cancel": "Hủy"
+      },
+      "error": "Không thể lưu quy trình làm việc. Vui lòng thử lại."
+    },
+    "editor": {
+      "back": "Quay lại các quy trình làm việc",
+      "save": "Lưu",
+      "discard": "Bỏ thay đổi",
+      "saved": "Đã lưu quy trình làm việc.",
+      "unsaved": "Thay đổi chưa lưu",
+      "read_only": "Chỉ quản trị viên không gian làm việc mới có thể thay đổi quy trình làm việc.",
+      "start": "BẮT ĐẦU",
+      "global": "Từ bất kỳ trạng thái nào",
+      "diagram_label": "Sơ đồ quy trình làm việc",
+      "add_state": {
+        "title": "Thêm trạng thái",
+        "existing": "Trạng thái hiện có",
+        "new": "Trạng thái mới",
+        "name": "Tên",
+        "color": "Màu",
+        "group": "Danh mục",
+        "group_auto": "Tự động",
+        "submit": "Thêm trạng thái"
+      },
+      "add_transition": {
+        "title": "Thêm chuyển tiếp",
+        "sources": "Từ",
+        "any_state": "Bất kỳ trạng thái nào",
+        "target": "Đến",
+        "name": "Tên (tùy chọn)",
+        "submit": "Thêm chuyển tiếp"
+      },
+      "panel": {
+        "close": "Đóng",
+        "state": "Trạng thái",
+        "transition": "Chuyển tiếp",
+        "set_initial": "Đặt làm trạng thái ban đầu",
+        "initial": "Trạng thái ban đầu",
+        "shared": "{count, plural, one {Dùng chung với # quy trình làm việc khác: thay đổi cũng áp dụng ở đó.} other {Dùng chung với # quy trình làm việc khác: thay đổi cũng áp dụng ở đó.}}",
+        "remove_state": "Gỡ trạng thái",
+        "remove_transition": "Gỡ chuyển tiếp"
+      },
+      "restrict": {
+        "title": "Giới hạn người được chuyển",
+        "description": "Khi không giới hạn, bất kỳ ai có thể chỉnh sửa mục công việc đều có thể dùng chuyển tiếp này.",
+        "roles": "Vai trò",
+        "users": "Người",
+        "assignee": "Người được giao mục công việc",
+        "creator": "Người tạo mục công việc",
+        "clear": "Gỡ giới hạn"
+      },
+      "errors": {
+        "initial_state_required": "Hãy chọn đúng một trạng thái ban đầu.",
+        "duplicate_state_key": "Một trạng thái xuất hiện hai lần. Hãy tải lại trang.",
+        "duplicate_status": "Một trạng thái xuất hiện hai lần trong quy trình làm việc này.",
+        "duplicate_status_name": "Hai trạng thái có cùng tên, hoặc đã có trạng thái với tên này: hãy chọn từ các trạng thái hiện có.",
+        "invalid_transition": "Một chuyển tiếp chưa hoàn chỉnh.",
+        "reserved_status_name": "Tên \"Triage\" được dành riêng cho Intake.",
+        "invalid_rule": "Một giới hạn chưa hoàn chỉnh.",
+        "invalid_status": "Một trạng thái không còn tồn tại. Hãy tải lại trang.",
+        "status_changed": "Một trạng thái đã thay đổi. Hãy tải lại trang.",
+        "status_limit": "Không gian làm việc đã đạt 1.000 trạng thái.",
+        "status_in_use": "Các trạng thái này vẫn chứa mục công việc, hãy chuyển chúng trước:",
+        "status_in_use_project": "{project}: {count, plural, one {# mục công việc} other {# mục công việc}}",
+        "default": "Không thể lưu quy trình làm việc."
+      }
+    },
+    "scheme": {
+      "description": "Chọn quy trình làm việc mà mỗi loại mục công việc tuân theo trong dự án này.",
+      "free": "Dự án này không dùng quy trình làm việc: mọi thay đổi trạng thái đều được phép.",
+      "default_workflow": "Quy trình làm việc mặc định",
+      "per_type": "Quy trình làm việc cho {type}",
+      "same_as_default": "Giống quy trình làm việc mặc định",
+      "choose": "Chọn quy trình làm việc",
+      "next": "Tiếp tục",
+      "back": "Quay lại",
+      "apply": "Áp dụng",
+      "detach": "Ngừng dùng quy trình làm việc",
+      "detach_confirm": "Các trạng thái được giữ lại, có thể chỉnh sửa trở lại, và mọi thay đổi trạng thái lại được phép.",
+      "mapping": {
+        "title": "Chuyển mục công việc",
+        "description": "Các trạng thái này chứa mục công việc nhưng không thuộc quy trình làm việc đã chọn. Hãy chọn nơi chuyển các mục công việc đến.",
+        "row": "{state} trong {workflow}: {count, plural, one {# mục công việc} other {# mục công việc}}",
+        "pick": "Trạng thái đích",
+        "none": "Không có gì để chuyển."
+      },
+      "applied": "Dự án hiện tuân theo các quy trình làm việc của nó.",
+      "detached": "Dự án không còn dùng quy trình làm việc.",
+      "errors": {
+        "invalid_scheme": "Một quy trình làm việc hoặc loại không còn hợp lệ. Hãy tải lại trang.",
+        "mapping_incomplete": "Hãy chọn trạng thái đích cho mỗi dòng.",
+        "invalid_mapping": "Một trạng thái đích không thuộc quy trình làm việc của nó.",
+        "default": "Không thể áp dụng thay đổi."
+      }
+    },
+    "refusal": {
+      "arrival_state_required": "Hãy chọn trạng thái mà mục công việc này sẽ vào trong quy trình làm việc mới."
+    },
+    "managed_states": {
+      "banner": "Các trạng thái này đến từ quy trình làm việc của dự án. Hãy thay đổi chúng trong Cài đặt không gian làm việc, Quy trình làm việc."
+    },
+    "type_change": {
+      "title": "Chọn trạng thái đích",
+      "description": "Trạng thái hiện tại không thuộc quy trình làm việc của loại này.",
+      "submit": "Đổi loại",
+      "cancel": "Hủy"
+    },
+    "creation": {
+      "initial_state": "Các mục công việc mới bắt đầu ở trạng thái này."
     }
   }
 }

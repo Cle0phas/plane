@@ -95,6 +95,154 @@
           "message": "Durum değişikliği kuralı inceleyicileri değiştirilemedi. Lütfen tekrar deneyin."
         }
       }
+    },
+    "label": "İş Akışları",
+    "groups": {
+      "backlog": "Backlog",
+      "unstarted": "Başlamadı",
+      "started": "Devam ediyor",
+      "completed": "Tamamlandı",
+      "cancelled": "İptal edildi"
+    },
+    "roles": {
+      "admin": "Yönetici",
+      "member": "Üye",
+      "guest": "Konuk"
+    },
+    "settings": {
+      "description": "Bir iş akışı, iş öğelerinin durumlarını ve aralarında izin verilen geçişleri listeler. Her proje, iş öğesi türü başına bir iş akışı seçer.",
+      "create": "İş akışı oluştur",
+      "empty": "Henüz iş akışı yok.",
+      "load_error": "İş akışları yüklenemedi.",
+      "columns": {
+        "name": "Ad",
+        "states": "Durumlar",
+        "projects": "Projeler"
+      },
+      "state_count": "{count, plural, one {# durum} other {# durum}}",
+      "project_count": "{count, plural, one {# proje} other {# proje}}",
+      "open": "Aç",
+      "delete": {
+        "action": "Sil",
+        "title": "Bu iş akışı silinsin mi?",
+        "description": "İş akışı ve diyagramı silinir. Statüleri diğer iş akışları için kullanılabilir kalır.",
+        "in_use": "Bazı projeler bu iş akışını hâlâ kullanıyor."
+      },
+      "form": {
+        "create_title": "İş akışı oluştur",
+        "name": "Ad",
+        "description": "Açıklama",
+        "duplicate": "Bu ada sahip bir iş akışı zaten var.",
+        "submit": "Oluştur",
+        "cancel": "İptal"
+      },
+      "error": "İş akışı kaydedilemedi. Lütfen tekrar deneyin."
+    },
+    "editor": {
+      "back": "İş akışlarına dön",
+      "save": "Kaydet",
+      "discard": "Değişiklikleri at",
+      "saved": "İş akışı kaydedildi.",
+      "unsaved": "Kaydedilmemiş değişiklikler",
+      "read_only": "İş akışlarını yalnızca çalışma alanı yöneticileri değiştirebilir.",
+      "start": "BAŞLANGIÇ",
+      "global": "Herhangi bir durumdan",
+      "diagram_label": "İş akışı diyagramı",
+      "add_state": {
+        "title": "Durum ekle",
+        "existing": "Mevcut statü",
+        "new": "Yeni statü",
+        "name": "Ad",
+        "color": "Renk",
+        "group": "Kategori",
+        "group_auto": "Otomatik",
+        "submit": "Durum ekle"
+      },
+      "add_transition": {
+        "title": "Geçiş ekle",
+        "sources": "Kaynak",
+        "any_state": "Herhangi bir durum",
+        "target": "Hedef",
+        "name": "Ad (isteğe bağlı)",
+        "submit": "Geçiş ekle"
+      },
+      "panel": {
+        "close": "Kapat",
+        "state": "Durum",
+        "transition": "Geçiş",
+        "set_initial": "Başlangıç durumu yap",
+        "initial": "Başlangıç durumu",
+        "shared": "{count, plural, one {Başka # iş akışıyla paylaşılıyor: değişiklikler orada da geçerli olur.} other {Başka # iş akışıyla paylaşılıyor: değişiklikler orada da geçerli olur.}}",
+        "remove_state": "Durumu kaldır",
+        "remove_transition": "Geçişi kaldır"
+      },
+      "restrict": {
+        "title": "Kimin taşıyabileceğini kısıtla",
+        "description": "Kısıtlama yoksa iş öğesini düzenleyebilen herkes bu geçişi kullanabilir.",
+        "roles": "Roller",
+        "users": "Kişiler",
+        "assignee": "İş öğesinin atananı",
+        "creator": "İş öğesinin oluşturanı",
+        "clear": "Kısıtlamayı kaldır"
+      },
+      "errors": {
+        "initial_state_required": "Tam olarak bir başlangıç durumu seçin.",
+        "duplicate_state_key": "Bir durum iki kez görünüyor. Sayfayı yeniden yükleyin.",
+        "duplicate_status": "Bir statü bu iş akışında iki kez görünüyor.",
+        "duplicate_status_name": "İki durum aynı ada sahip ya da bu adda bir statü zaten var: mevcut statülerden seçin.",
+        "invalid_transition": "Bir geçiş eksik.",
+        "reserved_status_name": "\"Triage\" adı Intake için ayrılmıştır.",
+        "invalid_rule": "Bir kısıtlama eksik.",
+        "invalid_status": "Bir statü artık mevcut değil. Sayfayı yeniden yükleyin.",
+        "status_changed": "Bir durumun statüsü değişti. Sayfayı yeniden yükleyin.",
+        "status_limit": "Çalışma alanı 1.000 statüye ulaştı.",
+        "status_in_use": "Bu durumlar hâlâ iş öğeleri içeriyor, önce onları taşıyın:",
+        "status_in_use_project": "{project}: {count, plural, one {# iş öğesi} other {# iş öğesi}}",
+        "default": "İş akışı kaydedilemedi."
+      }
+    },
+    "scheme": {
+      "description": "Bu projede her iş öğesi türünün izleyeceği iş akışını seçin.",
+      "free": "Bu proje iş akışı kullanmıyor: her durum değişikliğine izin verilir.",
+      "default_workflow": "Varsayılan iş akışı",
+      "per_type": "{type} için iş akışı",
+      "same_as_default": "Varsayılan iş akışıyla aynı",
+      "choose": "İş akışı seçin",
+      "next": "Devam",
+      "back": "Geri",
+      "apply": "Uygula",
+      "detach": "İş akışı kullanmayı bırak",
+      "detach_confirm": "Durumlar kalır, yeniden düzenlenebilir olur ve her durum değişikliğine yeniden izin verilir.",
+      "mapping": {
+        "title": "İş öğelerini taşı",
+        "description": "Bu durumlar iş öğeleri içeriyor ancak seçilen iş akışının parçası değil. İş öğelerinin nereye gideceğini seçin.",
+        "row": "{workflow} içinde {state}: {count, plural, one {# iş öğesi} other {# iş öğesi}}",
+        "pick": "Hedef durum",
+        "none": "Taşınacak bir şey yok."
+      },
+      "applied": "Proje artık iş akışlarını izliyor.",
+      "detached": "Proje artık iş akışı kullanmıyor.",
+      "errors": {
+        "invalid_scheme": "Bir iş akışı veya tür artık geçerli değil. Sayfayı yeniden yükleyin.",
+        "mapping_incomplete": "Her satır için bir hedef durum seçin.",
+        "invalid_mapping": "Bir hedef durum kendi iş akışının parçası değil.",
+        "default": "Değişiklik uygulanamadı."
+      }
+    },
+    "refusal": {
+      "arrival_state_required": "Bu iş öğesinin yeni iş akışında gireceği durumu seçin."
+    },
+    "managed_states": {
+      "banner": "Bu durumlar projenin iş akışlarından gelir. Bunları Çalışma alanı ayarları, İş Akışları bölümünden değiştirin."
+    },
+    "type_change": {
+      "title": "Hedef durumu seçin",
+      "description": "Geçerli durum bu türün iş akışının parçası değil.",
+      "submit": "Türü değiştir",
+      "cancel": "İptal"
+    },
+    "creation": {
+      "initial_state": "Yeni iş öğeleri bu durumda başlar."
     }
   }
 }

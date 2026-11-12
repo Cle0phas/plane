@@ -95,6 +95,154 @@
           "message": "State change rule reviewers could not be modified. Please try again."
         }
       }
+    },
+    "label": "Workflows",
+    "groups": {
+      "backlog": "Backlog",
+      "unstarted": "Not started",
+      "started": "In progress",
+      "completed": "Done",
+      "cancelled": "Cancelled"
+    },
+    "roles": {
+      "admin": "Admin",
+      "member": "Member",
+      "guest": "Guest"
+    },
+    "settings": {
+      "description": "A workflow lists the states of work items and the transitions allowed between them. Each project chooses a workflow per work item type.",
+      "create": "Create workflow",
+      "empty": "No workflow yet.",
+      "load_error": "Workflows could not be loaded.",
+      "columns": {
+        "name": "Name",
+        "states": "States",
+        "projects": "Projects"
+      },
+      "state_count": "{count, plural, one {# state} other {# states}}",
+      "project_count": "{count, plural, one {# project} other {# projects}}",
+      "open": "Open",
+      "delete": {
+        "action": "Delete",
+        "title": "Delete this workflow?",
+        "description": "The workflow and its diagram are deleted. Its statuses stay available to other workflows.",
+        "in_use": "Projects still use this workflow."
+      },
+      "form": {
+        "create_title": "Create a workflow",
+        "name": "Name",
+        "description": "Description",
+        "duplicate": "A workflow with this name already exists.",
+        "submit": "Create",
+        "cancel": "Cancel"
+      },
+      "error": "The workflow could not be saved. Try again."
+    },
+    "editor": {
+      "back": "Back to workflows",
+      "save": "Save",
+      "discard": "Discard changes",
+      "saved": "Workflow saved.",
+      "unsaved": "Unsaved changes",
+      "read_only": "Only workspace admins can change workflows.",
+      "start": "START",
+      "global": "From any state",
+      "diagram_label": "Workflow diagram",
+      "add_state": {
+        "title": "Add a state",
+        "existing": "Existing status",
+        "new": "New status",
+        "name": "Name",
+        "color": "Color",
+        "group": "Category",
+        "group_auto": "Automatic",
+        "submit": "Add state"
+      },
+      "add_transition": {
+        "title": "Add a transition",
+        "sources": "From",
+        "any_state": "Any state",
+        "target": "To",
+        "name": "Name (optional)",
+        "submit": "Add transition"
+      },
+      "panel": {
+        "close": "Close",
+        "state": "State",
+        "transition": "Transition",
+        "set_initial": "Make it the initial state",
+        "initial": "Initial state",
+        "shared": "{count, plural, one {Shared with # other workflow: changes apply there too.} other {Shared with # other workflows: changes apply there too.}}",
+        "remove_state": "Remove state",
+        "remove_transition": "Remove transition"
+      },
+      "restrict": {
+        "title": "Restrict who can move",
+        "description": "Without restriction, anyone who can edit the work item can use this transition.",
+        "roles": "Roles",
+        "users": "People",
+        "assignee": "Assignee of the work item",
+        "creator": "Creator of the work item",
+        "clear": "Remove restriction"
+      },
+      "errors": {
+        "initial_state_required": "Choose exactly one initial state.",
+        "duplicate_state_key": "A state appears twice. Reload the page.",
+        "duplicate_status": "A status appears twice in this workflow.",
+        "duplicate_status_name": "Two states have the same name, or a status with this name already exists: pick it from the existing statuses.",
+        "invalid_transition": "A transition is incomplete.",
+        "reserved_status_name": "The name \"Triage\" is reserved for the intake.",
+        "invalid_rule": "A restriction is incomplete.",
+        "invalid_status": "A status no longer exists. Reload the page.",
+        "status_changed": "A state changed status. Reload the page.",
+        "status_limit": "The workspace has reached 1,000 statuses.",
+        "status_in_use": "These states still hold work items, move them first:",
+        "status_in_use_project": "{project}: {count, plural, one {# work item} other {# work items}}",
+        "default": "The workflow could not be saved."
+      }
+    },
+    "scheme": {
+      "description": "Choose the workflow each work item type follows in this project.",
+      "free": "This project does not use workflows: any state change is allowed.",
+      "default_workflow": "Default workflow",
+      "per_type": "Workflow for {type}",
+      "same_as_default": "Same as the default workflow",
+      "choose": "Choose a workflow",
+      "next": "Continue",
+      "back": "Back",
+      "apply": "Apply",
+      "detach": "Stop using workflows",
+      "detach_confirm": "The states stay, become editable again, and any state change is allowed again.",
+      "mapping": {
+        "title": "Move work items",
+        "description": "These states hold work items but are not part of the chosen workflow. Choose where the work items go.",
+        "row": "{state} in {workflow}: {count, plural, one {# work item} other {# work items}}",
+        "pick": "Arrival state",
+        "none": "Nothing to move."
+      },
+      "applied": "The project now follows its workflows.",
+      "detached": "The project no longer uses workflows.",
+      "errors": {
+        "invalid_scheme": "A workflow or a type is no longer valid. Reload the page.",
+        "mapping_incomplete": "Choose an arrival state for every line.",
+        "invalid_mapping": "An arrival state is not part of its workflow.",
+        "default": "The change could not be applied."
+      }
+    },
+    "refusal": {
+      "arrival_state_required": "Choose the state this work item enters in its new workflow."
+    },
+    "managed_states": {
+      "banner": "These states come from the project workflows. Change them in Workspace settings, Workflows."
+    },
+    "type_change": {
+      "title": "Choose the arrival state",
+      "description": "The current state is not part of the workflow of this type.",
+      "submit": "Change type",
+      "cancel": "Cancel"
+    },
+    "creation": {
+      "initial_state": "New work items start in this state."
     }
   }
 }

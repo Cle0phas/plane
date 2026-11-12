@@ -95,6 +95,154 @@
           "message": "Prüfer der Statusänderungsregel konnten nicht geändert werden. Bitte versuchen Sie es erneut."
         }
       }
+    },
+    "label": "Workflows",
+    "groups": {
+      "backlog": "Backlog",
+      "unstarted": "Nicht begonnen",
+      "started": "In Bearbeitung",
+      "completed": "Erledigt",
+      "cancelled": "Abgebrochen"
+    },
+    "roles": {
+      "admin": "Admin",
+      "member": "Mitglied",
+      "guest": "Gast"
+    },
+    "settings": {
+      "description": "Ein Workflow listet die Status von Arbeitsaufgaben und die zulässigen Übergänge zwischen ihnen auf. Jedes Projekt wählt pro Arbeitsaufgabentyp einen Workflow.",
+      "create": "Workflow erstellen",
+      "empty": "Noch kein Workflow vorhanden.",
+      "load_error": "Workflows konnten nicht geladen werden.",
+      "columns": {
+        "name": "Name",
+        "states": "Status",
+        "projects": "Projekte"
+      },
+      "state_count": "{count, plural, one {# Status} other {# Status}}",
+      "project_count": "{count, plural, one {# Projekt} other {# Projekte}}",
+      "open": "Öffnen",
+      "delete": {
+        "action": "Löschen",
+        "title": "Diesen Workflow löschen?",
+        "description": "Der Workflow und sein Diagramm werden gelöscht. Seine Status bleiben für andere Workflows verfügbar.",
+        "in_use": "Projekte verwenden diesen Workflow noch."
+      },
+      "form": {
+        "create_title": "Workflow erstellen",
+        "name": "Name",
+        "description": "Beschreibung",
+        "duplicate": "Ein Workflow mit diesem Namen existiert bereits.",
+        "submit": "Erstellen",
+        "cancel": "Abbrechen"
+      },
+      "error": "Der Workflow konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+    },
+    "editor": {
+      "back": "Zurück zu den Workflows",
+      "save": "Speichern",
+      "discard": "Änderungen verwerfen",
+      "saved": "Workflow gespeichert.",
+      "unsaved": "Nicht gespeicherte Änderungen",
+      "read_only": "Nur Workspace-Admins können Workflows ändern.",
+      "start": "START",
+      "global": "Aus jedem Status",
+      "diagram_label": "Workflow-Diagramm",
+      "add_state": {
+        "title": "Status hinzufügen",
+        "existing": "Vorhandener Status",
+        "new": "Neuer Status",
+        "name": "Name",
+        "color": "Farbe",
+        "group": "Kategorie",
+        "group_auto": "Automatisch",
+        "submit": "Status hinzufügen"
+      },
+      "add_transition": {
+        "title": "Übergang hinzufügen",
+        "sources": "Von",
+        "any_state": "Beliebiger Status",
+        "target": "Nach",
+        "name": "Name (optional)",
+        "submit": "Übergang hinzufügen"
+      },
+      "panel": {
+        "close": "Schließen",
+        "state": "Status",
+        "transition": "Übergang",
+        "set_initial": "Als Anfangsstatus festlegen",
+        "initial": "Anfangsstatus",
+        "shared": "{count, plural, one {Mit # weiteren Workflow geteilt: Änderungen gelten auch dort.} other {Mit # weiteren Workflows geteilt: Änderungen gelten auch dort.}}",
+        "remove_state": "Status entfernen",
+        "remove_transition": "Übergang entfernen"
+      },
+      "restrict": {
+        "title": "Einschränken, wer verschieben darf",
+        "description": "Ohne Einschränkung kann jeder, der die Arbeitsaufgabe bearbeiten darf, diesen Übergang verwenden.",
+        "roles": "Rollen",
+        "users": "Personen",
+        "assignee": "Zugewiesene Person der Arbeitsaufgabe",
+        "creator": "Ersteller der Arbeitsaufgabe",
+        "clear": "Einschränkung entfernen"
+      },
+      "errors": {
+        "initial_state_required": "Wählen Sie genau einen Anfangsstatus.",
+        "duplicate_state_key": "Ein Status kommt doppelt vor. Laden Sie die Seite neu.",
+        "duplicate_status": "Ein Status kommt in diesem Workflow doppelt vor.",
+        "duplicate_status_name": "Zwei Status haben denselben Namen, oder ein Status mit diesem Namen existiert bereits: Wählen Sie ihn aus den vorhandenen Status.",
+        "invalid_transition": "Ein Übergang ist unvollständig.",
+        "reserved_status_name": "Der Name „Triage“ ist für Intake reserviert.",
+        "invalid_rule": "Eine Einschränkung ist unvollständig.",
+        "invalid_status": "Ein Status existiert nicht mehr. Laden Sie die Seite neu.",
+        "status_changed": "Ein Status wurde geändert. Laden Sie die Seite neu.",
+        "status_limit": "Der Workspace hat 1.000 Status erreicht.",
+        "status_in_use": "Diese Status enthalten noch Arbeitsaufgaben, verschieben Sie diese zuerst:",
+        "status_in_use_project": "{project}: {count, plural, one {# Arbeitsaufgabe} other {# Arbeitsaufgaben}}",
+        "default": "Der Workflow konnte nicht gespeichert werden."
+      }
+    },
+    "scheme": {
+      "description": "Wählen Sie den Workflow, dem jeder Arbeitsaufgabentyp in diesem Projekt folgt.",
+      "free": "Dieses Projekt verwendet keine Workflows: Jeder Statuswechsel ist erlaubt.",
+      "default_workflow": "Standard-Workflow",
+      "per_type": "Workflow für {type}",
+      "same_as_default": "Wie der Standard-Workflow",
+      "choose": "Workflow auswählen",
+      "next": "Weiter",
+      "back": "Zurück",
+      "apply": "Anwenden",
+      "detach": "Workflows nicht mehr verwenden",
+      "detach_confirm": "Die Status bleiben erhalten, sind wieder bearbeitbar, und jeder Statuswechsel ist wieder erlaubt.",
+      "mapping": {
+        "title": "Arbeitsaufgaben verschieben",
+        "description": "Diese Status enthalten Arbeitsaufgaben, gehören aber nicht zum gewählten Workflow. Wählen Sie, wohin die Arbeitsaufgaben verschoben werden.",
+        "row": "{state} in {workflow}: {count, plural, one {# Arbeitsaufgabe} other {# Arbeitsaufgaben}}",
+        "pick": "Zielstatus",
+        "none": "Nichts zu verschieben."
+      },
+      "applied": "Das Projekt folgt jetzt seinen Workflows.",
+      "detached": "Das Projekt verwendet keine Workflows mehr.",
+      "errors": {
+        "invalid_scheme": "Ein Workflow oder ein Typ ist nicht mehr gültig. Laden Sie die Seite neu.",
+        "mapping_incomplete": "Wählen Sie für jede Zeile einen Zielstatus.",
+        "invalid_mapping": "Ein Zielstatus gehört nicht zu seinem Workflow.",
+        "default": "Die Änderung konnte nicht angewendet werden."
+      }
+    },
+    "refusal": {
+      "arrival_state_required": "Wählen Sie den Status, in den diese Arbeitsaufgabe in ihrem neuen Workflow eintritt."
+    },
+    "managed_states": {
+      "banner": "Diese Status stammen aus den Projekt-Workflows. Ändern Sie sie unter Workspace-Einstellungen, Workflows."
+    },
+    "type_change": {
+      "title": "Zielstatus auswählen",
+      "description": "Der aktuelle Status gehört nicht zum Workflow dieses Typs.",
+      "submit": "Typ ändern",
+      "cancel": "Abbrechen"
+    },
+    "creation": {
+      "initial_state": "Neue Arbeitsaufgaben beginnen in diesem Status."
     }
   }
 }

@@ -95,6 +95,154 @@
           "message": "Os revisores da regra de mudança de estado não puderam ser modificados. Por favor, tente novamente."
         }
       }
+    },
+    "label": "Fluxos de trabalho",
+    "groups": {
+      "backlog": "Backlog",
+      "unstarted": "Não iniciado",
+      "started": "Em andamento",
+      "completed": "Concluído",
+      "cancelled": "Cancelado"
+    },
+    "roles": {
+      "admin": "Administrador",
+      "member": "Membro",
+      "guest": "Convidado"
+    },
+    "settings": {
+      "description": "Um fluxo de trabalho lista os estados dos itens de trabalho e as transições permitidas entre eles. Cada projeto escolhe um fluxo de trabalho por tipo de item de trabalho.",
+      "create": "Criar fluxo de trabalho",
+      "empty": "Nenhum fluxo de trabalho ainda.",
+      "load_error": "Não foi possível carregar os fluxos de trabalho.",
+      "columns": {
+        "name": "Nome",
+        "states": "Estados",
+        "projects": "Projetos"
+      },
+      "state_count": "{count, plural, one {# estado} many {# estados} other {# estados}}",
+      "project_count": "{count, plural, one {# projeto} many {# projetos} other {# projetos}}",
+      "open": "Abrir",
+      "delete": {
+        "action": "Excluir",
+        "title": "Excluir este fluxo de trabalho?",
+        "description": "O fluxo de trabalho e seu diagrama serão excluídos. Seus status continuam disponíveis para outros fluxos de trabalho.",
+        "in_use": "Ainda há projetos que usam este fluxo de trabalho."
+      },
+      "form": {
+        "create_title": "Criar um fluxo de trabalho",
+        "name": "Nome",
+        "description": "Descrição",
+        "duplicate": "Já existe um fluxo de trabalho com este nome.",
+        "submit": "Criar",
+        "cancel": "Cancelar"
+      },
+      "error": "Não foi possível salvar o fluxo de trabalho. Tente novamente."
+    },
+    "editor": {
+      "back": "Voltar aos fluxos de trabalho",
+      "save": "Salvar",
+      "discard": "Descartar alterações",
+      "saved": "Fluxo de trabalho salvo.",
+      "unsaved": "Alterações não salvas",
+      "read_only": "Somente administradores do espaço de trabalho podem alterar fluxos de trabalho.",
+      "start": "INÍCIO",
+      "global": "De qualquer estado",
+      "diagram_label": "Diagrama do fluxo de trabalho",
+      "add_state": {
+        "title": "Adicionar um estado",
+        "existing": "Status existente",
+        "new": "Novo status",
+        "name": "Nome",
+        "color": "Cor",
+        "group": "Categoria",
+        "group_auto": "Automática",
+        "submit": "Adicionar estado"
+      },
+      "add_transition": {
+        "title": "Adicionar uma transição",
+        "sources": "De",
+        "any_state": "Qualquer estado",
+        "target": "Para",
+        "name": "Nome (opcional)",
+        "submit": "Adicionar transição"
+      },
+      "panel": {
+        "close": "Fechar",
+        "state": "Estado",
+        "transition": "Transição",
+        "set_initial": "Tornar o estado inicial",
+        "initial": "Estado inicial",
+        "shared": "{count, plural, one {Compartilhado com # outro fluxo de trabalho: as alterações valem lá também.} many {Compartilhado com # outros fluxos de trabalho: as alterações valem lá também.} other {Compartilhado com # outros fluxos de trabalho: as alterações valem lá também.}}",
+        "remove_state": "Remover estado",
+        "remove_transition": "Remover transição"
+      },
+      "restrict": {
+        "title": "Restringir quem pode mover",
+        "description": "Sem restrição, qualquer pessoa que possa editar o item de trabalho pode usar esta transição.",
+        "roles": "Funções",
+        "users": "Pessoas",
+        "assignee": "Responsável pelo item de trabalho",
+        "creator": "Criador do item de trabalho",
+        "clear": "Remover restrição"
+      },
+      "errors": {
+        "initial_state_required": "Escolha exatamente um estado inicial.",
+        "duplicate_state_key": "Um estado aparece duas vezes. Recarregue a página.",
+        "duplicate_status": "Um status aparece duas vezes neste fluxo de trabalho.",
+        "duplicate_status_name": "Dois estados têm o mesmo nome, ou já existe um status com este nome: escolha-o entre os status existentes.",
+        "invalid_transition": "Uma transição está incompleta.",
+        "reserved_status_name": "O nome \"Triage\" é reservado para o Intake.",
+        "invalid_rule": "Uma restrição está incompleta.",
+        "invalid_status": "Um status não existe mais. Recarregue a página.",
+        "status_changed": "Um estado mudou de status. Recarregue a página.",
+        "status_limit": "O espaço de trabalho atingiu 1.000 status.",
+        "status_in_use": "Estes estados ainda contêm itens de trabalho, mova-os primeiro:",
+        "status_in_use_project": "{project}: {count, plural, one {# item de trabalho} many {# itens de trabalho} other {# itens de trabalho}}",
+        "default": "Não foi possível salvar o fluxo de trabalho."
+      }
+    },
+    "scheme": {
+      "description": "Escolha o fluxo de trabalho que cada tipo de item de trabalho segue neste projeto.",
+      "free": "Este projeto não usa fluxos de trabalho: qualquer mudança de estado é permitida.",
+      "default_workflow": "Fluxo de trabalho padrão",
+      "per_type": "Fluxo de trabalho para {type}",
+      "same_as_default": "Igual ao fluxo de trabalho padrão",
+      "choose": "Escolher um fluxo de trabalho",
+      "next": "Continuar",
+      "back": "Voltar",
+      "apply": "Aplicar",
+      "detach": "Parar de usar fluxos de trabalho",
+      "detach_confirm": "Os estados permanecem, voltam a ser editáveis e qualquer mudança de estado volta a ser permitida.",
+      "mapping": {
+        "title": "Mover itens de trabalho",
+        "description": "Estes estados contêm itens de trabalho, mas não fazem parte do fluxo de trabalho escolhido. Escolha para onde os itens de trabalho vão.",
+        "row": "{state} em {workflow}: {count, plural, one {# item de trabalho} many {# itens de trabalho} other {# itens de trabalho}}",
+        "pick": "Estado de destino",
+        "none": "Nada a mover."
+      },
+      "applied": "O projeto agora segue seus fluxos de trabalho.",
+      "detached": "O projeto não usa mais fluxos de trabalho.",
+      "errors": {
+        "invalid_scheme": "Um fluxo de trabalho ou um tipo não é mais válido. Recarregue a página.",
+        "mapping_incomplete": "Escolha um estado de destino para cada linha.",
+        "invalid_mapping": "Um estado de destino não faz parte do seu fluxo de trabalho.",
+        "default": "Não foi possível aplicar a alteração."
+      }
+    },
+    "refusal": {
+      "arrival_state_required": "Escolha o estado em que este item de trabalho entra no novo fluxo de trabalho."
+    },
+    "managed_states": {
+      "banner": "Estes estados vêm dos fluxos de trabalho do projeto. Altere-os em Configurações do espaço de trabalho, Fluxos de trabalho."
+    },
+    "type_change": {
+      "title": "Escolher o estado de destino",
+      "description": "O estado atual não faz parte do fluxo de trabalho deste tipo.",
+      "submit": "Alterar tipo",
+      "cancel": "Cancelar"
+    },
+    "creation": {
+      "initial_state": "Novos itens de trabalho começam neste estado."
     }
   }
 }

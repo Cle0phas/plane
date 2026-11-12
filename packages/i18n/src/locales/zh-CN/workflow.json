@@ -95,6 +95,154 @@
           "message": "状态更改规则移交人不能被修改。请重试。"
         }
       }
+    },
+    "label": "工作流",
+    "groups": {
+      "backlog": "待办",
+      "unstarted": "未开始",
+      "started": "进行中",
+      "completed": "已完成",
+      "cancelled": "已取消"
+    },
+    "roles": {
+      "admin": "管理员",
+      "member": "成员",
+      "guest": "访客"
+    },
+    "settings": {
+      "description": "工作流列出工作项的状态以及状态之间允许的转换。每个项目按工作项类型选择工作流。",
+      "create": "创建工作流",
+      "empty": "暂无工作流。",
+      "load_error": "无法加载工作流。",
+      "columns": {
+        "name": "名称",
+        "states": "状态",
+        "projects": "项目"
+      },
+      "state_count": "{count, plural, one {# 个状态} other {# 个状态}}",
+      "project_count": "{count, plural, one {# 个项目} other {# 个项目}}",
+      "open": "打开",
+      "delete": {
+        "action": "删除",
+        "title": "删除此工作流？",
+        "description": "工作流及其图表将被删除。其状态仍可供其他工作流使用。",
+        "in_use": "仍有项目在使用此工作流。"
+      },
+      "form": {
+        "create_title": "创建工作流",
+        "name": "名称",
+        "description": "描述",
+        "duplicate": "已存在同名工作流。",
+        "submit": "创建",
+        "cancel": "取消"
+      },
+      "error": "无法保存工作流。请重试。"
+    },
+    "editor": {
+      "back": "返回工作流",
+      "save": "保存",
+      "discard": "放弃更改",
+      "saved": "工作流已保存。",
+      "unsaved": "未保存的更改",
+      "read_only": "只有工作区管理员可以更改工作流。",
+      "start": "开始",
+      "global": "从任意状态",
+      "diagram_label": "工作流图",
+      "add_state": {
+        "title": "添加状态",
+        "existing": "现有状态",
+        "new": "新状态",
+        "name": "名称",
+        "color": "颜色",
+        "group": "类别",
+        "group_auto": "自动",
+        "submit": "添加状态"
+      },
+      "add_transition": {
+        "title": "添加转换",
+        "sources": "从",
+        "any_state": "任意状态",
+        "target": "到",
+        "name": "名称（可选）",
+        "submit": "添加转换"
+      },
+      "panel": {
+        "close": "关闭",
+        "state": "状态",
+        "transition": "转换",
+        "set_initial": "设为初始状态",
+        "initial": "初始状态",
+        "shared": "{count, plural, one {与另外 # 个工作流共享：更改也会应用到那里。} other {与另外 # 个工作流共享：更改也会应用到那里。}}",
+        "remove_state": "移除状态",
+        "remove_transition": "移除转换"
+      },
+      "restrict": {
+        "title": "限制可移动的人员",
+        "description": "不限制时，任何可以编辑工作项的人都可以使用此转换。",
+        "roles": "角色",
+        "users": "人员",
+        "assignee": "工作项的负责人",
+        "creator": "工作项的创建者",
+        "clear": "移除限制"
+      },
+      "errors": {
+        "initial_state_required": "请选择且仅选择一个初始状态。",
+        "duplicate_state_key": "有状态出现了两次。请刷新页面。",
+        "duplicate_status": "此工作流中有状态出现了两次。",
+        "duplicate_status_name": "有两个状态同名，或已存在同名状态：请从现有状态中选择。",
+        "invalid_transition": "有转换尚未填写完整。",
+        "reserved_status_name": "名称“Triage”已保留给 Intake 使用。",
+        "invalid_rule": "有限制尚未填写完整。",
+        "invalid_status": "有状态已不存在。请刷新页面。",
+        "status_changed": "有状态的设置已更改。请刷新页面。",
+        "status_limit": "工作区的状态数已达到 1000 个上限。",
+        "status_in_use": "这些状态中仍有工作项，请先移走：",
+        "status_in_use_project": "{project}：{count, plural, one {# 个工作项} other {# 个工作项}}",
+        "default": "无法保存工作流。"
+      }
+    },
+    "scheme": {
+      "description": "选择此项目中每种工作项类型所遵循的工作流。",
+      "free": "此项目未使用工作流：允许任意状态变更。",
+      "default_workflow": "默认工作流",
+      "per_type": "{type}的工作流",
+      "same_as_default": "与默认工作流相同",
+      "choose": "选择工作流",
+      "next": "继续",
+      "back": "返回",
+      "apply": "应用",
+      "detach": "停止使用工作流",
+      "detach_confirm": "状态会保留并可再次编辑，且再次允许任意状态变更。",
+      "mapping": {
+        "title": "移动工作项",
+        "description": "这些状态中有工作项，但不属于所选工作流。请选择工作项的去向。",
+        "row": "{workflow}中的{state}：{count, plural, one {# 个工作项} other {# 个工作项}}",
+        "pick": "目标状态",
+        "none": "没有需要移动的内容。"
+      },
+      "applied": "项目现在遵循其工作流。",
+      "detached": "项目不再使用工作流。",
+      "errors": {
+        "invalid_scheme": "有工作流或类型已失效。请刷新页面。",
+        "mapping_incomplete": "请为每一行选择目标状态。",
+        "invalid_mapping": "有目标状态不属于其工作流。",
+        "default": "无法应用此更改。"
+      }
+    },
+    "refusal": {
+      "arrival_state_required": "请选择此工作项在新工作流中进入的状态。"
+    },
+    "managed_states": {
+      "banner": "这些状态来自项目的工作流。请在工作区设置的工作流中更改。"
+    },
+    "type_change": {
+      "title": "选择目标状态",
+      "description": "当前状态不属于此类型的工作流。",
+      "submit": "更改类型",
+      "cancel": "取消"
+    },
+    "creation": {
+      "initial_state": "新工作项从此状态开始。"
     }
   }
 }

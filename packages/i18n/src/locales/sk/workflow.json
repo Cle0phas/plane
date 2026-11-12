@@ -95,6 +95,154 @@
           "message": "Recenzenti pravidla zmeny stavu nemohli byť upravení. Skúste to znova."
         }
       }
+    },
+    "label": "Pracovné postupy",
+    "groups": {
+      "backlog": "Backlog",
+      "unstarted": "Nezačaté",
+      "started": "Prebieha",
+      "completed": "Dokončené",
+      "cancelled": "Zrušené"
+    },
+    "roles": {
+      "admin": "Správca",
+      "member": "Člen",
+      "guest": "Hosť"
+    },
+    "settings": {
+      "description": "Pracovný postup uvádza stavy pracovných položiek a povolené prechody medzi nimi. Každý projekt si vyberá pracovný postup pre každý typ pracovnej položky.",
+      "create": "Vytvoriť pracovný postup",
+      "empty": "Zatiaľ žiadny pracovný postup.",
+      "load_error": "Pracovné postupy sa nepodarilo načítať.",
+      "columns": {
+        "name": "Názov",
+        "states": "Stavy",
+        "projects": "Projekty"
+      },
+      "state_count": "{count, plural, one {# stav} few {# stavy} many {# stavu} other {# stavov}}",
+      "project_count": "{count, plural, one {# projekt} few {# projekty} many {# projektu} other {# projektov}}",
+      "open": "Otvoriť",
+      "delete": {
+        "action": "Odstrániť",
+        "title": "Odstrániť tento pracovný postup?",
+        "description": "Pracovný postup a jeho diagram budú odstránené. Jeho statusy zostanú dostupné pre ostatné pracovné postupy.",
+        "in_use": "Niektoré projekty tento pracovný postup stále používajú."
+      },
+      "form": {
+        "create_title": "Vytvoriť pracovný postup",
+        "name": "Názov",
+        "description": "Popis",
+        "duplicate": "Pracovný postup s týmto názvom už existuje.",
+        "submit": "Vytvoriť",
+        "cancel": "Zrušiť"
+      },
+      "error": "Pracovný postup sa nepodarilo uložiť. Skúste to znova."
+    },
+    "editor": {
+      "back": "Späť na pracovné postupy",
+      "save": "Uložiť",
+      "discard": "Zahodiť zmeny",
+      "saved": "Pracovný postup bol uložený.",
+      "unsaved": "Neuložené zmeny",
+      "read_only": "Pracovné postupy môžu meniť iba správcovia pracovného priestoru.",
+      "start": "START",
+      "global": "Z ľubovoľného stavu",
+      "diagram_label": "Diagram pracovného postupu",
+      "add_state": {
+        "title": "Pridať stav",
+        "existing": "Existujúci status",
+        "new": "Nový status",
+        "name": "Názov",
+        "color": "Farba",
+        "group": "Kategória",
+        "group_auto": "Automaticky",
+        "submit": "Pridať stav"
+      },
+      "add_transition": {
+        "title": "Pridať prechod",
+        "sources": "Z",
+        "any_state": "Ľubovoľný stav",
+        "target": "Do",
+        "name": "Názov (voliteľné)",
+        "submit": "Pridať prechod"
+      },
+      "panel": {
+        "close": "Zavrieť",
+        "state": "Stav",
+        "transition": "Prechod",
+        "set_initial": "Nastaviť ako počiatočný stav",
+        "initial": "Počiatočný stav",
+        "shared": "{count, plural, one {Zdieľané s # ďalším pracovným postupom: zmeny platia aj tam.} few {Zdieľané s # ďalšími pracovnými postupmi: zmeny platia aj tam.} many {Zdieľané s # ďalšieho pracovného postupu: zmeny platia aj tam.} other {Zdieľané s # ďalšími pracovnými postupmi: zmeny platia aj tam.}}",
+        "remove_state": "Odstrániť stav",
+        "remove_transition": "Odstrániť prechod"
+      },
+      "restrict": {
+        "title": "Obmedziť, kto môže presúvať",
+        "description": "Bez obmedzenia môže tento prechod použiť každý, kto môže upravovať pracovnú položku.",
+        "roles": "Roly",
+        "users": "Ľudia",
+        "assignee": "Riešiteľ pracovnej položky",
+        "creator": "Autor pracovnej položky",
+        "clear": "Odstrániť obmedzenie"
+      },
+      "errors": {
+        "initial_state_required": "Vyberte presne jeden počiatočný stav.",
+        "duplicate_state_key": "Stav sa objavuje dvakrát. Načítajte stránku znova.",
+        "duplicate_status": "Status sa v tomto pracovnom postupe objavuje dvakrát.",
+        "duplicate_status_name": "Dva stavy majú rovnaký názov, alebo status s týmto názvom už existuje: vyberte ho z existujúcich statusov.",
+        "invalid_transition": "Prechod je neúplný.",
+        "reserved_status_name": "Názov „Triage“ je vyhradený pre Intake.",
+        "invalid_rule": "Obmedzenie je neúplné.",
+        "invalid_status": "Status už neexistuje. Načítajte stránku znova.",
+        "status_changed": "Stav zmenil status. Načítajte stránku znova.",
+        "status_limit": "Pracovný priestor dosiahol 1 000 statusov.",
+        "status_in_use": "Tieto stavy stále obsahujú pracovné položky, najprv ich presuňte:",
+        "status_in_use_project": "{project}: {count, plural, one {# pracovná položka} few {# pracovné položky} many {# pracovnej položky} other {# pracovných položiek}}",
+        "default": "Pracovný postup sa nepodarilo uložiť."
+      }
+    },
+    "scheme": {
+      "description": "Vyberte pracovný postup, ktorým sa v tomto projekte riadi každý typ pracovnej položky.",
+      "free": "Tento projekt nepoužíva pracovné postupy: akákoľvek zmena stavu je povolená.",
+      "default_workflow": "Predvolený pracovný postup",
+      "per_type": "Pracovný postup pre {type}",
+      "same_as_default": "Rovnaký ako predvolený pracovný postup",
+      "choose": "Vybrať pracovný postup",
+      "next": "Pokračovať",
+      "back": "Späť",
+      "apply": "Použiť",
+      "detach": "Prestať používať pracovné postupy",
+      "detach_confirm": "Stavy zostanú, bude ich opäť možné upravovať a akákoľvek zmena stavu bude znova povolená.",
+      "mapping": {
+        "title": "Presunúť pracovné položky",
+        "description": "Tieto stavy obsahujú pracovné položky, ale nie sú súčasťou vybraného pracovného postupu. Vyberte, kam sa pracovné položky presunú.",
+        "row": "{state} v {workflow}: {count, plural, one {# pracovná položka} few {# pracovné položky} many {# pracovnej položky} other {# pracovných položiek}}",
+        "pick": "Cieľový stav",
+        "none": "Nie je čo presúvať."
+      },
+      "applied": "Projekt sa teraz riadi svojimi pracovnými postupmi.",
+      "detached": "Projekt už pracovné postupy nepoužíva.",
+      "errors": {
+        "invalid_scheme": "Pracovný postup alebo typ už nie je platný. Načítajte stránku znova.",
+        "mapping_incomplete": "Vyberte cieľový stav pre každý riadok.",
+        "invalid_mapping": "Cieľový stav nie je súčasťou svojho pracovného postupu.",
+        "default": "Zmenu sa nepodarilo použiť."
+      }
+    },
+    "refusal": {
+      "arrival_state_required": "Vyberte stav, do ktorého táto pracovná položka vstúpi vo svojom novom pracovnom postupe."
+    },
+    "managed_states": {
+      "banner": "Tieto stavy pochádzajú z pracovných postupov projektu. Zmeňte ich v Nastaveniach pracovného priestoru, Pracovné postupy."
+    },
+    "type_change": {
+      "title": "Vyberte cieľový stav",
+      "description": "Aktuálny stav nie je súčasťou pracovného postupu tohto typu.",
+      "submit": "Zmeniť typ",
+      "cancel": "Zrušiť"
+    },
+    "creation": {
+      "initial_state": "Nové pracovné položky začínajú v tomto stave."
     }
   }
 }

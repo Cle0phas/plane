@@ -95,6 +95,154 @@
           "message": "Revisori cambiamento stato non può essere modificato. Per favore riprova."
         }
       }
+    },
+    "label": "Flussi di lavoro",
+    "groups": {
+      "backlog": "Backlog",
+      "unstarted": "Non iniziato",
+      "started": "In corso",
+      "completed": "Completato",
+      "cancelled": "Annullato"
+    },
+    "roles": {
+      "admin": "Amministratore",
+      "member": "Membro",
+      "guest": "Ospite"
+    },
+    "settings": {
+      "description": "Un flusso di lavoro elenca gli stati degli elementi di lavoro e le transizioni consentite tra di essi. Ogni progetto sceglie un flusso di lavoro per tipo di elemento di lavoro.",
+      "create": "Crea flusso di lavoro",
+      "empty": "Nessun flusso di lavoro per ora.",
+      "load_error": "Impossibile caricare i flussi di lavoro.",
+      "columns": {
+        "name": "Nome",
+        "states": "Stati",
+        "projects": "Progetti"
+      },
+      "state_count": "{count, plural, one {# stato} many {# stati} other {# stati}}",
+      "project_count": "{count, plural, one {# progetto} many {# progetti} other {# progetti}}",
+      "open": "Apri",
+      "delete": {
+        "action": "Elimina",
+        "title": "Eliminare questo flusso di lavoro?",
+        "description": "Il flusso di lavoro e il suo diagramma vengono eliminati. I suoi stati restano disponibili per gli altri flussi di lavoro.",
+        "in_use": "Alcuni progetti usano ancora questo flusso di lavoro."
+      },
+      "form": {
+        "create_title": "Crea un flusso di lavoro",
+        "name": "Nome",
+        "description": "Descrizione",
+        "duplicate": "Esiste già un flusso di lavoro con questo nome.",
+        "submit": "Crea",
+        "cancel": "Annulla"
+      },
+      "error": "Impossibile salvare il flusso di lavoro. Riprova."
+    },
+    "editor": {
+      "back": "Torna ai flussi di lavoro",
+      "save": "Salva",
+      "discard": "Annulla le modifiche",
+      "saved": "Flusso di lavoro salvato.",
+      "unsaved": "Modifiche non salvate",
+      "read_only": "Solo gli amministratori dello spazio di lavoro possono modificare i flussi di lavoro.",
+      "start": "INIZIO",
+      "global": "Da qualsiasi stato",
+      "diagram_label": "Diagramma del flusso di lavoro",
+      "add_state": {
+        "title": "Aggiungi uno stato",
+        "existing": "Stato esistente",
+        "new": "Nuovo stato",
+        "name": "Nome",
+        "color": "Colore",
+        "group": "Categoria",
+        "group_auto": "Automatica",
+        "submit": "Aggiungi stato"
+      },
+      "add_transition": {
+        "title": "Aggiungi una transizione",
+        "sources": "Da",
+        "any_state": "Qualsiasi stato",
+        "target": "A",
+        "name": "Nome (facoltativo)",
+        "submit": "Aggiungi transizione"
+      },
+      "panel": {
+        "close": "Chiudi",
+        "state": "Stato",
+        "transition": "Transizione",
+        "set_initial": "Imposta come stato iniziale",
+        "initial": "Stato iniziale",
+        "shared": "{count, plural, one {Condiviso con # altro flusso di lavoro: le modifiche si applicano anche lì.} many {Condiviso con # altri flussi di lavoro: le modifiche si applicano anche lì.} other {Condiviso con # altri flussi di lavoro: le modifiche si applicano anche lì.}}",
+        "remove_state": "Rimuovi stato",
+        "remove_transition": "Rimuovi transizione"
+      },
+      "restrict": {
+        "title": "Limita chi può spostare",
+        "description": "Senza limitazioni, chiunque possa modificare l'elemento di lavoro può usare questa transizione.",
+        "roles": "Ruoli",
+        "users": "Persone",
+        "assignee": "Assegnatario dell'elemento di lavoro",
+        "creator": "Creatore dell'elemento di lavoro",
+        "clear": "Rimuovi limitazione"
+      },
+      "errors": {
+        "initial_state_required": "Scegli esattamente uno stato iniziale.",
+        "duplicate_state_key": "Uno stato compare due volte. Ricarica la pagina.",
+        "duplicate_status": "Uno stato compare due volte in questo flusso di lavoro.",
+        "duplicate_status_name": "Due stati hanno lo stesso nome, oppure esiste già uno stato con questo nome: sceglilo tra gli stati esistenti.",
+        "invalid_transition": "Una transizione è incompleta.",
+        "reserved_status_name": "Il nome «Triage» è riservato a Intake.",
+        "invalid_rule": "Una limitazione è incompleta.",
+        "invalid_status": "Uno stato non esiste più. Ricarica la pagina.",
+        "status_changed": "Uno stato è cambiato. Ricarica la pagina.",
+        "status_limit": "Lo spazio di lavoro ha raggiunto i 1.000 stati.",
+        "status_in_use": "Questi stati contengono ancora elementi di lavoro, spostali prima:",
+        "status_in_use_project": "{project}: {count, plural, one {# elemento di lavoro} many {# elementi di lavoro} other {# elementi di lavoro}}",
+        "default": "Impossibile salvare il flusso di lavoro."
+      }
+    },
+    "scheme": {
+      "description": "Scegli il flusso di lavoro seguito da ogni tipo di elemento di lavoro in questo progetto.",
+      "free": "Questo progetto non usa flussi di lavoro: ogni cambio di stato è consentito.",
+      "default_workflow": "Flusso di lavoro predefinito",
+      "per_type": "Flusso di lavoro per {type}",
+      "same_as_default": "Come il flusso di lavoro predefinito",
+      "choose": "Scegli un flusso di lavoro",
+      "next": "Continua",
+      "back": "Indietro",
+      "apply": "Applica",
+      "detach": "Non usare più flussi di lavoro",
+      "detach_confirm": "Gli stati restano, tornano modificabili e ogni cambio di stato è di nuovo consentito.",
+      "mapping": {
+        "title": "Sposta gli elementi di lavoro",
+        "description": "Questi stati contengono elementi di lavoro ma non fanno parte del flusso di lavoro scelto. Scegli dove spostare gli elementi di lavoro.",
+        "row": "{state} in {workflow}: {count, plural, one {# elemento di lavoro} many {# elementi di lavoro} other {# elementi di lavoro}}",
+        "pick": "Stato di arrivo",
+        "none": "Niente da spostare."
+      },
+      "applied": "Il progetto ora segue i suoi flussi di lavoro.",
+      "detached": "Il progetto non usa più flussi di lavoro.",
+      "errors": {
+        "invalid_scheme": "Un flusso di lavoro o un tipo non è più valido. Ricarica la pagina.",
+        "mapping_incomplete": "Scegli uno stato di arrivo per ogni riga.",
+        "invalid_mapping": "Uno stato di arrivo non fa parte del suo flusso di lavoro.",
+        "default": "Impossibile applicare la modifica."
+      }
+    },
+    "refusal": {
+      "arrival_state_required": "Scegli lo stato in cui questo elemento di lavoro entra nel suo nuovo flusso di lavoro."
+    },
+    "managed_states": {
+      "banner": "Questi stati provengono dai flussi di lavoro del progetto. Modificali in Impostazioni dello spazio di lavoro, Flussi di lavoro."
+    },
+    "type_change": {
+      "title": "Scegli lo stato di arrivo",
+      "description": "Lo stato attuale non fa parte del flusso di lavoro di questo tipo.",
+      "submit": "Cambia tipo",
+      "cancel": "Annulla"
+    },
+    "creation": {
+      "initial_state": "I nuovi elementi di lavoro iniziano in questo stato."
     }
   }
 }

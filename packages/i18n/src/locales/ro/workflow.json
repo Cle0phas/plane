@@ -95,6 +95,154 @@
           "message": "Evaluatorii regulii de schimbare a stării nu au putut fi modificați. Te rugăm să încerci din nou."
         }
       }
+    },
+    "label": "Fluxuri de lucru",
+    "groups": {
+      "backlog": "Backlog",
+      "unstarted": "Neînceput",
+      "started": "În desfășurare",
+      "completed": "Finalizat",
+      "cancelled": "Anulat"
+    },
+    "roles": {
+      "admin": "Administrator",
+      "member": "Membru",
+      "guest": "Invitat"
+    },
+    "settings": {
+      "description": "Un flux de lucru listează stările elementelor de lucru și tranzițiile permise între ele. Fiecare proiect alege un flux de lucru pentru fiecare tip de element de lucru.",
+      "create": "Creează flux de lucru",
+      "empty": "Niciun flux de lucru deocamdată.",
+      "load_error": "Fluxurile de lucru nu au putut fi încărcate.",
+      "columns": {
+        "name": "Nume",
+        "states": "Stări",
+        "projects": "Proiecte"
+      },
+      "state_count": "{count, plural, one {# stare} few {# stări} other {# de stări}}",
+      "project_count": "{count, plural, one {# proiect} few {# proiecte} other {# de proiecte}}",
+      "open": "Deschide",
+      "delete": {
+        "action": "Șterge",
+        "title": "Ștergi acest flux de lucru?",
+        "description": "Fluxul de lucru și diagrama sa sunt șterse. Statusurile sale rămân disponibile pentru alte fluxuri de lucru.",
+        "in_use": "Unele proiecte folosesc încă acest flux de lucru."
+      },
+      "form": {
+        "create_title": "Creează un flux de lucru",
+        "name": "Nume",
+        "description": "Descriere",
+        "duplicate": "Există deja un flux de lucru cu acest nume.",
+        "submit": "Creează",
+        "cancel": "Anulează"
+      },
+      "error": "Fluxul de lucru nu a putut fi salvat. Încearcă din nou."
+    },
+    "editor": {
+      "back": "Înapoi la fluxurile de lucru",
+      "save": "Salvează",
+      "discard": "Renunță la modificări",
+      "saved": "Flux de lucru salvat.",
+      "unsaved": "Modificări nesalvate",
+      "read_only": "Doar administratorii spațiului de lucru pot modifica fluxurile de lucru.",
+      "start": "START",
+      "global": "Din orice stare",
+      "diagram_label": "Diagrama fluxului de lucru",
+      "add_state": {
+        "title": "Adaugă o stare",
+        "existing": "Status existent",
+        "new": "Status nou",
+        "name": "Nume",
+        "color": "Culoare",
+        "group": "Categorie",
+        "group_auto": "Automată",
+        "submit": "Adaugă starea"
+      },
+      "add_transition": {
+        "title": "Adaugă o tranziție",
+        "sources": "Din",
+        "any_state": "Orice stare",
+        "target": "În",
+        "name": "Nume (opțional)",
+        "submit": "Adaugă tranziția"
+      },
+      "panel": {
+        "close": "Închide",
+        "state": "Stare",
+        "transition": "Tranziție",
+        "set_initial": "Fă din ea starea inițială",
+        "initial": "Stare inițială",
+        "shared": "{count, plural, one {Partajată cu # alt flux de lucru: modificările se aplică și acolo.} few {Partajată cu # alte fluxuri de lucru: modificările se aplică și acolo.} other {Partajată cu # de alte fluxuri de lucru: modificările se aplică și acolo.}}",
+        "remove_state": "Elimină starea",
+        "remove_transition": "Elimină tranziția"
+      },
+      "restrict": {
+        "title": "Restricționează cine poate muta",
+        "description": "Fără restricție, orice persoană care poate edita elementul de lucru poate folosi această tranziție.",
+        "roles": "Roluri",
+        "users": "Persoane",
+        "assignee": "Responsabilul elementului de lucru",
+        "creator": "Creatorul elementului de lucru",
+        "clear": "Elimină restricția"
+      },
+      "errors": {
+        "initial_state_required": "Alege exact o stare inițială.",
+        "duplicate_state_key": "O stare apare de două ori. Reîncarcă pagina.",
+        "duplicate_status": "Un status apare de două ori în acest flux de lucru.",
+        "duplicate_status_name": "Două stări au același nume sau există deja un status cu acest nume: alege-l dintre statusurile existente.",
+        "invalid_transition": "O tranziție este incompletă.",
+        "reserved_status_name": "Numele „Triage” este rezervat pentru Intake.",
+        "invalid_rule": "O restricție este incompletă.",
+        "invalid_status": "Un status nu mai există. Reîncarcă pagina.",
+        "status_changed": "O stare și-a schimbat statusul. Reîncarcă pagina.",
+        "status_limit": "Spațiul de lucru a atins 1.000 de statusuri.",
+        "status_in_use": "Aceste stări conțin încă elemente de lucru, mută-le mai întâi:",
+        "status_in_use_project": "{project}: {count, plural, one {# element de lucru} few {# elemente de lucru} other {# de elemente de lucru}}",
+        "default": "Fluxul de lucru nu a putut fi salvat."
+      }
+    },
+    "scheme": {
+      "description": "Alege fluxul de lucru urmat de fiecare tip de element de lucru în acest proiect.",
+      "free": "Acest proiect nu folosește fluxuri de lucru: orice schimbare de stare este permisă.",
+      "default_workflow": "Flux de lucru implicit",
+      "per_type": "Flux de lucru pentru {type}",
+      "same_as_default": "La fel ca fluxul de lucru implicit",
+      "choose": "Alege un flux de lucru",
+      "next": "Continuă",
+      "back": "Înapoi",
+      "apply": "Aplică",
+      "detach": "Nu mai folosi fluxuri de lucru",
+      "detach_confirm": "Stările rămân, devin din nou editabile, iar orice schimbare de stare este din nou permisă.",
+      "mapping": {
+        "title": "Mută elementele de lucru",
+        "description": "Aceste stări conțin elemente de lucru, dar nu fac parte din fluxul de lucru ales. Alege unde merg elementele de lucru.",
+        "row": "{state} în {workflow}: {count, plural, one {# element de lucru} few {# elemente de lucru} other {# de elemente de lucru}}",
+        "pick": "Stare de destinație",
+        "none": "Nimic de mutat."
+      },
+      "applied": "Proiectul urmează acum fluxurile sale de lucru.",
+      "detached": "Proiectul nu mai folosește fluxuri de lucru.",
+      "errors": {
+        "invalid_scheme": "Un flux de lucru sau un tip nu mai este valid. Reîncarcă pagina.",
+        "mapping_incomplete": "Alege o stare de destinație pentru fiecare linie.",
+        "invalid_mapping": "O stare de destinație nu face parte din fluxul ei de lucru.",
+        "default": "Modificarea nu a putut fi aplicată."
+      }
+    },
+    "refusal": {
+      "arrival_state_required": "Alege starea în care acest element de lucru intră în noul său flux de lucru."
+    },
+    "managed_states": {
+      "banner": "Aceste stări provin din fluxurile de lucru ale proiectului. Modifică-le în Setările spațiului de lucru, Fluxuri de lucru."
+    },
+    "type_change": {
+      "title": "Alege starea de destinație",
+      "description": "Starea curentă nu face parte din fluxul de lucru al acestui tip.",
+      "submit": "Schimbă tipul",
+      "cancel": "Anulează"
+    },
+    "creation": {
+      "initial_state": "Elementele de lucru noi încep în această stare."
     }
   }
 }

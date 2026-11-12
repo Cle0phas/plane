@@ -95,6 +95,154 @@
           "message": "Recenzenti pravidla změny stavu nemohli být upraveni. Zkuste to prosím znovu."
         }
       }
+    },
+    "label": "Pracovní toky",
+    "groups": {
+      "backlog": "Backlog",
+      "unstarted": "Nezahájeno",
+      "started": "Probíhá",
+      "completed": "Dokončeno",
+      "cancelled": "Zrušeno"
+    },
+    "roles": {
+      "admin": "Správce",
+      "member": "Člen",
+      "guest": "Host"
+    },
+    "settings": {
+      "description": "Pracovní tok uvádí stavy pracovních položek a povolené přechody mezi nimi. Každý projekt si vybírá pracovní tok pro každý typ pracovní položky.",
+      "create": "Vytvořit pracovní tok",
+      "empty": "Zatím žádný pracovní tok.",
+      "load_error": "Pracovní toky se nepodařilo načíst.",
+      "columns": {
+        "name": "Název",
+        "states": "Stavy",
+        "projects": "Projekty"
+      },
+      "state_count": "{count, plural, one {# stav} few {# stavy} many {# stavu} other {# stavů}}",
+      "project_count": "{count, plural, one {# projekt} few {# projekty} many {# projektu} other {# projektů}}",
+      "open": "Otevřít",
+      "delete": {
+        "action": "Smazat",
+        "title": "Smazat tento pracovní tok?",
+        "description": "Pracovní tok a jeho diagram budou smazány. Jeho statusy zůstanou dostupné pro ostatní pracovní toky.",
+        "in_use": "Některé projekty tento pracovní tok stále používají."
+      },
+      "form": {
+        "create_title": "Vytvořit pracovní tok",
+        "name": "Název",
+        "description": "Popis",
+        "duplicate": "Pracovní tok s tímto názvem již existuje.",
+        "submit": "Vytvořit",
+        "cancel": "Zrušit"
+      },
+      "error": "Pracovní tok se nepodařilo uložit. Zkuste to znovu."
+    },
+    "editor": {
+      "back": "Zpět na pracovní toky",
+      "save": "Uložit",
+      "discard": "Zahodit změny",
+      "saved": "Pracovní tok byl uložen.",
+      "unsaved": "Neuložené změny",
+      "read_only": "Pracovní toky mohou měnit pouze správci pracovního prostoru.",
+      "start": "START",
+      "global": "Z libovolného stavu",
+      "diagram_label": "Diagram pracovního toku",
+      "add_state": {
+        "title": "Přidat stav",
+        "existing": "Existující status",
+        "new": "Nový status",
+        "name": "Název",
+        "color": "Barva",
+        "group": "Kategorie",
+        "group_auto": "Automaticky",
+        "submit": "Přidat stav"
+      },
+      "add_transition": {
+        "title": "Přidat přechod",
+        "sources": "Z",
+        "any_state": "Libovolný stav",
+        "target": "Do",
+        "name": "Název (volitelné)",
+        "submit": "Přidat přechod"
+      },
+      "panel": {
+        "close": "Zavřít",
+        "state": "Stav",
+        "transition": "Přechod",
+        "set_initial": "Nastavit jako počáteční stav",
+        "initial": "Počáteční stav",
+        "shared": "{count, plural, one {Sdíleno s # dalším pracovním tokem: změny platí i tam.} few {Sdíleno s # dalšími pracovními toky: změny platí i tam.} many {Sdíleno s # dalšího pracovního toku: změny platí i tam.} other {Sdíleno s # dalšími pracovními toky: změny platí i tam.}}",
+        "remove_state": "Odebrat stav",
+        "remove_transition": "Odebrat přechod"
+      },
+      "restrict": {
+        "title": "Omezit, kdo může přesouvat",
+        "description": "Bez omezení může tento přechod použít každý, kdo může upravovat pracovní položku.",
+        "roles": "Role",
+        "users": "Lidé",
+        "assignee": "Řešitel pracovní položky",
+        "creator": "Autor pracovní položky",
+        "clear": "Odebrat omezení"
+      },
+      "errors": {
+        "initial_state_required": "Vyberte právě jeden počáteční stav.",
+        "duplicate_state_key": "Stav se objevuje dvakrát. Načtěte stránku znovu.",
+        "duplicate_status": "Status se v tomto pracovním toku objevuje dvakrát.",
+        "duplicate_status_name": "Dva stavy mají stejný název, nebo status s tímto názvem již existuje: vyberte ho z existujících statusů.",
+        "invalid_transition": "Přechod je neúplný.",
+        "reserved_status_name": "Název „Triage“ je vyhrazen pro Intake.",
+        "invalid_rule": "Omezení je neúplné.",
+        "invalid_status": "Status již neexistuje. Načtěte stránku znovu.",
+        "status_changed": "Stav změnil status. Načtěte stránku znovu.",
+        "status_limit": "Pracovní prostor dosáhl 1 000 statusů.",
+        "status_in_use": "Tyto stavy stále obsahují pracovní položky, nejprve je přesuňte:",
+        "status_in_use_project": "{project}: {count, plural, one {# pracovní položka} few {# pracovní položky} many {# pracovní položky} other {# pracovních položek}}",
+        "default": "Pracovní tok se nepodařilo uložit."
+      }
+    },
+    "scheme": {
+      "description": "Vyberte pracovní tok, kterým se v tomto projektu řídí každý typ pracovní položky.",
+      "free": "Tento projekt nepoužívá pracovní toky: jakákoli změna stavu je povolena.",
+      "default_workflow": "Výchozí pracovní tok",
+      "per_type": "Pracovní tok pro {type}",
+      "same_as_default": "Stejný jako výchozí pracovní tok",
+      "choose": "Vybrat pracovní tok",
+      "next": "Pokračovat",
+      "back": "Zpět",
+      "apply": "Použít",
+      "detach": "Přestat používat pracovní toky",
+      "detach_confirm": "Stavy zůstanou, bude je opět možné upravovat a jakákoli změna stavu bude znovu povolena.",
+      "mapping": {
+        "title": "Přesunout pracovní položky",
+        "description": "Tyto stavy obsahují pracovní položky, ale nejsou součástí vybraného pracovního toku. Vyberte, kam se pracovní položky přesunou.",
+        "row": "{state} v {workflow}: {count, plural, one {# pracovní položka} few {# pracovní položky} many {# pracovní položky} other {# pracovních položek}}",
+        "pick": "Cílový stav",
+        "none": "Není co přesouvat."
+      },
+      "applied": "Projekt se nyní řídí svými pracovními toky.",
+      "detached": "Projekt již pracovní toky nepoužívá.",
+      "errors": {
+        "invalid_scheme": "Pracovní tok nebo typ již není platný. Načtěte stránku znovu.",
+        "mapping_incomplete": "Vyberte cílový stav pro každý řádek.",
+        "invalid_mapping": "Cílový stav není součástí svého pracovního toku.",
+        "default": "Změnu se nepodařilo použít."
+      }
+    },
+    "refusal": {
+      "arrival_state_required": "Vyberte stav, do kterého tato pracovní položka vstoupí ve svém novém pracovním toku."
+    },
+    "managed_states": {
+      "banner": "Tyto stavy pocházejí z pracovních toků projektu. Změňte je v Nastavení pracovního prostoru, Pracovní toky."
+    },
+    "type_change": {
+      "title": "Vyberte cílový stav",
+      "description": "Aktuální stav není součástí pracovního toku tohoto typu.",
+      "submit": "Změnit typ",
+      "cancel": "Zrušit"
+    },
+    "creation": {
+      "initial_state": "Nové pracovní položky začínají v tomto stavu."
     }
   }
 }

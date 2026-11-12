@@ -95,6 +95,154 @@
           "message": "Reviewer aturan perubahan status tidak dapat dimodifikasi. Silakan coba lagi."
         }
       }
+    },
+    "label": "Workflow",
+    "groups": {
+      "backlog": "Backlog",
+      "unstarted": "Belum dimulai",
+      "started": "Sedang berjalan",
+      "completed": "Selesai",
+      "cancelled": "Dibatalkan"
+    },
+    "roles": {
+      "admin": "Admin",
+      "member": "Anggota",
+      "guest": "Tamu"
+    },
+    "settings": {
+      "description": "Workflow mencantumkan status item kerja dan transisi yang diizinkan di antara status tersebut. Setiap proyek memilih satu workflow untuk setiap jenis item kerja.",
+      "create": "Buat workflow",
+      "empty": "Belum ada workflow.",
+      "load_error": "Workflow tidak dapat dimuat.",
+      "columns": {
+        "name": "Nama",
+        "states": "Status",
+        "projects": "Proyek"
+      },
+      "state_count": "{count, plural, one {# status} other {# status}}",
+      "project_count": "{count, plural, one {# proyek} other {# proyek}}",
+      "open": "Buka",
+      "delete": {
+        "action": "Hapus",
+        "title": "Hapus workflow ini?",
+        "description": "Workflow dan diagramnya akan dihapus. Statusnya tetap tersedia untuk workflow lain.",
+        "in_use": "Masih ada proyek yang menggunakan workflow ini."
+      },
+      "form": {
+        "create_title": "Buat workflow",
+        "name": "Nama",
+        "description": "Deskripsi",
+        "duplicate": "Workflow dengan nama ini sudah ada.",
+        "submit": "Buat",
+        "cancel": "Batal"
+      },
+      "error": "Workflow tidak dapat disimpan. Silakan coba lagi."
+    },
+    "editor": {
+      "back": "Kembali ke workflow",
+      "save": "Simpan",
+      "discard": "Buang perubahan",
+      "saved": "Workflow disimpan.",
+      "unsaved": "Perubahan belum disimpan",
+      "read_only": "Hanya admin ruang kerja yang dapat mengubah workflow.",
+      "start": "MULAI",
+      "global": "Dari status mana pun",
+      "diagram_label": "Diagram workflow",
+      "add_state": {
+        "title": "Tambah status",
+        "existing": "Status yang ada",
+        "new": "Status baru",
+        "name": "Nama",
+        "color": "Warna",
+        "group": "Kategori",
+        "group_auto": "Otomatis",
+        "submit": "Tambah status"
+      },
+      "add_transition": {
+        "title": "Tambah transisi",
+        "sources": "Dari",
+        "any_state": "Status mana pun",
+        "target": "Ke",
+        "name": "Nama (opsional)",
+        "submit": "Tambah transisi"
+      },
+      "panel": {
+        "close": "Tutup",
+        "state": "Status",
+        "transition": "Transisi",
+        "set_initial": "Jadikan status awal",
+        "initial": "Status awal",
+        "shared": "{count, plural, one {Dibagikan dengan # workflow lain: perubahan berlaku juga di sana.} other {Dibagikan dengan # workflow lain: perubahan berlaku juga di sana.}}",
+        "remove_state": "Hapus status",
+        "remove_transition": "Hapus transisi"
+      },
+      "restrict": {
+        "title": "Batasi siapa yang dapat memindahkan",
+        "description": "Tanpa pembatasan, siapa pun yang dapat mengedit item kerja dapat menggunakan transisi ini.",
+        "roles": "Peran",
+        "users": "Orang",
+        "assignee": "Penerima tugas item kerja",
+        "creator": "Pembuat item kerja",
+        "clear": "Hapus pembatasan"
+      },
+      "errors": {
+        "initial_state_required": "Pilih tepat satu status awal.",
+        "duplicate_state_key": "Sebuah status muncul dua kali. Muat ulang halaman.",
+        "duplicate_status": "Sebuah status muncul dua kali di workflow ini.",
+        "duplicate_status_name": "Dua status memiliki nama yang sama, atau status dengan nama ini sudah ada: pilih dari status yang ada.",
+        "invalid_transition": "Sebuah transisi belum lengkap.",
+        "reserved_status_name": "Nama \"Triage\" dicadangkan untuk Intake.",
+        "invalid_rule": "Sebuah pembatasan belum lengkap.",
+        "invalid_status": "Sebuah status sudah tidak ada. Muat ulang halaman.",
+        "status_changed": "Sebuah status telah berubah. Muat ulang halaman.",
+        "status_limit": "Ruang kerja telah mencapai 1.000 status.",
+        "status_in_use": "Status ini masih berisi item kerja, pindahkan terlebih dahulu:",
+        "status_in_use_project": "{project}: {count, plural, one {# item kerja} other {# item kerja}}",
+        "default": "Workflow tidak dapat disimpan."
+      }
+    },
+    "scheme": {
+      "description": "Pilih workflow yang diikuti setiap jenis item kerja di proyek ini.",
+      "free": "Proyek ini tidak menggunakan workflow: setiap perubahan status diizinkan.",
+      "default_workflow": "Workflow default",
+      "per_type": "Workflow untuk {type}",
+      "same_as_default": "Sama dengan workflow default",
+      "choose": "Pilih workflow",
+      "next": "Lanjutkan",
+      "back": "Kembali",
+      "apply": "Terapkan",
+      "detach": "Berhenti menggunakan workflow",
+      "detach_confirm": "Status tetap ada, dapat diedit kembali, dan setiap perubahan status diizinkan lagi.",
+      "mapping": {
+        "title": "Pindahkan item kerja",
+        "description": "Status ini berisi item kerja tetapi bukan bagian dari workflow yang dipilih. Pilih ke mana item kerja dipindahkan.",
+        "row": "{state} di {workflow}: {count, plural, one {# item kerja} other {# item kerja}}",
+        "pick": "Status tujuan",
+        "none": "Tidak ada yang perlu dipindahkan."
+      },
+      "applied": "Proyek kini mengikuti workflow-nya.",
+      "detached": "Proyek tidak lagi menggunakan workflow.",
+      "errors": {
+        "invalid_scheme": "Sebuah workflow atau jenis sudah tidak valid. Muat ulang halaman.",
+        "mapping_incomplete": "Pilih status tujuan untuk setiap baris.",
+        "invalid_mapping": "Sebuah status tujuan bukan bagian dari workflow-nya.",
+        "default": "Perubahan tidak dapat diterapkan."
+      }
+    },
+    "refusal": {
+      "arrival_state_required": "Pilih status yang dimasuki item kerja ini di workflow barunya."
+    },
+    "managed_states": {
+      "banner": "Status ini berasal dari workflow proyek. Ubah di Pengaturan ruang kerja, Workflow."
+    },
+    "type_change": {
+      "title": "Pilih status tujuan",
+      "description": "Status saat ini bukan bagian dari workflow jenis ini.",
+      "submit": "Ubah jenis",
+      "cancel": "Batal"
+    },
+    "creation": {
+      "initial_state": "Item kerja baru dimulai di status ini."
     }
   }
 }
