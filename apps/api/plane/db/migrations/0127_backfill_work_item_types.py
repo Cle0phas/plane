@@ -54,13 +54,14 @@ def _backfill_issues(Issue, project_id, type_id):
     while True:
         with transaction.atomic():
             ids = list(
-                Issue._base_manager.filter(project_id=project_id, type__isnull=True).values_list("id", flat=True)[
-                    :BATCH_SIZE
-                ]
+                Issue._base_manager.filter(project_id=project_id, type__isnull=True).order_by("id").values_list(
+                    "id", flat=True
+                )[:BATCH_SIZE]
             )
             if not ids:
                 return
-            Issue._base_manager.filter(id__in=ids).update(type_id=type_id)
+            # type__isnull again: a type set by a user since the SELECT must not be overwritten.
+            Issue._base_manager.filter(id__in=ids, type__isnull=True).update(type_id=type_id)
 
 
 def backfill_work_item_types(apps, schema_editor):
@@ -75,7 +76,9 @@ def backfill_work_item_types(apps, schema_editor):
         with transaction.atomic():
             _ensure_workspace_default(IssueType, workspace_id)
 
-    projects = Project._base_manager.filter(deleted_at__isnull=True).values_list("id", "workspace_id")
+    projects = Project._base_manager.filter(deleted_at__isnull=True, workspace__deleted_at__isnull=True).values_list(
+        "id", "workspace_id"
+    )
     for project_id, workspace_id in projects:
         with transaction.atomic():
             type_id = _ensure_project_default(IssueType, ProjectIssueType, project_id, workspace_id)

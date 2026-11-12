@@ -6,7 +6,11 @@ from importlib import import_module
 
 import pytest
 from django.apps import apps as django_apps
+from django.db import connection
+from django.db.migrations.loader import MigrationLoader
 from django.db.models.query import QuerySet
+from django.test import override_settings
+from django.utils import timezone
 
 from plane.db.models import Issue, IssueType, Project, ProjectIssueType
 from plane.tests.factories import IssueTypeFactory
@@ -95,3 +99,65 @@ def test_backfill_repairs_partially_migrated_data(workspace, create_user):
     assert Issue.objects.get(pk=untyped.pk).type_id == default.id
     assert Issue.objects.get(pk=typed.pk).type_id == bug.id
     assert ProjectIssueType.objects.get(project=project, is_default=True).issue_type_id == default.id
+
+
+@pytest.fixture
+def frozen_apps():
+    # Models as they were at 0126: no signals, no save guard, as in a real migration run.
+    # The suite runs with --nomigrations, so the real migration graph is restored for this loader only.
+    with override_settings(MIGRATION_MODULES={}):
+        return MigrationLoader(None).project_state(("db", "0126_auditlog")).apps
+
+
+def _drop_default_constraints():
+    with connection.cursor() as cursor:
+        cursor.execute("DROP INDEX issue_type_unique_default_workspace_when_deleted_at_null")
+        cursor.execute("DROP INDEX project_issue_type_unique_default_project_when_deleted_at_null")
+
+
+def _restore_default_constraints():
+    with connection.cursor() as cursor:
+        cursor.execute("SET CONSTRAINTS ALL IMMEDIATE")
+    with connection.schema_editor() as editor:
+        for model in (IssueType, ProjectIssueType):
+            for constraint in model._meta.constraints:
+                if "default" in constraint.name:
+                    editor.add_constraint(model, constraint)
+
+
+def test_backfill_normalises_duplicate_defaults_so_the_constraints_can_be_added(workspace, create_user, frozen_apps):
+    project = Project.objects.create(name="Dup", identifier="DUP", workspace=workspace, created_by=create_user)
+    _drop_default_constraints()
+    first_type = IssueType.objects.get(workspace=workspace, is_default=True)
+    second_type = IssueTypeFactory(workspace=workspace, name="Second default", is_default=True)
+    ProjectIssueType.objects.create(project=project, issue_type=second_type, is_default=True)
+
+    backfill.backfill_work_item_types(frozen_apps, None)
+
+    assert list(IssueType.objects.filter(workspace=workspace, is_default=True)) == [first_type]
+    link = ProjectIssueType.objects.get(project=project, is_default=True)
+    assert link.issue_type_id == first_type.id
+    _restore_default_constraints()
+
+
+def test_backfill_skips_soft_deleted_projects_and_workspaces(workspace, create_user, frozen_apps):
+    deleted_project = Project.objects.create(name="Gone", identifier="GON", workspace=workspace, created_by=create_user)
+    Issue.objects.filter(project=deleted_project).delete()
+    item = Issue.objects.create(name="Orphan", project=deleted_project)
+    Issue.objects.filter(pk=item.pk).update(type=None)
+    Project.objects.filter(pk=deleted_project.pk).update(deleted_at=timezone.now())
+    from plane.db.models import Workspace
+
+    dead_workspace = Workspace.objects.create(name="Dead", slug="dead-workspace", owner=create_user)
+    dead_project = Project.objects.create(
+        name="InDead", identifier="DED", workspace=dead_workspace, created_by=create_user
+    )
+    IssueType.all_objects.filter(workspace=dead_workspace).delete()
+    ProjectIssueType.all_objects.filter(project=dead_project).delete()
+    Workspace.objects.filter(pk=dead_workspace.pk).update(deleted_at=timezone.now())
+
+    backfill.backfill_work_item_types(frozen_apps, None)
+
+    assert Issue.objects.get(pk=item.pk).type_id is None
+    assert not IssueType.all_objects.filter(workspace=dead_workspace).exists()
+    assert not ProjectIssueType.all_objects.filter(project=dead_project).exists()
