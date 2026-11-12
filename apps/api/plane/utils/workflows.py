@@ -54,9 +54,10 @@ def project_default_type_id(project_id):
     )
 
 
-def state_in_workflow(state, workflow_id):
+def state_in_workflow(state, workflow_id, project_id):
     return (
         state is not None
+        and state.project_id == project_id
         and state.workflow_status_id is not None
         and WorkflowState.objects.filter(workflow_id=workflow_id, status_id=state.workflow_status_id).exists()
     )
@@ -74,17 +75,18 @@ def initial_state(project_id, workflow_id):
 
 def _actor_allowed(params, issue, actor):
     """W6: any one criterion admits the actor; workspace admins are not exempt."""
-    if actor is None or not getattr(actor, "is_authenticated", False):
+    if actor is None or not getattr(actor, "is_authenticated", False) or not isinstance(params, dict):
         return False
     actor_id = str(actor.id)
-    if actor_id in params.get("user_ids", []):
+    user_ids = params.get("user_ids")
+    if isinstance(user_ids, list) and actor_id in user_ids:
         return True
     if params.get("creator") is True and str(issue.created_by_id) == actor_id:
         return True
     if params.get("assignee") is True and IssueAssignee.objects.filter(issue_id=issue.id, assignee_id=actor.id).exists():
         return True
-    roles = params.get("roles", [])
-    return bool(roles) and ProjectMember.objects.filter(
+    roles = params.get("roles")
+    return isinstance(roles, list) and bool(roles) and ProjectMember.objects.filter(
         project_id=issue.project_id, member_id=actor.id, is_active=True, role__in=roles
     ).exists()
 
@@ -104,7 +106,7 @@ def check_transition(issue, from_state, to_state, actor, workflow_id=None):
         return True
     if from_state is not None and to_state is not None and from_state.pk == to_state.pk:
         return True
-    if to_state is None or to_state.workflow_status_id is None:
+    if to_state is None or to_state.workflow_status_id is None or to_state.project_id != issue.project_id:
         return False
     # Triage and unmanaged states have no arrow of their own, only global ones (P5).
     sources = Q(from_any=True)
@@ -137,13 +139,13 @@ def resolve_workflow_state(*, project_id, instance, state, state_given, type_id)
         return None
     if state_given and state is None:
         raise refusal(TRANSITION_NOT_ALLOWED)
-    if new_type_id != instance.type_id:
-        # A type change is a change of workflow, not a move inside one: no arrow needed (T2).
+    if workflow_id != workflow_id_for(project_id, instance.type_id):
+        # A change of workflow, not a move inside one: no arrow needed (T2).
         if state_given:
-            if not state_in_workflow(state, workflow_id):
+            if not state_in_workflow(state, workflow_id, project_id):
                 raise refusal(TRANSITION_NOT_ALLOWED)
             return None
-        if state_in_workflow(instance.state, workflow_id):
+        if state_in_workflow(instance.state, workflow_id, project_id):
             return None
         raise refusal(ARRIVAL_STATE_REQUIRED)
     if not state_given or state.pk == instance.state_id:

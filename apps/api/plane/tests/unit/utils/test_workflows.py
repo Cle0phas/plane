@@ -15,6 +15,7 @@ from plane.db.models import (
     ProjectWorkflowScheme,
     ProjectWorkflowSchemeItem,
     State,
+    WorkflowTransitionRule,
     WorkspaceMember,
 )
 from plane.tests.factories import IssueTypeFactory, ProjectIssueTypeFactory, UserFactory
@@ -175,8 +176,6 @@ class TestRestrictActors:
         assert check_transition(issue, states["Open"], states["Roles"], users["outside_admin"]) is False
 
     def test_named_users(self, project, states, users):
-        from plane.db.models import WorkflowTransitionRule
-
         WorkflowTransitionRule.objects.filter(transition__target__status__name="Named").update(
             params={"user_ids": [str(users["guest"].id)]}
         )
@@ -282,3 +281,100 @@ class TestResolveWorkflowState:
         with pytest.raises(serializers.ValidationError) as error:
             resolve_workflow_state(project_id=project.id, instance=issue, state=states["Done"], state_given=True, type_id=bug.id)
         assert _code(error) == TRANSITION_NOT_ALLOWED
+
+    def test_type_change_inside_the_same_workflow_is_a_normal_move(self, project, software, bug):
+        states = _link(project, software)
+        issue = _issue(project, states["To do"])
+        with pytest.raises(serializers.ValidationError) as error:
+            resolve_workflow_state(project_id=project.id, instance=issue, state=states["Done"], state_given=True, type_id=bug.id)
+        assert _code(error) == TRANSITION_NOT_ALLOWED
+        assert (
+            resolve_workflow_state(project_id=project.id, instance=issue, state=states["Doing"], state_given=True, type_id=bug.id)
+            is None
+        )
+        assert resolve_workflow_state(project_id=project.id, instance=issue, state=None, state_given=False, type_id=bug.id) is None
+
+
+class TestActorThroughResolution:
+    @pytest.fixture
+    def guarded(self, project, software):
+        states = _link(project, software)
+        return states, _issue(project, states["Doing"])
+
+    def _move(self, project, states, issue):
+        return resolve_workflow_state(
+            project_id=project.id, instance=issue, state=states["Done"], state_given=True, type_id=None
+        )
+
+    def test_a_member_is_refused_on_an_admin_arrow(self, project, guarded, users):
+        states, issue = guarded
+        set_current_user(users["member"])
+        try:
+            with pytest.raises(serializers.ValidationError) as error:
+                self._move(project, states, issue)
+            assert _code(error) == TRANSITION_NOT_ALLOWED
+        finally:
+            set_current_user(None)
+
+    def test_an_admin_is_allowed(self, project, guarded, users):
+        states, issue = guarded
+        set_current_user(users["admin"])
+        try:
+            assert self._move(project, states, issue) is None
+        finally:
+            set_current_user(None)
+
+    def test_without_current_user_the_rule_refuses(self, project, guarded):
+        states, issue = guarded
+        set_current_user(None)
+        with pytest.raises(serializers.ValidationError) as error:
+            self._move(project, states, issue)
+        assert _code(error) == TRANSITION_NOT_ALLOWED
+
+
+class TestDefenceInDepth:
+    def test_a_state_of_another_project_is_refused(self, project, software, users, workspace):
+        states = _link(project, software)
+        other = Project.objects.create(name="Other", identifier="OTH", workspace=workspace, created_by=users["admin"])
+        foreign = _link(other, software)
+        issue = _issue(project, states["To do"])
+        assert check_transition(issue, states["To do"], foreign["Doing"], users["admin"]) is False
+
+    def test_a_foreign_state_is_not_in_the_workflow(self, project, software, users, workspace):
+        from plane.utils.workflows import state_in_workflow
+
+        states = _link(project, software)
+        other = Project.objects.create(name="Other", identifier="OTH", workspace=workspace, created_by=users["admin"])
+        foreign = _link(other, software)
+        assert state_in_workflow(states["Doing"], software.id, project.id) is True
+        assert state_in_workflow(foreign["Doing"], software.id, project.id) is False
+
+
+class TestFailClosed:
+    @pytest.fixture
+    def states(self, project, workspace):
+        workflow = build_workflow(workspace, "G", ["Open", "Next"], [(["Open"], "Next", {"roles": [20]})])
+        return _link(project, workflow)
+
+    @pytest.mark.parametrize("params", [{"roles": "20"}, {"user_ids": "x", "roles": 20}, ["roles"], "roles"])
+    def test_malformed_params_refuse_without_raising(self, project, states, users, params):
+        WorkflowTransitionRule.objects.update(params=params)
+        issue = _issue(project, states["Open"])
+        assert check_transition(issue, states["Open"], states["Next"], users["admin"]) is False
+
+    def test_an_unknown_rule_type_refuses(self, project, states, users):
+        WorkflowTransitionRule.objects.update(rule_type="something_else")
+        issue = _issue(project, states["Open"])
+        assert check_transition(issue, states["Open"], states["Next"], users["admin"]) is False
+
+    def test_an_inactive_member_with_an_allowed_role_is_refused(self, project, states, users):
+        ProjectMember.objects.filter(project=project, member=users["admin"]).update(is_active=False)
+        issue = _issue(project, states["Open"])
+        assert check_transition(issue, states["Open"], states["Next"], users["admin"]) is False
+
+    def test_a_global_transition_still_applies_its_rule(self, project, workspace, users):
+        workflow = build_workflow(workspace, "Glob", ["A", "B"], [("*", "B", {"roles": [20]})])
+        states = _link(project, workflow)
+        issue = _issue(project, states["A"])
+        assert check_transition(issue, states["A"], states["B"], users["admin"]) is True
+        assert check_transition(issue, states["A"], states["B"], users["member"]) is False
