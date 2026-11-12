@@ -67,3 +67,16 @@ def test_a_type_of_another_workspace_is_never_named(scope, mock_celery):
     foreign = IssueTypeFactory(workspace=WorkspaceFactory(), name="Foreign secret")
     _update(scope, {"type_id": str(foreign.id)}, {"type_id": str(scope.default_type.id)})
     assert not IssueActivity.objects.filter(issue=scope.issue, field="type").exists()
+
+
+def test_a_null_requested_type_records_nothing(scope, mock_celery):
+    _update(scope, {"type_id": None}, {"type_id": str(scope.default_type.id)})
+    assert not IssueActivity.objects.filter(issue=scope.issue, field="type").exists()
+
+
+def test_a_change_from_no_type_has_no_old_value(scope, mock_celery):
+    _update(scope, {"type_id": str(scope.bug.id)}, {"type_id": None})
+
+    activity = IssueActivity.objects.get(issue=scope.issue, field="type")
+    assert activity.old_value is None and activity.old_identifier is None
+    assert activity.new_identifier == scope.bug.id
