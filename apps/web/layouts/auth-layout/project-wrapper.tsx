@@ -18,6 +18,7 @@ import {
   PROJECT_ME_INFORMATION,
   PROJECT_LABELS,
   PROJECT_WORK_ITEM_TYPES,
+  PROJECT_WORKFLOW_SCHEME,
   PROJECT_MEMBERS,
   PROJECT_MEMBER_PREFERENCES,
   PROJECT_STATES,
@@ -38,6 +39,7 @@ import { useProjectState } from "@/hooks/store/use-project-state";
 import { useProjectView } from "@/hooks/store/use-project-view";
 import { useUser, useUserPermissions } from "@/hooks/store/user";
 import { useWorkItemType } from "@/hooks/store/use-work-item-type";
+import { useWorkflow } from "@/hooks/store/use-workflow";
 import { useTimeLineChart } from "@/hooks/use-timeline-chart";
 
 interface IProjectAuthWrapper {
@@ -66,6 +68,7 @@ export const ProjectAuthWrapper = observer(function ProjectAuthWrapper(props: IP
   const { data: currentUserData } = useUser();
   const { fetchProjectLabels } = useLabel();
   const { fetchProjectTypes } = useWorkItemType();
+  const { fetchProjectScheme } = useWorkflow();
   const { getProjectEstimates } = useProjectEstimates();
   // derived values
   const hasPermissionToCurrentProject = allowPermissions(
@@ -102,6 +105,11 @@ export const ProjectAuthWrapper = observer(function ProjectAuthWrapper(props: IP
   });
   // fetching project work item types
   useSWR(PROJECT_WORK_ITEM_TYPES(projectId), () => fetchProjectTypes(workspaceSlug, projectId), {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+  });
+  // fetching the project workflow scheme (graphs included, P10)
+  useSWR(PROJECT_WORKFLOW_SCHEME(projectId), () => fetchProjectScheme(workspaceSlug, projectId), {
     revalidateIfStale: false,
     revalidateOnFocus: false,
   });

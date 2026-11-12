@@ -1,0 +1,201 @@
+/**
+ * Copyright (c) 2023-present Plane Software, Inc. and contributors
+ * SPDX-License-Identifier: AGPL-3.0-only
+ * See the LICENSE file for details.
+ */
+
+import { action, makeObservable, observable, runInAction } from "mobx";
+import { computedFn } from "mobx-utils";
+import type {
+  TProjectWorkflowScheme,
+  TProjectWorkflowSchemePayload,
+  TWorkflowDetail,
+  TWorkflowFormData,
+  TWorkflowGraph,
+  TWorkflowGraphPayload,
+  TWorkflowMappingNeed,
+  TWorkflowStatus,
+  TWorkflowSummary,
+} from "@plane/types";
+import { WorkflowService } from "@/services/workflow.service";
+
+export interface IWorkflowStore {
+  workflowsMap: Record<string, Record<string, TWorkflowSummary>>;
+  detailsMap: Record<string, TWorkflowDetail>;
+  statusesMap: Record<string, TWorkflowStatus[]>;
+  schemesMap: Record<string, TProjectWorkflowScheme>;
+  getWorkspaceWorkflows: (workspaceSlug: string) => TWorkflowSummary[];
+  getWorkflowDetail: (workflowId: string) => TWorkflowDetail | undefined;
+  getWorkspaceStatuses: (workspaceSlug: string) => TWorkflowStatus[];
+  getProjectScheme: (projectId: string) => TProjectWorkflowScheme | undefined;
+  fetchWorkflows: (workspaceSlug: string) => Promise<TWorkflowSummary[]>;
+  fetchWorkflowDetail: (workspaceSlug: string, workflowId: string) => Promise<TWorkflowDetail>;
+  fetchStatuses: (workspaceSlug: string) => Promise<TWorkflowStatus[]>;
+  createWorkflow: (workspaceSlug: string, data: TWorkflowFormData) => Promise<TWorkflowDetail>;
+  updateWorkflow: (
+    workspaceSlug: string,
+    workflowId: string,
+    data: Partial<TWorkflowFormData>
+  ) => Promise<TWorkflowDetail>;
+  removeWorkflow: (workspaceSlug: string, workflowId: string) => Promise<void>;
+  saveGraph: (workspaceSlug: string, workflowId: string, payload: TWorkflowGraphPayload) => Promise<TWorkflowDetail>;
+  removeStatus: (workspaceSlug: string, statusId: string) => Promise<void>;
+  fetchProjectScheme: (workspaceSlug: string, projectId: string) => Promise<TProjectWorkflowScheme>;
+  previewProjectScheme: (
+    workspaceSlug: string,
+    projectId: string,
+    payload: TProjectWorkflowSchemePayload
+  ) => Promise<TWorkflowMappingNeed[]>;
+  applyProjectScheme: (
+    workspaceSlug: string,
+    projectId: string,
+    payload: TProjectWorkflowSchemePayload
+  ) => Promise<TProjectWorkflowScheme>;
+  detachProjectScheme: (workspaceSlug: string, projectId: string) => Promise<void>;
+}
+
+const toGraph = ({ id, name, description, updated_at, states, transitions }: TWorkflowDetail): TWorkflowGraph => ({
+  id,
+  name,
+  description,
+  updated_at,
+  states,
+  transitions,
+});
+
+export class WorkflowStore implements IWorkflowStore {
+  // Keyed by workspace slug so a workspace switch or a late response never mixes workspaces.
+  workflowsMap: Record<string, Record<string, TWorkflowSummary>> = {};
+  detailsMap: Record<string, TWorkflowDetail> = {};
+  statusesMap: Record<string, TWorkflowStatus[]> = {};
+  schemesMap: Record<string, TProjectWorkflowScheme> = {};
+  private service: WorkflowService;
+
+  constructor(service: WorkflowService = new WorkflowService()) {
+    makeObservable(this, {
+      workflowsMap: observable,
+      detailsMap: observable,
+      statusesMap: observable,
+      schemesMap: observable,
+      fetchWorkflows: action,
+      fetchWorkflowDetail: action,
+      fetchStatuses: action,
+      createWorkflow: action,
+      updateWorkflow: action,
+      removeWorkflow: action,
+      saveGraph: action,
+      removeStatus: action,
+      fetchProjectScheme: action,
+      applyProjectScheme: action,
+      detachProjectScheme: action,
+    });
+    this.service = service;
+  }
+
+  getWorkspaceWorkflows = computedFn((workspaceSlug: string) =>
+    Object.values(this.workflowsMap[workspaceSlug] ?? {}).sort((a, b) => a.name.localeCompare(b.name))
+  );
+
+  getWorkflowDetail = computedFn((workflowId: string) => this.detailsMap[workflowId]);
+
+  getWorkspaceStatuses = computedFn((workspaceSlug: string) => this.statusesMap[workspaceSlug] ?? []);
+
+  getProjectScheme = computedFn((projectId: string) => this.schemesMap[projectId]);
+
+  fetchWorkflows = async (workspaceSlug: string) => {
+    const workflows = await this.service.list(workspaceSlug);
+    runInAction(() => {
+      this.workflowsMap[workspaceSlug] = Object.fromEntries(workflows.map((workflow) => [workflow.id, workflow]));
+    });
+    return workflows;
+  };
+
+  fetchWorkflowDetail = async (workspaceSlug: string, workflowId: string) => {
+    const workflow = await this.service.retrieve(workspaceSlug, workflowId);
+    runInAction(() => {
+      this.detailsMap[workflowId] = workflow;
+    });
+    return workflow;
+  };
+
+  fetchStatuses = async (workspaceSlug: string) => {
+    const statuses = await this.service.listStatuses(workspaceSlug);
+    runInAction(() => {
+      this.statusesMap[workspaceSlug] = statuses;
+    });
+    return statuses;
+  };
+
+  createWorkflow = async (workspaceSlug: string, data: TWorkflowFormData) => {
+    const workflow = await this.service.create(workspaceSlug, data);
+    runInAction(() => {
+      this.detailsMap[workflow.id] = workflow;
+    });
+    await this.fetchWorkflows(workspaceSlug).catch(() => undefined);
+    return workflow;
+  };
+
+  updateWorkflow = async (workspaceSlug: string, workflowId: string, data: Partial<TWorkflowFormData>) => {
+    const workflow = await this.service.update(workspaceSlug, workflowId, data);
+    runInAction(() => {
+      this.detailsMap[workflowId] = workflow;
+    });
+    await this.fetchWorkflows(workspaceSlug).catch(() => undefined);
+    return workflow;
+  };
+
+  removeWorkflow = async (workspaceSlug: string, workflowId: string) => {
+    await this.service.remove(workspaceSlug, workflowId);
+    runInAction(() => {
+      delete this.workflowsMap[workspaceSlug]?.[workflowId];
+      delete this.detailsMap[workflowId];
+    });
+  };
+
+  saveGraph = async (workspaceSlug: string, workflowId: string, payload: TWorkflowGraphPayload) => {
+    const workflow = await this.service.saveGraph(workspaceSlug, workflowId, payload);
+    runInAction(() => {
+      this.detailsMap[workflowId] = workflow;
+      // Linked projects read the graph from their cached scheme (P10): keep it current.
+      for (const scheme of Object.values(this.schemesMap)) {
+        scheme.workflows = scheme.workflows.map((graph) => (graph.id === workflowId ? toGraph(workflow) : graph));
+      }
+    });
+    // Counts and shared statuses changed too.
+    await Promise.allSettled([this.fetchWorkflows(workspaceSlug), this.fetchStatuses(workspaceSlug)]);
+    return workflow;
+  };
+
+  removeStatus = async (workspaceSlug: string, statusId: string) => {
+    await this.service.removeStatus(workspaceSlug, statusId);
+    runInAction(() => {
+      this.statusesMap[workspaceSlug] = (this.statusesMap[workspaceSlug] ?? []).filter((item) => item.id !== statusId);
+    });
+  };
+
+  fetchProjectScheme = async (workspaceSlug: string, projectId: string) => {
+    const scheme = await this.service.getProjectScheme(workspaceSlug, projectId);
+    runInAction(() => {
+      this.schemesMap[projectId] = scheme;
+    });
+    return scheme;
+  };
+
+  previewProjectScheme = async (workspaceSlug: string, projectId: string, payload: TProjectWorkflowSchemePayload) =>
+    (await this.service.previewProjectScheme(workspaceSlug, projectId, payload)).needs;
+
+  applyProjectScheme = async (workspaceSlug: string, projectId: string, payload: TProjectWorkflowSchemePayload) => {
+    const scheme = await this.service.applyProjectScheme(workspaceSlug, projectId, payload);
+    runInAction(() => {
+      this.schemesMap[projectId] = scheme;
+    });
+    return scheme;
+  };
+
+  detachProjectScheme = async (workspaceSlug: string, projectId: string) => {
+    await this.service.detachProjectScheme(workspaceSlug, projectId);
+    runInAction(() => {
+      this.schemesMap[projectId] = { default_workflow_id: null, items: [], workflows: [] };
+    });
+  };
+}

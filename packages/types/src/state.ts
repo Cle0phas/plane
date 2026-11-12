@@ -17,6 +17,7 @@ export interface IState {
   sequence: number;
   workspace_id: string;
   order: number;
+  workflow_status?: string | null;
 }
 
 export interface IStateLite {
