@@ -216,27 +216,38 @@ describe("identifier visibility", () => {
 });
 
 describe("type id after a project change", () => {
-  it("keeps the chosen type while the project stays the same", () => {
-    expect(getTypeIdAfterProjectChange({ typeId: "bug", isProjectChange: false, projectDefaultTypeId: "task" })).toBe(
-      "bug"
-    );
+  const resolve = (overrides: Partial<Parameters<typeof getTypeIdAfterProjectChange>[0]>) =>
+    getTypeIdAfterProjectChange({
+      typeId: "bug",
+      isProjectChange: false,
+      assignableTypeIds: ["task", "bug"],
+      projectDefaultTypeId: "task",
+      ...overrides,
+    });
+
+  it("keeps an assignable type while the project stays the same", () => {
+    expect(resolve({})).toBe("bug");
+  });
+
+  it("replaces a type the project does not allow with the project default", () => {
+    expect(resolve({ typeId: "epic" })).toBe("task");
+  });
+
+  it("keeps a preset type until the project links are loaded", () => {
+    expect(resolve({ typeId: "epic", assignableTypeIds: undefined, projectDefaultTypeId: null })).toBe("epic");
   });
 
   it("fills an empty type with the project default", () => {
-    expect(getTypeIdAfterProjectChange({ typeId: null, isProjectChange: false, projectDefaultTypeId: "task" })).toBe(
-      "task"
-    );
+    expect(resolve({ typeId: null })).toBe("task");
   });
 
   it("resets a chosen type to the new project default", () => {
-    expect(getTypeIdAfterProjectChange({ typeId: "bug", isProjectChange: true, projectDefaultTypeId: "story" })).toBe(
+    expect(resolve({ isProjectChange: true, assignableTypeIds: ["story", "bug"], projectDefaultTypeId: "story" })).toBe(
       "story"
     );
   });
 
-  it("clears the type when the new project default is not loaded, so the server assigns it", () => {
-    expect(
-      getTypeIdAfterProjectChange({ typeId: "bug", isProjectChange: true, projectDefaultTypeId: null })
-    ).toBeNull();
+  it("clears the type when the new project links are not loaded, so the server assigns the default", () => {
+    expect(resolve({ isProjectChange: true, assignableTypeIds: undefined, projectDefaultTypeId: null })).toBeNull();
   });
 });

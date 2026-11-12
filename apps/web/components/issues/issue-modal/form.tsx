@@ -51,6 +51,7 @@ import { useIssueModal } from "@/hooks/context/use-issue-modal";
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 import { useProject } from "@/hooks/store/use-project";
 import { useProjectState } from "@/hooks/store/use-project-state";
+import { useWorkItemType } from "@/hooks/store/use-work-item-type";
 import { useWorkspaceDraftIssues } from "@/hooks/store/workspace-draft";
 import { usePlatformOS } from "@/hooks/use-platform-os";
 import { useProjectIssueProperties } from "@/hooks/use-project-issue-properties";
@@ -138,6 +139,7 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
   } = useIssueDetail();
   const { fetchCycles } = useProjectIssueProperties();
   const { getStateById } = useProjectState();
+  const { projectLinksMap, getProjectAssignableTypes } = useWorkItemType();
 
   // form info
   const methods = useForm<TIssue>({
@@ -157,6 +159,11 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
 
   const projectId = watch("project_id");
   const previousProjectIdRef = useRef(projectId);
+  // undefined until the project links are loaded, so the type effect re-runs once they arrive
+  const assignableTypes =
+    projectId && projectLinksMap[projectId]
+      ? getProjectAssignableTypes(workspaceSlug?.toString() ?? "", projectId)
+      : undefined;
 
   const isDisabled = isSubmitting || isApplyingTemplate;
 
@@ -189,19 +196,21 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
 
   // Update the issue type id when the project id changes
   useEffect(() => {
-    if (!projectId) return;
+    // The type is only chosen at creation (spec 6.3); an update never sends a silently filled one.
+    if (!projectId || data?.id) return;
     const isProjectChange = previousProjectIdRef.current !== projectId;
     previousProjectIdRef.current = projectId;
     const issueTypeId = watch("type_id");
     const nextIssueTypeId = getTypeIdAfterProjectChange({
       typeId: issueTypeId,
       isProjectChange,
+      assignableTypeIds: assignableTypes?.map((workItemType) => workItemType.id),
       projectDefaultTypeId: getIssueTypeIdOnProjectChange(projectId),
     });
     if (nextIssueTypeId !== issueTypeId) setValue("type_id", nextIssueTypeId, { shouldValidate: true });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, projectId]);
+  }, [data, projectId, assignableTypes]);
 
   useEffect(() => {
     if (workItemTemplateId && editorRef.current) {
@@ -242,7 +251,6 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
           project_id: getValues<"project_id">("project_id"),
           id: data.id,
           description_html: formData.description_html ?? "<p></p>",
-          type_id: getValues<"type_id">("type_id"),
         };
 
     // this condition helps to move the issues from draft to project issues
@@ -392,6 +400,7 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
                           }}
                           variant="pill-md"
                           label={t("work_item_types.select.label")}
+                          tabIndex={getIndex("type_id")}
                           testId="create-work-item-type-select"
                         />
                       )}

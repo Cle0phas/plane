@@ -74,12 +74,21 @@ export const getIdentifierVisibility = (displayProperties: IIssueDisplayProperti
   showType: displayProperties?.issue_type !== false,
 });
 
-/** A type is only valid in the projects that enable it, so a project change always resets it (R9). */
+/**
+ * A type is only valid in the projects that enable it (R9): a project change resets it, and a preset type (duplicate,
+ * template) the project does not allow falls back to the default. Unloaded links (undefined) keep the preset pending.
+ */
 export const getTypeIdAfterProjectChange = (params: {
   typeId: string | null | undefined;
   isProjectChange: boolean;
+  assignableTypeIds: string[] | undefined;
   projectDefaultTypeId: string | null;
-}): string | null => (params.isProjectChange || !params.typeId ? params.projectDefaultTypeId : params.typeId);
+}): string | null => {
+  const { typeId, isProjectChange, assignableTypeIds, projectDefaultTypeId } = params;
+  if (isProjectChange || !typeId) return projectDefaultTypeId;
+  if (!assignableTypeIds || assignableTypeIds.includes(typeId)) return typeId;
+  return projectDefaultTypeId;
+};
 
 const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object";
 

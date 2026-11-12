@@ -208,6 +208,7 @@ const IssueRowDetails = observer(function IssueRowDetails(props: IssueRowDetails
   const issueDetail = issue.getIssueById(issueId);
 
   const subIssueIndentation = `${spacingLeft}px`;
+  const showIdentifier = !!displayProperties && (displayProperties.key || displayProperties.issue_type !== false);
 
   useOutsideClickDetector(menuActionRef, () => setIsMenuActive(false));
 
@@ -285,7 +286,7 @@ const IssueRowDetails = observer(function IssueRowDetails(props: IssueRowDetails
             )}
           >
             {/* Identifier section - conditionally rendered */}
-            {displayProperties?.key && (
+            {showIdentifier && (
               <div className="flex h-full min-w-24 flex-shrink-0 items-center">
                 <div className="relative flex cursor-pointer items-center text-caption-sm-regular hover:text-primary">
                   {issueDetail.project_id && (
@@ -304,8 +305,8 @@ const IssueRowDetails = observer(function IssueRowDetails(props: IssueRowDetails
             {/* Workitem section */}
             <div
               className={cn("flex flex-grow items-center gap-0.5 py-2", {
-                "min-w-[360px]": !displayProperties?.key,
-                "min-w-60": displayProperties?.key,
+                "min-w-[360px]": !showIdentifier,
+                "min-w-60": showIdentifier,
               })}
             >
               {/* select checkbox */}
@@ -386,6 +387,8 @@ const IssueRowDetails = observer(function IssueRowDetails(props: IssueRowDetails
       <td className="right-0 z-10 w-12 min-w-12 border-b-[0.5px] border-l-[0.5px] border-subtle bg-surface-1 shadow-direction-left md:sticky">
         <div className="flex items-center justify-center">
           {/* Revealed on row hover, while focused from the keyboard, and while its menu is open. */}
+          {/* Only stops the menu click bubbling to the row; the menu trigger inside is the keyboard target. */}
+          {/* oxlint-disable-next-line jsx_a11y/click-events-have-key-events oxlint-disable-next-line jsx_a11y/no-static-element-interactions */}
           <div
             className={cn(
               "opacity-0 transition-opacity group-hover/spreadsheet-row:opacity-100 focus-within:opacity-100 has-[[aria-expanded=true]]:opacity-100",

@@ -33,7 +33,7 @@ export const WorkItemTypeSelect = observer(function WorkItemTypeSelect(props: TW
   const { projectId, value, onChange, variant, label, disabled = false, tabIndex, testId } = props;
   const { workspaceSlug: routeWorkspaceSlug } = useParams();
   const workspaceSlug = routeWorkspaceSlug?.toString() ?? "";
-  const { getProjectAssignableTypes, getProjectDefaultTypeId, getTypeById, fetchProjectTypes } = useWorkItemType();
+  const { getProjectAssignableTypes, getProjectDefaultTypeId, fetchProjectTypes } = useWorkItemType();
   // The modal can target a project other than the route one, whose links the project wrapper did not load.
   useSWR(
     workspaceSlug && projectId ? PROJECT_WORK_ITEM_TYPES(projectId) : null,
@@ -41,8 +41,10 @@ export const WorkItemTypeSelect = observer(function WorkItemTypeSelect(props: TW
     { revalidateIfStale: false, revalidateOnFocus: false }
   );
   const options = projectId ? getProjectAssignableTypes(workspaceSlug, projectId) : [];
-  // An empty value is shown as the project default, which the server assigns on save (R9).
-  const selected = getTypeById(workspaceSlug, value || (projectId ? getProjectDefaultTypeId(projectId) : null)) ?? null;
+  // An empty value is shown as the project default, which the server assigns on save (R9); a type the project does not
+  // allow is never shown as selected.
+  const selectedTypeId = value || (projectId ? getProjectDefaultTypeId(projectId) : null);
+  const selected = options.find((option) => option.id === selectedTypeId) ?? null;
 
   return (
     <Select<TIssueType>
