@@ -29,7 +29,8 @@ import { useWorkFlowFDragNDrop } from "@/components/workflow";
 // local imports
 import type { TRenderQuickActions } from "../list/list-view-types";
 import type { GroupDropLocation } from "../utils";
-import { getGroupByColumns, getLoadedGroupIds, isWorkspaceLevel } from "../utils";
+import { getLoadedGroupIds } from "@/components/work-item-types/helpers";
+import { getGroupByColumns, isWorkspaceLevel } from "../utils";
 import {
   KANBAN_SWIMLANE_COLLAPSED_COLUMN_WIDTH,
   KANBAN_SWIMLANES_ATTRIBUTE,

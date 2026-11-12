@@ -15,9 +15,19 @@ import {
 import { COLLECTION_OPERATOR, WORK_ITEM_FILTER_PROPERTY_KEYS } from "@plane/types";
 import type { TIssueType, TWorkItemFilterProperty } from "@plane/types";
 import { getWorkItemTypeFilterConfig } from "@plane/utils";
-import type { TCreateWorkItemTypeFilterParams } from "@plane/utils";
 
-const buildType = (id: string, name: string): TIssueType => ({ id, name }) as TIssueType;
+const buildType = (id: string, name: string): TIssueType => ({
+  id,
+  name,
+  description: "",
+  logo_props: { in_use: "icon", icon: { name: "bug_report", color: "#e57a00" } },
+  is_active: true,
+  is_default: false,
+  issue_count: 0,
+  project_default_count: 0,
+  created_at: "2026-11-12T00:00:00Z",
+  updated_at: "2026-11-12T00:00:00Z",
+});
 
 describe("work item type filter and grouping", () => {
   it("groups by type on the server type_id column", () => {
@@ -36,21 +46,22 @@ describe("work item type filter and grouping", () => {
     expect(ISSUE_DISPLAY_PROPERTIES.some((property) => property.key === "issue_type")).toBe(true);
   });
 
-  it("lists exactly the given types as IN options keyed by type id", () => {
+  it("lists exactly the given types as IN options keyed by type id", async () => {
     const config = getWorkItemTypeFilterConfig<TWorkItemFilterProperty>("type_id")({
       isEnabled: true,
       allowedOperators: new Set([COLLECTION_OPERATOR.IN]),
       label: "Work item type",
       workItemTypes: [buildType("bug-id", "Bug"), buildType("task-id", "Task")],
       getOptionIcon: () => null,
-    } as TCreateWorkItemTypeFilterParams);
+    });
     expect(config.id).toBe("type_id");
     expect(config.label).toBe("Work item type");
     expect([...config.supportedOperatorConfigsMap.keys()]).toEqual([COLLECTION_OPERATOR.IN]);
-    const operatorConfig = config.supportedOperatorConfigsMap.get(COLLECTION_OPERATOR.IN) as {
-      getOptions: () => { value: string; label: string }[];
-    };
-    expect(operatorConfig.getOptions().map(({ value, label }) => ({ value, label }))).toEqual([
+    const operatorConfig = config.supportedOperatorConfigsMap.get(COLLECTION_OPERATOR.IN);
+    const getOptions = operatorConfig && "getOptions" in operatorConfig ? operatorConfig.getOptions : undefined;
+    if (typeof getOptions !== "function") throw new Error("IN operator has no options");
+    const options = await getOptions();
+    expect(options.map(({ value, label }) => ({ value, label }))).toEqual([
       { value: "bug-id", label: "Bug" },
       { value: "task-id", label: "Task" },
     ]);

@@ -37,7 +37,6 @@ export enum EIssueGroupByToServerOptions {
   // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   "project" = "project_id",
   "created_by" = "created_by",
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   "team_project" = "project_id",
 }
 

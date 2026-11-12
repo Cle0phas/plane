@@ -33,7 +33,8 @@ import { useIssueStoreType } from "@/hooks/use-issue-layout-store";
 import { useWorkFlowFDragNDrop } from "@/components/workflow";
 import type { TRenderQuickActions } from "../list/list-view-types";
 import type { GroupDropLocation } from "../utils";
-import { getGroupByColumns, getLoadedGroupIds, isWorkspaceLevel, getApproximateCardHeight } from "../utils";
+import { getLoadedGroupIds } from "@/components/work-item-types/helpers";
+import { getGroupByColumns, isWorkspaceLevel, getApproximateCardHeight } from "../utils";
 // components
 import {
   KANBAN_COLLAPSED_COLUMN_WIDTH,

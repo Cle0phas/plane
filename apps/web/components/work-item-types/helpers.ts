@@ -4,7 +4,13 @@
  * See the LICENSE file for details.
  */
 
-import type { IIssueDisplayProperties, TIssueType, TProjectIssueType } from "@plane/types";
+import type {
+  IIssueDisplayProperties,
+  TGroupedIssues,
+  TIssueType,
+  TProjectIssueType,
+  TSubGroupedIssues,
+} from "@plane/types";
 
 /** A disabled action carries the i18n key of its reason, shown to every user (spec 6.1, 6.6). */
 export type TWorkItemTypeActionState = { disabled: boolean; reasonKey?: string };
@@ -129,3 +135,59 @@ const ACTION_REFUSAL_KEYS: Partial<Record<TWorkItemTypeRowAction, string>> = {
 
 export const getActionRefusalKey = (error: unknown, action: TWorkItemTypeRowAction): string | undefined =>
   isRecord(error) && typeof error.error === "string" ? ACTION_REFUSAL_KEYS[action] : undefined;
+
+/** Quick-add in a type column pre-fills the type only when the project allows it; "None" and unknown columns never match. */
+export const getQuickAddTypeData = (columnId: string, assignableTypes: Pick<TIssueType, "id">[]) =>
+  assignableTypes.some((workItemType) => workItemType.id === columnId) ? { type_id: columnId } : {};
+
+/**
+ * Group ids (level "group") or sub group ids (level "subGroup") holding work items in the loaded data.
+ * The store keys sub-grouped data as [groupId][subGroupId].
+ */
+export const getLoadedGroupIds = (
+  groupedIssueIds: TGroupedIssues | TSubGroupedIssues | undefined,
+  level: "group" | "subGroup" = "group"
+): string[] => {
+  if (!groupedIssueIds) return [];
+  const topLevelKeys = Object.keys(groupedIssueIds);
+  const isFlat = Object.values(groupedIssueIds).every((value) => Array.isArray(value));
+  if (isFlat) return level === "group" ? topLevelKeys : [];
+  if (level === "group") return topLevelKeys;
+  const nestedKeys = Object.values(groupedIssueIds).flatMap((value) =>
+    Array.isArray(value) ? [] : Object.keys(value)
+  );
+  return [...new Set(nestedKeys)];
+};
+
+export type TWorkItemTypeColumnEntry = {
+  id: string;
+  name: string;
+  /** Set for a known type, so the caller renders its icon. */
+  workItemType?: TIssueType;
+  payload: { type_id?: string };
+  isDropDisabled?: boolean;
+};
+
+/**
+ * Columns of a "group by type" layout: the workspace types, then a neutral column for a type id present in the data
+ * but missing from the store (soft-deleted), then "None". Never shows a raw id.
+ */
+export const getWorkItemTypeColumnEntries = (
+  workItemTypes: TIssueType[],
+  loadedGroupIds: string[],
+  labels: { unknown: string; none: string }
+): TWorkItemTypeColumnEntry[] => {
+  const knownIds = new Set(workItemTypes.map((workItemType) => workItemType.id));
+  return [
+    ...workItemTypes.map((workItemType) => ({
+      id: workItemType.id,
+      name: workItemType.name,
+      workItemType,
+      payload: { type_id: workItemType.id },
+    })),
+    ...loadedGroupIds
+      .filter((groupId) => groupId !== "None" && !knownIds.has(groupId))
+      .map((groupId) => ({ id: groupId, name: labels.unknown, payload: {}, isDropDisabled: true })),
+    { id: "None", name: labels.none, payload: {}, isDropDisabled: true },
+  ];
+};

@@ -12,11 +12,14 @@ import {
   getDeleteState,
   getFormFieldErrorKeys,
   getIdentifierVisibility,
+  getLoadedGroupIds,
   getProjectDefaultState,
   getProjectListTypes,
   getProjectToggleState,
+  getQuickAddTypeData,
   getSetDefaultState,
   getTypeIdAfterProjectChange,
+  getWorkItemTypeColumnEntries,
   getWorkItemTypeChange,
 } from "./helpers";
 
@@ -261,5 +264,56 @@ describe("work item type change", () => {
   it("sends the new type id otherwise", () => {
     expect(getWorkItemTypeChange("task", "bug")).toEqual({ type_id: "bug" });
     expect(getWorkItemTypeChange(null, "bug")).toEqual({ type_id: "bug" });
+  });
+});
+
+describe("group by type columns", () => {
+  const labels = { unknown: "Unknown type", none: "None" };
+
+  it("lists the types, then a neutral column for a type missing from the store, then None", () => {
+    const columns = getWorkItemTypeColumnEntries(
+      [buildType({ id: "bug", name: "Bug" })],
+      ["bug", "deleted-id", "None"],
+      labels
+    );
+    expect(columns.map(({ id, name }) => ({ id, name }))).toEqual([
+      { id: "bug", name: "Bug" },
+      { id: "deleted-id", name: "Unknown type" },
+      { id: "None", name: "None" },
+    ]);
+    expect(columns.some((column) => column.name === "deleted-id")).toBe(false);
+  });
+
+  it("only accepts drops on known types", () => {
+    const columns = getWorkItemTypeColumnEntries([buildType()], ["gone"], labels);
+    expect(columns.map((column) => column.isDropDisabled ?? false)).toEqual([false, true, true]);
+    expect(columns[0].payload).toEqual({ type_id: "bug" });
+  });
+
+  it("reads flat data at group level only", () => {
+    const flat = { bug: ["1"], None: [] };
+    expect(getLoadedGroupIds(flat)).toEqual(["bug", "None"]);
+    expect(getLoadedGroupIds(flat, "subGroup")).toEqual([]);
+    expect(getLoadedGroupIds(undefined)).toEqual([]);
+  });
+
+  it("reads sub-grouped data keyed [groupId][subGroupId]", () => {
+    const grouped = { bug: { high: ["1"], low: [] }, gone: { high: ["2"] } };
+    expect(getLoadedGroupIds(grouped)).toEqual(["bug", "gone"]);
+    expect(getLoadedGroupIds(grouped, "subGroup")).toEqual(["high", "low"]);
+  });
+});
+
+describe("quick add in a type column", () => {
+  const assignable = [buildType({ id: "bug" })];
+
+  it("pre-fills type_id for a type the project allows", () => {
+    expect(getQuickAddTypeData("bug", assignable)).toEqual({ type_id: "bug" });
+  });
+
+  it("leaves the type to the server for None, unknown and unassignable columns", () => {
+    expect(getQuickAddTypeData("None", assignable)).toEqual({});
+    expect(getQuickAddTypeData("deleted-id", assignable)).toEqual({});
+    expect(getQuickAddTypeData("bug", [])).toEqual({});
   });
 });

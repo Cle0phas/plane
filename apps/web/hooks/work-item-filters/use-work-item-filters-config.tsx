@@ -107,6 +107,7 @@ export const useWorkItemFiltersConfig = (props: TUseWorkItemFiltersConfigProps):
   const { getWorkspaceTypes } = useWorkItemType();
   const { t } = useTranslation();
   // derived values
+  // computedFn caches per observer: the hook must run in an observer (WorkItemFilterRoot) for a stable identity.
   const workItemTypes = getWorkspaceTypes(workspaceSlug);
   const operatorConfigs = useFiltersOperatorConfigs({ workspaceSlug });
   const filtersToShow = useMemo(() => new Set(allowedFilters), [allowedFilters]);

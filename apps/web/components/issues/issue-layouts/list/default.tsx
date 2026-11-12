@@ -33,7 +33,8 @@ import { IssueBulkOperationsRoot } from "@/components/issues/bulk-operations";
 import { useBulkOperationStatus } from "@/hooks/use-bulk-operation-status";
 // utils
 import type { GroupDropLocation } from "../utils";
-import { getGroupByColumns, getLoadedGroupIds, isWorkspaceLevel, isSubGrouped } from "../utils";
+import { getLoadedGroupIds } from "@/components/work-item-types/helpers";
+import { getGroupByColumns, isWorkspaceLevel, isSubGrouped } from "../utils";
 import { ListGroup } from "./list-group";
 import type { TRenderQuickActions } from "./list-view-types";
 
