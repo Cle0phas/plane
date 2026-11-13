@@ -17,6 +17,7 @@ import type { IIssueDetail } from "./root.store";
 export interface IIssueStoreActions {
   // actions
   fetchIssue: (workspaceSlug: string, projectId: string, issueId: string) => Promise<TIssue>;
+  fetchIssueAndRegroup: (workspaceSlug: string, projectId: string, issueId: string) => Promise<void>;
   updateIssue: (workspaceSlug: string, projectId: string, issueId: string, data: Partial<TIssue>) => Promise<void>;
   removeIssue: (workspaceSlug: string, projectId: string, issueId: string) => Promise<void>;
   archiveIssue: (workspaceSlug: string, projectId: string, issueId: string) => Promise<void>;
@@ -103,6 +104,7 @@ export class IssueStore implements IIssueStore {
     if (issue && issue?.parent && issue?.parent?.id && issue?.parent?.project_id) {
       this.issueService.retrieve(workspaceSlug, issue.parent.project_id, issue?.parent?.id).then((res) => {
         this.rootIssueDetailStore.rootIssueStore.issues.addIssue([res]);
+        return res;
       });
     }
     // assignees
@@ -176,6 +178,19 @@ export class IssueStore implements IIssueStore {
     this.fetchingIssueDetails = undefined;
 
     return issuePayload;
+  };
+
+  /** Reads the item back and, when the server moved its state, moves it between the grouped list ids too. */
+  fetchIssueAndRegroup = async (workspaceSlug: string, projectId: string, issueId: string) => {
+    const stateBefore = this.getIssueById(issueId)?.state_id;
+    const issue = await this.fetchIssue(workspaceSlug, projectId, issueId);
+    if (issue.state_id === stateBefore) return;
+    const { rootIssueStore } = this.rootIssueDetailStore;
+    const currentStore =
+      this.serviceType === EIssueServiceType.EPICS ? rootIssueStore.projectEpics : rootIssueStore.projectIssues;
+    // fetchIssue already wrote the new state, so restore the old one for issueUpdate to find the group to leave.
+    rootIssueStore.issues.updateIssue(issueId, { state_id: stateBefore });
+    await currentStore.updateIssue(workspaceSlug, projectId, issueId, { state_id: issue.state_id }, false);
   };
 
   updateIssue = async (workspaceSlug: string, projectId: string, issueId: string, data: Partial<TIssue>) => {
@@ -288,6 +303,7 @@ export class IssueStore implements IIssueStore {
     if (issue?.parent && issue?.parent?.id && issue?.parent?.project_id) {
       this.issueService.retrieve(workspaceSlug, issue.parent.project_id, issue.parent.id).then((res) => {
         this.rootIssueDetailStore.rootIssueStore.issues.addIssue([res]);
+        return res;
       });
     }
 

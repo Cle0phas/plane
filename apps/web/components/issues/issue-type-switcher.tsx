@@ -29,7 +29,7 @@ export const IssueTypeSwitcher = observer(function IssueTypeSwitcher(props: TIss
   // store hooks
   const {
     issue: { getIssueById },
-    fetchIssue,
+    fetchIssueAndRegroup,
     updateIssue,
   } = useIssueDetail();
   // derived values
@@ -47,7 +47,7 @@ export const IssueTypeSwitcher = observer(function IssueTypeSwitcher(props: TIss
       await submitWorkItemTypeChange(
         change,
         (data) => updateIssue(workspaceSlug.toString(), projectId, issueId, data),
-        () => fetchIssue(workspaceSlug.toString(), projectId, issueId)
+        () => fetchIssueAndRegroup(workspaceSlug.toString(), projectId, issueId)
       );
     } catch (error) {
       setToast({

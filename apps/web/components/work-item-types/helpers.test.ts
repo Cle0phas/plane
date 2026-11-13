@@ -286,6 +286,19 @@ describe("work item type change", () => {
     expect(store.state_id).toBe("new");
   });
 
+  it("does not reject when the read-back fails after a saved change", async () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    await expect(
+      submitWorkItemTypeChange(
+        { type_id: "bug" },
+        async () => undefined,
+        () => Promise.reject(new Error("offline"))
+      )
+    ).resolves.toBeUndefined();
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
+  });
+
   it("does not refetch when the update is refused", async () => {
     const refetch = vi.fn();
     await expect(

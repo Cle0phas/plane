@@ -15,5 +15,7 @@ def writable_data(serializer, data):
     # A state the workflow set on its own (type change) is a change too, so history and webhooks record it.
     workflow_state_id = getattr(serializer, "workflow_state_id", None)
     if workflow_state_id is not None and serializer.instance is not None:
-        accepted["state_id"] = str(workflow_state_id)
+        # Under the key the request used, so one state change is one activity.
+        key = next((key for key in ("state_id", "state") if key in accepted), "state_id")
+        accepted[key] = str(workflow_state_id)
     return accepted

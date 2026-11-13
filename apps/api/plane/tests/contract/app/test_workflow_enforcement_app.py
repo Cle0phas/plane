@@ -280,3 +280,20 @@ class TestIntake:
         assert kept.status_code == status.HTTP_200_OK, kept.data
         issue.refresh_from_db()
         assert (issue.type_id, issue.state_id) == (ctx.bug.id, triage.id)
+
+    def test_an_accepted_intake_item_traces_the_state_set_by_a_type_change(self, ctx, mock_celery):
+        project = ctx.project
+        project.intake_view = True
+        project.save()
+        intake = Intake.objects.create(name="Intake", project=project, workspace=ctx.workspace, is_default=True)
+        issue = _issue(ctx, "To do")
+        IntakeIssue.objects.create(intake=intake, issue=issue, project=project, workspace=ctx.workspace)
+        url = f"/api/workspaces/{ctx.workspace.slug}/projects/{project.id}/intake-issues/{issue.id}/"
+        response = _client(ctx.admin).patch(url, {"issue": {"type_id": str(ctx.bug.id)}}, format="json")
+        assert response.status_code == status.HTTP_200_OK, response.data
+        calls = [
+            call.kwargs for call in mock_celery.call_args_list if call.kwargs.get("type") == "issue.activity.updated"
+        ]
+        assert len(calls) == 1
+        issue_activity(**calls[0])
+        assert IssueActivity.objects.filter(issue=issue, field="state", new_identifier=ctx.states["New"].id).exists()

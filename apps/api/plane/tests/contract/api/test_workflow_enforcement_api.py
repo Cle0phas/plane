@@ -11,7 +11,8 @@ from rest_framework import status
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from plane.api.views.issue import IssueDetailAPIEndpoint
-from plane.db.models import Issue, Project, ProjectMember, WorkflowTransitionRule
+from plane.bgtasks.issue_activities_task import issue_activity
+from plane.db.models import Issue, IssueActivity, Project, ProjectMember, WorkflowTransitionRule
 from plane.tests.factories import IssueTypeFactory, ProjectIssueTypeFactory
 from plane.tests.workflow_builders import build_workflow, link_project
 
@@ -130,3 +131,16 @@ class TestApiV1Workflow:
         assert requested["state_id"] == str(ctx.states["New"].id)
         issue.refresh_from_db()
         assert (issue.type_id, issue.state_id) == (ctx.bug.id, ctx.states["New"].id)
+
+    def test_an_explicit_initial_state_is_traced_once(self, api_key_client, ctx, dispatched):
+        issue = Issue.objects.create(name="Item", project=ctx.project, state=ctx.states["To do"])
+        response = api_key_client.patch(
+            _url(ctx, issue), {"type_id": str(ctx.bug.id), "state": str(ctx.states["New"].id)}, format="json"
+        )
+        assert response.status_code == status.HTTP_200_OK, response.data
+        kwargs = dispatched.activity.call_args.kwargs
+        requested = json.loads(kwargs["requested_data"])
+        assert "state_id" not in requested
+        assert requested["state"] == str(ctx.states["New"].id)
+        issue_activity(**kwargs)
+        assert IssueActivity.objects.filter(issue=issue, field="state").count() == 1

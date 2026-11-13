@@ -110,7 +110,12 @@ export const submitWorkItemTypeChange = async (
   refetch: () => Promise<unknown>
 ) => {
   await update(change);
-  await refetch();
+  try {
+    await refetch();
+  } catch (error) {
+    // The change is saved: a failed read-back leaves the state stale until the next load, it is not an update error.
+    console.error("Failed to refresh the work item after a type change:", error);
+  }
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object";
