@@ -51,14 +51,23 @@ class TestGraphInput:
         "data, code",
         [
             ({"states": [_state("a", "Open"), _state("b", "Done")], "transitions": []}, "initial_state_required"),
-            ({"states": [_state("a", "Open", True), _state("b", "Done", True)], "transitions": []}, "initial_state_required"),
+            (
+                {"states": [_state("a", "Open", True), _state("b", "Done", True)], "transitions": []},
+                "initial_state_required",
+            ),
             ({"states": [_state("a", "Open", True), _state("a", "Done")], "transitions": []}, "duplicate_state_key"),
             ({"states": [_state("a", "Open", True), _state("b", "OPEN")], "transitions": []}, "duplicate_status_name"),
             ({"states": [_state("a", "Triage", True)], "transitions": []}, "reserved_status_name"),
             ({"states": [_state("a", "Open", True)], "transitions": [_transition(["a"], "zz")]}, "invalid_transition"),
-            ({"states": [_state("a", "Open", True), _state("b", "B")], "transitions": [_transition([], "b")]}, "invalid_transition"),
             (
-                {"states": [_state("a", "Open", True), _state("b", "B")], "transitions": [_transition(["a"], "b", from_any=True)]},
+                {"states": [_state("a", "Open", True), _state("b", "B")], "transitions": [_transition([], "b")]},
+                "invalid_transition",
+            ),
+            (
+                {
+                    "states": [_state("a", "Open", True), _state("b", "B")],
+                    "transitions": [_transition(["a"], "b", from_any=True)],
+                },
                 "invalid_transition",
             ),
             ({"states": [_state("a", "Open", True)], "transitions": [_transition(["a"], "a")]}, "invalid_transition"),
@@ -73,7 +82,10 @@ class TestGraphInput:
         status = WorkflowStatus.objects.create(workspace=workspace, name="Open", color="#3A3A3A")
         valid, serializer = _validate(
             workspace,
-            {"states": [_state("a", "Open", True, status.id), _state("b", "Other", False, status.id)], "transitions": []},
+            {
+                "states": [_state("a", "Open", True, status.id), _state("b", "Other", False, status.id)],
+                "transitions": [],
+            },
         )
         assert not valid and serializer.errors["graph"] == ["duplicate_status"]
 
@@ -221,7 +233,10 @@ class TestSaveGraph:
         with pytest.raises(GraphError) as error:
             self._save(
                 workflow,
-                {"states": [_state(str(workflow.states_by_name["Open"].id), "Other", True, other.id)], "transitions": []},
+                {
+                    "states": [_state(str(workflow.states_by_name["Open"].id), "Other", True, other.id)],
+                    "transitions": [],
+                },
                 create_user,
             )
         assert error.value.code == "status_changed"
@@ -240,7 +255,10 @@ class TestSaveGraph:
         with pytest.raises(GraphError) as error:
             self._save(
                 workflow,
-                {"states": [_state(str(open_state.id), "Open", True, open_state.status_id), _state("n", "New")], "transitions": []},
+                {
+                    "states": [_state(str(open_state.id), "Open", True, open_state.status_id), _state("n", "New")],
+                    "transitions": [],
+                },
                 create_user,
             )
         assert error.value.code == "status_limit"

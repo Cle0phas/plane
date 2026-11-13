@@ -162,7 +162,10 @@ def save_workflow_graph(*, workflow, graph, actor_id):
     WorkflowTransition.objects.filter(workflow_id=workflow.id).delete()
     for item in graph["transitions"]:
         transition = WorkflowTransition.objects.create(
-            workflow_id=workflow.id, target=state_by_key[item["target_key"]], name=item["name"], from_any=item["from_any"]
+            workflow_id=workflow.id,
+            target=state_by_key[item["target_key"]],
+            name=item["name"],
+            from_any=item["from_any"],
         )
         WorkflowTransitionSource.objects.bulk_create(
             WorkflowTransitionSource(transition=transition, source=state_by_key[key]) for key in item["source_keys"]

@@ -79,9 +79,9 @@ def test_the_builder_creates_sources_and_rules(workspace):
     local = WorkflowTransition.objects.get(workflow=workflow, target=workflow.states_by_name["Doing"])
     globally = WorkflowTransition.objects.get(workflow=workflow, target=workflow.states_by_name["Done"])
     assert local.from_any is False
-    assert list(WorkflowTransitionSource.objects.filter(transition=local).values_list("source__status__name", flat=True)) == [
-        "To do"
-    ]
+    assert list(
+        WorkflowTransitionSource.objects.filter(transition=local).values_list("source__status__name", flat=True)
+    ) == ["To do"]
     assert globally.from_any is True
     assert WorkflowTransitionRule.objects.get(transition=globally).params == {"roles": [20]}
 

@@ -246,7 +246,8 @@ class TestUsageAndGroups:
         )
         deduce_groups(workflow.id)
         groups = {
-            name: WorkflowStatus.objects.get(pk=state.status_id).group for name, state in workflow.states_by_name.items()
+            name: WorkflowStatus.objects.get(pk=state.status_id).group
+            for name, state in workflow.states_by_name.items()
         }
         assert groups == {"Open": "unstarted", "Work": "started", "Shipped": "completed", "Dropped": "completed"}
 

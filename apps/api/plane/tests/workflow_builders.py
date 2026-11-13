@@ -26,12 +26,16 @@ def build_workflow(workspace, name, statuses, transitions=(), initial=None):
             workflow=workflow, status=status, is_initial=status_name == initial, position_x=index * 240
         )
     for sources, target, rule_params in transitions:
-        transition = WorkflowTransition.objects.create(workflow=workflow, target=states[target], from_any=sources == "*")
+        transition = WorkflowTransition.objects.create(
+            workflow=workflow, target=states[target], from_any=sources == "*"
+        )
         if sources != "*":
             for source in sources:
                 WorkflowTransitionSource.objects.create(transition=transition, source=states[source])
         if rule_params is not None:
-            WorkflowTransitionRule.objects.create(transition=transition, rule_type=RULE_RESTRICT_ACTORS, params=rule_params)
+            WorkflowTransitionRule.objects.create(
+                transition=transition, rule_type=RULE_RESTRICT_ACTORS, params=rule_params
+            )
     workflow.states_by_name = states
     return workflow
 
