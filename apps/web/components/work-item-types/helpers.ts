@@ -103,6 +103,16 @@ export const canChooseTypeInForm = (params: { isEditing: boolean; isDraft: boole
 export const getWorkItemTypeChange = (currentTypeId: string | null | undefined, nextTypeId: string) =>
   currentTypeId === nextTypeId ? null : { type_id: nextTypeId };
 
+/** The server may move the state with the type (W9), so the item is read back instead of guessing it. */
+export const submitWorkItemTypeChange = async (
+  change: { type_id: string },
+  update: (change: { type_id: string }) => Promise<unknown>,
+  refetch: () => Promise<unknown>
+) => {
+  await update(change);
+  await refetch();
+};
+
 const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object";
 
 type TWorkItemTypeFormField = "name" | "description";

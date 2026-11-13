@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { TIssueType, TProjectIssueType } from "@plane/types";
 import {
   getActionRefusalKey,
@@ -22,6 +22,7 @@ import {
   getTypeIdAfterProjectChange,
   getWorkItemTypeColumnEntries,
   getWorkItemTypeChange,
+  submitWorkItemTypeChange,
 } from "./helpers";
 
 const buildType = (overrides: Partial<TIssueType> = {}): TIssueType => ({
@@ -269,6 +270,28 @@ describe("work item type change", () => {
   it("sends the new type id otherwise", () => {
     expect(getWorkItemTypeChange("task", "bug")).toEqual({ type_id: "bug" });
     expect(getWorkItemTypeChange(null, "bug")).toEqual({ type_id: "bug" });
+  });
+
+  it("refetches the item after the update, the server owns the resulting state", async () => {
+    const server = { state_id: "to-do" };
+    const update = vi.fn(async () => {
+      server.state_id = "new";
+    });
+    const store = { state_id: "to-do" };
+    const refetch = vi.fn(async () => {
+      store.state_id = server.state_id;
+    });
+    await submitWorkItemTypeChange({ type_id: "bug" }, update, refetch);
+    expect(update).toHaveBeenCalledWith({ type_id: "bug" });
+    expect(store.state_id).toBe("new");
+  });
+
+  it("does not refetch when the update is refused", async () => {
+    const refetch = vi.fn();
+    await expect(
+      submitWorkItemTypeChange({ type_id: "bug" }, () => Promise.reject(new Error("refused")), refetch)
+    ).rejects.toThrow("refused");
+    expect(refetch).not.toHaveBeenCalled();
   });
 });
 

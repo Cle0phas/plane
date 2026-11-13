@@ -226,6 +226,8 @@ class IssueCreateSerializer(BaseSerializer):
         )
         if state is not None:
             attrs["state"] = state
+            # The server moved the state: the views report it with the other changes.
+            self.workflow_state_id = state.id
 
         return attrs
 

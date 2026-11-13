@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # See the LICENSE file for details.
 
+import json
 from types import SimpleNamespace
 from unittest import mock
 
@@ -114,14 +115,18 @@ class TestApiV1Workflow:
 
     def test_a_type_change_to_another_workflow_sets_the_initial_state(self, api_key_client, ctx, dispatched):
         issue = Issue.objects.create(name="Item", project=ctx.project, state=ctx.states["To do"])
+        before_type = issue.type_id
         refused = api_key_client.patch(
             _url(ctx, issue), {"type_id": str(ctx.bug.id), "state": str(ctx.states["Closed"].id)}, format="json"
         )
         assert refused.status_code == status.HTTP_400_BAD_REQUEST
         assert refused.data == REFUSED
         issue.refresh_from_db()
-        assert issue.state_id == ctx.states["To do"].id
+        assert (issue.type_id, issue.state_id) == (before_type, ctx.states["To do"].id)
+        assert dispatched.activity.call_count == 0
         allowed = api_key_client.patch(_url(ctx, issue), {"type_id": str(ctx.bug.id)}, format="json")
         assert allowed.status_code == status.HTTP_200_OK, allowed.data
+        requested = json.loads(dispatched.activity.call_args.kwargs["requested_data"])
+        assert requested["state_id"] == str(ctx.states["New"].id)
         issue.refresh_from_db()
         assert (issue.type_id, issue.state_id) == (ctx.bug.id, ctx.states["New"].id)

@@ -362,6 +362,16 @@ class TestResolveWorkflowState:
             is None
         )
 
+    def test_type_change_of_a_stateless_item_takes_the_initial_state(self, project, software, support, bug):
+        states = _link(project, software, {bug: support})
+        issue = _issue(project, states["To do"])
+        Issue.objects.filter(pk=issue.pk).update(state=None)
+        issue.refresh_from_db()
+        resolved = resolve_workflow_state(
+            project_id=project.id, instance=issue, state=None, state_given=False, type_id=bug.id
+        )
+        assert resolved == states["New"]
+
     def test_type_change_refuses_a_cleared_state(self, project, software, support, bug):
         states = _link(project, software, {bug: support})
         with pytest.raises(serializers.ValidationError) as error:

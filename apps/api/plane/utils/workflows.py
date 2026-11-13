@@ -132,7 +132,7 @@ def check_transition(issue, from_state, to_state, actor, workflow_id=None):
 
 def _resolve_workflow_change(project_id, instance, state, state_given, workflow_id):
     """T2: a type change to another workflow keeps the state it can keep, else the server sets the initial one."""
-    if instance.state.group == StateGroup.TRIAGE.value:
+    if instance.state is not None and instance.state.group == StateGroup.TRIAGE.value:
         if state_given:
             raise refusal(TRANSITION_NOT_ALLOWED)
         return None
@@ -157,7 +157,7 @@ def resolve_workflow_state(*, project_id, instance, state, state_given, type_id)
             return _resolve_workflow_change(project_id, instance, state, state_given, new_workflow_id)
     if state is not None and state.group == StateGroup.TRIAGE.value:
         # Intake items stay in triage outside any workflow (invariant 6), but a managed item cannot re-enter it.
-        if instance is None or instance.state.group == StateGroup.TRIAGE.value:
+        if instance is None or (instance.state is not None and instance.state.group == StateGroup.TRIAGE.value):
             return None
         if workflow_id_for(project_id, instance.type_id) is None:
             return None

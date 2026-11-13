@@ -14,7 +14,7 @@ import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 // components
 import { IssueIdentifier } from "@/components/issues/issue-detail/issue-identifier";
 import { getWorkflowRefusalKey } from "@/components/workflow";
-import { getWorkItemTypeChange } from "@/components/work-item-types/helpers";
+import { getWorkItemTypeChange, submitWorkItemTypeChange } from "@/components/work-item-types/helpers";
 import { WorkItemTypeSelect } from "@/components/work-item-types/work-item-type-select";
 
 export type TIssueTypeSwitcherProps = {
@@ -29,6 +29,7 @@ export const IssueTypeSwitcher = observer(function IssueTypeSwitcher(props: TIss
   // store hooks
   const {
     issue: { getIssueById },
+    fetchIssue,
     updateIssue,
   } = useIssueDetail();
   // derived values
@@ -43,7 +44,11 @@ export const IssueTypeSwitcher = observer(function IssueTypeSwitcher(props: TIss
     try {
       // W9: only the type is sent, the server keeps the state or sets the initial one of the new workflow.
       // The store applies the change optimistically and reverts it when the request fails.
-      await updateIssue(workspaceSlug.toString(), projectId, issueId, change);
+      await submitWorkItemTypeChange(
+        change,
+        (data) => updateIssue(workspaceSlug.toString(), projectId, issueId, data),
+        () => fetchIssue(workspaceSlug.toString(), projectId, issueId)
+      );
     } catch (error) {
       setToast({
         type: "error",

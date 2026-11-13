@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # See the LICENSE file for details.
 
+import json
 from types import SimpleNamespace
 from unittest import mock
 
@@ -9,7 +10,18 @@ import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from plane.db.models import DraftIssue, Intake, IntakeIssue, Issue, Project, ProjectMember, State, WorkspaceMember
+from plane.bgtasks.issue_activities_task import issue_activity
+from plane.db.models import (
+    DraftIssue,
+    Intake,
+    IntakeIssue,
+    Issue,
+    IssueActivity,
+    Project,
+    ProjectMember,
+    State,
+    WorkspaceMember,
+)
 from plane.tests.factories import IssueTypeFactory, ProjectIssueTypeFactory, UserFactory
 from plane.tests.workflow_builders import build_workflow, link_project
 
@@ -138,6 +150,38 @@ class TestTypeChange:
         issue.refresh_from_db()
         assert (issue.type_id, issue.state_id) == (ctx.bug.id, ctx.states["New"].id)
 
+    def test_the_state_the_server_sets_is_traced_in_the_history(self, ctx, mock_celery):
+        issue = _issue(ctx, "To do")
+        assert _patch(ctx, ctx.member, issue, {"type_id": str(ctx.bug.id)}).status_code == status.HTTP_204_NO_CONTENT
+        calls = [
+            call.kwargs for call in mock_celery.call_args_list if call.kwargs.get("type") == "issue.activity.updated"
+        ]
+        assert len(calls) == 1
+        assert json.loads(calls[0]["requested_data"])["state_id"] == str(ctx.states["New"].id)
+        # The task reads the payload the view sent, as the worker would.
+        issue_activity(**calls[0])
+        assert IssueActivity.objects.filter(issue=issue, field="state", new_identifier=ctx.states["New"].id).exists()
+
+    def test_a_type_change_cannot_clear_the_state(self, ctx, mock_celery):
+        issue = _issue(ctx, "To do")
+        response = _patch(ctx, ctx.member, issue, {"type_id": str(ctx.bug.id), "state_id": None})
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data == REFUSED
+        issue.refresh_from_db()
+        assert issue.state_id == ctx.states["To do"].id
+
+    def test_a_type_change_in_a_free_project_is_not_controlled(self, ctx, workspace, mock_celery):
+        free = Project.objects.create(name="Free", identifier="FREE", workspace=workspace)
+        ProjectMember.objects.create(project=free, member=ctx.member, role=15)
+        ProjectIssueTypeFactory(project=free, issue_type=ctx.bug)
+        a = State.objects.create(name="A", project=free)
+        issue = Issue.objects.create(name="Free", project=free, state=a)
+        url = ISSUE_URL.format(slug=workspace.slug, project_id=free.id, issue_id=issue.id)
+        response = _client(ctx.member).patch(url, {"type_id": str(ctx.bug.id)}, format="json")
+        assert response.status_code == status.HTTP_204_NO_CONTENT, response.data
+        issue.refresh_from_db()
+        assert (issue.type_id, issue.state_id) == (ctx.bug.id, a.id)
+
     def test_a_type_change_cannot_request_another_state(self, ctx, mock_celery):
         issue = _issue(ctx, "To do")
         before = issue.type_id
@@ -220,6 +264,7 @@ class TestIntake:
         triage = State.objects.create(name="Triage", group="triage", project=project)
         intake = Intake.objects.create(name="Intake", project=project, workspace=ctx.workspace, is_default=True)
         issue = Issue.objects.create(name="Pending", project=project, state=triage)
+        before_type = issue.type_id
         IntakeIssue.objects.create(intake=intake, issue=issue, project=project, workspace=ctx.workspace)
         url = f"/api/workspaces/{ctx.workspace.slug}/projects/{project.id}/intake-issues/{issue.id}/"
         # A managed state is already rejected by the intake state check; the triage one reaches the workflow rule.
@@ -228,6 +273,8 @@ class TestIntake:
                 url, {"issue": {"type_id": str(ctx.bug.id), "state_id": str(requested.id)}}, format="json"
             )
             assert refused.status_code == status.HTTP_400_BAD_REQUEST, refused.data
+            issue.refresh_from_db()
+            assert (issue.type_id, issue.state_id) == (before_type, triage.id)
         assert refused.data == REFUSED
         kept = _client(ctx.admin).patch(url, {"issue": {"type_id": str(ctx.bug.id)}}, format="json")
         assert kept.status_code == status.HTTP_200_OK, kept.data
