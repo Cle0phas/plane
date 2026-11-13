@@ -22,7 +22,6 @@ from plane.db.models import (
 from plane.db.models.workflow import RULE_RESTRICT_ACTORS
 
 TRANSITION_NOT_ALLOWED = "transition_not_allowed"
-ARRIVAL_STATE_REQUIRED = "arrival_state_required"
 
 
 def refusal(code):
@@ -131,10 +130,31 @@ def check_transition(issue, from_state, to_state, actor, workflow_id=None):
     return any(all(_rule_allows(rule, issue, actor) for rule in transition.rules.all()) for transition in transitions)
 
 
+def _resolve_workflow_change(project_id, instance, state, state_given, workflow_id):
+    """T2: a type change to another workflow keeps the state it can keep, else the server sets the initial one."""
+    if instance.state.group == StateGroup.TRIAGE.value:
+        if state_given:
+            raise refusal(TRANSITION_NOT_ALLOWED)
+        return None
+    if state_in_workflow(instance.state, workflow_id, project_id):
+        target, to_set = instance.state, None
+    else:
+        target = to_set = initial_state(project_id, workflow_id)
+        if target is None:
+            raise refusal(TRANSITION_NOT_ALLOWED)
+    if state_given and (state is None or state.pk != target.pk):
+        raise refusal(TRANSITION_NOT_ALLOWED)
+    return to_set
+
+
 def resolve_workflow_state(*, project_id, instance, state, state_given, type_id):
     """State a written work item must take (T1, T2, 4.1), None to keep the request as is; raises one refusal."""
     if instance is not None and not state_given and type_id is None:
         return None
+    if instance is not None and type_id is not None:
+        new_workflow_id = workflow_id_for(project_id, type_id)
+        if new_workflow_id is not None and new_workflow_id != workflow_id_for(project_id, instance.type_id):
+            return _resolve_workflow_change(project_id, instance, state, state_given, new_workflow_id)
     if state is not None and state.group == StateGroup.TRIAGE.value:
         # Intake items stay in triage outside any workflow (invariant 6), but a managed item cannot re-enter it.
         if instance is None or instance.state.group == StateGroup.TRIAGE.value:
@@ -156,15 +176,6 @@ def resolve_workflow_state(*, project_id, instance, state, state_given, type_id)
         return None
     if state_given and state is None:
         raise refusal(TRANSITION_NOT_ALLOWED)
-    if workflow_id != workflow_id_for(project_id, instance.type_id):
-        # A change of workflow, not a move inside one: no arrow needed (T2).
-        if state_given:
-            if not state_in_workflow(state, workflow_id, project_id):
-                raise refusal(TRANSITION_NOT_ALLOWED)
-            return None
-        if state_in_workflow(instance.state, workflow_id, project_id):
-            return None
-        raise refusal(ARRIVAL_STATE_REQUIRED)
     if not state_given or state.pk == instance.state_id:
         return None
     if not check_transition(instance, instance.state, state, get_current_user(), workflow_id=workflow_id):

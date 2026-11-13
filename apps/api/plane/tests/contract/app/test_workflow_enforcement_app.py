@@ -131,27 +131,36 @@ class TestTransitions:
 @pytest.mark.contract
 @pytest.mark.django_db
 class TestTypeChange:
-    def test_a_type_change_needing_an_arrival_state_is_refused_without_one(self, ctx, mock_celery):
+    def test_a_type_change_to_another_workflow_sets_its_initial_state(self, ctx, mock_celery):
+        issue = _issue(ctx, "To do")
+        response = _patch(ctx, ctx.member, issue, {"type_id": str(ctx.bug.id)})
+        assert response.status_code == status.HTTP_204_NO_CONTENT, response.data
+        issue.refresh_from_db()
+        assert (issue.type_id, issue.state_id) == (ctx.bug.id, ctx.states["New"].id)
+
+    def test_a_type_change_cannot_request_another_state(self, ctx, mock_celery):
         issue = _issue(ctx, "To do")
         before = issue.type_id
-        response = _patch(ctx, ctx.member, issue, {"type_id": str(ctx.bug.id)})
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.data == {"workflow": ["arrival_state_required"]}
-        issue.refresh_from_db()
-        assert (issue.type_id, issue.state_id) == (before, ctx.states["To do"].id)
-
-    def test_a_type_change_with_an_arrival_state(self, ctx, mock_celery):
-        issue = _issue(ctx, "To do")
         response = _patch(
             ctx, ctx.member, issue, {"type_id": str(ctx.bug.id), "state_id": str(ctx.states["Closed"].id)}
         )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data == REFUSED
+        issue.refresh_from_db()
+        assert (issue.type_id, issue.state_id) == (before, ctx.states["To do"].id)
+
+    def test_a_type_change_accepts_the_initial_state_as_requested(self, ctx, mock_celery):
+        issue = _issue(ctx, "To do")
+        response = _patch(ctx, ctx.member, issue, {"type_id": str(ctx.bug.id), "state_id": str(ctx.states["New"].id)})
         assert response.status_code == status.HTTP_204_NO_CONTENT, response.data
         issue.refresh_from_db()
-        assert (issue.type_id, issue.state_id) == (ctx.bug.id, ctx.states["Closed"].id)
+        assert (issue.type_id, issue.state_id) == (ctx.bug.id, ctx.states["New"].id)
 
     def test_a_type_change_keeps_a_shared_state(self, ctx, mock_celery):
         issue = _issue(ctx, "Doing")
         assert _patch(ctx, ctx.member, issue, {"type_id": str(ctx.bug.id)}).status_code == status.HTTP_204_NO_CONTENT
+        issue.refresh_from_db()
+        assert (issue.type_id, issue.state_id) == (ctx.bug.id, ctx.states["Doing"].id)
 
 
 @pytest.mark.contract
@@ -203,3 +212,24 @@ class TestIntake:
         assert response.data == REFUSED
         issue.refresh_from_db()
         assert issue.state_id == ctx.states["Doing"].id
+
+    def test_a_triage_item_cannot_leave_triage_through_a_type_change(self, ctx, mock_celery):
+        project = ctx.project
+        project.intake_view = True
+        project.save()
+        triage = State.objects.create(name="Triage", group="triage", project=project)
+        intake = Intake.objects.create(name="Intake", project=project, workspace=ctx.workspace, is_default=True)
+        issue = Issue.objects.create(name="Pending", project=project, state=triage)
+        IntakeIssue.objects.create(intake=intake, issue=issue, project=project, workspace=ctx.workspace)
+        url = f"/api/workspaces/{ctx.workspace.slug}/projects/{project.id}/intake-issues/{issue.id}/"
+        # A managed state is already rejected by the intake state check; the triage one reaches the workflow rule.
+        for requested in (ctx.states["New"], triage):
+            refused = _client(ctx.admin).patch(
+                url, {"issue": {"type_id": str(ctx.bug.id), "state_id": str(requested.id)}}, format="json"
+            )
+            assert refused.status_code == status.HTTP_400_BAD_REQUEST, refused.data
+        assert refused.data == REFUSED
+        kept = _client(ctx.admin).patch(url, {"issue": {"type_id": str(ctx.bug.id)}}, format="json")
+        assert kept.status_code == status.HTTP_200_OK, kept.data
+        issue.refresh_from_db()
+        assert (issue.type_id, issue.state_id) == (ctx.bug.id, triage.id)

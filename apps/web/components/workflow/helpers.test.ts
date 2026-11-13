@@ -8,11 +8,9 @@ import { describe, expect, it } from "vitest";
 import type { IState, TProjectWorkflowScheme, TWorkflowGraph, TWorkflowRule } from "@plane/types";
 import {
   getAllowedTargetStateIds,
-  getArrivalStateIds,
   getEffectiveTypeId,
   getInitialStateId,
   getWorkflowRefusalKey,
-  getWorkflowStateIds,
   isProjectWorkflowManaged,
   type TWorkflowIssue,
 } from "./helpers";
@@ -207,15 +205,11 @@ describe("getAllowedTargetStateIds", () => {
   });
 });
 
-describe("initial and workflow states", () => {
+describe("getInitialStateId", () => {
   it("returns the initial state of the type workflow", () => {
     expect(getInitialStateId(scheme, states, "task")).toBe("s-todo");
     expect(getInitialStateId(scheme, states, "bug")).toBe("s-new");
     expect(getInitialStateId({ default_workflow_id: null, items: [], workflows: [] }, states, "task")).toBeUndefined();
-  });
-
-  it("lists the states of the type workflow", () => {
-    expect(new Set(getWorkflowStateIds(scheme, states, "bug"))).toEqual(new Set(["s-doing", "s-new"]));
   });
 });
 
@@ -227,30 +221,10 @@ describe("getEffectiveTypeId", () => {
   });
 });
 
-describe("getArrivalStateIds", () => {
-  it("asks for an arrival state only when the workflow changes and lacks the current state", () => {
-    expect(new Set(getArrivalStateIds(scheme, states, "task", "bug", "s-todo"))).toEqual(new Set(["s-doing", "s-new"]));
-    expect(getArrivalStateIds(scheme, states, "task", "bug", "s-doing")).toBeNull();
-    expect(getArrivalStateIds(scheme, states, "task", "bug", null)).not.toBeNull();
-  });
-
-  it("never asks inside the same workflow, even when the state is unmanaged", () => {
-    expect(getArrivalStateIds(scheme, states, "task", "story", "s-todo")).toBeNull();
-    expect(getArrivalStateIds(scheme, states, "task", "story", "s-unknown")).toBeNull();
-  });
-
-  it("never asks in a free project", () => {
-    const free = { default_workflow_id: null, items: [], workflows: [] };
-    expect(getArrivalStateIds(free, states, "task", "bug", "s-todo")).toBeNull();
-  });
-});
-
 describe("getWorkflowRefusalKey", () => {
-  it("maps the two server codes and ignores anything else", () => {
+  it("maps the server code and ignores anything else", () => {
     expect(getWorkflowRefusalKey({ workflow: ["transition_not_allowed"] })).toBe("workflows.workflow_disabled.title");
-    expect(getWorkflowRefusalKey({ workflow: ["arrival_state_required"] })).toBe(
-      "workflows.refusal.arrival_state_required"
-    );
+    expect(getWorkflowRefusalKey({ workflow: ["arrival_state_required"] })).toBeUndefined();
     expect(getWorkflowRefusalKey({ workflow: ["<script>"] })).toBeUndefined();
     expect(getWorkflowRefusalKey({ detail: "x" })).toBeUndefined();
     expect(getWorkflowRefusalKey(undefined)).toBeUndefined();

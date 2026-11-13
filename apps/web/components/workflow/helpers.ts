@@ -12,7 +12,6 @@ export type TWorkflowIssue = Pick<TIssue, "state_id" | "type_id" | "assignee_ids
 // The server answers one of these codes, never free text (spec 4.5).
 export const WORKFLOW_REFUSAL_KEYS = {
   transition_not_allowed: "workflows.workflow_disabled.title",
-  arrival_state_required: "workflows.refusal.arrival_state_required",
 } as const;
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
@@ -84,39 +83,11 @@ export const getInitialStateId = (
   return initial ? stateIdsByStatus(projectStates).get(initial.status.id) : undefined;
 };
 
-/** `typeId` is the effective type id (see getInitialStateId). W9: every state of the type's workflow can receive an item changing type; null for a free project. */
-export const getWorkflowStateIds = (
-  scheme: TProjectWorkflowScheme | undefined,
-  projectStates: IState[],
-  typeId: string | null | undefined
-): Set<string> | null => {
-  const workflow = getIssueWorkflow(scheme, typeId);
-  if (!workflow) return null;
-  const byStatus = stateIdsByStatus(projectStates);
-  return new Set(workflow.states.flatMap((node) => byStatus.get(node.status.id) ?? []));
-};
-
 /** The server resolves a null type to the project default type; pass the result to the type-based helpers. */
 export const getEffectiveTypeId = (
   typeId: string | null | undefined,
   projectDefaultTypeId: string | null | undefined
 ) => typeId ?? projectDefaultTypeId ?? null;
-
-/**
- * W9: the states to choose from when the type change moves the item to another workflow that lacks its current state,
- * which is exactly when the server answers arrival_state_required; null when no choice is needed.
- */
-export const getArrivalStateIds = (
-  scheme: TProjectWorkflowScheme | undefined,
-  projectStates: IState[],
-  oldEffectiveTypeId: string | null | undefined,
-  newEffectiveTypeId: string | null | undefined,
-  currentStateId: string | null | undefined
-): Set<string> | null => {
-  if (getIssueWorkflow(scheme, oldEffectiveTypeId) === getIssueWorkflow(scheme, newEffectiveTypeId)) return null;
-  const stateIds = getWorkflowStateIds(scheme, projectStates, newEffectiveTypeId);
-  return stateIds && (!currentStateId || !stateIds.has(currentStateId)) ? stateIds : null;
-};
 
 export const getWorkflowRefusalKey = (error: unknown): string | undefined => {
   if (!isRecord(error) || !Array.isArray(error.workflow)) return undefined;

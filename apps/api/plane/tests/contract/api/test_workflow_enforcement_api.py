@@ -11,6 +11,7 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 
 from plane.api.views.issue import IssueDetailAPIEndpoint
 from plane.db.models import Issue, Project, ProjectMember, WorkflowTransitionRule
+from plane.tests.factories import IssueTypeFactory, ProjectIssueTypeFactory
 from plane.tests.workflow_builders import build_workflow, link_project
 
 ISSUES_URL = "/api/v1/workspaces/{slug}/projects/{project_id}/work-items/"
@@ -28,11 +29,15 @@ def ctx(db, workspace, create_user):
         ["To do", "Doing", "Done"],
         [(["To do"], "Doing", None), (["Doing"], "Done", {"roles": [15]})],
     )
+    support = build_workflow(workspace, "Support", ["New", "Doing", "Closed"], [(["New"], "Closed", None)])
+    bug = IssueTypeFactory(workspace=workspace, name="Bug")
+    ProjectIssueTypeFactory(project=project, issue_type=bug)
     return SimpleNamespace(
         workspace=workspace,
         project=project,
         user=create_user,
-        states=link_project(project, software),
+        bug=bug,
+        states=link_project(project, software, {bug: support}),
         issues_url=ISSUES_URL.format(slug=workspace.slug, project_id=project.id),
     )
 
@@ -106,3 +111,17 @@ class TestApiV1Workflow:
         issue.refresh_from_db()
         assert issue.state_id == ctx.states["To do"].id
         assert dispatched.activity.call_count == dispatched.model.call_count == 0
+
+    def test_a_type_change_to_another_workflow_sets_the_initial_state(self, api_key_client, ctx, dispatched):
+        issue = Issue.objects.create(name="Item", project=ctx.project, state=ctx.states["To do"])
+        refused = api_key_client.patch(
+            _url(ctx, issue), {"type_id": str(ctx.bug.id), "state": str(ctx.states["Closed"].id)}, format="json"
+        )
+        assert refused.status_code == status.HTTP_400_BAD_REQUEST
+        assert refused.data == REFUSED
+        issue.refresh_from_db()
+        assert issue.state_id == ctx.states["To do"].id
+        allowed = api_key_client.patch(_url(ctx, issue), {"type_id": str(ctx.bug.id)}, format="json")
+        assert allowed.status_code == status.HTTP_200_OK, allowed.data
+        issue.refresh_from_db()
+        assert (issue.type_id, issue.state_id) == (ctx.bug.id, ctx.states["New"].id)
