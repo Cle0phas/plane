@@ -229,17 +229,8 @@
         "default": "Perubahan tidak dapat diterapkan."
       }
     },
-    "refusal": {
-      "arrival_state_required": "Pilih status yang dimasuki item kerja ini di workflow barunya."
-    },
     "managed_states": {
       "banner": "Status ini berasal dari workflow proyek. Ubah di Pengaturan ruang kerja, Workflow."
-    },
-    "type_change": {
-      "title": "Pilih status tujuan",
-      "description": "Status saat ini bukan bagian dari workflow jenis ini.",
-      "submit": "Ubah jenis",
-      "cancel": "Batal"
     },
     "creation": {
       "initial_state": "Item kerja baru dimulai di status ini."

@@ -229,17 +229,8 @@
         "default": "無法套用此變更。"
       }
     },
-    "refusal": {
-      "arrival_state_required": "請選擇此工作項目在新工作流程中進入的狀態。"
-    },
     "managed_states": {
       "banner": "這些狀態來自專案的工作流程。請在工作區設定的工作流程中變更。"
-    },
-    "type_change": {
-      "title": "選擇目標狀態",
-      "description": "目前的狀態不屬於此類型的工作流程。",
-      "submit": "變更類型",
-      "cancel": "取消"
     },
     "creation": {
       "initial_state": "新的工作項目從此狀態開始。"

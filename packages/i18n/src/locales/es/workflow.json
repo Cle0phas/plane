@@ -229,17 +229,8 @@
         "default": "No se pudo aplicar el cambio."
       }
     },
-    "refusal": {
-      "arrival_state_required": "Elige el estado en el que este elemento de trabajo entra en su nuevo workflow."
-    },
     "managed_states": {
       "banner": "Estos estados provienen de los workflows del proyecto. Modifícalos en Configuración del espacio de trabajo, Workflows."
-    },
-    "type_change": {
-      "title": "Elegir el estado de destino",
-      "description": "El estado actual no forma parte del workflow de este tipo.",
-      "submit": "Cambiar tipo",
-      "cancel": "Cancelar"
     },
     "creation": {
       "initial_state": "Los nuevos elementos de trabajo empiezan en este estado."

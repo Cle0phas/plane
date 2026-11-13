@@ -229,17 +229,8 @@
         "default": "Zmenu sa nepodarilo použiť."
       }
     },
-    "refusal": {
-      "arrival_state_required": "Vyberte stav, do ktorého táto pracovná položka vstúpi vo svojom novom pracovnom postupe."
-    },
     "managed_states": {
       "banner": "Tieto stavy pochádzajú z pracovných postupov projektu. Zmeňte ich v Nastaveniach pracovného priestoru, Pracovné postupy."
-    },
-    "type_change": {
-      "title": "Vyberte cieľový stav",
-      "description": "Aktuálny stav nie je súčasťou pracovného postupu tohto typu.",
-      "submit": "Zmeniť typ",
-      "cancel": "Zrušiť"
     },
     "creation": {
       "initial_state": "Nové pracovné položky začínajú v tomto stave."

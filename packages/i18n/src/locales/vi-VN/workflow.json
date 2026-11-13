@@ -229,17 +229,8 @@
         "default": "Không thể áp dụng thay đổi."
       }
     },
-    "refusal": {
-      "arrival_state_required": "Hãy chọn trạng thái mà mục công việc này sẽ vào trong quy trình làm việc mới."
-    },
     "managed_states": {
       "banner": "Các trạng thái này đến từ quy trình làm việc của dự án. Hãy thay đổi chúng trong Cài đặt không gian làm việc, Quy trình làm việc."
-    },
-    "type_change": {
-      "title": "Chọn trạng thái đích",
-      "description": "Trạng thái hiện tại không thuộc quy trình làm việc của loại này.",
-      "submit": "Đổi loại",
-      "cancel": "Hủy"
     },
     "creation": {
       "initial_state": "Các mục công việc mới bắt đầu ở trạng thái này."

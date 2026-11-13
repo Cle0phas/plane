@@ -229,17 +229,8 @@
         "default": "Nie udało się zastosować zmiany."
       }
     },
-    "refusal": {
-      "arrival_state_required": "Wybierz stan, w którym ten element pracy trafia do nowego workflow."
-    },
     "managed_states": {
       "banner": "Te stany pochodzą z workflowów projektu. Zmienisz je w Ustawieniach przestrzeni roboczej, Workflowy."
-    },
-    "type_change": {
-      "title": "Wybierz stan docelowy",
-      "description": "Bieżący stan nie należy do workflow tego typu.",
-      "submit": "Zmień typ",
-      "cancel": "Anuluj"
     },
     "creation": {
       "initial_state": "Nowe elementy pracy zaczynają w tym stanie."

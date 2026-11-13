@@ -229,17 +229,8 @@
         "default": "The change could not be applied."
       }
     },
-    "refusal": {
-      "arrival_state_required": "Choose the state this work item enters in its new workflow."
-    },
     "managed_states": {
       "banner": "These states come from the project workflows. Change them in Workspace settings, Workflows."
-    },
-    "type_change": {
-      "title": "Choose the arrival state",
-      "description": "The current state is not part of the workflow of this type.",
-      "submit": "Change type",
-      "cancel": "Cancel"
     },
     "creation": {
       "initial_state": "New work items start in this state."

@@ -229,17 +229,8 @@
         "default": "Změnu se nepodařilo použít."
       }
     },
-    "refusal": {
-      "arrival_state_required": "Vyberte stav, do kterého tato pracovní položka vstoupí ve svém novém pracovním toku."
-    },
     "managed_states": {
       "banner": "Tyto stavy pocházejí z pracovních toků projektu. Změňte je v Nastavení pracovního prostoru, Pracovní toky."
-    },
-    "type_change": {
-      "title": "Vyberte cílový stav",
-      "description": "Aktuální stav není součástí pracovního toku tohoto typu.",
-      "submit": "Změnit typ",
-      "cancel": "Zrušit"
     },
     "creation": {
       "initial_state": "Nové pracovní položky začínají v tomto stavu."

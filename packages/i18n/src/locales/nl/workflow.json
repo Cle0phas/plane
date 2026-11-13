@@ -229,17 +229,8 @@
         "default": "De wijziging kon niet worden toegepast."
       }
     },
-    "refusal": {
-      "arrival_state_required": "Kies de status waarin dit werkitem terechtkomt in de nieuwe workflow."
-    },
     "managed_states": {
       "banner": "Deze statussen komen uit de projectworkflows. Wijzig ze in Werkruimte-instellingen, Workflows."
-    },
-    "type_change": {
-      "title": "Kies de doelstatus",
-      "description": "De huidige status maakt geen deel uit van de workflow van dit type.",
-      "submit": "Type wijzigen",
-      "cancel": "Annuleren"
     },
     "creation": {
       "initial_state": "Nieuwe werkitems beginnen in deze status."

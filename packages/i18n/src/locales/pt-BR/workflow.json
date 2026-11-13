@@ -229,17 +229,8 @@
         "default": "Não foi possível aplicar a alteração."
       }
     },
-    "refusal": {
-      "arrival_state_required": "Escolha o estado em que este item de trabalho entra no novo fluxo de trabalho."
-    },
     "managed_states": {
       "banner": "Estes estados vêm dos fluxos de trabalho do projeto. Altere-os em Configurações do espaço de trabalho, Fluxos de trabalho."
-    },
-    "type_change": {
-      "title": "Escolher o estado de destino",
-      "description": "O estado atual não faz parte do fluxo de trabalho deste tipo.",
-      "submit": "Alterar tipo",
-      "cancel": "Cancelar"
     },
     "creation": {
       "initial_state": "Novos itens de trabalho começam neste estado."

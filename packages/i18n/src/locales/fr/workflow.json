@@ -229,17 +229,8 @@
         "default": "Impossible d’appliquer le changement."
       }
     },
-    "refusal": {
-      "arrival_state_required": "Choisissez l’état dans lequel ce ticket entre dans son nouveau workflow."
-    },
     "managed_states": {
       "banner": "Ces états viennent des workflows du projet. Modifiez-les dans Paramètres de l’espace de travail, Workflows."
-    },
-    "type_change": {
-      "title": "Choisir l’état d’arrivée",
-      "description": "L’état actuel ne fait pas partie du workflow de ce type.",
-      "submit": "Changer de type",
-      "cancel": "Annuler"
     },
     "creation": {
       "initial_state": "Les nouveaux tickets commencent dans cet état."

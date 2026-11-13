@@ -229,17 +229,8 @@
         "default": "无法应用此更改。"
       }
     },
-    "refusal": {
-      "arrival_state_required": "请选择此工作项在新工作流中进入的状态。"
-    },
     "managed_states": {
       "banner": "这些状态来自项目的工作流。请在工作区设置的工作流中更改。"
-    },
-    "type_change": {
-      "title": "选择目标状态",
-      "description": "当前状态不属于此类型的工作流。",
-      "submit": "更改类型",
-      "cancel": "取消"
     },
     "creation": {
       "initial_state": "新工作项从此状态开始。"

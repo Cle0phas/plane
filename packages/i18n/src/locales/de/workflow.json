@@ -229,17 +229,8 @@
         "default": "Die Änderung konnte nicht angewendet werden."
       }
     },
-    "refusal": {
-      "arrival_state_required": "Wählen Sie den Status, in den diese Arbeitsaufgabe in ihrem neuen Workflow eintritt."
-    },
     "managed_states": {
       "banner": "Diese Status stammen aus den Projekt-Workflows. Ändern Sie sie unter Workspace-Einstellungen, Workflows."
-    },
-    "type_change": {
-      "title": "Zielstatus auswählen",
-      "description": "Der aktuelle Status gehört nicht zum Workflow dieses Typs.",
-      "submit": "Typ ändern",
-      "cancel": "Abbrechen"
     },
     "creation": {
       "initial_state": "Neue Arbeitsaufgaben beginnen in diesem Status."

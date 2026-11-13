@@ -229,17 +229,8 @@
         "default": "Değişiklik uygulanamadı."
       }
     },
-    "refusal": {
-      "arrival_state_required": "Bu iş öğesinin yeni iş akışında gireceği durumu seçin."
-    },
     "managed_states": {
       "banner": "Bu durumlar projenin iş akışlarından gelir. Bunları Çalışma alanı ayarları, İş Akışları bölümünden değiştirin."
-    },
-    "type_change": {
-      "title": "Hedef durumu seçin",
-      "description": "Geçerli durum bu türün iş akışının parçası değil.",
-      "submit": "Türü değiştir",
-      "cancel": "İptal"
     },
     "creation": {
       "initial_state": "Yeni iş öğeleri bu durumda başlar."

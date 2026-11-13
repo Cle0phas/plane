@@ -229,17 +229,8 @@
         "default": "Modificarea nu a putut fi aplicată."
       }
     },
-    "refusal": {
-      "arrival_state_required": "Alege starea în care acest element de lucru intră în noul său flux de lucru."
-    },
     "managed_states": {
       "banner": "Aceste stări provin din fluxurile de lucru ale proiectului. Modifică-le în Setările spațiului de lucru, Fluxuri de lucru."
-    },
-    "type_change": {
-      "title": "Alege starea de destinație",
-      "description": "Starea curentă nu face parte din fluxul de lucru al acestui tip.",
-      "submit": "Schimbă tipul",
-      "cancel": "Anulează"
     },
     "creation": {
       "initial_state": "Elementele de lucru noi încep în această stare."

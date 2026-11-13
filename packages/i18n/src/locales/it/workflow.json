@@ -229,17 +229,8 @@
         "default": "Impossibile applicare la modifica."
       }
     },
-    "refusal": {
-      "arrival_state_required": "Scegli lo stato in cui questo elemento di lavoro entra nel suo nuovo flusso di lavoro."
-    },
     "managed_states": {
       "banner": "Questi stati provengono dai flussi di lavoro del progetto. Modificali in Impostazioni dello spazio di lavoro, Flussi di lavoro."
-    },
-    "type_change": {
-      "title": "Scegli lo stato di arrivo",
-      "description": "Lo stato attuale non fa parte del flusso di lavoro di questo tipo.",
-      "submit": "Cambia tipo",
-      "cancel": "Annulla"
     },
     "creation": {
       "initial_state": "I nuovi elementi di lavoro iniziano in questo stato."
