@@ -27,6 +27,7 @@ from plane.db.models import (
     WorkflowTransitionSource,
 )
 from plane.utils.audit import record_audit
+from plane.utils.exception_logger import log_exception
 
 
 class SchemeError(Exception):
@@ -228,16 +229,20 @@ def _drop_unmanaged_states(project):
 def _record_moves(moves, project_id, actor_id):
     epoch = int(timezone.now().timestamp())
     for issue_id, old_state_id, new_state_id in moves:
-        issue_activity.delay(
-            type="issue.activity.updated",
-            requested_data=json.dumps({"state_id": str(new_state_id)}),
-            current_instance=json.dumps({"state_id": str(old_state_id)}),
-            issue_id=str(issue_id),
-            project_id=str(project_id),
-            actor_id=str(actor_id),
-            epoch=epoch,
-            notification=False,
-        )
+        # The change is committed: a broker failure must not turn it into an error response.
+        try:
+            issue_activity.delay(
+                type="issue.activity.updated",
+                requested_data=json.dumps({"state_id": str(new_state_id)}),
+                current_instance=json.dumps({"state_id": str(old_state_id)}),
+                issue_id=str(issue_id),
+                project_id=str(project_id),
+                actor_id=str(actor_id),
+                epoch=epoch,
+                notification=False,
+            )
+        except Exception as error:
+            log_exception(error)
 
 
 def apply_scheme(*, project, default_workflow_id, items, mappings, actor_id):
@@ -379,4 +384,6 @@ def resync_workflow(workflow_id):
     with transaction.atomic():
         project_ids = list(projects_using(workflow_id).values_list("id", flat=True))
         for project in Project.objects.select_for_update(of=("self",)).filter(pk__in=project_ids).order_by("id"):
-            sync_project_states(project)
+            # A detach may have raced the graph save.
+            if ProjectWorkflowScheme.objects.filter(project_id=project.id).exists():
+                sync_project_states(project)

@@ -24,3 +24,22 @@ export const isWorkflowDropForbidden = ({
   if (groupBy === "state" && !allowed.has(destinationGroupId)) return true;
   return subGroupBy === "state" && !!destinationSubGroupId && !allowed.has(destinationSubGroupId);
 };
+
+/** The server puts new items in the initial state (T1): a state column or sub-group other than it cannot take creation. */
+export const isWorkflowCreationDisabled = ({
+  groupBy,
+  subGroupBy,
+  groupId,
+  subGroupId,
+  initialStateId,
+}: {
+  groupBy: TIssueGroupByOptions | undefined;
+  subGroupBy?: TIssueGroupByOptions;
+  groupId: string;
+  subGroupId?: string;
+  initialStateId: string | undefined;
+}) => {
+  if (!initialStateId) return false;
+  if (groupBy === "state" && groupId !== initialStateId) return true;
+  return subGroupBy === "state" && !!subGroupId && subGroupId !== initialStateId;
+};

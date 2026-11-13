@@ -136,6 +136,7 @@ export const KanbanGroup = observer(function KanbanGroup(props: IKanbanGroup) {
     handleWorkFlowState,
     resetWorkFlowState,
     getIsWorkflowWorkItemCreationDisabled,
+    getWorkflowInitialStateId,
   } = useWorkFlowFDragNDrop(group_by, sub_group_by);
 
   // Enable Kanban Columns as Drop Targets
@@ -275,7 +276,9 @@ export const KanbanGroup = observer(function KanbanGroup(props: IKanbanGroup) {
       }
     }
 
-    return preloadedData;
+    // A linked project refuses any other state than the initial one of the type's workflow (T1).
+    const initialStateId = getWorkflowInitialStateId((preloadedData as { type_id?: string }).type_id);
+    return initialStateId ? { ...preloadedData, state_id: initialStateId } : preloadedData;
   };
 
   const isSubGroup = !!sub_group_id && sub_group_id !== "null";

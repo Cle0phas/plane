@@ -126,6 +126,7 @@ export const ListGroup = observer(function ListGroup(props: Props) {
     handleWorkFlowState,
     resetWorkFlowState,
     getIsWorkflowWorkItemCreationDisabled,
+    getWorkflowInitialStateId,
   } = useWorkFlowFDragNDrop(group_by);
   const isWorkflowIssueCreationDisabled = getIsWorkflowWorkItemCreationDisabled(group.id);
 
@@ -187,7 +188,9 @@ export const ListGroup = observer(function ListGroup(props: Props) {
       }
     }
 
-    return preloadedData;
+    // A linked project refuses any other state than the initial one of the type's workflow (T1).
+    const initialStateId = getWorkflowInitialStateId((preloadedData as { type_id?: string }).type_id);
+    return initialStateId ? { ...preloadedData, state_id: initialStateId } : preloadedData;
   };
 
   useEffect(() => {

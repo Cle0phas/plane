@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { isWorkflowDropForbidden } from "./drag-n-drop-helpers";
+import { isWorkflowCreationDisabled, isWorkflowDropForbidden } from "./drag-n-drop-helpers";
 
 const allowed = new Set(["s-todo", "s-doing"]);
 
@@ -30,5 +30,40 @@ describe("isWorkflowDropForbidden", () => {
   it("never blocks a free project or a layout not grouped by state", () => {
     expect(isWorkflowDropForbidden({ groupBy: "state", destinationGroupId: "s-done", allowed: null })).toBe(false);
     expect(isWorkflowDropForbidden({ groupBy: "priority", destinationGroupId: "high", allowed })).toBe(false);
+  });
+});
+
+describe("isWorkflowCreationDisabled", () => {
+  const base = { groupId: "s-doing", initialStateId: "s-todo" };
+
+  it("allows only the initial state column when grouped by state", () => {
+    expect(isWorkflowCreationDisabled({ ...base, groupBy: "state" })).toBe(true);
+    expect(isWorkflowCreationDisabled({ ...base, groupBy: "state", groupId: "s-todo" })).toBe(false);
+  });
+
+  it("checks the state sub-group too", () => {
+    expect(
+      isWorkflowCreationDisabled({
+        ...base,
+        groupBy: "priority",
+        groupId: "high",
+        subGroupBy: "state",
+        subGroupId: "s-doing",
+      })
+    ).toBe(true);
+    expect(
+      isWorkflowCreationDisabled({
+        ...base,
+        groupBy: "priority",
+        groupId: "high",
+        subGroupBy: "state",
+        subGroupId: "s-todo",
+      })
+    ).toBe(false);
+  });
+
+  it("never disables a free project or a layout not grouped by state", () => {
+    expect(isWorkflowCreationDisabled({ ...base, groupBy: "state", initialStateId: undefined })).toBe(false);
+    expect(isWorkflowCreationDisabled({ ...base, groupBy: "priority", groupId: "high" })).toBe(false);
   });
 });

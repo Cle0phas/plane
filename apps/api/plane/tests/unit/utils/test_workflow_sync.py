@@ -158,6 +158,20 @@ class TestMappingAndApply:
         assert entry.after["default_workflow_id"] == str(software.id)
         assert entry.after["moved_issue_count"] == 1
 
+    def test_a_broker_failure_after_commit_does_not_fail_the_apply(
+        self, project, software, mock_celery, django_capture_on_commit_callbacks
+    ):
+        mock_celery.side_effect = ConnectionError("broker down")
+        legacy = State.objects.create(name="Backlog", project=project)
+        issue = Issue.objects.create(name="Task", project=project, state=legacy)
+        with django_capture_on_commit_callbacks(execute=True):
+            states = _apply(
+                project, software, mappings={(legacy.id, software.id): software.states_by_name["Doing"].status_id}
+            )
+        issue.refresh_from_db()
+        assert issue.state_id == states[software.states_by_name["Doing"].status_id].id
+        assert mock_celery.call_count == 1
+
     def test_applying_twice_changes_nothing_the_second_time(self, project, software, mock_celery):
         _apply(project, software)
         _apply(project, software)
@@ -227,6 +241,14 @@ class TestResync:
         WorkflowState.objects.create(workflow=software, status=extra, position_x=900)
         resync_workflow(software.id)
         assert State.objects.filter(project=project, workflow_status=extra).exists()
+
+    def test_resync_skips_a_project_detached_meanwhile(self, project, software, monkeypatch):
+        link_project(project, software)
+        detach_scheme(project=project, actor_id=project.workspace.owner_id)
+        monkeypatch.setattr(
+            "plane.utils.workflow_sync.projects_using", lambda workflow_id: Project.objects.filter(pk=project.pk)
+        )
+        resync_workflow(software.id)
 
 
 class TestUsageAndGroups:
