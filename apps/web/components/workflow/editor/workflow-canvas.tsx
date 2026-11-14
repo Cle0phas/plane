@@ -254,6 +254,8 @@ export function WorkflowCanvas({
         connectionMode={ConnectionMode.Loose}
         fitView
         fitViewOptions={FIT_VIEW_OPTIONS}
+        // Plane's tokens follow every theme (light, dark, high contrast, custom); colorMode only knows two.
+        className="[--xy-attribution-background-color:var(--background-color-surface-2)] [&_.react-flow\_\_attribution_a]:text-tertiary"
         minZoom={0.25}
         maxZoom={2}
         nodesDraggable={canEdit}
@@ -312,7 +314,16 @@ export function WorkflowCanvas({
           for (const key of transitionKeys) if (typeof key === "string") onRemoveTransition(key);
         }}
       >
-        <MiniMap pannable zoomable style={{ height: MINIMAP_HEIGHT }} ariaLabel={t("workflows.editor.minimap")} />
+        <MiniMap
+          pannable
+          zoomable
+          className="border border-subtle"
+          style={{ height: MINIMAP_HEIGHT }}
+          bgColor="var(--background-color-surface-2)"
+          maskColor="color-mix(in srgb, var(--text-color-tertiary) 15%, transparent)"
+          nodeColor="var(--border-color-strong)"
+          ariaLabel={t("workflows.editor.minimap")}
+        />
         <Panel position="bottom-right" style={{ bottom: MINIMAP_HEIGHT + PANEL_MARGIN }}>
           <ZoomSlider label={t("workflows.editor.zoom")} />
         </Panel>

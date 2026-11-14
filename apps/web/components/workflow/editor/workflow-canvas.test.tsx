@@ -7,17 +7,18 @@
 import { createElement, type ComponentProps } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ReactFlowInstance, ReactFlow as TReactFlow } from "@xyflow/react";
+import type { MiniMap as TMiniMap, ReactFlowInstance, ReactFlow as TReactFlow } from "@xyflow/react";
 import { describe, expect, it, vi } from "vitest";
 import type { TDraftGraph } from "./graph-model";
 import { WorkflowCanvas } from "./workflow-canvas";
 
-const { translate, flowProps, flowInstance } = vi.hoisted(() => ({
+const { translate, flowProps, miniMapProps, flowInstance } = vi.hoisted(() => ({
   // Parameters are echoed so the accessible names built from them can be asserted.
   translate: vi.fn((key: string, params?: Record<string, unknown>) =>
     params ? `${key} ${JSON.stringify(params)}` : key
   ),
   flowProps: { current: undefined as ComponentProps<typeof TReactFlow> | undefined },
+  miniMapProps: { current: undefined as ComponentProps<typeof TMiniMap> | undefined },
   flowInstance: { current: undefined as ReactFlowInstance | undefined },
 }));
 
@@ -32,6 +33,10 @@ vi.mock("@xyflow/react", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@xyflow/react")>();
   return {
     ...actual,
+    MiniMap: (props: ComponentProps<typeof TMiniMap>) => {
+      miniMapProps.current = props;
+      return createElement(actual.MiniMap, props);
+    },
     ReactFlow: (props: ComponentProps<typeof TReactFlow>) => {
       flowProps.current = props;
       return createElement(actual.ReactFlow, {
@@ -262,6 +267,20 @@ describe("WorkflowCanvas", () => {
     expect(onMove).not.toHaveBeenCalled();
     flow().onNodesChange?.([{ type: "position", id: "b", position: { x: 255, y: 10 }, dragging: false }]);
     expect(onMove).toHaveBeenCalledWith([{ key: "b", x: 255, y: 10 }]);
+  });
+
+  // Plane's tokens switch with every theme (light, dark, high contrast, custom); colorMode only knows two.
+  it("colours the minimap and the attribution with theme tokens, never with React Flow's colour mode", () => {
+    renderCanvas();
+    expect(flow().colorMode).toBeUndefined();
+    expect(flow().className).toContain("[--xy-attribution-background-color:var(--background-color-surface-2)]");
+    expect(flow().className).toContain("[&_.react-flow\\_\\_attribution_a]:text-tertiary");
+    expect(miniMapProps.current).toMatchObject({
+      bgColor: "var(--background-color-surface-2)",
+      maskColor: "color-mix(in srgb, var(--text-color-tertiary) 15%, transparent)",
+      nodeColor: "var(--border-color-strong)",
+      className: "border border-subtle",
+    });
   });
 
   it("never zooms past 1 when it fits the view, so a lone node keeps its size", () => {
