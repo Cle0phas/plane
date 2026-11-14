@@ -138,20 +138,40 @@ export const shouldResetDraft = (previousSaved: TDraftGraph, saved: TDraftGraph,
   JSON.stringify(previousSaved) !== JSON.stringify(saved) && !isDraftDirty(draft, previousSaved);
 
 const PLACEMENT_STEP = 240;
+// shortcut: the state and its any-state pill above it are taken at their minimum width (min-w-32); a wider
+// name or pill is not measured, pass the measured sizes in if long names start to overlap.
+const STATE_BOX = { width: 128, height: 40, pill: 28 };
+
+type TBox = { x0: number; y0: number; x1: number; y1: number };
+const overlaps = (a: TBox, b: TBox) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+const stateBox = (x: number, y: number): TBox => ({
+  x0: x,
+  y0: y - STATE_BOX.pill,
+  x1: x + STATE_BOX.width,
+  y1: y + STATE_BOX.height,
+});
 
 type TNewState = { key: string; status: TDraftStatus; globalKey?: string };
 
-// New states line up right of the last one (R12); globalKey adds a transition from any state.
+// New states line up right of the last one (R12), one more step while a state takes the place;
+// globalKey adds a transition from any state.
 export const addStates = (draft: TDraftGraph, entries: TNewState[]): TDraftGraph => {
   const last = draft.states[draft.states.length - 1];
   const hasInitial = draft.states.some((state) => state.is_initial);
-  const states = entries.map((entry, index) => ({
-    key: entry.key,
-    status: entry.status,
-    position_x: last ? last.position_x + (index + 1) * PLACEMENT_STEP : index * PLACEMENT_STEP,
-    position_y: last?.position_y ?? 0,
-    is_initial: !hasInitial && index === 0,
-  }));
+  const taken = draft.states.map((state) => stateBox(state.position_x, state.position_y));
+  const y = last?.position_y ?? 0;
+  let x = last ? last.position_x : -PLACEMENT_STEP;
+  const states = entries.map((entry, index) => {
+    do x += PLACEMENT_STEP;
+    while (taken.some((box) => overlaps(box, stateBox(x, y))));
+    return {
+      key: entry.key,
+      status: entry.status,
+      position_x: x,
+      position_y: y,
+      is_initial: !hasInitial && index === 0,
+    };
+  });
   const transitions = entries.flatMap((entry) =>
     entry.globalKey
       ? [
@@ -319,12 +339,6 @@ export const closestSides = (source: TPoint, target: TPoint): { source: TWorkflo
 
 const START_SIZE = 80;
 const START_ARROW = 80;
-// shortcut: the state and its any-state pill above it are taken at their minimum width (min-w-32); a wider
-// name or pill is not measured, pass the measured sizes in if long names start to overlap.
-const STATE_BOX = { width: 128, height: 40, pill: 28 };
-
-type TBox = { x0: number; y0: number; x1: number; y1: number };
-const overlaps = (a: TBox, b: TBox) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
 
 type TStartPlacement = { x: number; y: number; sides: { source: TWorkflowSide; target: TWorkflowSide } };
 
@@ -343,12 +357,7 @@ export const startPlacement = (draft: TDraftGraph): TStartPlacement | null => {
   // Each place is taken with the room of its arrow up to the initial state.
   const others = draft.states
     .filter((state) => state.key !== initial.key)
-    .map((state) => ({
-      x0: state.position_x,
-      y0: state.position_y - STATE_BOX.pill,
-      x1: state.position_x + STATE_BOX.width,
-      y1: state.position_y + STATE_BOX.height,
-    }));
+    .map((state) => stateBox(state.position_x, state.position_y));
   const isFree = (area: TBox) => !others.some((box) => overlaps(box, area));
   const hasPill = draft.transitions.some((transition) => transition.from_any && transition.target_key === initial.key);
   if (isFree({ x0: left.x, y0: left.y, x1: x, y1: left.y + START_SIZE }))

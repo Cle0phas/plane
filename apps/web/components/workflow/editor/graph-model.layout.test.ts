@@ -74,6 +74,22 @@ describe("addStates", () => {
     ]);
   });
 
+  // R12 on a diagram rearranged by hand: the place right of the last state can already be taken.
+  it("moves a new state further right while its place is taken by a state", () => {
+    const base: TDraftGraph = {
+      states: [state("b", { position_x: 240 }), state("d", { position_x: 730, position_y: 30 }), state("a")],
+      transitions: [],
+    };
+    const draft = addStates(base, [
+      { key: "x", status: status("X") },
+      { key: "y", status: status("Y") },
+    ]);
+    expect(draft.states.slice(3).map((item) => [item.key, item.position_x, item.position_y])).toEqual([
+      ["x", 480, 0],
+      ["y", 960, 0],
+    ]);
+  });
+
   it("makes a state initial only when the draft has none", () => {
     const withInitial: TDraftGraph = { states: [state("a", { is_initial: true })], transitions: [] };
     expect(addStates(withInitial, [{ key: "b", status: status("B") }]).states[1].is_initial).toBe(false);
