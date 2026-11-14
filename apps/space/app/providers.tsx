@@ -14,7 +14,7 @@ import { ToastProvider } from "@/lib/toast-provider";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider themes={["light", "dark"]} defaultTheme="system" enableSystem>
+    <ThemeProvider themes={["light", "dark"]} defaultTheme="light" enableSystem>
       <StoreProvider>
         <AppProgressBar />
         <TranslationProvider>

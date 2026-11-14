@@ -25,7 +25,7 @@ const DEFAULT_SWR_CONFIG = {
 
 export function CoreProviders({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider themes={["light", "dark"]} defaultTheme="system" enableSystem>
+    <ThemeProvider themes={["light", "dark"]} defaultTheme="light" enableSystem>
       <AppProgressBar />
       {/* The toast viewport is a provider that calls `useTranslation`. Admin had no i18n provider,
           so TranslationProvider is mounted here for it. */}

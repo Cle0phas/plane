@@ -38,7 +38,7 @@ export class RootStore {
   }
 
   resetOnSignOut() {
-    localStorage.setItem("theme", "system");
+    localStorage.setItem("theme", "light");
     this.instance = new InstanceStore(this);
     this.user = new UserStore(this);
     this.theme = new ThemeStore(this);

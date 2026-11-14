@@ -66,7 +66,7 @@ export class RootStore {
   };
 
   reset() {
-    localStorage.setItem("theme", "system");
+    localStorage.setItem("theme", "light");
     this.instance = new InstanceStore(this);
     this.user = new UserStore(this);
     this.issue = new IssueStore(this);

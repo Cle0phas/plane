@@ -40,7 +40,7 @@ export function SwitchAccountModal(props: Props) {
 
     try {
       await signOut();
-      setTheme("system");
+      setTheme("light");
       router.push("/");
       handleClose();
     } catch {

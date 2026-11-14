@@ -65,12 +65,13 @@ function StoreWrapper(props: TStoreWrapper) {
     }
 
     // Only initialize theme from server on FIRST load for this user
-    if (!userProfile?.theme?.theme || hasInitializedThemeRef.current) {
+    if (!userProfile?.id || hasInitializedThemeRef.current) {
       return; // Skip if already initialized or no profile data
     }
 
-    // Apply theme from server profile (one-time only)
-    setTheme(userProfile?.theme?.theme || "system");
+    // Apply theme from server profile (one-time only); a profile without a saved choice gets light,
+    // which also replaces a "system" value left in localStorage by an earlier sign-out.
+    setTheme(userProfile?.theme?.theme || "light");
 
     // Mark as initialized - prevents future syncs from server
     hasInitializedThemeRef.current = true;
