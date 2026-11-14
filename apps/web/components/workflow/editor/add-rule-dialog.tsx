@@ -19,7 +19,7 @@ import {
 import { useTranslation } from "@plane/i18n";
 import type { TWorkflowRestrictActorsParams } from "@plane/types";
 // local imports
-import type { TDraftGraph, TDraftTransition } from "./graph-model";
+import { isRuleComplete, type TDraftGraph, type TDraftTransition } from "./graph-model";
 import { RestrictActorsForm } from "./restrict-actors-form";
 
 type Props = {
@@ -35,14 +35,15 @@ export function AddRuleDialog({ isOpen, draft, presetKey, onClose, onApply }: Pr
   const [transitionKey, setTransitionKey] = useState("");
   const [params, setParams] = useState<TWorkflowRestrictActorsParams | null>(null);
   const firstKey = draft.transitions[0]?.key ?? "";
+  const initialKey = draft.transitions.some((item) => item.key === presetKey) ? (presetKey as string) : firstKey;
 
   useEffect(() => {
-    if (isOpen) setTransitionKey(presetKey ?? firstKey);
-  }, [isOpen, presetKey, firstKey]);
+    if (isOpen) setTransitionKey(initialKey);
+  }, [isOpen, initialKey]);
 
   const transition = draft.transitions.find((item) => item.key === transitionKey);
   const currentParams = transition?.rules[0]?.params ?? null;
-  // Each transition shows its own rule when it is picked.
+  // currentParams is left out on purpose: a draft update must not wipe the restriction being edited.
   useEffect(() => setParams(currentParams), [transitionKey, isOpen]); // oxlint-disable-line react-hooks/exhaustive-deps
 
   const nameOf = (key: string) => draft.states.find((state) => state.key === key)?.status.name ?? "";
@@ -110,7 +111,7 @@ export function AddRuleDialog({ isOpen, draft, presetKey, onClose, onApply }: Pr
               size="md"
               stretch="auto"
               type="submit"
-              disabled={!transition}
+              disabled={!transition || (params !== null && !isRuleComplete({ type: "restrict_actors", params }))}
               label={t("workflows.editor.add_rule.submit")}
             />
           </DialogActions>

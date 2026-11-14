@@ -226,7 +226,7 @@ export const setRestriction = (
     rules: params ? [{ type: "restrict_actors", params: { ...params } }] : [],
   });
 
-const isRuleComplete = ({ params }: TWorkflowRule) =>
+export const isRuleComplete = ({ params }: TWorkflowRule) =>
   (params.roles?.length ?? 0) > 0 ||
   (params.user_ids?.length ?? 0) > 0 ||
   params.assignee === true ||

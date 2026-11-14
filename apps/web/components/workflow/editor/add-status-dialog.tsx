@@ -71,6 +71,11 @@ export function AddStatusDialog({ isOpen, draft, options, onClose, onAdd }: Prop
       current.includes(keyOf(name)) ? current.filter((key) => key !== keyOf(name)) : [...current, keyOf(name)]
     );
 
+  const create = () => {
+    setCreated((current) => [...current, { name: query.trim(), group: null }]);
+    setQuery("");
+  };
+
   const submit = () =>
     onAdd(
       [
@@ -114,6 +119,12 @@ export function AddStatusDialog({ isOpen, draft, options, onClose, onAdd }: Prop
                   placeholder={t("workflows.editor.add_state.search")}
                   value={query}
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => setQuery(event.target.value)}
+                  // Enter must never submit the dialog and drop what was typed.
+                  onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
+                    if (event.key !== "Enter") return;
+                    event.preventDefault();
+                    if (canCreate) create();
+                  }}
                 />
                 {createError && (
                   <p role="alert" className="text-body-xs-regular text-danger-primary">
@@ -148,10 +159,7 @@ export function AddStatusDialog({ isOpen, draft, options, onClose, onAdd }: Prop
                     size="sm"
                     stretch="auto"
                     label={t("workflows.editor.add_state.create_option", { name: query.trim() })}
-                    onClick={() => {
-                      setCreated((current) => [...current, { name: query.trim(), group: null }]);
-                      setQuery("");
-                    }}
+                    onClick={create}
                   />
                 )}
                 {created.map((item) => (

@@ -98,4 +98,22 @@ describe("AddStatusDialog", () => {
     open();
     await waitFor(() => expect(screen.getByRole("dialog").contains(document.activeElement)).toBe(true));
   });
+
+  it("creates the typed state on Enter without submitting the dialog", async () => {
+    const { onAdd, user } = open();
+    await user.click(screen.getByRole("checkbox", { name: /Todo/ }));
+    await user.type(screen.getByRole("textbox", { name: NAME }), "Fresh{Enter}");
+    expect(onAdd).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: ADD }));
+    expect(onAdd).toHaveBeenCalledTimes(1);
+    expect(onAdd.mock.calls[0][0].map((status: { name: string }) => status.name)).toEqual(["Todo", "Fresh"]);
+  });
+
+  it("does nothing on Enter when the typed name cannot be created", async () => {
+    const { onAdd, user } = open();
+    await user.click(screen.getByRole("checkbox", { name: /Todo/ }));
+    await user.type(screen.getByRole("textbox", { name: NAME }), "used{Enter}");
+    expect(onAdd).not.toHaveBeenCalled();
+    expect(screen.getByRole("alert").textContent).toBe("workflows.editor.add_state.errors.present");
+  });
 });
