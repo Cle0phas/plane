@@ -78,8 +78,8 @@ def _graph_payload(workflow, extra_states=(), drop=()):
 @pytest.mark.contract
 @pytest.mark.django_db
 class TestRead:
-    @pytest.mark.parametrize("role", ["admin", "member", "guest"])
-    def test_every_member_reads_workflows_and_statuses(self, workspace, users, software, role):
+    @pytest.mark.parametrize("role", ["admin", "member"])
+    def test_admins_and_members_read_workflows_and_statuses(self, workspace, users, software, role):
         client = _client(users[role])
         listed = client.get(WORKFLOWS_URL.format(slug=workspace.slug))
         detail = client.get(WORKFLOW_URL.format(slug=workspace.slug, pk=software.id))
@@ -88,6 +88,25 @@ class TestRead:
         assert listed.data[0]["state_count"] == 2
         assert [state["status"]["name"] for state in detail.data["states"]] == ["To do", "Done"]
         assert {item["name"] for item in statuses.data} == {"To do", "Done"}
+
+    def test_guests_read_neither_workflows_nor_statuses(self, workspace, users, software):
+        client = _client(users["guest"])
+        for url in (
+            WORKFLOWS_URL.format(slug=workspace.slug),
+            WORKFLOW_URL.format(slug=workspace.slug, pk=software.id),
+            STATUSES_URL.format(slug=workspace.slug),
+        ):
+            assert client.get(url).status_code == status.HTTP_403_FORBIDDEN
+
+    def test_a_status_names_the_workflows_that_use_it(self, workspace, users, software):
+        build_workflow(workspace, "Bug", ["To do", "Fixed"])
+        WorkflowStatus.objects.create(workspace=workspace, name="Unused", color="#3A3A3A")
+        response = _client(users["member"]).get(STATUSES_URL.format(slug=workspace.slug))
+        by_name = {item["name"]: item for item in response.data}
+        assert [item["name"] for item in by_name["To do"]["workflows"]] == ["Bug", "Software"]
+        assert by_name["Done"]["workflows"] == [{"id": str(software.id), "name": "Software"}]
+        assert by_name["Unused"]["workflows"] == []
+        assert by_name["To do"]["workflow_count"] == 2
 
     def test_project_names_only_reach_workspace_admins(self, workspace, users, project, software):
         link_project(project, software)

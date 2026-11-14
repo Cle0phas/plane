@@ -4,7 +4,7 @@
 
 # Django imports
 from django.db import IntegrityError, transaction
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 
 # Third party imports
 from rest_framework import serializers, status
@@ -91,11 +91,21 @@ def _seed(workflow, graph, actor_id):
 
 
 class WorkflowStatusEndpoint(BaseAPIView):
-    @allow_permission(allowed_roles=[ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST], level="WORKSPACE")
+    # Guests are outside accounts: workflows carry state names of projects they cannot see (spec 6.6).
+    @allow_permission(allowed_roles=[ROLE.ADMIN, ROLE.MEMBER], level="WORKSPACE")
     def get(self, request, slug, pk=None):
         if pk is not None:
             return Response(METHOD_NOT_ALLOWED, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        statuses = WorkflowStatus.objects.filter(workspace__slug=slug).annotate(workflow_count=Count("workflow_states"))
+        statuses = (
+            WorkflowStatus.objects.filter(workspace__slug=slug)
+            .annotate(workflow_count=Count("workflow_states"))
+            .prefetch_related(
+                Prefetch(
+                    "workflow_states",
+                    queryset=WorkflowState.objects.select_related("workflow").order_by("workflow__name"),
+                )
+            )
+        )
         return Response(WorkflowStatusSerializer(statuses, many=True).data, status=status.HTTP_200_OK)
 
     @allow_permission(allowed_roles=[ROLE.ADMIN], level="WORKSPACE")
@@ -128,7 +138,7 @@ class WorkflowStatusCandidatesEndpoint(BaseAPIView):
 
 
 class WorkflowEndpoint(BaseAPIView):
-    @allow_permission(allowed_roles=[ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST], level="WORKSPACE")
+    @allow_permission(allowed_roles=[ROLE.ADMIN, ROLE.MEMBER], level="WORKSPACE")
     def get(self, request, slug, pk=None):
         is_admin = is_workspace_admin(request.user, slug)
         if pk is not None:

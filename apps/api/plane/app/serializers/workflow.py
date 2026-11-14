@@ -31,11 +31,16 @@ def graph_error(code):
 
 class WorkflowStatusSerializer(BaseSerializer):
     workflow_count = serializers.IntegerField(read_only=True)
+    workflows = serializers.SerializerMethodField()
 
     class Meta:
         model = WorkflowStatus
-        fields = ["id", "name", "color", "group", "group_is_auto", "sequence", "workflow_count"]
+        fields = ["id", "name", "color", "group", "group_is_auto", "sequence", "workflow_count", "workflows"]
         read_only_fields = fields
+
+    def get_workflows(self, obj):
+        # Read from the prefetch of the view: one query for every status.
+        return [{"id": str(state.workflow_id), "name": state.workflow.name} for state in obj.workflow_states.all()]
 
 
 class WorkflowSerializer(BaseSerializer):
