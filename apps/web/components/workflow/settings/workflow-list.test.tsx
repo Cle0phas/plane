@@ -121,12 +121,16 @@ describe("used in", () => {
       }),
     ];
     const user = open();
-    await user.tab();
     const trigger = screen.getByRole("button", { name: "workflows.settings.project_count" });
-    const description = document.getElementById(trigger.getAttribute("aria-describedby") ?? "");
-    expect(description?.textContent).toBe("Alpha, Beta");
-    trigger.focus();
+    // Tab through the row until the count takes focus: nothing but the keyboard moves it there.
+    // oxlint-disable-next-line no-await-in-loop -- tab presses must run one after the other
+    for (let step = 0; step < 10 && document.activeElement !== trigger; step += 1) await user.tab();
     expect(document.activeElement).toBe(trigger);
+    // Focus opens the tooltip, which adds its own id to the description list.
+    const descriptions = (trigger.getAttribute("aria-describedby") ?? "")
+      .split(" ")
+      .map((id) => document.getElementById(id)?.textContent);
+    expect(descriptions).toContain("Alpha, Beta");
   });
 
   it("shows only the count when the server sends no names", () => {

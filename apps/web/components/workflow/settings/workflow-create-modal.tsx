@@ -147,7 +147,7 @@ export const WorkflowCreateModal = observer(function WorkflowCreateModal(props: 
                     name="source_project_id"
                     render={({ field: { value, onChange } }) => (
                       <select
-                        className="rounded-md border border-subtle bg-layer-1 px-2 py-1.5 text-body-sm-regular"
+                        className="rounded-md border border-subtle bg-layer-1 px-2 py-1.5 text-body-sm-regular max-md:min-h-11"
                         value={value ?? ""}
                         onChange={onChange}
                       >
