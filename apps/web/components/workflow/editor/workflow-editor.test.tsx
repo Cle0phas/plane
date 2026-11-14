@@ -224,6 +224,16 @@ describe("WorkflowEditor", () => {
     expect(screen.getByRole("heading", { name: "workflows.editor.panel.state" })).toBeTruthy();
   });
 
+  it("expands the collapsed panel on a click on the state already selected in the diagram", async () => {
+    renderEditor();
+    const user = userEvent.setup();
+    fireEvent.click(screen.getByText("Done"));
+    await user.click(screen.getByRole("button", { name: "workflows.editor.panel.collapse" }));
+    expect(screen.queryByRole("heading", { name: "workflows.editor.panel.state" })).toBeNull();
+    fireEvent.click(screen.getByText("Done"));
+    expect(screen.getByRole("heading", { name: "workflows.editor.panel.state" })).toBeTruthy();
+  });
+
   it("points the skip link at the view shown", async () => {
     renderEditor();
     expect(screen.getByRole("link", { name: "workflows.editor.diagram_label" })).toBeTruthy();

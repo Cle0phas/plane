@@ -51,11 +51,11 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
   const headingRef = useRef<HTMLHeadingElement>(null);
   const handledSignal = useRef(0);
 
-  // Any new selection opens the panel (spec 3.7).
-  const selectionKey = selection ? `${selection.kind}:${selection.key}` : null;
+  // Any selection opens the panel (spec 3.7), a click on the element already selected too: each click
+  // stores a new selection object, while a re-render keeps the same one.
   useEffect(() => {
-    if (selectionKey !== null) setIsCollapsed(false);
-  }, [selectionKey]);
+    if (selection !== null) setIsCollapsed(false);
+  }, [selection]);
 
   // A collapsed panel renders its heading only on the next pass, so the hand-off waits for it.
   useEffect(() => {
