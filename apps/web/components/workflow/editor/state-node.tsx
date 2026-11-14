@@ -11,7 +11,7 @@ import type { TWorkflowSide } from "@plane/types";
 import type { TStateTone } from "./graph-model";
 import { INVERSE_CLASS, TONE_CLASS } from "./tones";
 
-export type TStateNodeData = {
+type TStateNodeData = {
   name: string;
   tone: TStateTone;
   groupLabel: string;
@@ -21,7 +21,7 @@ export type TStateNodeData = {
   globalName: string;
   globalSelected: boolean;
 };
-export type TStateNode = Node<TStateNodeData, "workflowState">;
+type TStateNode = Node<TStateNodeData, "workflowState">;
 
 export const SIDES: TWorkflowSide[] = ["top", "right", "bottom", "left"];
 const POSITION: Record<TWorkflowSide, Position> = {

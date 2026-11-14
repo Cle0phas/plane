@@ -11,7 +11,7 @@ import { INVERSE_CLASS } from "./tones";
 export const START_NODE_ID = "__start__";
 export const START_EDGE_ID = "__start_edge__";
 
-export type TStartNode = Node<{ label: string }, "workflowStart">;
+type TStartNode = Node<{ label: string }, "workflowStart">;
 
 /** Display only (X7): derived from the initial state, never saved. */
 export function WorkflowStartNode({ data }: NodeProps<TStartNode>) {

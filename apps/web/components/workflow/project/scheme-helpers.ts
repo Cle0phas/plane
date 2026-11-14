@@ -51,7 +51,7 @@ export const getSchemeErrorKey = (error: unknown) => {
     : "workflows.scheme.errors.default";
 };
 
-export type TSchemeRow = { workflowId: string; isDefault: boolean; typeIds: string[] };
+type TSchemeRow = { workflowId: string; isDefault: boolean; typeIds: string[] };
 
 /** Rows of the linked-project table: the default workflow first, then each other workflow. */
 export const schemeRows = (scheme: Pick<TProjectWorkflowScheme, "default_workflow_id" | "items">): TSchemeRow[] => {

@@ -128,9 +128,9 @@ export const isDraftDirty = (draft: TDraftGraph, saved: TDraftGraph) =>
 export const shouldResetDraft = (previousSaved: TDraftGraph, saved: TDraftGraph, draft: TDraftGraph) =>
   JSON.stringify(previousSaved) !== JSON.stringify(saved) && !isDraftDirty(draft, previousSaved);
 
-export const PLACEMENT_STEP = 240;
+const PLACEMENT_STEP = 240;
 
-export type TNewState = { key: string; status: TDraftStatus; globalKey?: string };
+type TNewState = { key: string; status: TDraftStatus; globalKey?: string };
 
 // New states line up right of the last one (R12); globalKey adds a transition from any state.
 export const addStates = (draft: TDraftGraph, entries: TNewState[]): TDraftGraph => {
@@ -321,7 +321,7 @@ const STATE_BOX = { width: 128, height: 40, pill: 28 };
 type TBox = { x0: number; y0: number; x1: number; y1: number };
 const overlaps = (a: TBox, b: TBox) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
 
-export type TStartPlacement = { x: number; y: number; sides: { source: TWorkflowSide; target: TWorkflowSide } };
+type TStartPlacement = { x: number; y: number; sides: { source: TWorkflowSide; target: TWorkflowSide } };
 
 /** Start node place (X7, display only): left of the initial state, else above, else below; never on a state. */
 export const startPlacement = (draft: TDraftGraph): TStartPlacement | null => {
@@ -392,7 +392,7 @@ export const toneOf = (group: TStateGroups): TStateTone => {
 };
 
 /** Colour given to a status created in the editor: the default Plane colour of its category. */
-export const GROUP_COLORS: Record<TStateGroups, string> = {
+const GROUP_COLORS: Record<TStateGroups, string> = {
   backlog: "#A3A3A3",
   unstarted: "#3A3A3A",
   started: "#F59E0B",
@@ -479,7 +479,7 @@ export type TTextTransition = {
   sourceKey?: string;
   sourceName?: string;
 };
-export type TTextRow = { key: string; name: string; group: TStateGroups; transitions: TTextTransition[] };
+type TTextRow = { key: string; name: string; group: TStateGroups; transitions: TTextTransition[] };
 
 /** Text view (spec 3.7): each state with the transitions that lead to it, the start first. */
 export const textRows = (draft: TDraftGraph): TTextRow[] => {
