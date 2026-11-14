@@ -244,6 +244,7 @@ from .workflow.base import (
     ProjectWorkflowSchemePreviewEndpoint,
     WorkflowEndpoint,
     WorkflowGraphEndpoint,
+    WorkflowStatusCandidatesEndpoint,
     WorkflowStatusEndpoint,
 )
 

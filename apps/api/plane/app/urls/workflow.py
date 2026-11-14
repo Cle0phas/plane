@@ -9,11 +9,17 @@ from plane.app.views import (
     ProjectWorkflowSchemePreviewEndpoint,
     WorkflowEndpoint,
     WorkflowGraphEndpoint,
+    WorkflowStatusCandidatesEndpoint,
     WorkflowStatusEndpoint,
 )
 
 urlpatterns = [
     path("workspaces/<str:slug>/workflow-statuses/", WorkflowStatusEndpoint.as_view(), name="workflow-statuses"),
+    path(
+        "workspaces/<str:slug>/workflow-statuses/candidates/",
+        WorkflowStatusCandidatesEndpoint.as_view(),
+        name="workflow-status-candidates",
+    ),
     path(
         "workspaces/<str:slug>/workflow-statuses/<uuid:pk>/", WorkflowStatusEndpoint.as_view(), name="workflow-status"
     ),

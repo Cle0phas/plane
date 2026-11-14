@@ -31,6 +31,7 @@ from plane.db.models import (
 )
 from plane.utils.audit import record_audit
 from plane.utils.workflow_graph import GraphError, save_workflow_graph, workflow_graph
+from plane.utils.workflow_seed import candidate_statuses
 from plane.utils.workflow_sync import (
     SchemeError,
     apply_scheme,
@@ -101,6 +102,14 @@ class WorkflowStatusEndpoint(BaseAPIView):
             # Queryset delete: soft, without the per-row cascade task.
             WorkflowStatus.objects.filter(pk=workflow_status.pk).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class WorkflowStatusCandidatesEndpoint(BaseAPIView):
+    # Admins only: the names come from every project of the workspace, private ones included (R15).
+    @allow_permission(allowed_roles=[ROLE.ADMIN], level="WORKSPACE")
+    def get(self, request, slug):
+        workspace = Workspace.objects.get(slug=slug)
+        return Response(candidate_statuses(workspace.id), status=status.HTTP_200_OK)
 
 
 class WorkflowEndpoint(BaseAPIView):

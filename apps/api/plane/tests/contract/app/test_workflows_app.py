@@ -13,6 +13,7 @@ from plane.db.models import (
     Issue,
     Project,
     ProjectMember,
+    State,
     Workflow,
     WorkflowState,
     WorkflowStatus,
@@ -26,6 +27,7 @@ STATUS_URL = "/api/workspaces/{slug}/workflow-statuses/{pk}/"
 WORKFLOWS_URL = "/api/workspaces/{slug}/workflows/"
 WORKFLOW_URL = "/api/workspaces/{slug}/workflows/{pk}/"
 GRAPH_URL = "/api/workspaces/{slug}/workflows/{pk}/graph/"
+CANDIDATES_URL = "/api/workspaces/{slug}/workflow-statuses/candidates/"
 
 
 def _client(user):
@@ -302,3 +304,41 @@ class TestTransitionSides:
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.data == {"graph": ["invalid_transition"]}
+
+
+def _state(project, name, group, default=False):
+    return State.objects.create(
+        project=project, workspace=project.workspace, name=name, group=group, color="#3A3A3A", default=default
+    )
+
+
+@pytest.mark.contract
+@pytest.mark.django_db
+class TestStatusCandidates:
+    def test_admin_reads_project_states_that_are_not_statuses(self, workspace, users, project, software):
+        _state(project, "To do", "unstarted")
+        _state(project, "In review", "started")
+        response = _client(users["admin"]).get(CANDIDATES_URL.format(slug=workspace.slug))
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == [{"name": "In review", "color": "#3A3A3A", "group": "started"}]
+
+    @pytest.mark.parametrize("role", ["member", "guest"])
+    def test_other_roles_are_refused(self, workspace, users, project, role):
+        _state(project, "In review", "started")
+        response = _client(users[role]).get(CANDIDATES_URL.format(slug=workspace.slug))
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_a_project_admin_who_is_only_a_workspace_member_is_refused(self, workspace, users, project):
+        ProjectMember.objects.create(project=project, member=users["member"], role=20)
+        response = _client(users["member"]).get(CANDIDATES_URL.format(slug=workspace.slug))
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_a_user_with_no_membership_is_refused(self, workspace, project):
+        response = _client(UserFactory()).get(CANDIDATES_URL.format(slug=workspace.slug))
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_an_admin_of_another_workspace_is_refused(self, workspace, project):
+        outsider = UserFactory()
+        WorkspaceMember.objects.create(workspace=WorkspaceFactory(), member=outsider, role=20)
+        response = _client(outsider).get(CANDIDATES_URL.format(slug=workspace.slug))
+        assert response.status_code == status.HTTP_403_FORBIDDEN
