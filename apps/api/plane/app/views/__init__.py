@@ -242,6 +242,7 @@ from .issue_type.base import (
 from .workflow.base import (
     ProjectWorkflowSchemeEndpoint,
     ProjectWorkflowSchemePreviewEndpoint,
+    WorkflowDuplicateEndpoint,
     WorkflowEndpoint,
     WorkflowGraphEndpoint,
     WorkflowStatusCandidatesEndpoint,

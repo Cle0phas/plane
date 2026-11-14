@@ -29,6 +29,7 @@ WORKFLOWS_URL = "/api/workspaces/{slug}/workflows/"
 WORKFLOW_URL = "/api/workspaces/{slug}/workflows/{pk}/"
 GRAPH_URL = "/api/workspaces/{slug}/workflows/{pk}/graph/"
 CANDIDATES_URL = "/api/workspaces/{slug}/workflow-statuses/candidates/"
+DUPLICATE_URL = "/api/workspaces/{slug}/workflows/{pk}/duplicate/"
 
 
 def _client(user):
@@ -441,3 +442,115 @@ class TestCreateFromProject:
         assert not Workflow.objects.filter(name="Huge").exists()
         assert not WorkflowStatus.objects.filter(workspace=workspace).exists()
         assert not AuditLog.objects.filter(action="workflow.created").exists()
+
+
+def _shape(detail):
+    """A graph without its identifiers, to compare a copy with its source."""
+    by_id = {state["id"]: state["status"]["name"] for state in detail["states"]}
+    states = sorted(
+        (state["status"]["id"], state["position_x"], state["position_y"], state["is_initial"])
+        for state in detail["states"]
+    )
+    transitions = sorted(
+        (
+            item["name"],
+            item["from_any"],
+            sorted(by_id[source] for source in item["source_ids"]),
+            by_id[item["target_id"]],
+            sorted((by_id[source], sides["source"], sides["target"]) for source, sides in item["sides"].items()),
+            str(item["rules"]),
+        )
+        for item in detail["transitions"]
+    )
+    return states, transitions
+
+
+@pytest.mark.contract
+@pytest.mark.django_db
+class TestDuplicate:
+    @pytest.fixture
+    def rich(self, workspace, users):
+        workflow = build_workflow(
+            workspace,
+            "Rich",
+            ["To do", "Doing", "Done"],
+            [(["To do"], "Doing", {"roles": [20]}), (["Doing"], "Done", None), ("*", "To do", None)],
+        )
+        source = workflow.states_by_name["To do"].outgoing_sources.get()
+        source.source_side, source.target_side = "right", "left"
+        source.save()
+        return workflow
+
+    def _post(self, user, workspace, pk, **body):
+        return _client(user).post(DUPLICATE_URL.format(slug=workspace.slug, pk=pk), body, format="json")
+
+    def _refused(self, user, workspace, rich):
+        response = self._post(user, workspace, rich.id, name="Nope")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert Workflow.objects.filter(workspace=workspace).count() == 1
+
+    def test_the_copy_matches_its_source(self, workspace, users, rich):
+        original = _client(users["admin"]).get(WORKFLOW_URL.format(slug=workspace.slug, pk=rich.id)).data
+        response = self._post(users["admin"], workspace, rich.id, name="Copy of Rich")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["id"] != str(rich.id)
+        assert response.data["name"] == "Copy of Rich"
+        assert response.data["project_count"] == 0
+        assert _shape(response.data) == _shape(original)
+        assert not {state["id"] for state in response.data["states"]} & {state["id"] for state in original["states"]}
+
+    def test_changing_the_copy_leaves_the_source_alone(self, workspace, users, rich):
+        client = _client(users["admin"])
+        before = _shape(client.get(WORKFLOW_URL.format(slug=workspace.slug, pk=rich.id)).data)
+        copy = self._post(users["admin"], workspace, rich.id, name="Copy of Rich").data
+        emptied = client.put(
+            GRAPH_URL.format(slug=workspace.slug, pk=copy["id"]), {"states": [], "transitions": []}, format="json"
+        )
+        assert emptied.status_code == status.HTTP_200_OK
+        assert _shape(client.get(WORKFLOW_URL.format(slug=workspace.slug, pk=rich.id)).data) == before
+
+    def test_the_copy_of_a_linked_workflow_is_linked_to_nothing(self, workspace, users, project, software):
+        link_project(project, software)
+        response = self._post(users["admin"], workspace, software.id, name="Copy")
+        assert response.data["project_count"] == 0
+        assert ProjectWorkflowScheme.objects.count() == 1
+
+    def test_the_duplication_is_audited(self, workspace, users, rich):
+        response = self._post(users["admin"], workspace, rich.id, name="Copy of Rich")
+        entry = AuditLog.objects.get(action="workflow.duplicated")
+        assert str(entry.target_id) == response.data["id"]
+        assert entry.after["source_workflow_id"] == str(rich.id)
+        assert entry.actor_id == users["admin"].id
+        # X2: the graph save leaves its own entry, after the duplication one.
+        graph_entry = AuditLog.objects.get(action="workflow.graph_updated", target_id=response.data["id"])
+        assert graph_entry.created_at > entry.created_at
+
+    def test_a_taken_or_missing_name_is_refused(self, workspace, users, rich):
+        taken = self._post(users["admin"], workspace, rich.id, name="rich")
+        missing = self._post(users["admin"], workspace, rich.id)
+        assert taken.status_code == missing.status_code == status.HTTP_400_BAD_REQUEST
+        assert "name" in taken.data and "name" in missing.data
+        assert Workflow.objects.filter(workspace=workspace).count() == 1
+
+    @pytest.mark.parametrize("role", ["member", "guest"])
+    def test_other_roles_cannot_duplicate(self, workspace, users, rich, role):
+        self._refused(users[role], workspace, rich)
+
+    def test_a_project_admin_who_is_only_a_workspace_member_is_refused(self, workspace, users, project, rich):
+        ProjectMember.objects.create(project=project, member=users["member"], role=20)
+        self._refused(users["member"], workspace, rich)
+
+    def test_a_user_with_no_membership_is_refused(self, workspace, rich):
+        self._refused(UserFactory(), workspace, rich)
+
+    def test_an_admin_of_another_workspace_is_refused(self, workspace, rich):
+        outsider = UserFactory()
+        WorkspaceMember.objects.create(workspace=WorkspaceFactory(), member=outsider, role=20)
+        self._refused(outsider, workspace, rich)
+
+    def test_a_workflow_of_another_workspace_looks_missing(self, workspace, users):
+        foreign = build_workflow(WorkspaceFactory(), "Foreign", ["A"])
+        hidden = self._post(users["admin"], workspace, foreign.id, name="Copy")
+        missing = self._post(users["admin"], workspace, uuid4(), name="Copy")
+        assert hidden.status_code == missing.status_code == status.HTTP_404_NOT_FOUND
+        assert hidden.data == missing.data

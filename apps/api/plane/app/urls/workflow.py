@@ -7,6 +7,7 @@ from django.urls import path
 from plane.app.views import (
     ProjectWorkflowSchemeEndpoint,
     ProjectWorkflowSchemePreviewEndpoint,
+    WorkflowDuplicateEndpoint,
     WorkflowEndpoint,
     WorkflowGraphEndpoint,
     WorkflowStatusCandidatesEndpoint,
@@ -26,6 +27,11 @@ urlpatterns = [
     path("workspaces/<str:slug>/workflows/", WorkflowEndpoint.as_view(), name="workflows"),
     path("workspaces/<str:slug>/workflows/<uuid:pk>/", WorkflowEndpoint.as_view(), name="workflow"),
     path("workspaces/<str:slug>/workflows/<uuid:pk>/graph/", WorkflowGraphEndpoint.as_view(), name="workflow-graph"),
+    path(
+        "workspaces/<str:slug>/workflows/<uuid:pk>/duplicate/",
+        WorkflowDuplicateEndpoint.as_view(),
+        name="workflow-duplicate",
+    ),
     path(
         "workspaces/<str:slug>/projects/<uuid:project_id>/workflow-scheme/",
         ProjectWorkflowSchemeEndpoint.as_view(),

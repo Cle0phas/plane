@@ -32,7 +32,7 @@ from plane.db.models import (
 from plane.utils.audit import record_audit
 from plane.utils.issue_types import StrictUUIDField
 from plane.utils.workflow_graph import GraphError, save_workflow_graph, workflow_graph
-from plane.utils.workflow_seed import candidate_statuses, graph_from_project
+from plane.utils.workflow_seed import candidate_statuses, graph_copy, graph_from_project
 from plane.utils.workflow_sync import (
     SchemeError,
     apply_scheme,
@@ -264,6 +264,42 @@ class WorkflowGraphEndpoint(BaseAPIView):
             return Response({"graph": ["duplicate_status_name"]}, status=status.HTTP_400_BAD_REQUEST)
         workflow.refresh_from_db()
         return Response(workflow_detail(workflow, True), status=status.HTTP_200_OK)
+
+
+class WorkflowDuplicateEndpoint(BaseAPIView):
+    @allow_permission(allowed_roles=[ROLE.ADMIN], level="WORKSPACE")
+    def post(self, request, slug, pk):
+        if not isinstance(request.data, dict):
+            return Response(NOT_AN_OBJECT, status=status.HTTP_400_BAD_REQUEST)
+        workspace = Workspace.objects.get(slug=slug)
+        source = Workflow.objects.get(workspace_id=workspace.id, pk=pk)
+        serializer = WorkflowSerializer(
+            data={"name": request.data.get("name"), "description": source.description},
+            context={"workspace_id": workspace.id},
+        )
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            with transaction.atomic():
+                copy = serializer.save(workspace_id=workspace.id)
+                record_audit(
+                    workspace_id=workspace.id,
+                    actor_id=request.user.id,
+                    action="workflow.duplicated",
+                    target_type="workflow",
+                    target_id=copy.id,
+                    after={**_workflow_snapshot(copy), "source_workflow_id": str(source.id)},
+                )
+                # Rows already validated in this workspace: saved as they are (X2).
+                save_workflow_graph(workflow=copy, graph=graph_copy(source), actor_id=request.user.id)
+        except GraphError as error:
+            return Response({"graph": [error.code]}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError as error:
+            if _constraint_name(error) != WORKFLOW_NAME_CONSTRAINT:
+                raise
+            return Response({"name": [DUPLICATE_WORKFLOW_NAME_MESSAGE]}, status=status.HTTP_400_BAD_REQUEST)
+        copy.refresh_from_db()
+        return Response(workflow_detail(copy, True), status=status.HTTP_201_CREATED)
 
 
 def _writable_project(slug, project_id):

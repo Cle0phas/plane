@@ -8,6 +8,7 @@ import re
 # Module imports
 from plane.db.models import State, WorkflowStatus
 from plane.db.models.workflow import RESERVED_STATUS_NAMES
+from plane.utils.workflow_graph import workflow_graph
 
 GROUP_ORDER = ["backlog", "unstarted", "started", "completed", "cancelled"]
 CANDIDATE_LIMIT = 500
@@ -89,3 +90,35 @@ def graph_from_project(project):
     cancelled = [state for state in rows if state.group == "cancelled" and state is not initial]
     transitions += [_transition(state) for state in ([initial] if initial is not None else []) + cancelled]
     return {"states": states, "transitions": transitions}
+
+
+def graph_copy(workflow):
+    """Validated-shape graph reproducing a workflow, keyed by its own state ids (spec 4.3)."""
+    graph = workflow_graph(workflow)
+    return {
+        "states": [
+            {
+                "key": state["id"],
+                "status": {
+                    "id": state["status"]["id"],
+                    "name": state["status"]["name"],
+                    "color": state["status"]["color"],
+                },
+                "position_x": state["position_x"],
+                "position_y": state["position_y"],
+                "is_initial": state["is_initial"],
+            }
+            for state in graph["states"]
+        ],
+        "transitions": [
+            {
+                "name": item["name"],
+                "from_any": item["from_any"],
+                "source_keys": item["source_ids"],
+                "target_key": item["target_id"],
+                "rules": item["rules"],
+                "sides": item["sides"],
+            }
+            for item in graph["transitions"]
+        ],
+    }
