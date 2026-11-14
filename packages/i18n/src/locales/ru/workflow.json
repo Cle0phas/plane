@@ -241,6 +241,7 @@
       "minimap": "Мини-карта",
       "state_label": "Состояние {name}, категория {group}, входящих: {incoming}, исходящих: {outgoing}",
       "transition_label": "Переход {name}, из состояния {source} в состояние {target}",
+      "transition_label_unnamed": "Переход без названия, из состояния {source} в состояние {target}",
       "start_label": "Начальное состояние: {name}",
       "view": {
         "label": "Вид",

@@ -241,6 +241,7 @@
       "minimap": "Mini-carte",
       "state_label": "État {name}, catégorie {group}, {incoming, plural, one {# transition entrante} many {# de transitions entrantes} other {# transitions entrantes}}, {outgoing, plural, one {# sortante} many {# de sortantes} other {# sortantes}}",
       "transition_label": "Transition {name}, de {source} à {target}",
+      "transition_label_unnamed": "Transition sans nom, de {source} à {target}",
       "start_label": "État de départ : {name}",
       "view": {
         "label": "Vue",

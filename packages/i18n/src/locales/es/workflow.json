@@ -241,6 +241,7 @@
       "minimap": "Minimapa",
       "state_label": "Estado {name}, categoría {group}, {incoming, plural, one {# transición entrante} other {# transiciones entrantes}}, {outgoing, plural, one {# saliente} other {# salientes}}",
       "transition_label": "Transición {name}, de {source} a {target}",
+      "transition_label_unnamed": "Transición sin nombre, de {source} a {target}",
       "start_label": "Estado inicial: {name}",
       "view": {
         "label": "Vista",

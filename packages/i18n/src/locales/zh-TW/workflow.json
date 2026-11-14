@@ -241,6 +241,7 @@
       "minimap": "小地圖",
       "state_label": "狀態 {name}，類別 {group}，{incoming} 個傳入轉換，{outgoing} 個傳出轉換",
       "transition_label": "轉換 {name}，從 {source} 到 {target}",
+      "transition_label_unnamed": "未命名的轉換，從 {source} 到 {target}",
       "start_label": "初始狀態：{name}",
       "view": {
         "label": "檢視",

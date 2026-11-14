@@ -241,6 +241,7 @@
       "minimap": "Minikarte",
       "state_label": "Status {name}, Kategorie {group}, {incoming} eingehend, {outgoing} ausgehend",
       "transition_label": "Übergang {name}, von {source} nach {target}",
+      "transition_label_unnamed": "Unbenannter Übergang, von {source} nach {target}",
       "start_label": "Anfangsstatus: {name}",
       "view": {
         "label": "Ansicht",

@@ -241,6 +241,7 @@
       "minimap": "Minimapa",
       "state_label": "Stav {name}, kategorie {group}, příchozí: {incoming}, odchozí: {outgoing}",
       "transition_label": "Přechod {name}, ze stavu {source} do stavu {target}",
+      "transition_label_unnamed": "Nepojmenovaný přechod, ze stavu {source} do stavu {target}",
       "start_label": "Počáteční stav: {name}",
       "view": {
         "label": "Zobrazení",

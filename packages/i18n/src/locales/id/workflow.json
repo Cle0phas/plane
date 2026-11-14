@@ -241,6 +241,7 @@
       "minimap": "Peta mini",
       "state_label": "Status {name}, kategori {group}, {incoming} transisi masuk, {outgoing} transisi keluar",
       "transition_label": "Transisi {name}, dari {source} ke {target}",
+      "transition_label_unnamed": "Transisi tanpa nama, dari {source} ke {target}",
       "start_label": "Status awal: {name}",
       "view": {
         "label": "Tampilan",

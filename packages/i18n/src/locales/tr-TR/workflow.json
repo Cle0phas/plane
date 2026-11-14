@@ -241,6 +241,7 @@
       "minimap": "Mini harita",
       "state_label": "Durum {name}, kategori {group}, {incoming} gelen, {outgoing} giden",
       "transition_label": "Geçiş {name}, kaynak: {source}, hedef: {target}",
+      "transition_label_unnamed": "Adsız geçiş, kaynak: {source}, hedef: {target}",
       "start_label": "Başlangıç durumu: {name}",
       "view": {
         "label": "Görünüm",

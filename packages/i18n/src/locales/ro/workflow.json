@@ -241,6 +241,7 @@
       "minimap": "Minihartă",
       "state_label": "Starea {name}, categoria {group}, intrări: {incoming}, ieșiri: {outgoing}",
       "transition_label": "Tranziția {name}, din starea {source} în starea {target}",
+      "transition_label_unnamed": "Tranziție fără nume, din starea {source} în starea {target}",
       "start_label": "Stare inițială: {name}",
       "view": {
         "label": "Vizualizare",

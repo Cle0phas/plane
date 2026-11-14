@@ -241,6 +241,7 @@
       "minimap": "მინი-რუკა",
       "state_label": "მდგომარეობა {name}, კატეგორია {group}, შემომავალი: {incoming}, გამავალი: {outgoing}",
       "transition_label": "გადასვლა {name}, საწყისი: {source}, სამიზნე: {target}",
+      "transition_label_unnamed": "უსახელო გადასვლა, საწყისი: {source}, სამიზნე: {target}",
       "start_label": "საწყისი მდგომარეობა: {name}",
       "view": {
         "label": "ხედი",
