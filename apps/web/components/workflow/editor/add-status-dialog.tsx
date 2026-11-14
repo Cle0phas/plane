@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Button } from "@makeplane/propel/components/button";
 import {
   Dialog,
@@ -53,6 +53,7 @@ export function AddStatusDialog({ isOpen, draft: liveDraft, options: liveOptions
   const [checked, setChecked] = useState<string[]>([]);
   const [created, setCreated] = useState<TCreated[]>([]);
   const [allowAny, setAllowAny] = useState(false);
+  const optionId = useId();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -70,6 +71,8 @@ export function AddStatusDialog({ isOpen, draft: liveDraft, options: liveOptions
   const createError = query !== "" && !isListed ? statusNameError(query, draft) : null;
   const canCreate = needle !== "" && !isListed && createError === null;
   const count = checked.length + created.length;
+  // The option applies to the added states: with none left it is cleared, not kept for later.
+  if (count === 0 && allowAny) setAllowAny(false);
 
   const toggle = (name: string) =>
     setChecked((current) =>
@@ -155,7 +158,7 @@ export function AddStatusDialog({ isOpen, draft: liveDraft, options: liveOptions
                   ))}
                   {visible.length === 0 && !canCreate && (
                     <li className="px-2 py-1.5 text-body-sm-regular text-tertiary">
-                      {t("workflows.editor.add_state.none")}
+                      {t(needle === "" ? "workflows.editor.add_state.all_used" : "workflows.editor.add_state.none")}
                     </li>
                   )}
                 </ul>
@@ -201,10 +204,36 @@ export function AddStatusDialog({ isOpen, draft: liveDraft, options: liveOptions
                     />
                   </div>
                 ))}
-                <label className="flex items-center gap-2 text-body-sm-regular text-secondary">
-                  <input type="checkbox" checked={allowAny} onChange={(event) => setAllowAny(event.target.checked)} />
-                  {t("workflows.editor.add_state.allow_any")}
-                </label>
+                <div
+                  role="group"
+                  aria-labelledby={`${optionId}-title`}
+                  className="space-y-1.5 border-t border-subtle pt-3"
+                >
+                  <p id={`${optionId}-title`} className="text-body-sm-medium text-primary">
+                    {t("workflows.editor.add_state.any_title")}
+                  </p>
+                  <label className="flex items-center gap-2 text-body-sm-regular text-secondary">
+                    <input
+                      type="checkbox"
+                      checked={allowAny}
+                      disabled={count === 0}
+                      aria-describedby={`${optionId}-help${count === 0 ? ` ${optionId}-needs` : ""}`}
+                      onChange={(event) => setAllowAny(event.target.checked)}
+                    />
+                    {t("workflows.editor.add_state.allow_any")}
+                  </label>
+                  <p id={`${optionId}-help`} className="text-caption-sm-regular text-tertiary">
+                    {t("workflows.editor.add_state.any_help")}
+                  </p>
+                  {count === 0 && (
+                    <p id={`${optionId}-needs`} className="text-caption-sm-regular text-tertiary">
+                      {t("workflows.editor.add_state.any_needs_selection")}
+                    </p>
+                  )}
+                  <p className="text-caption-sm-regular text-tertiary">
+                    {t("workflows.editor.add_state.any_existing_hint")}
+                  </p>
+                </div>
                 <p aria-live="polite" className="text-caption-sm-regular text-tertiary">
                   {count > 0 ? t("workflows.editor.add_state.selected", { count }) : ""}
                 </p>

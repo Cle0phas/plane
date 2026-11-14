@@ -33,6 +33,16 @@ const draft: TDraftGraph = {
 const ADD = "workflows.editor.add_state.submit";
 const NAME = "workflows.editor.add_state.name";
 const CREATE = "workflows.editor.add_state.create_option";
+const ANY = "workflows.editor.add_state.allow_any";
+const K = "workflows.editor.add_state.";
+
+// What a screen reader reads after the name of the control.
+const describedBy = (element: HTMLElement) =>
+  (element.getAttribute("aria-describedby") ?? "")
+    .split(" ")
+    .filter(Boolean)
+    .map((id) => document.getElementById(id)?.textContent)
+    .join(" | ");
 
 const open = (onAdd = vi.fn()) => {
   render(<AddStatusDialog isOpen draft={draft} options={options} onClose={() => {}} onAdd={onAdd} />);
@@ -66,7 +76,7 @@ describe("AddStatusDialog", () => {
     await user.type(screen.getByRole("textbox", { name: NAME }), "Fresh");
     expect(screen.queryByRole("checkbox", { name: /Todo/ })).toBeNull();
     await user.click(screen.getByRole("button", { name: CREATE }));
-    await user.click(screen.getByRole("checkbox", { name: "workflows.editor.add_state.allow_any" }));
+    await user.click(screen.getByRole("checkbox", { name: ANY }));
     await user.click(screen.getByRole("button", { name: ADD }));
     expect(onAdd).toHaveBeenCalledWith([{ name: "Fresh", color: "#3A3A3A", group: null, shared_count: 0 }], true);
   });
@@ -148,5 +158,70 @@ describe("AddStatusDialog", () => {
     await user.type(screen.getByRole("textbox", { name: NAME }), "used{Enter}");
     expect(onAdd).not.toHaveBeenCalled();
     expect(screen.getByRole("alert").textContent).toBe("workflows.editor.add_state.errors.present");
+  });
+
+  describe("the any-state option", () => {
+    it("is set apart from the list under its own heading, with what it does and how to do the same for an existing state", () => {
+      open();
+      const option = screen.getByRole("group", { name: K + "any_title" });
+      expect(option.contains(screen.getByRole("checkbox", { name: ANY }))).toBe(true);
+      expect(option.textContent).toContain(K + "any_help");
+      expect(option.textContent).toContain(K + "any_existing_hint");
+      expect(screen.getByRole("list").contains(option)).toBe(false);
+    });
+
+    it("is disabled while no state is selected, and says why to assistive technology", async () => {
+      const { user } = open();
+      const box = screen.getByRole("checkbox", { name: ANY });
+      expect(box).toHaveProperty("disabled", true);
+      expect(describedBy(box)).toContain(K + "any_help");
+      expect(describedBy(box)).toContain(K + "any_needs_selection");
+      await user.click(screen.getByRole("checkbox", { name: /Todo/ }));
+      expect(box).toHaveProperty("disabled", false);
+      expect(describedBy(box)).toContain(K + "any_help");
+      expect(describedBy(box)).not.toContain(K + "any_needs_selection");
+    });
+
+    it("becomes available as soon as a state is created", async () => {
+      const { user } = open();
+      await user.type(screen.getByRole("textbox", { name: NAME }), "Fresh{Enter}");
+      expect(screen.getByRole("checkbox", { name: ANY })).toHaveProperty("disabled", false);
+    });
+
+    it("is unticked and disabled again when the selection becomes empty", async () => {
+      const { onAdd, user } = open();
+      const todo = screen.getByRole("checkbox", { name: /Todo/ });
+      await user.click(todo);
+      await user.click(screen.getByRole("checkbox", { name: ANY }));
+      await user.click(todo);
+      const box = screen.getByRole("checkbox", { name: ANY });
+      expect(box).toHaveProperty("checked", false);
+      expect(box).toHaveProperty("disabled", true);
+      expect(screen.getByRole("button", { name: ADD })).toHaveProperty("disabled", true);
+      await user.click(todo);
+      expect(box).toHaveProperty("checked", false);
+      await user.click(screen.getByRole("button", { name: ADD }));
+      expect(onAdd.mock.calls[0][1]).toBe(false);
+    });
+  });
+
+  describe("an empty list", () => {
+    const openWith = (list: TStatusOption[]) => {
+      render(<AddStatusDialog isOpen draft={draft} options={list} onClose={() => {}} onAdd={vi.fn()} />);
+      return userEvent.setup();
+    };
+
+    it("tells that every available state is already in the workflow when nothing is searched", () => {
+      openWith([]);
+      expect(screen.getByText(K + "all_used")).toBeTruthy();
+      expect(screen.queryByText(K + "none")).toBeNull();
+    });
+
+    it("keeps the no-match message for a search that matches nothing", async () => {
+      const user = openWith(options);
+      await user.type(screen.getByRole("textbox", { name: NAME }), "used");
+      expect(screen.getByText(K + "none")).toBeTruthy();
+      expect(screen.queryByText(K + "all_used")).toBeNull();
+    });
   });
 });
