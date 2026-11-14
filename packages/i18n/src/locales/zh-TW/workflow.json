@@ -117,7 +117,10 @@
       "columns": {
         "name": "名稱",
         "states": "狀態",
-        "projects": "專案"
+        "projects": "專案",
+        "description": "描述",
+        "updated": "更新時間",
+        "actions": "動作"
       },
       "state_count": "{count, plural, one {# 個狀態} other {# 個狀態}}",
       "project_count": "{count, plural, one {# 個專案} other {# 個專案}}",
@@ -134,9 +137,17 @@
         "description": "描述",
         "duplicate": "已存在同名的工作流程。",
         "submit": "建立",
-        "cancel": "取消"
+        "cancel": "取消",
+        "source_project": "以專案為基礎",
+        "source_project_none": "無專案（空白工作流程）"
       },
-      "error": "無法儲存工作流程。請再試一次。"
+      "error": "無法儲存工作流程。請再試一次。",
+      "edit": "編輯",
+      "duplicate": {
+        "action": "複製",
+        "copy_name": "{name} 的副本",
+        "success": "已複製工作流程"
+      }
     },
     "editor": {
       "back": "返回工作流程",
@@ -144,9 +155,9 @@
       "discard": "捨棄變更",
       "saved": "工作流程已儲存。",
       "unsaved": "未儲存的變更",
-      "read_only": "只有工作區管理員可以變更工作流程。",
+      "read_only": "您無權編輯此工作流程。",
       "start": "開始",
-      "global": "從任何狀態",
+      "global": "任何狀態",
       "diagram_label": "工作流程圖",
       "add_state": {
         "title": "新增狀態",
@@ -156,7 +167,18 @@
         "color": "顏色",
         "group": "類別",
         "group_auto": "自動",
-        "submit": "新增狀態"
+        "submit": "新增狀態",
+        "description": "狀態表示工作項目的進展程度。請選擇現有狀態，或輸入名稱以建立新狀態。",
+        "search": "搜尋或建立",
+        "create_option": "建立「{name}」",
+        "allow_any": "允許從任何狀態轉換",
+        "none": "沒有符合的狀態。",
+        "selected": "{count, plural, one {已選取 # 個} other {已選取 # 個}}",
+        "errors": {
+          "too_long": "名稱不得超過 255 個字元。",
+          "present": "此工作流程中已有同名狀態。",
+          "reserved": "此名稱已保留。"
+        }
       },
       "add_transition": {
         "title": "新增轉換",
@@ -174,7 +196,17 @@
         "initial": "初始狀態",
         "shared": "{count, plural, one {與另外 # 個工作流程共用：變更也會套用到那裡。} other {與另外 # 個工作流程共用：變更也會套用到那裡。}}",
         "remove_state": "移除狀態",
-        "remove_transition": "移除轉換"
+        "remove_transition": "移除轉換",
+        "empty_title": "建立自訂工作流程",
+        "empty_body": "工作流程符合您團隊的工作方式。新增狀態（它們會成為專案看板的欄），再以轉換將其連接，並透過規則限制誰可以使用這些轉換。",
+        "empty_hint": "選取一個狀態以檢視其詳細資訊。",
+        "color": "看板欄顏色",
+        "incoming": "傳入",
+        "outgoing": "傳出",
+        "add_incoming": "新增傳入轉換",
+        "add_outgoing": "新增傳出轉換",
+        "collapse": "收合面板",
+        "expand": "展開面板"
       },
       "restrict": {
         "title": "限制可移動的人員",
@@ -199,6 +231,33 @@
         "status_in_use": "這些狀態中仍有工作項目，請先移走：",
         "status_in_use_project": "{project}：{count, plural, one {# 個工作項目} other {# 個工作項目}}",
         "default": "無法儲存工作流程。"
+      },
+      "close": "關閉",
+      "small_screen": "請在較寬的螢幕上開啟此工作流程以進行編輯。",
+      "used_in": "{count, plural, one {已在 # 個專案中使用} other {已在 # 個專案中使用}}",
+      "show_labels": "顯示轉換標籤",
+      "zoom": "縮放",
+      "minimap": "小地圖",
+      "state_label": "狀態 {name}，類別 {group}，{incoming} 個傳入轉換，{outgoing} 個傳出轉換",
+      "view": {
+        "label": "檢視",
+        "diagram": "圖表",
+        "text": "文字"
+      },
+      "add_rule": {
+        "title": "新增規則",
+        "transition": "轉換",
+        "none": "請先新增轉換。",
+        "submit": "套用"
+      },
+      "text": {
+        "state": "狀態",
+        "transitions": "轉換",
+        "origin_start": "開始",
+        "origin_any": "任何狀態",
+        "unnamed": "未命名的轉換",
+        "toggle": "顯示或隱藏 {name} 的轉換",
+        "empty": "此工作流程尚未有任何狀態。"
       }
     },
     "scheme": {
@@ -227,6 +286,16 @@
         "mapping_incomplete": "請為每一列選擇目標狀態。",
         "invalid_mapping": "有目標狀態不屬於其工作流程。",
         "default": "無法套用此變更。"
+      },
+      "link": "連結至工作流程",
+      "change": "變更工作流程",
+      "view_workflow": "檢視",
+      "edit_workflow": "編輯工作流程",
+      "other_types": "所有其他類型",
+      "table": {
+        "workflow": "工作流程",
+        "types": "工作項目類型",
+        "actions": "動作"
       }
     },
     "managed_states": {

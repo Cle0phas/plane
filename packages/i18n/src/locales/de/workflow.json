@@ -117,7 +117,10 @@
       "columns": {
         "name": "Name",
         "states": "Status",
-        "projects": "Projekte"
+        "projects": "Projekte",
+        "description": "Beschreibung",
+        "updated": "Aktualisiert",
+        "actions": "Aktionen"
       },
       "state_count": "{count, plural, one {# Status} other {# Status}}",
       "project_count": "{count, plural, one {# Projekt} other {# Projekte}}",
@@ -134,9 +137,17 @@
         "description": "Beschreibung",
         "duplicate": "Ein Workflow mit diesem Namen existiert bereits.",
         "submit": "Erstellen",
-        "cancel": "Abbrechen"
+        "cancel": "Abbrechen",
+        "source_project": "Von einem Projekt ausgehen",
+        "source_project_none": "Kein Projekt (leerer Workflow)"
       },
-      "error": "Der Workflow konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+      "error": "Der Workflow konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+      "edit": "Bearbeiten",
+      "duplicate": {
+        "action": "Duplizieren",
+        "copy_name": "Kopie von {name}",
+        "success": "Workflow dupliziert"
+      }
     },
     "editor": {
       "back": "Zurück zu den Workflows",
@@ -144,9 +155,9 @@
       "discard": "Änderungen verwerfen",
       "saved": "Workflow gespeichert.",
       "unsaved": "Nicht gespeicherte Änderungen",
-      "read_only": "Nur Workspace-Admins können Workflows ändern.",
+      "read_only": "Sie dürfen diesen Workflow nicht bearbeiten.",
       "start": "START",
-      "global": "Aus jedem Status",
+      "global": "Beliebiger Status",
       "diagram_label": "Workflow-Diagramm",
       "add_state": {
         "title": "Status hinzufügen",
@@ -156,7 +167,18 @@
         "color": "Farbe",
         "group": "Kategorie",
         "group_auto": "Automatisch",
-        "submit": "Status hinzufügen"
+        "submit": "Status hinzufügen",
+        "description": "Ein Status zeigt, wie weit eine Arbeitsaufgabe fortgeschritten ist. Wählen Sie vorhandene Status aus oder geben Sie einen Namen ein, um einen neuen zu erstellen.",
+        "search": "Suchen oder erstellen",
+        "create_option": "„{name}“ erstellen",
+        "allow_any": "Übergänge aus jedem Status erlauben",
+        "none": "Kein passender Status.",
+        "selected": "{count, plural, one {# ausgewählt} other {# ausgewählt}}",
+        "errors": {
+          "too_long": "Der Name darf höchstens 255 Zeichen lang sein.",
+          "present": "Dieser Workflow hat bereits einen Status mit diesem Namen.",
+          "reserved": "Dieser Name ist reserviert."
+        }
       },
       "add_transition": {
         "title": "Übergang hinzufügen",
@@ -174,7 +196,17 @@
         "initial": "Anfangsstatus",
         "shared": "{count, plural, one {Mit # weiteren Workflow geteilt: Änderungen gelten auch dort.} other {Mit # weiteren Workflows geteilt: Änderungen gelten auch dort.}}",
         "remove_state": "Status entfernen",
-        "remove_transition": "Übergang entfernen"
+        "remove_transition": "Übergang entfernen",
+        "empty_title": "Eigene Workflows erstellen",
+        "empty_body": "Workflows bilden die Arbeitsweise Ihres Teams ab. Fügen Sie Status hinzu, die zu den Spalten Ihres Projekt-Boards werden, verbinden Sie sie mit Übergängen und legen Sie mit Regeln fest, wer sie verwenden darf.",
+        "empty_hint": "Wählen Sie einen Status aus, um seine Details zu sehen.",
+        "color": "Farbe der Board-Spalte",
+        "incoming": "Eingehend",
+        "outgoing": "Ausgehend",
+        "add_incoming": "Eingehenden Übergang hinzufügen",
+        "add_outgoing": "Ausgehenden Übergang hinzufügen",
+        "collapse": "Bereich einklappen",
+        "expand": "Bereich ausklappen"
       },
       "restrict": {
         "title": "Einschränken, wer verschieben darf",
@@ -199,6 +231,33 @@
         "status_in_use": "Diese Status enthalten noch Arbeitsaufgaben, verschieben Sie diese zuerst:",
         "status_in_use_project": "{project}: {count, plural, one {# Arbeitsaufgabe} other {# Arbeitsaufgaben}}",
         "default": "Der Workflow konnte nicht gespeichert werden."
+      },
+      "close": "Schließen",
+      "small_screen": "Öffnen Sie diesen Workflow auf einem breiteren Bildschirm, um ihn zu bearbeiten.",
+      "used_in": "{count, plural, one {In # Projekt verwendet} other {In # Projekten verwendet}}",
+      "show_labels": "Übergangsbezeichnungen anzeigen",
+      "zoom": "Zoom",
+      "minimap": "Minikarte",
+      "state_label": "Status {name}, Kategorie {group}, {incoming} eingehend, {outgoing} ausgehend",
+      "view": {
+        "label": "Ansicht",
+        "diagram": "Diagramm",
+        "text": "Text"
+      },
+      "add_rule": {
+        "title": "Regel hinzufügen",
+        "transition": "Übergang",
+        "none": "Fügen Sie zuerst einen Übergang hinzu.",
+        "submit": "Anwenden"
+      },
+      "text": {
+        "state": "Status",
+        "transitions": "Übergänge",
+        "origin_start": "Start",
+        "origin_any": "Beliebiger Status",
+        "unnamed": "Unbenannter Übergang",
+        "toggle": "Übergänge von {name} ein- oder ausblenden",
+        "empty": "Dieser Workflow hat noch keinen Status."
       }
     },
     "scheme": {
@@ -227,6 +286,16 @@
         "mapping_incomplete": "Wählen Sie für jede Zeile einen Zielstatus.",
         "invalid_mapping": "Ein Zielstatus gehört nicht zu seinem Workflow.",
         "default": "Die Änderung konnte nicht angewendet werden."
+      },
+      "link": "Mit einem Workflow verknüpfen",
+      "change": "Workflows ändern",
+      "view_workflow": "Anzeigen",
+      "edit_workflow": "Workflow bearbeiten",
+      "other_types": "Alle anderen Typen",
+      "table": {
+        "workflow": "Workflow",
+        "types": "Arbeitsaufgabentypen",
+        "actions": "Aktionen"
       }
     },
     "managed_states": {

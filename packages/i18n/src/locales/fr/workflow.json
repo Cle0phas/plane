@@ -117,7 +117,10 @@
       "columns": {
         "name": "Nom",
         "states": "États",
-        "projects": "Projets"
+        "projects": "Projets",
+        "description": "Description",
+        "updated": "Modifié le",
+        "actions": "Actions"
       },
       "state_count": "{count, plural, one {# état} many {# états} other {# états}}",
       "project_count": "{count, plural, one {# projet} many {# projets} other {# projets}}",
@@ -134,9 +137,17 @@
         "description": "Description",
         "duplicate": "Un workflow porte déjà ce nom.",
         "submit": "Créer",
-        "cancel": "Annuler"
+        "cancel": "Annuler",
+        "source_project": "Partir du projet",
+        "source_project_none": "Aucun projet (workflow vide)"
       },
-      "error": "Impossible d’enregistrer le workflow. Réessayez."
+      "error": "Impossible d’enregistrer le workflow. Réessayez.",
+      "edit": "Modifier",
+      "duplicate": {
+        "action": "Dupliquer",
+        "copy_name": "Copie de {name}",
+        "success": "Workflow dupliqué"
+      }
     },
     "editor": {
       "back": "Retour aux workflows",
@@ -144,9 +155,9 @@
       "discard": "Annuler les changements",
       "saved": "Workflow enregistré.",
       "unsaved": "Modifications non enregistrées",
-      "read_only": "Seuls les admins de l’espace de travail peuvent modifier les workflows.",
-      "start": "DÉBUT",
-      "global": "Depuis n’importe quel état",
+      "read_only": "Vous n'êtes pas autorisé à modifier ce workflow.",
+      "start": "DÉMARRER",
+      "global": "N'importe lequel",
       "diagram_label": "Diagramme du workflow",
       "add_state": {
         "title": "Ajouter un état",
@@ -156,7 +167,18 @@
         "color": "Couleur",
         "group": "Catégorie",
         "group_auto": "Automatique",
-        "submit": "Ajouter l’état"
+        "submit": "Ajouter l’état",
+        "description": "Un état indique la progression du ticket. Choisissez des états existants ou saisissez un nom pour en créer un.",
+        "search": "Rechercher ou créer",
+        "create_option": "Créer « {name} »",
+        "allow_any": "Autoriser les transitions depuis n'importe quel état",
+        "none": "Aucun état ne correspond.",
+        "selected": "{count, plural, one {# sélectionné} other {# sélectionnés}}",
+        "errors": {
+          "too_long": "Le nom doit faire 255 caractères au plus.",
+          "present": "Ce workflow a déjà un état de ce nom.",
+          "reserved": "Ce nom est réservé."
+        }
       },
       "add_transition": {
         "title": "Ajouter une transition",
@@ -174,7 +196,17 @@
         "initial": "État initial",
         "shared": "{count, plural, one {Partagé avec # autre workflow : les changements s’y appliquent aussi.} many {Partagé avec # autres workflows : les changements s’y appliquent aussi.} other {Partagé avec # autres workflows : les changements s’y appliquent aussi.}}",
         "remove_state": "Retirer l’état",
-        "remove_transition": "Retirer la transition"
+        "remove_transition": "Retirer la transition",
+        "empty_title": "Créer des workflows sur mesure",
+        "empty_body": "Les workflows correspondent à la façon de travailler de votre équipe. Ajoutez des états, qui deviennent les colonnes du tableau de votre projet, reliez-les par des transitions et limitez par des règles qui peut les emprunter.",
+        "empty_hint": "Sélectionnez un état pour consulter ses informations.",
+        "color": "Couleur de la colonne du tableau",
+        "incoming": "Entrant",
+        "outgoing": "Sortant",
+        "add_incoming": "Ajouter une transition entrante",
+        "add_outgoing": "Ajouter une transition sortante",
+        "collapse": "Réduire le panneau",
+        "expand": "Ouvrir le panneau"
       },
       "restrict": {
         "title": "Limiter qui peut passer",
@@ -199,6 +231,33 @@
         "status_in_use": "Ces états contiennent encore des tickets, déplacez-les d’abord :",
         "status_in_use_project": "{project} : {count, plural, one {# ticket} many {# tickets} other {# tickets}}",
         "default": "Impossible d’enregistrer le workflow."
+      },
+      "close": "Fermer",
+      "small_screen": "Ouvrez ce workflow sur un écran plus large pour le modifier.",
+      "used_in": "{count, plural, one {Utilisé dans # projet} other {Utilisé dans # projets}}",
+      "show_labels": "Afficher les étiquettes de transition",
+      "zoom": "Zoom",
+      "minimap": "Mini-carte",
+      "state_label": "État {name}, catégorie {group}, {incoming} entrantes, {outgoing} sortantes",
+      "view": {
+        "label": "Vue",
+        "diagram": "Diagramme",
+        "text": "Texte"
+      },
+      "add_rule": {
+        "title": "Ajouter une règle",
+        "transition": "Transition",
+        "none": "Ajoutez d'abord une transition.",
+        "submit": "Appliquer"
+      },
+      "text": {
+        "state": "État",
+        "transitions": "Transitions",
+        "origin_start": "Début",
+        "origin_any": "Tous les états",
+        "unnamed": "Transition sans nom",
+        "toggle": "Afficher ou masquer les transitions de {name}",
+        "empty": "Ce workflow n'a encore aucun état."
       }
     },
     "scheme": {
@@ -227,6 +286,16 @@
         "mapping_incomplete": "Choisissez un état d’arrivée pour chaque ligne.",
         "invalid_mapping": "Un état d’arrivée ne fait pas partie de son workflow.",
         "default": "Impossible d’appliquer le changement."
+      },
+      "link": "Relier à un workflow",
+      "change": "Changer les workflows",
+      "view_workflow": "Voir",
+      "edit_workflow": "Modifier le workflow",
+      "other_types": "Tous les autres types",
+      "table": {
+        "workflow": "Workflow",
+        "types": "Types de ticket",
+        "actions": "Actions"
       }
     },
     "managed_states": {

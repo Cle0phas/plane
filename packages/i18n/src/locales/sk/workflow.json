@@ -117,7 +117,10 @@
       "columns": {
         "name": "Názov",
         "states": "Stavy",
-        "projects": "Projekty"
+        "projects": "Projekty",
+        "description": "Popis",
+        "updated": "Aktualizované",
+        "actions": "Akcie"
       },
       "state_count": "{count, plural, one {# stav} few {# stavy} many {# stavu} other {# stavov}}",
       "project_count": "{count, plural, one {# projekt} few {# projekty} many {# projektu} other {# projektov}}",
@@ -134,9 +137,17 @@
         "description": "Popis",
         "duplicate": "Pracovný postup s týmto názvom už existuje.",
         "submit": "Vytvoriť",
-        "cancel": "Zrušiť"
+        "cancel": "Zrušiť",
+        "source_project": "Vychádzať z projektu",
+        "source_project_none": "Žiadny projekt (prázdny pracovný postup)"
       },
-      "error": "Pracovný postup sa nepodarilo uložiť. Skúste to znova."
+      "error": "Pracovný postup sa nepodarilo uložiť. Skúste to znova.",
+      "edit": "Upraviť",
+      "duplicate": {
+        "action": "Duplikovať",
+        "copy_name": "Kópia {name}",
+        "success": "Pracovný postup bol duplikovaný"
+      }
     },
     "editor": {
       "back": "Späť na pracovné postupy",
@@ -144,9 +155,9 @@
       "discard": "Zahodiť zmeny",
       "saved": "Pracovný postup bol uložený.",
       "unsaved": "Neuložené zmeny",
-      "read_only": "Pracovné postupy môžu meniť iba správcovia pracovného priestoru.",
+      "read_only": "Nemáte oprávnenie upravovať tento pracovný postup.",
       "start": "START",
-      "global": "Z ľubovoľného stavu",
+      "global": "Ľubovoľný stav",
       "diagram_label": "Diagram pracovného postupu",
       "add_state": {
         "title": "Pridať stav",
@@ -156,7 +167,18 @@
         "color": "Farba",
         "group": "Kategória",
         "group_auto": "Automaticky",
-        "submit": "Pridať stav"
+        "submit": "Pridať stav",
+        "description": "Stav ukazuje, ako ďaleko pracovná položka pokročila. Vyberte existujúce stavy alebo zadajte názov a vytvorte nový.",
+        "search": "Hľadať alebo vytvoriť",
+        "create_option": "Vytvoriť „{name}“",
+        "allow_any": "Povoliť prechody z ľubovoľného stavu",
+        "none": "Žiadny stav nezodpovedá.",
+        "selected": "{count, plural, one {Vybraté: #} few {Vybraté: #} many {Vybraté: #} other {Vybraté: #}}",
+        "errors": {
+          "too_long": "Názov môže mať najviac 255 znakov.",
+          "present": "Tento pracovný postup už má stav s týmto názvom.",
+          "reserved": "Tento názov je vyhradený."
+        }
       },
       "add_transition": {
         "title": "Pridať prechod",
@@ -174,7 +196,17 @@
         "initial": "Počiatočný stav",
         "shared": "{count, plural, one {Zdieľané s # ďalším pracovným postupom: zmeny platia aj tam.} few {Zdieľané s # ďalšími pracovnými postupmi: zmeny platia aj tam.} many {Zdieľané s # ďalšieho pracovného postupu: zmeny platia aj tam.} other {Zdieľané s # ďalšími pracovnými postupmi: zmeny platia aj tam.}}",
         "remove_state": "Odstrániť stav",
-        "remove_transition": "Odstrániť prechod"
+        "remove_transition": "Odstrániť prechod",
+        "empty_title": "Vytvárajte vlastné pracovné postupy",
+        "empty_body": "Pracovné postupy zodpovedajú spôsobu práce vášho tímu. Pridajte stavy, ktoré sa stanú stĺpcami nástenky projektu, prepojte ich prechodmi a pomocou pravidiel obmedzte, kto ich smie používať.",
+        "empty_hint": "Vyberte stav a zobrazte jeho podrobnosti.",
+        "color": "Farba stĺpca na nástenke",
+        "incoming": "Prichádzajúce",
+        "outgoing": "Odchádzajúce",
+        "add_incoming": "Pridať prichádzajúci prechod",
+        "add_outgoing": "Pridať odchádzajúci prechod",
+        "collapse": "Zbaliť panel",
+        "expand": "Rozbaliť panel"
       },
       "restrict": {
         "title": "Obmedziť, kto môže presúvať",
@@ -199,6 +231,33 @@
         "status_in_use": "Tieto stavy stále obsahujú pracovné položky, najprv ich presuňte:",
         "status_in_use_project": "{project}: {count, plural, one {# pracovná položka} few {# pracovné položky} many {# pracovnej položky} other {# pracovných položiek}}",
         "default": "Pracovný postup sa nepodarilo uložiť."
+      },
+      "close": "Zavrieť",
+      "small_screen": "Ak chcete tento pracovný postup upraviť, otvorte ho na širšej obrazovke.",
+      "used_in": "{count, plural, one {Použitý v # projekte} few {Použitý v # projektoch} many {Použitý v # projektu} other {Použitý v # projektoch}}",
+      "show_labels": "Zobraziť popisy prechodov",
+      "zoom": "Priblíženie",
+      "minimap": "Minimapa",
+      "state_label": "Stav {name}, kategória {group}, prichádzajúce: {incoming}, odchádzajúce: {outgoing}",
+      "view": {
+        "label": "Zobrazenie",
+        "diagram": "Diagram",
+        "text": "Text"
+      },
+      "add_rule": {
+        "title": "Pridať pravidlo",
+        "transition": "Prechod",
+        "none": "Najprv pridajte prechod.",
+        "submit": "Použiť"
+      },
+      "text": {
+        "state": "Stav",
+        "transitions": "Prechody",
+        "origin_start": "Začiatok",
+        "origin_any": "Ľubovoľný stav",
+        "unnamed": "Nepomenovaný prechod",
+        "toggle": "Zobraziť alebo skryť prechody stavu {name}",
+        "empty": "Tento pracovný postup zatiaľ nemá žiadny stav."
       }
     },
     "scheme": {
@@ -227,6 +286,16 @@
         "mapping_incomplete": "Vyberte cieľový stav pre každý riadok.",
         "invalid_mapping": "Cieľový stav nie je súčasťou svojho pracovného postupu.",
         "default": "Zmenu sa nepodarilo použiť."
+      },
+      "link": "Prepojiť s pracovným postupom",
+      "change": "Zmeniť pracovné postupy",
+      "view_workflow": "Zobraziť",
+      "edit_workflow": "Upraviť pracovný postup",
+      "other_types": "Všetky ostatné typy",
+      "table": {
+        "workflow": "Pracovný postup",
+        "types": "Typy pracovných položiek",
+        "actions": "Akcie"
       }
     },
     "managed_states": {

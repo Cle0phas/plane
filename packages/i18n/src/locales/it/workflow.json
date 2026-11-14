@@ -117,7 +117,10 @@
       "columns": {
         "name": "Nome",
         "states": "Stati",
-        "projects": "Progetti"
+        "projects": "Progetti",
+        "description": "Descrizione",
+        "updated": "Aggiornato",
+        "actions": "Azioni"
       },
       "state_count": "{count, plural, one {# stato} many {# stati} other {# stati}}",
       "project_count": "{count, plural, one {# progetto} many {# progetti} other {# progetti}}",
@@ -134,9 +137,17 @@
         "description": "Descrizione",
         "duplicate": "Esiste già un flusso di lavoro con questo nome.",
         "submit": "Crea",
-        "cancel": "Annulla"
+        "cancel": "Annulla",
+        "source_project": "Progetto di partenza",
+        "source_project_none": "Nessun progetto (flusso di lavoro vuoto)"
       },
-      "error": "Impossibile salvare il flusso di lavoro. Riprova."
+      "error": "Impossibile salvare il flusso di lavoro. Riprova.",
+      "edit": "Modifica",
+      "duplicate": {
+        "action": "Duplica",
+        "copy_name": "Copia di {name}",
+        "success": "Flusso di lavoro duplicato"
+      }
     },
     "editor": {
       "back": "Torna ai flussi di lavoro",
@@ -144,9 +155,9 @@
       "discard": "Annulla le modifiche",
       "saved": "Flusso di lavoro salvato.",
       "unsaved": "Modifiche non salvate",
-      "read_only": "Solo gli amministratori dello spazio di lavoro possono modificare i flussi di lavoro.",
+      "read_only": "Non ha l'autorizzazione per modificare questo flusso di lavoro.",
       "start": "INIZIO",
-      "global": "Da qualsiasi stato",
+      "global": "Qualsiasi stato",
       "diagram_label": "Diagramma del flusso di lavoro",
       "add_state": {
         "title": "Aggiungi uno stato",
@@ -156,7 +167,18 @@
         "color": "Colore",
         "group": "Categoria",
         "group_auto": "Automatica",
-        "submit": "Aggiungi stato"
+        "submit": "Aggiungi stato",
+        "description": "Uno stato indica a che punto è un elemento di lavoro. Selezionare stati esistenti o digitare un nome per crearne uno.",
+        "search": "Cerca o crea",
+        "create_option": "Crea «{name}»",
+        "allow_any": "Consenti transizioni da qualsiasi stato",
+        "none": "Nessuno stato corrispondente.",
+        "selected": "{count, plural, one {# selezionato} many {# selezionati} other {# selezionati}}",
+        "errors": {
+          "too_long": "Il nome deve contenere al massimo 255 caratteri.",
+          "present": "Questo flusso di lavoro ha già uno stato con questo nome.",
+          "reserved": "Questo nome è riservato."
+        }
       },
       "add_transition": {
         "title": "Aggiungi una transizione",
@@ -174,7 +196,17 @@
         "initial": "Stato iniziale",
         "shared": "{count, plural, one {Condiviso con # altro flusso di lavoro: le modifiche si applicano anche lì.} many {Condiviso con # altri flussi di lavoro: le modifiche si applicano anche lì.} other {Condiviso con # altri flussi di lavoro: le modifiche si applicano anche lì.}}",
         "remove_state": "Rimuovi stato",
-        "remove_transition": "Rimuovi transizione"
+        "remove_transition": "Rimuovi transizione",
+        "empty_title": "Crea flussi di lavoro personalizzati",
+        "empty_body": "I flussi di lavoro rispecchiano il modo di lavorare del team. Aggiungere stati, che diventano le colonne della bacheca del progetto, collegarli con transizioni e limitare con regole chi può usarle.",
+        "empty_hint": "Selezionare uno stato per vederne i dettagli.",
+        "color": "Colore della colonna della bacheca",
+        "incoming": "In entrata",
+        "outgoing": "In uscita",
+        "add_incoming": "Aggiungi una transizione in entrata",
+        "add_outgoing": "Aggiungi una transizione in uscita",
+        "collapse": "Comprimi il pannello",
+        "expand": "Espandi il pannello"
       },
       "restrict": {
         "title": "Limita chi può spostare",
@@ -199,6 +231,33 @@
         "status_in_use": "Questi stati contengono ancora elementi di lavoro, spostali prima:",
         "status_in_use_project": "{project}: {count, plural, one {# elemento di lavoro} many {# elementi di lavoro} other {# elementi di lavoro}}",
         "default": "Impossibile salvare il flusso di lavoro."
+      },
+      "close": "Chiudi",
+      "small_screen": "Aprire questo flusso di lavoro su uno schermo più ampio per modificarlo.",
+      "used_in": "{count, plural, one {Usato in # progetto} many {Usato in # di progetti} other {Usato in # progetti}}",
+      "show_labels": "Mostra le etichette delle transizioni",
+      "zoom": "Zoom",
+      "minimap": "Minimappa",
+      "state_label": "Stato {name}, categoria {group}, {incoming} in entrata, {outgoing} in uscita",
+      "view": {
+        "label": "Vista",
+        "diagram": "Diagramma",
+        "text": "Testo"
+      },
+      "add_rule": {
+        "title": "Aggiungi una regola",
+        "transition": "Transizione",
+        "none": "Aggiungere prima una transizione.",
+        "submit": "Applica"
+      },
+      "text": {
+        "state": "Stato",
+        "transitions": "Transizioni",
+        "origin_start": "Inizio",
+        "origin_any": "Qualsiasi stato",
+        "unnamed": "Transizione senza nome",
+        "toggle": "Mostra o nascondi le transizioni di {name}",
+        "empty": "Questo flusso di lavoro non ha ancora stati."
       }
     },
     "scheme": {
@@ -227,6 +286,16 @@
         "mapping_incomplete": "Scegli uno stato di arrivo per ogni riga.",
         "invalid_mapping": "Uno stato di arrivo non fa parte del suo flusso di lavoro.",
         "default": "Impossibile applicare la modifica."
+      },
+      "link": "Collega a un flusso di lavoro",
+      "change": "Cambia flussi di lavoro",
+      "view_workflow": "Visualizza",
+      "edit_workflow": "Modifica flusso di lavoro",
+      "other_types": "Tutti gli altri tipi",
+      "table": {
+        "workflow": "Flusso di lavoro",
+        "types": "Tipi di elemento di lavoro",
+        "actions": "Azioni"
       }
     },
     "managed_states": {

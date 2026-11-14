@@ -117,7 +117,10 @@
       "columns": {
         "name": "Nama",
         "states": "Status",
-        "projects": "Proyek"
+        "projects": "Proyek",
+        "description": "Deskripsi",
+        "updated": "Diperbarui",
+        "actions": "Tindakan"
       },
       "state_count": "{count, plural, one {# status} other {# status}}",
       "project_count": "{count, plural, one {# proyek} other {# proyek}}",
@@ -134,9 +137,17 @@
         "description": "Deskripsi",
         "duplicate": "Workflow dengan nama ini sudah ada.",
         "submit": "Buat",
-        "cancel": "Batal"
+        "cancel": "Batal",
+        "source_project": "Mulai dari proyek",
+        "source_project_none": "Tanpa proyek (workflow kosong)"
       },
-      "error": "Workflow tidak dapat disimpan. Silakan coba lagi."
+      "error": "Workflow tidak dapat disimpan. Silakan coba lagi.",
+      "edit": "Edit",
+      "duplicate": {
+        "action": "Duplikat",
+        "copy_name": "Salinan {name}",
+        "success": "Workflow diduplikasi"
+      }
     },
     "editor": {
       "back": "Kembali ke workflow",
@@ -144,9 +155,9 @@
       "discard": "Buang perubahan",
       "saved": "Workflow disimpan.",
       "unsaved": "Perubahan belum disimpan",
-      "read_only": "Hanya admin ruang kerja yang dapat mengubah workflow.",
+      "read_only": "Anda tidak diizinkan mengedit workflow ini.",
       "start": "MULAI",
-      "global": "Dari status mana pun",
+      "global": "Status mana pun",
       "diagram_label": "Diagram workflow",
       "add_state": {
         "title": "Tambah status",
@@ -156,7 +167,18 @@
         "color": "Warna",
         "group": "Kategori",
         "group_auto": "Otomatis",
-        "submit": "Tambah status"
+        "submit": "Tambah status",
+        "description": "Status menunjukkan sejauh mana kemajuan item kerja. Pilih status yang ada atau ketik nama untuk membuat status baru.",
+        "search": "Cari atau buat",
+        "create_option": "Buat \"{name}\"",
+        "allow_any": "Izinkan transisi dari status mana pun",
+        "none": "Tidak ada status yang cocok.",
+        "selected": "{count, plural, one {# dipilih} other {# dipilih}}",
+        "errors": {
+          "too_long": "Nama maksimal 255 karakter.",
+          "present": "Workflow ini sudah memiliki status dengan nama ini.",
+          "reserved": "Nama ini dicadangkan."
+        }
       },
       "add_transition": {
         "title": "Tambah transisi",
@@ -174,7 +196,17 @@
         "initial": "Status awal",
         "shared": "{count, plural, one {Dibagikan dengan # workflow lain: perubahan berlaku juga di sana.} other {Dibagikan dengan # workflow lain: perubahan berlaku juga di sana.}}",
         "remove_state": "Hapus status",
-        "remove_transition": "Hapus transisi"
+        "remove_transition": "Hapus transisi",
+        "empty_title": "Buat workflow kustom",
+        "empty_body": "Workflow menyesuaikan cara kerja tim Anda. Tambahkan status, yang menjadi kolom papan proyek Anda, lalu hubungkan dengan transisi dan batasi siapa yang boleh menggunakannya dengan aturan.",
+        "empty_hint": "Pilih status untuk melihat detailnya.",
+        "color": "Warna kolom papan",
+        "incoming": "Masuk",
+        "outgoing": "Keluar",
+        "add_incoming": "Tambah transisi masuk",
+        "add_outgoing": "Tambah transisi keluar",
+        "collapse": "Ciutkan panel",
+        "expand": "Bentangkan panel"
       },
       "restrict": {
         "title": "Batasi siapa yang dapat memindahkan",
@@ -199,6 +231,33 @@
         "status_in_use": "Status ini masih berisi item kerja, pindahkan terlebih dahulu:",
         "status_in_use_project": "{project}: {count, plural, one {# item kerja} other {# item kerja}}",
         "default": "Workflow tidak dapat disimpan."
+      },
+      "close": "Tutup",
+      "small_screen": "Buka workflow ini di layar yang lebih lebar untuk mengeditnya.",
+      "used_in": "{count, plural, one {Digunakan di # proyek} other {Digunakan di # proyek}}",
+      "show_labels": "Tampilkan label transisi",
+      "zoom": "Perbesaran",
+      "minimap": "Peta mini",
+      "state_label": "Status {name}, kategori {group}, {incoming} masuk, {outgoing} keluar",
+      "view": {
+        "label": "Tampilan",
+        "diagram": "Diagram",
+        "text": "Teks"
+      },
+      "add_rule": {
+        "title": "Tambah aturan",
+        "transition": "Transisi",
+        "none": "Tambahkan transisi terlebih dahulu.",
+        "submit": "Terapkan"
+      },
+      "text": {
+        "state": "Status",
+        "transitions": "Transisi",
+        "origin_start": "Mulai",
+        "origin_any": "Status mana pun",
+        "unnamed": "Transisi tanpa nama",
+        "toggle": "Tampilkan atau sembunyikan transisi {name}",
+        "empty": "Workflow ini belum memiliki status."
       }
     },
     "scheme": {
@@ -227,6 +286,16 @@
         "mapping_incomplete": "Pilih status tujuan untuk setiap baris.",
         "invalid_mapping": "Sebuah status tujuan bukan bagian dari workflow-nya.",
         "default": "Perubahan tidak dapat diterapkan."
+      },
+      "link": "Tautkan ke workflow",
+      "change": "Ubah workflow",
+      "view_workflow": "Lihat",
+      "edit_workflow": "Edit workflow",
+      "other_types": "Semua jenis lainnya",
+      "table": {
+        "workflow": "Workflow",
+        "types": "Jenis item kerja",
+        "actions": "Tindakan"
       }
     },
     "managed_states": {

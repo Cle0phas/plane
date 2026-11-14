@@ -117,7 +117,10 @@
       "columns": {
         "name": "Nume",
         "states": "Stări",
-        "projects": "Proiecte"
+        "projects": "Proiecte",
+        "description": "Descriere",
+        "updated": "Actualizat",
+        "actions": "Acțiuni"
       },
       "state_count": "{count, plural, one {# stare} few {# stări} other {# de stări}}",
       "project_count": "{count, plural, one {# proiect} few {# proiecte} other {# de proiecte}}",
@@ -134,9 +137,17 @@
         "description": "Descriere",
         "duplicate": "Există deja un flux de lucru cu acest nume.",
         "submit": "Creează",
-        "cancel": "Anulează"
+        "cancel": "Anulează",
+        "source_project": "Pornind de la proiect",
+        "source_project_none": "Niciun proiect (flux de lucru gol)"
       },
-      "error": "Fluxul de lucru nu a putut fi salvat. Încearcă din nou."
+      "error": "Fluxul de lucru nu a putut fi salvat. Încearcă din nou.",
+      "edit": "Editează",
+      "duplicate": {
+        "action": "Duplică",
+        "copy_name": "{name} (copie)",
+        "success": "Flux de lucru duplicat"
+      }
     },
     "editor": {
       "back": "Înapoi la fluxurile de lucru",
@@ -144,9 +155,9 @@
       "discard": "Renunță la modificări",
       "saved": "Flux de lucru salvat.",
       "unsaved": "Modificări nesalvate",
-      "read_only": "Doar administratorii spațiului de lucru pot modifica fluxurile de lucru.",
+      "read_only": "Nu aveți permisiunea să modificați acest flux de lucru.",
       "start": "START",
-      "global": "Din orice stare",
+      "global": "Orice stare",
       "diagram_label": "Diagrama fluxului de lucru",
       "add_state": {
         "title": "Adaugă o stare",
@@ -156,7 +167,18 @@
         "color": "Culoare",
         "group": "Categorie",
         "group_auto": "Automată",
-        "submit": "Adaugă starea"
+        "submit": "Adaugă starea",
+        "description": "O stare arată cât de mult a avansat un element de lucru. Alegeți stări existente sau introduceți un nume pentru a crea una.",
+        "search": "Căutare sau creare",
+        "create_option": "Creează „{name}”",
+        "allow_any": "Permite tranziții din orice stare",
+        "none": "Nicio stare nu corespunde.",
+        "selected": "{count, plural, one {# stare selectată} few {# stări selectate} other {# de stări selectate}}",
+        "errors": {
+          "too_long": "Numele trebuie să aibă cel mult 255 de caractere.",
+          "present": "Acest flux de lucru are deja o stare cu acest nume.",
+          "reserved": "Acest nume este rezervat."
+        }
       },
       "add_transition": {
         "title": "Adaugă o tranziție",
@@ -174,7 +196,17 @@
         "initial": "Stare inițială",
         "shared": "{count, plural, one {Partajată cu # alt flux de lucru: modificările se aplică și acolo.} few {Partajată cu # alte fluxuri de lucru: modificările se aplică și acolo.} other {Partajată cu # de alte fluxuri de lucru: modificările se aplică și acolo.}}",
         "remove_state": "Elimină starea",
-        "remove_transition": "Elimină tranziția"
+        "remove_transition": "Elimină tranziția",
+        "empty_title": "Creați fluxuri de lucru personalizate",
+        "empty_body": "Fluxurile de lucru reflectă modul de lucru al echipei dumneavoastră. Adăugați stări, care devin coloanele tablei proiectului, legați-le prin tranziții și limitați prin reguli cine le poate folosi.",
+        "empty_hint": "Selectați o stare pentru a-i vedea detaliile.",
+        "color": "Culoarea coloanei pe tablă",
+        "incoming": "De intrare",
+        "outgoing": "De ieșire",
+        "add_incoming": "Adaugă o tranziție de intrare",
+        "add_outgoing": "Adaugă o tranziție de ieșire",
+        "collapse": "Restrânge panoul",
+        "expand": "Extinde panoul"
       },
       "restrict": {
         "title": "Restricționează cine poate muta",
@@ -199,6 +231,33 @@
         "status_in_use": "Aceste stări conțin încă elemente de lucru, mută-le mai întâi:",
         "status_in_use_project": "{project}: {count, plural, one {# element de lucru} few {# elemente de lucru} other {# de elemente de lucru}}",
         "default": "Fluxul de lucru nu a putut fi salvat."
+      },
+      "close": "Închide",
+      "small_screen": "Deschideți acest flux de lucru pe un ecran mai lat pentru a-l modifica.",
+      "used_in": "{count, plural, one {Folosit în # proiect} few {Folosit în # proiecte} other {Folosit în # de proiecte}}",
+      "show_labels": "Afișează etichetele tranzițiilor",
+      "zoom": "Zoom",
+      "minimap": "Minihartă",
+      "state_label": "Starea {name}, categoria {group}, intrări: {incoming}, ieșiri: {outgoing}",
+      "view": {
+        "label": "Vizualizare",
+        "diagram": "Diagramă",
+        "text": "Text"
+      },
+      "add_rule": {
+        "title": "Adaugă o regulă",
+        "transition": "Tranziție",
+        "none": "Adăugați mai întâi o tranziție.",
+        "submit": "Aplică"
+      },
+      "text": {
+        "state": "Stare",
+        "transitions": "Tranziții",
+        "origin_start": "Început",
+        "origin_any": "Orice stare",
+        "unnamed": "Tranziție fără nume",
+        "toggle": "Afișează sau ascunde tranzițiile stării {name}",
+        "empty": "Acest flux de lucru nu are încă nicio stare."
       }
     },
     "scheme": {
@@ -227,6 +286,16 @@
         "mapping_incomplete": "Alege o stare de destinație pentru fiecare linie.",
         "invalid_mapping": "O stare de destinație nu face parte din fluxul ei de lucru.",
         "default": "Modificarea nu a putut fi aplicată."
+      },
+      "link": "Asociază cu un flux de lucru",
+      "change": "Schimbă fluxurile de lucru",
+      "view_workflow": "Vezi",
+      "edit_workflow": "Editează fluxul de lucru",
+      "other_types": "Toate celelalte tipuri",
+      "table": {
+        "workflow": "Flux de lucru",
+        "types": "Tipuri de elemente de lucru",
+        "actions": "Acțiuni"
       }
     },
     "managed_states": {

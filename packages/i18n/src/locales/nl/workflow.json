@@ -117,7 +117,10 @@
       "columns": {
         "name": "Naam",
         "states": "Statussen",
-        "projects": "Projecten"
+        "projects": "Projecten",
+        "description": "Beschrijving",
+        "updated": "Bijgewerkt",
+        "actions": "Acties"
       },
       "state_count": "{count, plural, one {# status} other {# statussen}}",
       "project_count": "{count, plural, one {# project} other {# projecten}}",
@@ -134,9 +137,17 @@
         "description": "Beschrijving",
         "duplicate": "Er bestaat al een workflow met deze naam.",
         "submit": "Maken",
-        "cancel": "Annuleren"
+        "cancel": "Annuleren",
+        "source_project": "Starten vanuit project",
+        "source_project_none": "Geen project (lege workflow)"
       },
-      "error": "De workflow kon niet worden opgeslagen. Probeer het opnieuw."
+      "error": "De workflow kon niet worden opgeslagen. Probeer het opnieuw.",
+      "edit": "Bewerken",
+      "duplicate": {
+        "action": "Dupliceren",
+        "copy_name": "Kopie van {name}",
+        "success": "Workflow gedupliceerd"
+      }
     },
     "editor": {
       "back": "Terug naar workflows",
@@ -144,9 +155,9 @@
       "discard": "Wijzigingen negeren",
       "saved": "Workflow opgeslagen.",
       "unsaved": "Niet-opgeslagen wijzigingen",
-      "read_only": "Alleen beheerders van de werkruimte kunnen workflows wijzigen.",
+      "read_only": "Je mag deze workflow niet bewerken.",
       "start": "START",
-      "global": "Vanuit elke status",
+      "global": "Elke status",
       "diagram_label": "Workflowdiagram",
       "add_state": {
         "title": "Een status toevoegen",
@@ -156,7 +167,18 @@
         "color": "Kleur",
         "group": "Categorie",
         "group_auto": "Automatisch",
-        "submit": "Status toevoegen"
+        "submit": "Status toevoegen",
+        "description": "Een status laat zien hoe ver een werkitem gevorderd is. Kies bestaande statussen of typ een naam om er een te maken.",
+        "search": "Zoeken of maken",
+        "create_option": "\"{name}\" maken",
+        "allow_any": "Overgangen vanuit elke status toestaan",
+        "none": "Geen enkele status komt overeen.",
+        "selected": "{count, plural, one {# geselecteerd} other {# geselecteerd}}",
+        "errors": {
+          "too_long": "De naam mag maximaal 255 tekens lang zijn.",
+          "present": "Deze workflow heeft al een status met deze naam.",
+          "reserved": "Deze naam is gereserveerd."
+        }
       },
       "add_transition": {
         "title": "Een overgang toevoegen",
@@ -174,7 +196,17 @@
         "initial": "Beginstatus",
         "shared": "{count, plural, one {Gedeeld met # andere workflow: wijzigingen gelden daar ook.} other {Gedeeld met # andere workflows: wijzigingen gelden daar ook.}}",
         "remove_state": "Status verwijderen",
-        "remove_transition": "Overgang verwijderen"
+        "remove_transition": "Overgang verwijderen",
+        "empty_title": "Aangepaste workflows maken",
+        "empty_body": "Workflows sluiten aan bij de manier waarop je team werkt. Voeg statussen toe, die de kolommen van je projectbord worden, verbind ze met overgangen en beperk met regels wie ze mag gebruiken.",
+        "empty_hint": "Selecteer een status om de details te bekijken.",
+        "color": "Kleur van de bordkolom",
+        "incoming": "Inkomend",
+        "outgoing": "Uitgaand",
+        "add_incoming": "Een inkomende overgang toevoegen",
+        "add_outgoing": "Een uitgaande overgang toevoegen",
+        "collapse": "Paneel samenvouwen",
+        "expand": "Paneel uitvouwen"
       },
       "restrict": {
         "title": "Beperken wie mag verplaatsen",
@@ -199,6 +231,33 @@
         "status_in_use": "Deze statussen bevatten nog werkitems, verplaats ze eerst:",
         "status_in_use_project": "{project}: {count, plural, one {# werkitem} other {# werkitems}}",
         "default": "De workflow kon niet worden opgeslagen."
+      },
+      "close": "Sluiten",
+      "small_screen": "Open deze workflow op een breder scherm om hem te bewerken.",
+      "used_in": "{count, plural, one {Gebruikt in # project} other {Gebruikt in # projecten}}",
+      "show_labels": "Labels van overgangen tonen",
+      "zoom": "Zoomen",
+      "minimap": "Minikaart",
+      "state_label": "Status {name}, categorie {group}, {incoming} inkomend, {outgoing} uitgaand",
+      "view": {
+        "label": "Weergave",
+        "diagram": "Diagram",
+        "text": "Tekst"
+      },
+      "add_rule": {
+        "title": "Een regel toevoegen",
+        "transition": "Overgang",
+        "none": "Voeg eerst een overgang toe.",
+        "submit": "Toepassen"
+      },
+      "text": {
+        "state": "Status",
+        "transitions": "Overgangen",
+        "origin_start": "Start",
+        "origin_any": "Elke status",
+        "unnamed": "Naamloze overgang",
+        "toggle": "Overgangen van {name} tonen of verbergen",
+        "empty": "Deze workflow heeft nog geen status."
       }
     },
     "scheme": {
@@ -227,6 +286,16 @@
         "mapping_incomplete": "Kies voor elke regel een doelstatus.",
         "invalid_mapping": "Een doelstatus maakt geen deel uit van de bijbehorende workflow.",
         "default": "De wijziging kon niet worden toegepast."
+      },
+      "link": "Koppelen aan een workflow",
+      "change": "Workflows wijzigen",
+      "view_workflow": "Bekijken",
+      "edit_workflow": "Workflow bewerken",
+      "other_types": "Alle andere typen",
+      "table": {
+        "workflow": "Workflow",
+        "types": "Werkitemtypen",
+        "actions": "Acties"
       }
     },
     "managed_states": {

@@ -117,7 +117,10 @@
       "columns": {
         "name": "Tên",
         "states": "Trạng thái",
-        "projects": "Dự án"
+        "projects": "Dự án",
+        "description": "Mô tả",
+        "updated": "Cập nhật lúc",
+        "actions": "Thao tác"
       },
       "state_count": "{count, plural, one {# trạng thái} other {# trạng thái}}",
       "project_count": "{count, plural, one {# dự án} other {# dự án}}",
@@ -134,9 +137,17 @@
         "description": "Mô tả",
         "duplicate": "Đã có một quy trình làm việc với tên này.",
         "submit": "Tạo",
-        "cancel": "Hủy"
+        "cancel": "Hủy",
+        "source_project": "Bắt đầu từ dự án",
+        "source_project_none": "Không có dự án (quy trình làm việc trống)"
       },
-      "error": "Không thể lưu quy trình làm việc. Vui lòng thử lại."
+      "error": "Không thể lưu quy trình làm việc. Vui lòng thử lại.",
+      "edit": "Chỉnh sửa",
+      "duplicate": {
+        "action": "Nhân bản",
+        "copy_name": "Bản sao của {name}",
+        "success": "Đã nhân bản quy trình làm việc"
+      }
     },
     "editor": {
       "back": "Quay lại các quy trình làm việc",
@@ -144,9 +155,9 @@
       "discard": "Bỏ thay đổi",
       "saved": "Đã lưu quy trình làm việc.",
       "unsaved": "Thay đổi chưa lưu",
-      "read_only": "Chỉ quản trị viên không gian làm việc mới có thể thay đổi quy trình làm việc.",
+      "read_only": "Bạn không có quyền chỉnh sửa quy trình làm việc này.",
       "start": "BẮT ĐẦU",
-      "global": "Từ bất kỳ trạng thái nào",
+      "global": "Bất kỳ trạng thái nào",
       "diagram_label": "Sơ đồ quy trình làm việc",
       "add_state": {
         "title": "Thêm trạng thái",
@@ -156,7 +167,18 @@
         "color": "Màu",
         "group": "Danh mục",
         "group_auto": "Tự động",
-        "submit": "Thêm trạng thái"
+        "submit": "Thêm trạng thái",
+        "description": "Trạng thái cho biết mục công việc đã tiến triển đến đâu. Chọn các trạng thái có sẵn hoặc nhập tên để tạo trạng thái mới.",
+        "search": "Tìm kiếm hoặc tạo",
+        "create_option": "Tạo \"{name}\"",
+        "allow_any": "Cho phép chuyển tiếp từ bất kỳ trạng thái nào",
+        "none": "Không có trạng thái nào phù hợp.",
+        "selected": "{count, plural, one {Đã chọn #} other {Đã chọn #}}",
+        "errors": {
+          "too_long": "Tên phải có tối đa 255 ký tự.",
+          "present": "Quy trình làm việc này đã có một trạng thái với tên này.",
+          "reserved": "Tên này đã được dành riêng."
+        }
       },
       "add_transition": {
         "title": "Thêm chuyển tiếp",
@@ -174,7 +196,17 @@
         "initial": "Trạng thái ban đầu",
         "shared": "{count, plural, one {Dùng chung với # quy trình làm việc khác: thay đổi cũng áp dụng ở đó.} other {Dùng chung với # quy trình làm việc khác: thay đổi cũng áp dụng ở đó.}}",
         "remove_state": "Gỡ trạng thái",
-        "remove_transition": "Gỡ chuyển tiếp"
+        "remove_transition": "Gỡ chuyển tiếp",
+        "empty_title": "Xây dựng quy trình làm việc tùy chỉnh",
+        "empty_body": "Quy trình làm việc phản ánh cách nhóm của bạn làm việc. Thêm các trạng thái, chúng sẽ trở thành các cột trên bảng của dự án, sau đó nối chúng bằng các chuyển tiếp và dùng quy tắc để giới hạn ai được sử dụng.",
+        "empty_hint": "Chọn một trạng thái để xem chi tiết.",
+        "color": "Màu cột trên bảng",
+        "incoming": "Chuyển tiếp đến",
+        "outgoing": "Chuyển tiếp đi",
+        "add_incoming": "Thêm chuyển tiếp đến",
+        "add_outgoing": "Thêm chuyển tiếp đi",
+        "collapse": "Thu gọn bảng điều khiển",
+        "expand": "Mở rộng bảng điều khiển"
       },
       "restrict": {
         "title": "Giới hạn người được chuyển",
@@ -199,6 +231,33 @@
         "status_in_use": "Các trạng thái này vẫn chứa mục công việc, hãy chuyển chúng trước:",
         "status_in_use_project": "{project}: {count, plural, one {# mục công việc} other {# mục công việc}}",
         "default": "Không thể lưu quy trình làm việc."
+      },
+      "close": "Đóng",
+      "small_screen": "Hãy mở quy trình làm việc này trên màn hình rộng hơn để chỉnh sửa.",
+      "used_in": "{count, plural, one {Được dùng trong # dự án} other {Được dùng trong # dự án}}",
+      "show_labels": "Hiển thị nhãn chuyển tiếp",
+      "zoom": "Thu phóng",
+      "minimap": "Bản đồ thu nhỏ",
+      "state_label": "Trạng thái {name}, danh mục {group}, {incoming} chuyển tiếp đến, {outgoing} chuyển tiếp đi",
+      "view": {
+        "label": "Chế độ xem",
+        "diagram": "Sơ đồ",
+        "text": "Văn bản"
+      },
+      "add_rule": {
+        "title": "Thêm quy tắc",
+        "transition": "Chuyển tiếp",
+        "none": "Hãy thêm một chuyển tiếp trước.",
+        "submit": "Áp dụng"
+      },
+      "text": {
+        "state": "Trạng thái",
+        "transitions": "Chuyển tiếp",
+        "origin_start": "Bắt đầu",
+        "origin_any": "Bất kỳ trạng thái nào",
+        "unnamed": "Chuyển tiếp không tên",
+        "toggle": "Hiện hoặc ẩn các chuyển tiếp của {name}",
+        "empty": "Quy trình làm việc này chưa có trạng thái nào."
       }
     },
     "scheme": {
@@ -227,6 +286,16 @@
         "mapping_incomplete": "Hãy chọn trạng thái đích cho mỗi dòng.",
         "invalid_mapping": "Một trạng thái đích không thuộc quy trình làm việc của nó.",
         "default": "Không thể áp dụng thay đổi."
+      },
+      "link": "Liên kết với quy trình làm việc",
+      "change": "Thay đổi quy trình làm việc",
+      "view_workflow": "Xem",
+      "edit_workflow": "Chỉnh sửa quy trình làm việc",
+      "other_types": "Tất cả các loại khác",
+      "table": {
+        "workflow": "Quy trình làm việc",
+        "types": "Loại mục công việc",
+        "actions": "Thao tác"
       }
     },
     "managed_states": {

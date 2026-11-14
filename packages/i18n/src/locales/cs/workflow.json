@@ -117,7 +117,10 @@
       "columns": {
         "name": "Název",
         "states": "Stavy",
-        "projects": "Projekty"
+        "projects": "Projekty",
+        "description": "Popis",
+        "updated": "Aktualizováno",
+        "actions": "Akce"
       },
       "state_count": "{count, plural, one {# stav} few {# stavy} many {# stavu} other {# stavů}}",
       "project_count": "{count, plural, one {# projekt} few {# projekty} many {# projektu} other {# projektů}}",
@@ -134,9 +137,17 @@
         "description": "Popis",
         "duplicate": "Pracovní tok s tímto názvem již existuje.",
         "submit": "Vytvořit",
-        "cancel": "Zrušit"
+        "cancel": "Zrušit",
+        "source_project": "Vycházet z projektu",
+        "source_project_none": "Žádný projekt (prázdný pracovní tok)"
       },
-      "error": "Pracovní tok se nepodařilo uložit. Zkuste to znovu."
+      "error": "Pracovní tok se nepodařilo uložit. Zkuste to znovu.",
+      "edit": "Upravit",
+      "duplicate": {
+        "action": "Duplikovat",
+        "copy_name": "Kopie {name}",
+        "success": "Pracovní tok byl duplikován"
+      }
     },
     "editor": {
       "back": "Zpět na pracovní toky",
@@ -144,9 +155,9 @@
       "discard": "Zahodit změny",
       "saved": "Pracovní tok byl uložen.",
       "unsaved": "Neuložené změny",
-      "read_only": "Pracovní toky mohou měnit pouze správci pracovního prostoru.",
+      "read_only": "Nemáte oprávnění upravovat tento pracovní tok.",
       "start": "START",
-      "global": "Z libovolného stavu",
+      "global": "Libovolný stav",
       "diagram_label": "Diagram pracovního toku",
       "add_state": {
         "title": "Přidat stav",
@@ -156,7 +167,18 @@
         "color": "Barva",
         "group": "Kategorie",
         "group_auto": "Automaticky",
-        "submit": "Přidat stav"
+        "submit": "Přidat stav",
+        "description": "Stav ukazuje, jak daleko pracovní položka pokročila. Vyberte existující stavy nebo zadejte název a vytvořte nový.",
+        "search": "Hledat nebo vytvořit",
+        "create_option": "Vytvořit „{name}“",
+        "allow_any": "Povolit přechody z libovolného stavu",
+        "none": "Žádný stav neodpovídá.",
+        "selected": "{count, plural, one {Vybráno: #} few {Vybráno: #} many {Vybráno: #} other {Vybráno: #}}",
+        "errors": {
+          "too_long": "Název může mít nejvýše 255 znaků.",
+          "present": "Tento pracovní tok již má stav s tímto názvem.",
+          "reserved": "Tento název je vyhrazen."
+        }
       },
       "add_transition": {
         "title": "Přidat přechod",
@@ -174,7 +196,17 @@
         "initial": "Počáteční stav",
         "shared": "{count, plural, one {Sdíleno s # dalším pracovním tokem: změny platí i tam.} few {Sdíleno s # dalšími pracovními toky: změny platí i tam.} many {Sdíleno s # dalšího pracovního toku: změny platí i tam.} other {Sdíleno s # dalšími pracovními toky: změny platí i tam.}}",
         "remove_state": "Odebrat stav",
-        "remove_transition": "Odebrat přechod"
+        "remove_transition": "Odebrat přechod",
+        "empty_title": "Vytvářejte vlastní pracovní toky",
+        "empty_body": "Pracovní toky odpovídají způsobu práce vašeho týmu. Přidejte stavy, které se stanou sloupci nástěnky projektu, propojte je přechody a pomocí pravidel omezte, kdo je smí používat.",
+        "empty_hint": "Vyberte stav a zobrazte jeho podrobnosti.",
+        "color": "Barva sloupce na nástěnce",
+        "incoming": "Příchozí",
+        "outgoing": "Odchozí",
+        "add_incoming": "Přidat příchozí přechod",
+        "add_outgoing": "Přidat odchozí přechod",
+        "collapse": "Sbalit panel",
+        "expand": "Rozbalit panel"
       },
       "restrict": {
         "title": "Omezit, kdo může přesouvat",
@@ -199,6 +231,33 @@
         "status_in_use": "Tyto stavy stále obsahují pracovní položky, nejprve je přesuňte:",
         "status_in_use_project": "{project}: {count, plural, one {# pracovní položka} few {# pracovní položky} many {# pracovní položky} other {# pracovních položek}}",
         "default": "Pracovní tok se nepodařilo uložit."
+      },
+      "close": "Zavřít",
+      "small_screen": "Chcete-li tento pracovní tok upravit, otevřete jej na širší obrazovce.",
+      "used_in": "{count, plural, one {Použito v # projektu} few {Použito ve # projektech} many {Použito v # projektu} other {Použito v # projektech}}",
+      "show_labels": "Zobrazit popisky přechodů",
+      "zoom": "Přiblížení",
+      "minimap": "Minimapa",
+      "state_label": "Stav {name}, kategorie {group}, příchozí: {incoming}, odchozí: {outgoing}",
+      "view": {
+        "label": "Zobrazení",
+        "diagram": "Diagram",
+        "text": "Text"
+      },
+      "add_rule": {
+        "title": "Přidat pravidlo",
+        "transition": "Přechod",
+        "none": "Nejprve přidejte přechod.",
+        "submit": "Použít"
+      },
+      "text": {
+        "state": "Stav",
+        "transitions": "Přechody",
+        "origin_start": "Začátek",
+        "origin_any": "Libovolný stav",
+        "unnamed": "Nepojmenovaný přechod",
+        "toggle": "Zobrazit nebo skrýt přechody stavu {name}",
+        "empty": "Tento pracovní tok zatím nemá žádný stav."
       }
     },
     "scheme": {
@@ -227,6 +286,16 @@
         "mapping_incomplete": "Vyberte cílový stav pro každý řádek.",
         "invalid_mapping": "Cílový stav není součástí svého pracovního toku.",
         "default": "Změnu se nepodařilo použít."
+      },
+      "link": "Propojit s pracovním tokem",
+      "change": "Změnit pracovní toky",
+      "view_workflow": "Zobrazit",
+      "edit_workflow": "Upravit pracovní tok",
+      "other_types": "Všechny ostatní typy",
+      "table": {
+        "workflow": "Pracovní tok",
+        "types": "Typy pracovních položek",
+        "actions": "Akce"
       }
     },
     "managed_states": {

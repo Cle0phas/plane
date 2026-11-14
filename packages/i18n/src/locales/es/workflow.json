@@ -117,7 +117,10 @@
       "columns": {
         "name": "Nombre",
         "states": "Estados",
-        "projects": "Proyectos"
+        "projects": "Proyectos",
+        "description": "Descripción",
+        "updated": "Actualizado",
+        "actions": "Acciones"
       },
       "state_count": "{count, plural, one {# estado} other {# estados}}",
       "project_count": "{count, plural, one {# proyecto} other {# proyectos}}",
@@ -134,9 +137,17 @@
         "description": "Descripción",
         "duplicate": "Ya existe un workflow con este nombre.",
         "submit": "Crear",
-        "cancel": "Cancelar"
+        "cancel": "Cancelar",
+        "source_project": "Partir de un proyecto",
+        "source_project_none": "Ningún proyecto (workflow vacío)"
       },
-      "error": "No se pudo guardar el workflow. Inténtalo de nuevo."
+      "error": "No se pudo guardar el workflow. Inténtalo de nuevo.",
+      "edit": "Editar",
+      "duplicate": {
+        "action": "Duplicar",
+        "copy_name": "Copia de {name}",
+        "success": "Workflow duplicado"
+      }
     },
     "editor": {
       "back": "Volver a los workflows",
@@ -144,9 +155,9 @@
       "discard": "Descartar cambios",
       "saved": "Workflow guardado.",
       "unsaved": "Cambios sin guardar",
-      "read_only": "Solo los administradores del espacio de trabajo pueden modificar los workflows.",
+      "read_only": "No tiene permiso para editar este workflow.",
       "start": "INICIO",
-      "global": "Desde cualquier estado",
+      "global": "Cualquier estado",
       "diagram_label": "Diagrama del workflow",
       "add_state": {
         "title": "Añadir un estado",
@@ -156,7 +167,18 @@
         "color": "Color",
         "group": "Categoría",
         "group_auto": "Automática",
-        "submit": "Añadir estado"
+        "submit": "Añadir estado",
+        "description": "Un estado indica cuánto ha avanzado un elemento de trabajo. Elija estados existentes o escriba un nombre para crear uno.",
+        "search": "Buscar o crear",
+        "create_option": "Crear «{name}»",
+        "allow_any": "Permitir transiciones desde cualquier estado",
+        "none": "Ningún estado coincide.",
+        "selected": "{count, plural, one {# seleccionado} other {# seleccionados}}",
+        "errors": {
+          "too_long": "El nombre debe tener 255 caracteres como máximo.",
+          "present": "Este workflow ya tiene un estado con este nombre.",
+          "reserved": "Este nombre está reservado."
+        }
       },
       "add_transition": {
         "title": "Añadir una transición",
@@ -174,7 +196,17 @@
         "initial": "Estado inicial",
         "shared": "{count, plural, one {Compartido con # otro workflow: los cambios se aplican también allí.} other {Compartido con # otros workflows: los cambios se aplican también allí.}}",
         "remove_state": "Quitar estado",
-        "remove_transition": "Quitar transición"
+        "remove_transition": "Quitar transición",
+        "empty_title": "Crear workflows personalizados",
+        "empty_body": "Los workflows se adaptan a la forma de trabajar de su equipo. Añada estados, que se convierten en las columnas del tablero de su proyecto, conéctelos con transiciones y limite con reglas quién puede usarlas.",
+        "empty_hint": "Seleccione un estado para ver sus detalles.",
+        "color": "Color de la columna del tablero",
+        "incoming": "Entrantes",
+        "outgoing": "Salientes",
+        "add_incoming": "Añadir una transición entrante",
+        "add_outgoing": "Añadir una transición saliente",
+        "collapse": "Contraer el panel",
+        "expand": "Expandir el panel"
       },
       "restrict": {
         "title": "Restringir quién puede mover",
@@ -199,6 +231,33 @@
         "status_in_use": "Estos estados aún contienen elementos de trabajo, muévelos primero:",
         "status_in_use_project": "{project}: {count, plural, one {# elemento de trabajo} other {# elementos de trabajo}}",
         "default": "No se pudo guardar el workflow."
+      },
+      "close": "Cerrar",
+      "small_screen": "Abra este workflow en una pantalla más ancha para editarlo.",
+      "used_in": "{count, plural, one {Usado en # proyecto} other {Usado en # proyectos}}",
+      "show_labels": "Mostrar las etiquetas de las transiciones",
+      "zoom": "Zoom",
+      "minimap": "Minimapa",
+      "state_label": "Estado {name}, categoría {group}, {incoming} entrantes, {outgoing} salientes",
+      "view": {
+        "label": "Vista",
+        "diagram": "Diagrama",
+        "text": "Texto"
+      },
+      "add_rule": {
+        "title": "Añadir una regla",
+        "transition": "Transición",
+        "none": "Añada primero una transición.",
+        "submit": "Aplicar"
+      },
+      "text": {
+        "state": "Estado",
+        "transitions": "Transiciones",
+        "origin_start": "Inicio",
+        "origin_any": "Cualquier estado",
+        "unnamed": "Transición sin nombre",
+        "toggle": "Mostrar u ocultar las transiciones de {name}",
+        "empty": "Este workflow aún no tiene estados."
       }
     },
     "scheme": {
@@ -227,6 +286,16 @@
         "mapping_incomplete": "Elige un estado de destino para cada línea.",
         "invalid_mapping": "Un estado de destino no forma parte de su workflow.",
         "default": "No se pudo aplicar el cambio."
+      },
+      "link": "Vincular a un workflow",
+      "change": "Cambiar workflows",
+      "view_workflow": "Ver",
+      "edit_workflow": "Editar workflow",
+      "other_types": "Todos los demás tipos",
+      "table": {
+        "workflow": "Workflow",
+        "types": "Tipos de elemento de trabajo",
+        "actions": "Acciones"
       }
     },
     "managed_states": {

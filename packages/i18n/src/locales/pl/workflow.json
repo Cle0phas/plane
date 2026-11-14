@@ -117,7 +117,10 @@
       "columns": {
         "name": "Nazwa",
         "states": "Stany",
-        "projects": "Projekty"
+        "projects": "Projekty",
+        "description": "Opis",
+        "updated": "Zaktualizowano",
+        "actions": "Akcje"
       },
       "state_count": "{count, plural, one {# stan} few {# stany} many {# stanów} other {# stanu}}",
       "project_count": "{count, plural, one {# projekt} few {# projekty} many {# projektów} other {# projektu}}",
@@ -134,9 +137,17 @@
         "description": "Opis",
         "duplicate": "Workflow o tej nazwie już istnieje.",
         "submit": "Utwórz",
-        "cancel": "Anuluj"
+        "cancel": "Anuluj",
+        "source_project": "Na podstawie projektu",
+        "source_project_none": "Brak projektu (pusty workflow)"
       },
-      "error": "Nie udało się zapisać workflow. Spróbuj ponownie."
+      "error": "Nie udało się zapisać workflow. Spróbuj ponownie.",
+      "edit": "Edytuj",
+      "duplicate": {
+        "action": "Duplikuj",
+        "copy_name": "Kopia {name}",
+        "success": "Workflow zduplikowany"
+      }
     },
     "editor": {
       "back": "Wróć do workflowów",
@@ -144,9 +155,9 @@
       "discard": "Odrzuć zmiany",
       "saved": "Workflow zapisany.",
       "unsaved": "Niezapisane zmiany",
-      "read_only": "Tylko administratorzy przestrzeni roboczej mogą zmieniać workflowy.",
+      "read_only": "Brak uprawnień do edycji tego workflow.",
       "start": "START",
-      "global": "Z dowolnego stanu",
+      "global": "Dowolny stan",
       "diagram_label": "Diagram workflow",
       "add_state": {
         "title": "Dodaj stan",
@@ -156,7 +167,18 @@
         "color": "Kolor",
         "group": "Kategoria",
         "group_auto": "Automatyczna",
-        "submit": "Dodaj stan"
+        "submit": "Dodaj stan",
+        "description": "Stan pokazuje postęp elementu pracy. Wybierz istniejące stany lub wpisz nazwę, aby utworzyć nowy.",
+        "search": "Wyszukaj lub utwórz",
+        "create_option": "Utwórz „{name}”",
+        "allow_any": "Zezwalaj na przejścia z dowolnego stanu",
+        "none": "Brak pasujących stanów.",
+        "selected": "{count, plural, one {Wybrano: #} few {Wybrano: #} many {Wybrano: #} other {Wybrano: #}}",
+        "errors": {
+          "too_long": "Nazwa może mieć maksymalnie 255 znaków.",
+          "present": "Ten workflow ma już stan o tej nazwie.",
+          "reserved": "Ta nazwa jest zarezerwowana."
+        }
       },
       "add_transition": {
         "title": "Dodaj przejście",
@@ -174,7 +196,17 @@
         "initial": "Stan początkowy",
         "shared": "{count, plural, one {Współdzielony z # innym workflow: zmiany obowiązują tam także.} few {Współdzielony z # innymi workflowami: zmiany obowiązują tam także.} many {Współdzielony z # innymi workflowami: zmiany obowiązują tam także.} other {Współdzielony z # innego workflow: zmiany obowiązują tam także.}}",
         "remove_state": "Usuń stan",
-        "remove_transition": "Usuń przejście"
+        "remove_transition": "Usuń przejście",
+        "empty_title": "Tworzenie własnych workflowów",
+        "empty_body": "Workflowy odzwierciedlają sposób pracy zespołu. Dodaj stany, które stają się kolumnami tablicy projektu, połącz je przejściami i za pomocą reguł ogranicz, kto może z nich korzystać.",
+        "empty_hint": "Wybierz stan, aby zobaczyć jego szczegóły.",
+        "color": "Kolor kolumny na tablicy",
+        "incoming": "Przychodzące",
+        "outgoing": "Wychodzące",
+        "add_incoming": "Dodaj przejście przychodzące",
+        "add_outgoing": "Dodaj przejście wychodzące",
+        "collapse": "Zwiń panel",
+        "expand": "Rozwiń panel"
       },
       "restrict": {
         "title": "Ogranicz, kto może przenosić",
@@ -199,6 +231,33 @@
         "status_in_use": "Te stany nadal zawierają elementy pracy, najpierw je przenieś:",
         "status_in_use_project": "{project}: {count, plural, one {# element pracy} few {# elementy pracy} many {# elementów pracy} other {# elementu pracy}}",
         "default": "Nie udało się zapisać workflow."
+      },
+      "close": "Zamknij",
+      "small_screen": "Otwórz ten workflow na szerszym ekranie, aby go edytować.",
+      "used_in": "{count, plural, one {Używany w # projekcie} few {Używany w # projektach} many {Używany w # projektach} other {Używany w # projektu}}",
+      "show_labels": "Pokaż etykiety przejść",
+      "zoom": "Powiększenie",
+      "minimap": "Minimapa",
+      "state_label": "Stan {name}, kategoria {group}, przychodzące: {incoming}, wychodzące: {outgoing}",
+      "view": {
+        "label": "Widok",
+        "diagram": "Diagram",
+        "text": "Tekst"
+      },
+      "add_rule": {
+        "title": "Dodaj regułę",
+        "transition": "Przejście",
+        "none": "Najpierw dodaj przejście.",
+        "submit": "Zastosuj"
+      },
+      "text": {
+        "state": "Stan",
+        "transitions": "Przejścia",
+        "origin_start": "Start",
+        "origin_any": "Dowolny stan",
+        "unnamed": "Przejście bez nazwy",
+        "toggle": "Pokaż lub ukryj przejścia stanu {name}",
+        "empty": "Ten workflow nie ma jeszcze żadnego stanu."
       }
     },
     "scheme": {
@@ -227,6 +286,16 @@
         "mapping_incomplete": "Wybierz stan docelowy dla każdego wiersza.",
         "invalid_mapping": "Stan docelowy nie należy do swojego workflow.",
         "default": "Nie udało się zastosować zmiany."
+      },
+      "link": "Powiąż z workflow",
+      "change": "Zmień workflowy",
+      "view_workflow": "Wyświetl",
+      "edit_workflow": "Edytuj workflow",
+      "other_types": "Wszystkie pozostałe typy",
+      "table": {
+        "workflow": "Workflow",
+        "types": "Typy elementów pracy",
+        "actions": "Akcje"
       }
     },
     "managed_states": {

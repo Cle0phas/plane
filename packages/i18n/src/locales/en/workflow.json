@@ -117,7 +117,10 @@
       "columns": {
         "name": "Name",
         "states": "States",
-        "projects": "Projects"
+        "projects": "Projects",
+        "description": "Description",
+        "updated": "Updated",
+        "actions": "Actions"
       },
       "state_count": "{count, plural, one {# state} other {# states}}",
       "project_count": "{count, plural, one {# project} other {# projects}}",
@@ -134,9 +137,17 @@
         "description": "Description",
         "duplicate": "A workflow with this name already exists.",
         "submit": "Create",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "source_project": "Start from project",
+        "source_project_none": "No project (empty workflow)"
       },
-      "error": "The workflow could not be saved. Try again."
+      "error": "The workflow could not be saved. Try again.",
+      "edit": "Edit",
+      "duplicate": {
+        "action": "Duplicate",
+        "copy_name": "Copy of {name}",
+        "success": "Workflow duplicated"
+      }
     },
     "editor": {
       "back": "Back to workflows",
@@ -144,9 +155,9 @@
       "discard": "Discard changes",
       "saved": "Workflow saved.",
       "unsaved": "Unsaved changes",
-      "read_only": "Only workspace admins can change workflows.",
+      "read_only": "You are not allowed to edit this workflow.",
       "start": "START",
-      "global": "From any state",
+      "global": "Any state",
       "diagram_label": "Workflow diagram",
       "add_state": {
         "title": "Add a state",
@@ -156,7 +167,18 @@
         "color": "Color",
         "group": "Category",
         "group_auto": "Automatic",
-        "submit": "Add state"
+        "submit": "Add state",
+        "description": "A state shows how far a work item has progressed. Pick existing states or type a name to create one.",
+        "search": "Search or create",
+        "create_option": "Create \"{name}\"",
+        "allow_any": "Allow transitions from any state",
+        "none": "No state matches.",
+        "selected": "{count, plural, one {# selected} other {# selected}}",
+        "errors": {
+          "too_long": "The name must be 255 characters or fewer.",
+          "present": "This workflow already has a state with this name.",
+          "reserved": "This name is reserved."
+        }
       },
       "add_transition": {
         "title": "Add a transition",
@@ -174,7 +196,17 @@
         "initial": "Initial state",
         "shared": "{count, plural, one {Shared with # other workflow: changes apply there too.} other {Shared with # other workflows: changes apply there too.}}",
         "remove_state": "Remove state",
-        "remove_transition": "Remove transition"
+        "remove_transition": "Remove transition",
+        "empty_title": "Build custom workflows",
+        "empty_body": "Workflows match the way your team works. Add states, which become the columns of your project board, then link them with transitions and limit who may use them with rules.",
+        "empty_hint": "Select a state to see its details.",
+        "color": "Board column color",
+        "incoming": "Incoming",
+        "outgoing": "Outgoing",
+        "add_incoming": "Add an incoming transition",
+        "add_outgoing": "Add an outgoing transition",
+        "collapse": "Collapse panel",
+        "expand": "Expand panel"
       },
       "restrict": {
         "title": "Restrict who can move",
@@ -199,6 +231,33 @@
         "status_in_use": "These states still hold work items, move them first:",
         "status_in_use_project": "{project}: {count, plural, one {# work item} other {# work items}}",
         "default": "The workflow could not be saved."
+      },
+      "close": "Close",
+      "small_screen": "Open this workflow on a wider screen to edit it.",
+      "used_in": "{count, plural, one {Used in # project} other {Used in # projects}}",
+      "show_labels": "Show transition labels",
+      "zoom": "Zoom",
+      "minimap": "Mini-map",
+      "state_label": "State {name}, category {group}, {incoming} incoming, {outgoing} outgoing",
+      "view": {
+        "label": "View",
+        "diagram": "Diagram",
+        "text": "Text"
+      },
+      "add_rule": {
+        "title": "Add a rule",
+        "transition": "Transition",
+        "none": "Add a transition first.",
+        "submit": "Apply"
+      },
+      "text": {
+        "state": "State",
+        "transitions": "Transitions",
+        "origin_start": "Start",
+        "origin_any": "Any state",
+        "unnamed": "Unnamed transition",
+        "toggle": "Show or hide the transitions of {name}",
+        "empty": "This workflow has no state yet."
       }
     },
     "scheme": {
@@ -227,6 +286,16 @@
         "mapping_incomplete": "Choose an arrival state for every line.",
         "invalid_mapping": "An arrival state is not part of its workflow.",
         "default": "The change could not be applied."
+      },
+      "link": "Link to a workflow",
+      "change": "Change workflows",
+      "view_workflow": "View",
+      "edit_workflow": "Edit workflow",
+      "other_types": "All other types",
+      "table": {
+        "workflow": "Workflow",
+        "types": "Work item types",
+        "actions": "Actions"
       }
     },
     "managed_states": {

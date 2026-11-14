@@ -117,7 +117,10 @@
       "columns": {
         "name": "名称",
         "states": "状态",
-        "projects": "项目"
+        "projects": "项目",
+        "description": "描述",
+        "updated": "更新时间",
+        "actions": "操作"
       },
       "state_count": "{count, plural, one {# 个状态} other {# 个状态}}",
       "project_count": "{count, plural, one {# 个项目} other {# 个项目}}",
@@ -134,9 +137,17 @@
         "description": "描述",
         "duplicate": "已存在同名工作流。",
         "submit": "创建",
-        "cancel": "取消"
+        "cancel": "取消",
+        "source_project": "基于项目",
+        "source_project_none": "无项目（空工作流）"
       },
-      "error": "无法保存工作流。请重试。"
+      "error": "无法保存工作流。请重试。",
+      "edit": "编辑",
+      "duplicate": {
+        "action": "复制",
+        "copy_name": "{name} 的副本",
+        "success": "工作流已复制"
+      }
     },
     "editor": {
       "back": "返回工作流",
@@ -144,9 +155,9 @@
       "discard": "放弃更改",
       "saved": "工作流已保存。",
       "unsaved": "未保存的更改",
-      "read_only": "只有工作区管理员可以更改工作流。",
+      "read_only": "您无权编辑此工作流。",
       "start": "开始",
-      "global": "从任意状态",
+      "global": "任意状态",
       "diagram_label": "工作流图",
       "add_state": {
         "title": "添加状态",
@@ -156,7 +167,18 @@
         "color": "颜色",
         "group": "类别",
         "group_auto": "自动",
-        "submit": "添加状态"
+        "submit": "添加状态",
+        "description": "状态表示工作项的进展程度。请选择现有状态，或输入名称以创建新状态。",
+        "search": "搜索或创建",
+        "create_option": "创建“{name}”",
+        "allow_any": "允许从任意状态转换",
+        "none": "没有匹配的状态。",
+        "selected": "{count, plural, one {已选择 # 个} other {已选择 # 个}}",
+        "errors": {
+          "too_long": "名称不能超过 255 个字符。",
+          "present": "此工作流中已有同名状态。",
+          "reserved": "此名称已被保留。"
+        }
       },
       "add_transition": {
         "title": "添加转换",
@@ -174,7 +196,17 @@
         "initial": "初始状态",
         "shared": "{count, plural, one {与另外 # 个工作流共享：更改也会应用到那里。} other {与另外 # 个工作流共享：更改也会应用到那里。}}",
         "remove_state": "移除状态",
-        "remove_transition": "移除转换"
+        "remove_transition": "移除转换",
+        "empty_title": "构建自定义工作流",
+        "empty_body": "工作流与您团队的工作方式相匹配。添加状态（它们会成为项目看板的列），再用转换将其连接，并通过规则限制谁可以使用这些转换。",
+        "empty_hint": "选择一个状态以查看其详细信息。",
+        "color": "看板列颜色",
+        "incoming": "传入",
+        "outgoing": "传出",
+        "add_incoming": "添加传入转换",
+        "add_outgoing": "添加传出转换",
+        "collapse": "收起面板",
+        "expand": "展开面板"
       },
       "restrict": {
         "title": "限制可移动的人员",
@@ -199,6 +231,33 @@
         "status_in_use": "这些状态中仍有工作项，请先移走：",
         "status_in_use_project": "{project}：{count, plural, one {# 个工作项} other {# 个工作项}}",
         "default": "无法保存工作流。"
+      },
+      "close": "关闭",
+      "small_screen": "请在更宽的屏幕上打开此工作流以进行编辑。",
+      "used_in": "{count, plural, one {已在 # 个项目中使用} other {已在 # 个项目中使用}}",
+      "show_labels": "显示转换标签",
+      "zoom": "缩放",
+      "minimap": "小地图",
+      "state_label": "状态 {name}，类别 {group}，{incoming} 个传入转换，{outgoing} 个传出转换",
+      "view": {
+        "label": "视图",
+        "diagram": "图表",
+        "text": "文本"
+      },
+      "add_rule": {
+        "title": "添加规则",
+        "transition": "转换",
+        "none": "请先添加转换。",
+        "submit": "应用"
+      },
+      "text": {
+        "state": "状态",
+        "transitions": "转换",
+        "origin_start": "开始",
+        "origin_any": "任意状态",
+        "unnamed": "未命名转换",
+        "toggle": "显示或隐藏 {name} 的转换",
+        "empty": "此工作流还没有任何状态。"
       }
     },
     "scheme": {
@@ -227,6 +286,16 @@
         "mapping_incomplete": "请为每一行选择目标状态。",
         "invalid_mapping": "有目标状态不属于其工作流。",
         "default": "无法应用此更改。"
+      },
+      "link": "关联工作流",
+      "change": "更改工作流",
+      "view_workflow": "查看",
+      "edit_workflow": "编辑工作流",
+      "other_types": "所有其他类型",
+      "table": {
+        "workflow": "工作流",
+        "types": "工作项类型",
+        "actions": "操作"
       }
     },
     "managed_states": {

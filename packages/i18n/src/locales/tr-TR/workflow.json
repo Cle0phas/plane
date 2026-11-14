@@ -117,7 +117,10 @@
       "columns": {
         "name": "Ad",
         "states": "Durumlar",
-        "projects": "Projeler"
+        "projects": "Projeler",
+        "description": "Açıklama",
+        "updated": "Güncellendi",
+        "actions": "İşlemler"
       },
       "state_count": "{count, plural, one {# durum} other {# durum}}",
       "project_count": "{count, plural, one {# proje} other {# proje}}",
@@ -134,9 +137,17 @@
         "description": "Açıklama",
         "duplicate": "Bu ada sahip bir iş akışı zaten var.",
         "submit": "Oluştur",
-        "cancel": "İptal"
+        "cancel": "İptal",
+        "source_project": "Projeden başla",
+        "source_project_none": "Proje yok (boş iş akışı)"
       },
-      "error": "İş akışı kaydedilemedi. Lütfen tekrar deneyin."
+      "error": "İş akışı kaydedilemedi. Lütfen tekrar deneyin.",
+      "edit": "Düzenle",
+      "duplicate": {
+        "action": "Çoğalt",
+        "copy_name": "{name} kopyası",
+        "success": "İş akışı çoğaltıldı"
+      }
     },
     "editor": {
       "back": "İş akışlarına dön",
@@ -144,9 +155,9 @@
       "discard": "Değişiklikleri at",
       "saved": "İş akışı kaydedildi.",
       "unsaved": "Kaydedilmemiş değişiklikler",
-      "read_only": "İş akışlarını yalnızca çalışma alanı yöneticileri değiştirebilir.",
+      "read_only": "Bu iş akışını düzenleme izniniz yok.",
       "start": "BAŞLANGIÇ",
-      "global": "Herhangi bir durumdan",
+      "global": "Herhangi bir durum",
       "diagram_label": "İş akışı diyagramı",
       "add_state": {
         "title": "Durum ekle",
@@ -156,7 +167,18 @@
         "color": "Renk",
         "group": "Kategori",
         "group_auto": "Otomatik",
-        "submit": "Durum ekle"
+        "submit": "Durum ekle",
+        "description": "Durum, bir iş öğesinin ne kadar ilerlediğini gösterir. Mevcut durumları seçin veya yeni bir durum oluşturmak için bir ad yazın.",
+        "search": "Ara veya oluştur",
+        "create_option": "\"{name}\" oluştur",
+        "allow_any": "Herhangi bir durumdan geçişlere izin ver",
+        "none": "Eşleşen durum yok.",
+        "selected": "{count, plural, one {# seçildi} other {# seçildi}}",
+        "errors": {
+          "too_long": "Ad en fazla 255 karakter olmalıdır.",
+          "present": "Bu iş akışında bu ada sahip bir durum zaten var.",
+          "reserved": "Bu ad ayrılmıştır."
+        }
       },
       "add_transition": {
         "title": "Geçiş ekle",
@@ -174,7 +196,17 @@
         "initial": "Başlangıç durumu",
         "shared": "{count, plural, one {Başka # iş akışıyla paylaşılıyor: değişiklikler orada da geçerli olur.} other {Başka # iş akışıyla paylaşılıyor: değişiklikler orada da geçerli olur.}}",
         "remove_state": "Durumu kaldır",
-        "remove_transition": "Geçişi kaldır"
+        "remove_transition": "Geçişi kaldır",
+        "empty_title": "Özel iş akışları oluşturun",
+        "empty_body": "İş akışları ekibinizin çalışma biçimine uyar. Proje panonuzun sütunlarına dönüşen durumlar ekleyin, bunları geçişlerle bağlayın ve kimlerin kullanabileceğini kurallarla sınırlayın.",
+        "empty_hint": "Ayrıntılarını görmek için bir durum seçin.",
+        "color": "Pano sütunu rengi",
+        "incoming": "Gelen",
+        "outgoing": "Giden",
+        "add_incoming": "Gelen geçiş ekle",
+        "add_outgoing": "Giden geçiş ekle",
+        "collapse": "Paneli daralt",
+        "expand": "Paneli genişlet"
       },
       "restrict": {
         "title": "Kimin taşıyabileceğini kısıtla",
@@ -199,6 +231,33 @@
         "status_in_use": "Bu durumlar hâlâ iş öğeleri içeriyor, önce onları taşıyın:",
         "status_in_use_project": "{project}: {count, plural, one {# iş öğesi} other {# iş öğesi}}",
         "default": "İş akışı kaydedilemedi."
+      },
+      "close": "Kapat",
+      "small_screen": "Bu iş akışını düzenlemek için daha geniş bir ekranda açın.",
+      "used_in": "{count, plural, one {# projede kullanılıyor} other {# projede kullanılıyor}}",
+      "show_labels": "Geçiş etiketlerini göster",
+      "zoom": "Yakınlaştırma",
+      "minimap": "Mini harita",
+      "state_label": "Durum {name}, kategori {group}, {incoming} gelen, {outgoing} giden",
+      "view": {
+        "label": "Görünüm",
+        "diagram": "Diyagram",
+        "text": "Metin"
+      },
+      "add_rule": {
+        "title": "Kural ekle",
+        "transition": "Geçiş",
+        "none": "Önce bir geçiş ekleyin.",
+        "submit": "Uygula"
+      },
+      "text": {
+        "state": "Durum",
+        "transitions": "Geçişler",
+        "origin_start": "Başlangıç",
+        "origin_any": "Herhangi bir durum",
+        "unnamed": "Adsız geçiş",
+        "toggle": "{name} durumunun geçişlerini göster veya gizle",
+        "empty": "Bu iş akışında henüz durum yok."
       }
     },
     "scheme": {
@@ -227,6 +286,16 @@
         "mapping_incomplete": "Her satır için bir hedef durum seçin.",
         "invalid_mapping": "Bir hedef durum kendi iş akışının parçası değil.",
         "default": "Değişiklik uygulanamadı."
+      },
+      "link": "Bir iş akışına bağla",
+      "change": "İş akışlarını değiştir",
+      "view_workflow": "Görüntüle",
+      "edit_workflow": "İş akışını düzenle",
+      "other_types": "Diğer tüm türler",
+      "table": {
+        "workflow": "İş akışı",
+        "types": "İş öğesi türleri",
+        "actions": "İşlemler"
       }
     },
     "managed_states": {
