@@ -225,6 +225,11 @@ describe("shared statuses", () => {
     expect(optionToStatus(candidate).shared_names).toEqual([]);
   });
 
+  it("leaves the edited workflow out of the names of a status", () => {
+    const [option] = statusOptions([shared], [], { states: [], transitions: [] }, "w");
+    expect(option.workflow_names).toEqual(["Bug", "Delivery"]);
+  });
+
   it("lists the renamed statuses that other workflows use", () => {
     const draft: TDraftGraph = {
       states: [

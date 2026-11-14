@@ -12,6 +12,7 @@ import { ChevronRightOutline, CloseOutline, PlusCircleOutline, WorkflowsOutline 
 import { useTranslation } from "@plane/i18n";
 import type { TStateGroups } from "@plane/types";
 // local imports
+import type { TTransitionLock } from "./add-transition-dialog";
 import {
   removeSource,
   removeState,
@@ -36,7 +37,7 @@ type Props = {
   selection: TEditorSelection;
   canEdit: boolean;
   onChange: (draft: TDraftGraph) => void;
-  onAddTransition: (preset: { sourceKey?: string; targetKey?: string }) => void;
+  onAddTransition: (lock: TTransitionLock) => void;
   // Bumped when the selection comes from the text view, so keyboard users land in the panel.
   focusSignal: number;
 };
@@ -170,10 +171,10 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
             <h3 className="text-body-sm-medium text-primary">{t("workflows.editor.text.transitions")}</h3>
             {(
               [
-                ["incoming", counts.incoming, { targetKey: state.key }, "add_incoming"],
-                ["outgoing", counts.outgoing, { sourceKey: state.key }, "add_outgoing"],
+                ["incoming", counts.incoming, { side: "target", key: state.key }, "add_incoming"],
+                ["outgoing", counts.outgoing, { side: "source", key: state.key }, "add_outgoing"],
               ] as const
-            ).map(([kind, count, preset, addKey]) => (
+            ).map(([kind, count, lock, addKey]) => (
               <div key={kind} className="flex items-center gap-2 text-body-sm-regular text-secondary">
                 <span className="flex-1">{t(`workflows.editor.panel.${kind}`)}</span>
                 <span className="rounded-full bg-layer-1 px-2 text-caption-sm-medium">{count}</span>
@@ -182,7 +183,7 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
                     type="button"
                     className="flex size-8 items-center justify-center rounded-md hover:bg-layer-1 max-md:size-11"
                     aria-label={t(`workflows.editor.panel.${addKey}`)}
-                    onClick={() => onAddTransition(preset)}
+                    onClick={() => onAddTransition(lock)}
                   >
                     <PlusCircleOutline className="size-4" aria-hidden />
                   </button>

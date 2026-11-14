@@ -548,7 +548,8 @@ export type TStatusOption = {
 export const statusOptions = (
   statuses: TWorkflowStatus[],
   candidates: TWorkflowStatusCandidate[],
-  draft: TDraftGraph
+  draft: TDraftGraph,
+  workflowId?: string
 ): TStatusOption[] => {
   const seen = new Set(draft.states.map((state) => state.status.name.trim().toLowerCase()));
   // A renamed status keeps its id: it must stay out of the list even though its name changed.
@@ -561,7 +562,9 @@ export const statusOptions = (
       group: item.group,
       group_is_auto: item.group_is_auto,
       workflow_count: item.workflow_count ?? 0,
-      workflow_names: (item.workflows ?? []).map((workflow) => workflow.name),
+      workflow_names: (item.workflows ?? [])
+        .filter((workflow) => workflow.id !== workflowId)
+        .map((workflow) => workflow.name),
     })),
     ...candidates.map((item) => ({ ...item, group_is_auto: false, workflow_count: 0, workflow_names: [] })),
   ];

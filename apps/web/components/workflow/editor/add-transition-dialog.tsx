@@ -17,36 +17,100 @@ import {
   DialogTitle,
 } from "@makeplane/propel/components/dialog";
 import { InputField } from "@makeplane/propel/components/input-field";
+import { LockOutline } from "@makeplane/propel/icons";
 import { useTranslation } from "@plane/i18n";
 // local imports
-import type { TDraftGraph, TDraftTransition } from "./graph-model";
+import { isDuplicateRoute, stateName, type TDraftGraph, type TStatusOption } from "./graph-model";
+
+export type TTransitionLock = { side: "source" | "target"; key: string };
+export type TStateChoice = { kind: "state"; key: string } | { kind: "option"; option: TStatusOption };
+export type TTransitionChoice = { name: string; from_any: boolean; sources: TStateChoice[]; target: TStateChoice };
 
 type Props = {
   isOpen: boolean;
   draft: TDraftGraph;
-  preset: { sourceKey?: string; targetKey?: string } | null;
+  /** Other existing states: workspace statuses and project states that are not in the workflow (D1). */
+  options: TStatusOption[];
+  /** Set when the dialog is opened from a state: that side cannot be changed (D2). */
+  lock: TTransitionLock | null;
   onClose: () => void;
-  onAdd: (transition: Omit<TDraftTransition, "key">) => void;
+  onAdd: (choice: TTransitionChoice) => void;
 };
 
-export function AddTransitionDialog({ isOpen, draft, preset, onClose, onAdd }: Props) {
+// Values of the two lists: a state of the draft by its key, another existing state by its index.
+const STATE = "state:";
+const OPTION = "option:";
+const PREFIX = "workflows.editor.add_transition";
+const LABEL_CLASS = "text-body-xs-medium text-secondary";
+const FIELD_CLASS = "rounded-md border border-subtle bg-layer-1 px-2 py-1.5 text-body-sm-regular";
+const CHECK_CLASS = "flex items-center gap-2 text-body-sm-regular text-primary max-md:min-h-11";
+const HINT_CLASS = "text-caption-sm-regular text-tertiary";
+
+export function AddTransitionDialog({ isOpen, draft, options, lock, onClose, onAdd }: Props) {
   const { t } = useTranslation();
   const [fromAny, setFromAny] = useState(false);
   const [sources, setSources] = useState<string[]>([]);
   const [target, setTarget] = useState("");
   const [name, setName] = useState("");
-  const presetSource = preset?.sourceKey;
-  const presetTarget = preset?.targetKey;
+  const lockSide = lock?.side;
+  const lockKey = lock?.key;
 
   useEffect(() => {
     if (!isOpen) return;
     setFromAny(false);
-    setSources(presetSource ? [presetSource] : []);
-    setTarget(presetTarget ?? "");
+    setSources(lockSide === "source" && lockKey ? [`${STATE}${lockKey}`] : []);
+    setTarget(lockSide === "target" && lockKey ? `${STATE}${lockKey}` : "");
     setName("");
-  }, [isOpen, presetSource, presetTarget]);
+  }, [isOpen, lockSide, lockKey]);
 
-  const isValid = target !== "" && (fromAny || sources.length > 0) && (fromAny || !sources.includes(target));
+  const groups = [
+    {
+      label: t(`${PREFIX}.in_workflow`),
+      entries: draft.states.map((state) => ({ value: `${STATE}${state.key}`, name: state.status.name })),
+    },
+    {
+      label: t(`${PREFIX}.other_states`),
+      hint: t(`${PREFIX}.other_states_hint`),
+      entries: options.map((option, index) => ({ value: `${OPTION}${index}`, name: option.name })),
+    },
+  ].filter((group) => group.entries.length > 0);
+
+  const toChoice = (value: string): TStateChoice =>
+    value.startsWith(STATE)
+      ? { kind: "state", key: value.slice(STATE.length) }
+      : { kind: "option", option: options[Number(value.slice(OPTION.length))] };
+  const stateKeys = (values: string[]) =>
+    values.flatMap((value) => (value.startsWith(STATE) ? [value.slice(STATE.length)] : []));
+  // Only a route between states already in the workflow can exist twice.
+  const isDuplicate =
+    target.startsWith(STATE) &&
+    isDuplicateRoute(draft, {
+      from_any: fromAny,
+      source_keys: fromAny ? [] : stateKeys(sources),
+      target_key: target.slice(STATE.length),
+    });
+  const isValid = target !== "" && (fromAny || sources.length > 0) && !sources.includes(target) && !isDuplicate;
+
+  const lockedField = (labelKey: string, stateKey: string) => (
+    <div className="flex flex-col gap-1">
+      <label htmlFor="workflow-transition-locked" className={LABEL_CLASS}>
+        {t(labelKey)}
+      </label>
+      <input
+        id="workflow-transition-locked"
+        type="text"
+        disabled
+        readOnly
+        value={stateName(draft, stateKey)}
+        aria-describedby="workflow-transition-locked-note"
+        className={`${FIELD_CLASS} bg-layer-2 text-tertiary`}
+      />
+      <p id="workflow-transition-locked-note" className={`flex items-center gap-1 ${HINT_CLASS}`}>
+        <LockOutline className="size-3" aria-hidden />
+        {t(`${PREFIX}.locked`)}
+      </p>
+    </div>
+  );
 
   return (
     <Dialog
@@ -64,74 +128,94 @@ export function AddTransitionDialog({ isOpen, draft, preset, onClose, onAdd }: P
             onAdd({
               name: name.trim(),
               from_any: fromAny,
-              source_keys: fromAny ? [] : sources,
-              target_key: target,
-              rules: [],
-              sides: {},
+              sources: fromAny ? [] : sources.map(toChoice),
+              target: toChoice(target),
             });
           }}
         >
           <DialogMain>
             <DialogHeader>
               <DialogHeading>
-                <DialogTitle>{t("workflows.editor.add_transition.title")}</DialogTitle>
+                <DialogTitle>{t(`${PREFIX}.title`)}</DialogTitle>
               </DialogHeading>
             </DialogHeader>
             <DialogBody tabIndex={0}>
               <div className="space-y-4">
-                <fieldset className="space-y-1">
-                  <legend className="text-body-xs-medium text-secondary">
-                    {t("workflows.editor.add_transition.sources")}
-                  </legend>
-                  <label className="flex items-center gap-2 text-body-sm-regular text-primary">
-                    <input type="checkbox" checked={fromAny} onChange={(event) => setFromAny(event.target.checked)} />
-                    {t("workflows.editor.add_transition.any_state")}
-                  </label>
-                  {draft.states.map((state) => (
-                    <label key={state.key} className="flex items-center gap-2 text-body-sm-regular text-primary">
-                      <input
-                        type="checkbox"
-                        disabled={fromAny || state.key === target}
-                        checked={!fromAny && sources.includes(state.key)}
-                        onChange={() =>
-                          setSources((current) =>
-                            current.includes(state.key)
-                              ? current.filter((key) => key !== state.key)
-                              : [...current, state.key]
-                          )
-                        }
-                      />
-                      {state.status.name}
+                {lockSide === "source" && lockKey ? (
+                  lockedField(`${PREFIX}.sources`, lockKey)
+                ) : (
+                  <fieldset className="space-y-2">
+                    <legend className={LABEL_CLASS}>{t(`${PREFIX}.sources`)}</legend>
+                    <label className={CHECK_CLASS}>
+                      <input type="checkbox" checked={fromAny} onChange={(event) => setFromAny(event.target.checked)} />
+                      {t(`${PREFIX}.any_state`)}
                     </label>
-                  ))}
-                </fieldset>
-                <label className="flex flex-col gap-1 text-body-xs-medium text-secondary">
-                  {t("workflows.editor.add_transition.target")}
-                  <select
-                    className="rounded-md border border-subtle bg-layer-1 px-2 py-1.5"
-                    value={target}
-                    onChange={(event) => {
-                      setTarget(event.target.value);
-                      setSources((current) => current.filter((key) => key !== event.target.value));
-                    }}
-                  >
-                    <option value="" disabled>
-                      {t("workflows.editor.add_transition.choose_state")}
-                    </option>
-                    {draft.states.map((state) => (
-                      <option key={state.key} value={state.key}>
-                        {state.status.name}
-                      </option>
+                    {groups.map((group) => (
+                      <fieldset key={group.label} className="space-y-1">
+                        <legend className="text-caption-sm-medium text-secondary">{group.label}</legend>
+                        {group.hint && <p className={HINT_CLASS}>{group.hint}</p>}
+                        {group.entries.map((entry) => (
+                          <label key={entry.value} className={CHECK_CLASS}>
+                            <input
+                              type="checkbox"
+                              disabled={fromAny || entry.value === target}
+                              checked={!fromAny && sources.includes(entry.value)}
+                              onChange={() =>
+                                setSources((current) =>
+                                  current.includes(entry.value)
+                                    ? current.filter((value) => value !== entry.value)
+                                    : [...current, entry.value]
+                                )
+                              }
+                            />
+                            {entry.name}
+                          </label>
+                        ))}
+                      </fieldset>
                     ))}
-                  </select>
-                </label>
+                  </fieldset>
+                )}
+                {lockSide === "target" && lockKey ? (
+                  lockedField(`${PREFIX}.target`, lockKey)
+                ) : (
+                  <label className={`flex flex-col gap-1 ${LABEL_CLASS}`}>
+                    {t(`${PREFIX}.target`)}
+                    <select
+                      className={FIELD_CLASS}
+                      value={target}
+                      onChange={(event) => {
+                        setTarget(event.target.value);
+                        setSources((current) => current.filter((value) => value !== event.target.value));
+                      }}
+                    >
+                      <option value="" disabled>
+                        {t(`${PREFIX}.choose_state`)}
+                      </option>
+                      {groups.map((group) => (
+                        <optgroup key={group.label} label={group.label}>
+                          {group.entries.map((entry) => (
+                            <option key={entry.value} value={entry.value}>
+                              {entry.name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                {isDuplicate && (
+                  <p role="alert" className="text-body-sm-regular text-danger-primary">
+                    {t(`${PREFIX}.duplicate`)}
+                  </p>
+                )}
                 <InputField
                   size="md"
                   orientation="vertical"
                   id="workflow-transition-new-name"
                   name="transition-name"
                   type="text"
-                  label={t("workflows.editor.add_transition.name")}
+                  maxLength={255}
+                  label={t(`${PREFIX}.name`)}
                   value={name}
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => setName(event.target.value)}
                 />
@@ -152,7 +236,7 @@ export function AddTransitionDialog({ isOpen, draft, preset, onClose, onAdd }: P
               stretch="auto"
               type="submit"
               disabled={!isValid}
-              label={t("workflows.editor.add_transition.submit")}
+              label={t(`${PREFIX}.submit`)}
             />
           </DialogActions>
         </form>

@@ -19,12 +19,12 @@ import type {
 // local imports
 import { AddRuleDialog } from "./add-rule-dialog";
 import { AddStatusDialog } from "./add-status-dialog";
-import { AddTransitionDialog } from "./add-transition-dialog";
+import { AddTransitionDialog, type TStateChoice, type TTransitionLock } from "./add-transition-dialog";
 import { EditorHeader } from "./editor-header";
 import { focusWhenReady } from "./focus-when-ready";
 import {
   addStates,
-  addTransition,
+  addTransitionWithStates,
   connectStates,
   errorTarget,
   fromDetail,
@@ -32,6 +32,7 @@ import {
   getGraphErrorKey,
   isDraftDirty,
   moveState,
+  optionToStatus,
   removeState,
   removeTransition,
   setInitial,
@@ -41,6 +42,7 @@ import {
   toPayload,
   validateDraft,
   type TDraftGraph,
+  type TStateRef,
 } from "./graph-model";
 import { WorkflowSidePanel } from "./side-panel";
 import { WorkflowTextView } from "./text-view";
@@ -56,8 +58,7 @@ type Props = {
   onClose: () => void;
 };
 
-type TPreset = { sourceKey?: string; targetKey?: string };
-type TDialog = { kind: "state" } | { kind: "transition"; preset: TPreset | null } | { kind: "rule" } | null;
+type TDialog = { kind: "state" } | { kind: "transition"; lock: TTransitionLock | null } | { kind: "rule" } | null;
 
 const VIEW_CLASS = "rounded-sm px-3 py-1 text-body-xs-medium max-md:min-h-11";
 
@@ -113,7 +114,10 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
   const selection = isPickedInDraft ? picked : null;
   const errors = validateDraft(draft);
   const dirty = isDraftDirty(draft, saved);
-  const options = useMemo(() => statusOptions(statuses, candidates, draft), [statuses, candidates, draft]);
+  const options = useMemo(
+    () => statusOptions(statuses, candidates, draft, workflow.id),
+    [statuses, candidates, draft, workflow.id]
+  );
   const selectedTransitionKey = selection?.kind === "transition" ? selection.key : null;
 
   const save = async () => {
@@ -146,7 +150,7 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
         canSave={dirty && errors.length === 0}
         isSaving={isSaving}
         onAddState={() => setDialog({ kind: "state" })}
-        onAddTransition={() => setDialog({ kind: "transition", preset: null })}
+        onAddTransition={() => setDialog({ kind: "transition", lock: null })}
         onAddRule={() => setDialog({ kind: "rule" })}
         onSave={save}
         onDiscard={() => {
@@ -258,7 +262,7 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
           selection={selection}
           canEdit={canEdit}
           onChange={setDraft}
-          onAddTransition={(preset) => setDialog({ kind: "transition", preset })}
+          onAddTransition={(lock) => setDialog({ kind: "transition", lock })}
           focusSignal={focusSignal}
         />
       </div>
@@ -283,10 +287,22 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
       <AddTransitionDialog
         isOpen={dialog?.kind === "transition"}
         draft={draft}
-        preset={dialog?.kind === "transition" ? dialog.preset : null}
+        options={options}
+        lock={dialog?.kind === "transition" ? dialog.lock : null}
         onClose={() => setDialog(null)}
-        onAdd={(transition) => {
-          setDraft((current) => addTransition(current, { ...transition, key: `new-${uuidv4()}` }));
+        onAdd={(choice) => {
+          // Keys are made here, outside the state updater, so a replayed updater gives the same draft.
+          const toRef = (item: TStateChoice): TStateRef =>
+            item.kind === "state" ? item : { kind: "new", key: `new-${uuidv4()}`, status: optionToStatus(item.option) };
+          const input = {
+            key: `new-${uuidv4()}`,
+            name: choice.name,
+            from_any: choice.from_any,
+            sources: choice.sources.map(toRef),
+            target: toRef(choice.target),
+          };
+          setDraft((current) => addTransitionWithStates(current, input));
+          setSelection({ kind: "transition", key: input.key });
           setDialog(null);
         }}
       />

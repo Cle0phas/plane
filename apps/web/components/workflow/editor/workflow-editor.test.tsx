@@ -75,6 +75,39 @@ const addReview = async (user: ReturnType<typeof userEvent.setup>) => {
 afterEach(() => vi.restoreAllMocks());
 
 describe("WorkflowEditor", () => {
+  it("adds a transition towards a state taken from the other existing states", async () => {
+    const onSave = vi.fn(async (_payload: TWorkflowGraphPayload) => workflow);
+    renderEditor({ onSave });
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "workflows.editor.add_transition.title" }));
+    await user.click(screen.getByRole("checkbox", { name: "Todo" }));
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "workflows.editor.add_transition.target" }),
+      "Review"
+    );
+    await user.click(screen.getByRole("button", { name: "workflows.editor.add_transition.submit" }));
+    await waitFor(() => expect(screen.getAllByText("Review").length).toBeGreaterThan(0));
+    await user.click(screen.getByRole("button", { name: "workflows.editor.save" }));
+    const payload = onSave.mock.calls[0][0];
+    expect(payload.states.map((item) => item.status.name)).toEqual(["Todo", "Done", "Review"]);
+    expect(payload.states[2].is_initial).toBe(false);
+    expect(payload.transitions[1]).toMatchObject({
+      from_any: false,
+      source_keys: ["a"],
+      target_key: payload.states[2].key,
+    });
+  });
+
+  it("locks the target of a transition added from the panel of a state", async () => {
+    renderEditor();
+    const user = userEvent.setup();
+    fireEvent.click(screen.getByText("Done"));
+    await user.click(screen.getByRole("button", { name: "workflows.editor.panel.add_incoming" }));
+    const locked = screen.getByRole("textbox", { name: "workflows.editor.add_transition.target" }) as HTMLInputElement;
+    expect(locked.value).toBe("Done");
+    expect(locked.disabled).toBe(true);
+  });
+
   it("opens a workflow that has states", () => {
     renderEditor();
     expect(screen.getByRole("heading", { name: "Software" })).toBeTruthy();
