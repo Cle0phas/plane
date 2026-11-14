@@ -21,6 +21,7 @@ RULE_RESTRICT_ACTORS = "restrict_actors"
 WORKFLOW_GROUPS = [group for group in StateGroup.values if group != StateGroup.TRIAGE.value]
 # The intake creates a project state named "Triage" in every project (P7).
 RESERVED_STATUS_NAMES = {"triage"}
+TRANSITION_SIDES = ["top", "right", "bottom", "left"]
 
 
 class WorkflowGraphRow(models.Model):
@@ -112,6 +113,13 @@ class WorkflowTransition(WorkflowGraphRow):
 class WorkflowTransitionSource(WorkflowGraphRow):
     transition = models.ForeignKey(WorkflowTransition, on_delete=models.CASCADE, related_name="sources")
     source = models.ForeignKey(WorkflowState, on_delete=models.CASCADE, related_name="outgoing_sources")
+    # Empty: the editor picks the closest pair of sides (X4).
+    source_side = models.CharField(
+        max_length=6, blank=True, default="", choices=[(side, side) for side in TRANSITION_SIDES]
+    )
+    target_side = models.CharField(
+        max_length=6, blank=True, default="", choices=[(side, side) for side in TRANSITION_SIDES]
+    )
 
     class Meta:
         db_table = "workflow_transition_sources"

@@ -15,6 +15,7 @@ from plane.db.models.workflow import (
     MAX_TRANSITIONS_PER_WORKFLOW,
     RESERVED_STATUS_NAMES,
     RULE_RESTRICT_ACTORS,
+    TRANSITION_SIDES,
     WORKFLOW_GROUPS,
 )
 from plane.utils.issue_types import StrictUUIDField
@@ -144,6 +145,8 @@ class GraphTransitionInputSerializer(serializers.Serializer):
     target_key = serializers.CharField(max_length=64)
     # Rules are validated in WorkflowGraphInputSerializer.validate so their errors surface under `graph`.
     rules = serializers.ListField(child=serializers.JSONField(), required=False, default=list, max_length=1)
+    # Validated in WorkflowGraphInputSerializer.validate, next to the sources it refers to.
+    sides = serializers.DictField(child=serializers.JSONField(), required=False, default=dict)
 
 
 class WorkflowGraphInputSerializer(serializers.Serializer):
@@ -182,6 +185,18 @@ class WorkflowGraphInputSerializer(serializers.Serializer):
                 or transition["from_any"] == bool(sources)
             ):
                 raise graph_error("invalid_transition")
+            sides = {}
+            for key, value in transition["sides"].items():
+                if (
+                    key not in sources
+                    or not isinstance(value, dict)
+                    or set(value) != {"source", "target"}
+                    or value["source"] not in TRANSITION_SIDES
+                    or value["target"] not in TRANSITION_SIDES
+                ):
+                    raise graph_error("invalid_transition")
+                sides[key] = {"source": value["source"], "target": value["target"]}
+            transition["sides"] = sides
         return attrs
 
 

@@ -246,3 +246,59 @@ class TestIsolationAndVisibility:
         url = WORKFLOW_URL.format(slug=workspace.slug, pk=software.id)
         assert "projects" not in _client(users["member"]).get(url).data
         assert _client(users["admin"]).get(url).data["projects"] == [{"id": str(project.id), "name": "Secret"}]
+
+
+@pytest.mark.contract
+@pytest.mark.django_db
+class TestTransitionSides:
+    def _payload(self, software, build):
+        payload = _graph_payload(software)
+        todo, done = (str(software.states_by_name[name].id) for name in ("To do", "Done"))
+        payload["transitions"] = [
+            {
+                "name": "",
+                "from_any": False,
+                "source_keys": [todo],
+                "target_key": done,
+                "rules": [],
+                "sides": build(todo),
+            }
+        ]
+        return payload
+
+    def test_sides_survive_a_save_and_a_reload(self, workspace, users, software):
+        client = _client(users["admin"])
+        todo = str(software.states_by_name["To do"].id)
+        payload = self._payload(software, lambda key: {key: {"source": "right", "target": "left"}})
+        saved = client.put(GRAPH_URL.format(slug=workspace.slug, pk=software.id), payload, format="json")
+        assert saved.status_code == status.HTTP_200_OK
+        assert saved.data["transitions"][0]["sides"] == {todo: {"source": "right", "target": "left"}}
+        reloaded = client.get(WORKFLOW_URL.format(slug=workspace.slug, pk=software.id))
+        assert reloaded.data["transitions"][0]["sides"] == {todo: {"source": "right", "target": "left"}}
+
+    def test_a_transition_without_sides_reports_an_empty_mapping(self, workspace, users, software):
+        payload = self._payload(software, lambda key: {})
+        del payload["transitions"][0]["sides"]
+        saved = _client(users["admin"]).put(
+            GRAPH_URL.format(slug=workspace.slug, pk=software.id), payload, format="json"
+        )
+        assert saved.status_code == status.HTTP_200_OK
+        assert saved.data["transitions"][0]["sides"] == {}
+
+    @pytest.mark.parametrize(
+        "build",
+        [
+            lambda key: {"other": {"source": "top", "target": "left"}},
+            lambda key: {key: {"source": "middle", "target": "left"}},
+            lambda key: {key: {"source": "top"}},
+            lambda key: {key: {"source": "top", "target": "left", "extra": 1}},
+            lambda key: {key: "top"},
+        ],
+        ids=["foreign-key", "unknown-side", "missing-target", "extra-key", "not-an-object"],
+    )
+    def test_bad_sides_are_refused(self, workspace, users, software, build):
+        response = _client(users["admin"]).put(
+            GRAPH_URL.format(slug=workspace.slug, pk=software.id), self._payload(software, build), format="json"
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data == {"graph": ["invalid_transition"]}

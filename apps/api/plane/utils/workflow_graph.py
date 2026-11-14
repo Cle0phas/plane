@@ -68,6 +68,11 @@ def workflow_graph(workflow):
                 "name": transition.name,
                 "from_any": transition.from_any,
                 "source_ids": sorted(str(source.source_id) for source in transition.sources.all()),
+                "sides": {
+                    str(source.source_id): {"source": source.source_side, "target": source.target_side}
+                    for source in transition.sources.all()
+                    if source.source_side and source.target_side
+                },
                 "target_id": str(transition.target_id),
                 "rules": [{"type": rule.rule_type, "params": rule.params} for rule in transition.rules.all()],
             }
@@ -167,8 +172,15 @@ def save_workflow_graph(*, workflow, graph, actor_id):
             name=item["name"],
             from_any=item["from_any"],
         )
+        sides = item.get("sides", {})
         WorkflowTransitionSource.objects.bulk_create(
-            WorkflowTransitionSource(transition=transition, source=state_by_key[key]) for key in item["source_keys"]
+            WorkflowTransitionSource(
+                transition=transition,
+                source=state_by_key[key],
+                source_side=sides.get(key, {}).get("source", ""),
+                target_side=sides.get(key, {}).get("target", ""),
+            )
+            for key in item["source_keys"]
         )
         WorkflowTransitionRule.objects.bulk_create(
             WorkflowTransitionRule(transition=transition, rule_type=rule["type"], params=rule["params"])
