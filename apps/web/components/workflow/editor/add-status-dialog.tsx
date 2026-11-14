@@ -42,8 +42,13 @@ type TCreated = { name: string; group: TStateGroups | null };
 const GROUPS: TStateGroups[] = ["backlog", "unstarted", "started", "completed", "cancelled"];
 const keyOf = (name: string) => name.trim().toLowerCase();
 
-export function AddStatusDialog({ isOpen, draft, options, onClose, onAdd }: Props) {
+export function AddStatusDialog({ isOpen, draft: liveDraft, options: liveOptions, onClose, onAdd }: Props) {
   const { t } = useTranslation();
+  // While it closes, the dialog keeps what it showed: the draft already holds the states just added.
+  const [shown, setShown] = useState({ draft: liveDraft, options: liveOptions });
+  if (isOpen && (shown.draft !== liveDraft || shown.options !== liveOptions))
+    setShown({ draft: liveDraft, options: liveOptions });
+  const { draft, options } = shown;
   const [query, setQuery] = useState("");
   const [checked, setChecked] = useState<string[]>([]);
   const [created, setCreated] = useState<TCreated[]>([]);

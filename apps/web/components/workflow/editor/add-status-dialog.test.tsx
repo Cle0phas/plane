@@ -109,6 +109,30 @@ describe("AddStatusDialog", () => {
     expect(onAdd.mock.calls[0][0].map((status: { name: string }) => status.name)).toEqual(["Todo", "Fresh"]);
   });
 
+  it("keeps showing its list while it closes after an add", async () => {
+    const view = render(<AddStatusDialog isOpen draft={draft} options={options} onClose={() => {}} onAdd={vi.fn()} />);
+    await userEvent.setup().click(screen.getByRole("checkbox", { name: /Review/ }));
+    // jsdom runs no animation: an endless one keeps the closing dialog on screen, as a browser does.
+    const prototype = Element.prototype as unknown as { getAnimations?: () => unknown[] };
+    prototype.getAnimations = () => [{ finished: new Promise(() => {}) }];
+    try {
+      // The editor closes the dialog in the same update that puts the ticked states in the draft.
+      view.rerender(
+        <AddStatusDialog
+          isOpen={false}
+          draft={draft}
+          options={options.slice(0, 1)}
+          onClose={() => {}}
+          onAdd={vi.fn()}
+        />
+      );
+      expect(screen.getByRole("checkbox", { name: /Review/, hidden: true })).toHaveProperty("checked", true);
+      expect(screen.queryByText("workflows.editor.add_state.none")).toBeNull();
+    } finally {
+      delete prototype.getAnimations;
+    }
+  });
+
   it("ignores the Enter that commits an IME composition", async () => {
     const { user } = open();
     const field = screen.getByRole("textbox", { name: NAME });
