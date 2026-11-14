@@ -175,6 +175,7 @@
         "none": "Không có trạng thái nào phù hợp.",
         "selected": "{count, plural, one {Đã chọn #} other {Đã chọn #}}",
         "errors": {
+          "required": "Hãy nhập tên.",
           "too_long": "Tên phải có tối đa 255 ký tự.",
           "present": "Quy trình làm việc này đã có một trạng thái với tên này.",
           "reserved": "Tên này đã được dành riêng."

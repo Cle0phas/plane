@@ -175,6 +175,7 @@
         "none": "没有匹配的状态。",
         "selected": "{count, plural, one {已选择 # 个} other {已选择 # 个}}",
         "errors": {
+          "required": "请输入名称。",
           "too_long": "名称不能超过 255 个字符。",
           "present": "此工作流中已有同名状态。",
           "reserved": "此名称已被保留。"

@@ -175,6 +175,7 @@
         "none": "Eşleşen durum yok.",
         "selected": "{count, plural, one {# seçildi} other {# seçildi}}",
         "errors": {
+          "required": "Bir ad girin.",
           "too_long": "Ad en fazla 255 karakter olmalıdır.",
           "present": "Bu iş akışında bu ada sahip bir durum zaten var.",
           "reserved": "Bu ad ayrılmıştır."

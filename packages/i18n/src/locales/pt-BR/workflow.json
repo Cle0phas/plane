@@ -175,6 +175,7 @@
         "none": "Nenhum estado corresponde.",
         "selected": "{count, plural, one {# selecionado} many {# selecionados} other {# selecionados}}",
         "errors": {
+          "required": "Informe um nome.",
           "too_long": "O nome deve ter no máximo 255 caracteres.",
           "present": "Este fluxo de trabalho já tem um estado com este nome.",
           "reserved": "Este nome é reservado."

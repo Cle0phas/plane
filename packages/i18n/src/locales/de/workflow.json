@@ -175,6 +175,7 @@
         "none": "Kein passender Status.",
         "selected": "{count, plural, one {# ausgewählt} other {# ausgewählt}}",
         "errors": {
+          "required": "Gib einen Namen ein.",
           "too_long": "Der Name darf höchstens 255 Zeichen lang sein.",
           "present": "Dieser Workflow hat bereits einen Status mit diesem Namen.",
           "reserved": "Dieser Name ist reserviert."

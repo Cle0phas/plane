@@ -175,6 +175,7 @@
         "none": "Ningún estado coincide.",
         "selected": "{count, plural, one {# seleccionado} other {# seleccionados}}",
         "errors": {
+          "required": "Introduce un nombre.",
           "too_long": "El nombre debe tener 255 caracteres como máximo.",
           "present": "Este workflow ya tiene un estado con este nombre.",
           "reserved": "Este nombre está reservado."

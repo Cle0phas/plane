@@ -175,6 +175,7 @@
         "none": "Nicio stare nu corespunde.",
         "selected": "{count, plural, one {# stare selectată} few {# stări selectate} other {# de stări selectate}}",
         "errors": {
+          "required": "Introdu un nume.",
           "too_long": "Numele trebuie să aibă cel mult 255 de caractere.",
           "present": "Acest flux de lucru are deja o stare cu acest nume.",
           "reserved": "Acest nume este rezervat."

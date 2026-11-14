@@ -175,6 +175,7 @@
         "none": "Brak pasujących stanów.",
         "selected": "{count, plural, one {Wybrano: #} few {Wybrano: #} many {Wybrano: #} other {Wybrano: #}}",
         "errors": {
+          "required": "Wpisz nazwę.",
           "too_long": "Nazwa może mieć maksymalnie 255 znaków.",
           "present": "Ten workflow ma już stan o tej nazwie.",
           "reserved": "Ta nazwa jest zarezerwowana."

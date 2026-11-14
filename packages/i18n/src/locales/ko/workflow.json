@@ -175,6 +175,7 @@
         "none": "일치하는 스테이트가 없습니다.",
         "selected": "{count, plural, one {#개 선택됨} other {#개 선택됨}}",
         "errors": {
+          "required": "이름을 입력하세요.",
           "too_long": "이름은 255자 이하여야 합니다.",
           "present": "이 워크플로우에 같은 이름의 스테이트가 이미 있습니다.",
           "reserved": "예약된 이름입니다."

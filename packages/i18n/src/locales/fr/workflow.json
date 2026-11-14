@@ -175,6 +175,7 @@
         "none": "Aucun état ne correspond.",
         "selected": "{count, plural, one {# sélectionné} many {# sélectionnés} other {# sélectionnés}}",
         "errors": {
+          "required": "Saisissez un nom.",
           "too_long": "Le nom doit faire 255 caractères au plus.",
           "present": "Ce workflow a déjà un état de ce nom.",
           "reserved": "Ce nom est réservé."

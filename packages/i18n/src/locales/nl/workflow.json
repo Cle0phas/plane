@@ -175,6 +175,7 @@
         "none": "Geen enkele status komt overeen.",
         "selected": "{count, plural, one {# geselecteerd} other {# geselecteerd}}",
         "errors": {
+          "required": "Voer een naam in.",
           "too_long": "De naam mag maximaal 255 tekens lang zijn.",
           "present": "Deze workflow heeft al een status met deze naam.",
           "reserved": "Deze naam is gereserveerd."

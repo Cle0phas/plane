@@ -175,6 +175,7 @@
         "none": "沒有符合的狀態。",
         "selected": "{count, plural, one {已選取 # 個} other {已選取 # 個}}",
         "errors": {
+          "required": "請輸入名稱。",
           "too_long": "名稱不得超過 255 個字元。",
           "present": "此工作流程中已有同名狀態。",
           "reserved": "此名稱已保留。"

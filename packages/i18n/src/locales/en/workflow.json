@@ -175,6 +175,7 @@
         "none": "No state matches.",
         "selected": "{count, plural, one {# selected} other {# selected}}",
         "errors": {
+          "required": "Enter a name.",
           "too_long": "The name must be 255 characters or fewer.",
           "present": "This workflow already has a state with this name.",
           "reserved": "This name is reserved."

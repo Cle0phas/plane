@@ -175,6 +175,7 @@
         "none": "Tidak ada status yang cocok.",
         "selected": "{count, plural, one {# dipilih} other {# dipilih}}",
         "errors": {
+          "required": "Masukkan nama.",
           "too_long": "Nama maksimal 255 karakter.",
           "present": "Workflow ini sudah memiliki status dengan nama ini.",
           "reserved": "Nama ini dicadangkan."
