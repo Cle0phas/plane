@@ -16,9 +16,27 @@ export default defineConfig({
     },
   },
   test: {
-    name: "unit",
-    environment: "node",
-    include: ["**/*.test.ts"],
-    exclude: ["node_modules/**", "build/**", ".react-router/**"],
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "unit",
+          environment: "node",
+          include: ["**/*.test.ts"],
+          exclude: ["node_modules/**", "build/**", ".react-router/**"],
+        },
+      },
+      {
+        // Component tests that need a DOM but not a real browser, like packages/blocks (X12).
+        extends: true,
+        test: {
+          name: "dom",
+          environment: "jsdom",
+          include: ["**/*.test.tsx"],
+          exclude: ["node_modules/**", "build/**", ".react-router/**"],
+          setupFiles: ["./vitest.setup.dom.ts"],
+        },
+      },
+    ],
   },
 });
