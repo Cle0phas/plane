@@ -167,6 +167,11 @@
         "create_option": "Vytvořit „{name}“",
         "allow_any": "Povolit přechody z libovolného stavu",
         "none": "Žádný stav neodpovídá.",
+        "any_title": "Přechody k přidaným stavům",
+        "any_help": "Každý přidaný stav bude dosažitelný z libovolného jiného stavu.",
+        "any_needs_selection": "Nejprve vyberte nebo vytvořte stav, aby se tato volba zpřístupnila.",
+        "all_used": "Všechny dostupné stavy už v tomto pracovním toku jsou. Zadejte název a vytvořte nový.",
+        "any_existing_hint": "U stavu, který už v pracovním toku je, použijte „Přidat přechod“ a zvolte „Libovolný stav“.",
         "selected": "{count, plural, one {Vybráno: #} few {Vybráno: #} many {Vybráno: #} other {Vybráno: #}}",
         "errors": {
           "required": "Zadejte název.",

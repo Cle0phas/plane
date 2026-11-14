@@ -167,6 +167,11 @@
         "create_option": "Tạo \"{name}\"",
         "allow_any": "Cho phép chuyển tiếp từ bất kỳ trạng thái nào",
         "none": "Không có trạng thái nào phù hợp.",
+        "any_title": "Chuyển tiếp đến các trạng thái đã thêm",
+        "any_help": "Mỗi trạng thái đã thêm có thể được truy cập từ bất kỳ trạng thái nào khác.",
+        "any_needs_selection": "Hãy chọn hoặc tạo một trạng thái trước để bật tùy chọn này.",
+        "all_used": "Tất cả trạng thái có sẵn đã có trong quy trình làm việc này. Nhập tên để tạo trạng thái mới.",
+        "any_existing_hint": "Với trạng thái đã có trong quy trình làm việc, hãy dùng \"Thêm chuyển tiếp\" và chọn \"Bất kỳ trạng thái nào\".",
         "selected": "{count, plural, one {Đã chọn #} other {Đã chọn #}}",
         "errors": {
           "required": "Hãy nhập tên.",

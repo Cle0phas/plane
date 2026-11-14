@@ -167,6 +167,11 @@
         "create_option": "\"{name}\" maken",
         "allow_any": "Overgangen vanuit elke status toestaan",
         "none": "Geen enkele status komt overeen.",
+        "any_title": "Overgangen naar de toegevoegde statussen",
+        "any_help": "Elke toegevoegde status kan vanuit elke andere status worden bereikt.",
+        "any_needs_selection": "Selecteer of maak eerst een status om deze optie in te schakelen.",
+        "all_used": "Alle beschikbare statussen staan al in deze workflow. Typ een naam om er een te maken.",
+        "any_existing_hint": "Gebruik voor een status die al in de workflow staat \"Een overgang toevoegen\" en kies \"Elke status\".",
         "selected": "{count, plural, one {# geselecteerd} other {# geselecteerd}}",
         "errors": {
           "required": "Voer een naam in.",

@@ -167,6 +167,11 @@
         "create_option": "Créer « {name} »",
         "allow_any": "Autoriser les transitions depuis n’importe quel état",
         "none": "Aucun état ne correspond.",
+        "any_title": "Transitions vers les états ajoutés",
+        "any_help": "Chaque état ajouté pourra être atteint depuis n’importe quel autre état.",
+        "any_needs_selection": "Sélectionnez ou créez d’abord un état pour activer cette option.",
+        "all_used": "Tous les états disponibles sont déjà dans ce workflow. Saisissez un nom pour en créer un.",
+        "any_existing_hint": "Pour un état déjà présent, utilisez « Ajouter une transition » et choisissez « N’importe quel état ».",
         "selected": "{count, plural, one {# sélectionné} many {# sélectionnés} other {# sélectionnés}}",
         "errors": {
           "required": "Saisissez un nom.",

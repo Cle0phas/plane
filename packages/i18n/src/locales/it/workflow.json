@@ -167,6 +167,11 @@
         "create_option": "Crea «{name}»",
         "allow_any": "Consenti transizioni da qualsiasi stato",
         "none": "Nessuno stato corrispondente.",
+        "any_title": "Transizioni verso gli stati aggiunti",
+        "any_help": "Ogni stato aggiunto potrà essere raggiunto da qualsiasi altro stato.",
+        "any_needs_selection": "Selezionare o creare prima uno stato per attivare questa opzione.",
+        "all_used": "Tutti gli stati disponibili sono già in questo flusso di lavoro. Digitare un nome per crearne uno.",
+        "any_existing_hint": "Per uno stato già presente nel flusso di lavoro, usare «Aggiungi una transizione» e scegliere «Qualsiasi stato».",
         "selected": "{count, plural, one {# selezionato} many {# selezionati} other {# selezionati}}",
         "errors": {
           "required": "Inserire un nome.",

@@ -167,6 +167,11 @@
         "create_option": "Vytvoriť „{name}“",
         "allow_any": "Povoliť prechody z ľubovoľného stavu",
         "none": "Žiadny stav nezodpovedá.",
+        "any_title": "Prechody k pridaným stavom",
+        "any_help": "Každý pridaný stav bude dosiahnuteľný z ľubovoľného iného stavu.",
+        "any_needs_selection": "Najprv vyberte alebo vytvorte stav, aby sa táto voľba sprístupnila.",
+        "all_used": "Všetky dostupné stavy už v tomto pracovnom postupe sú. Zadajte názov a vytvorte nový.",
+        "any_existing_hint": "Pri stave, ktorý už v pracovnom postupe je, použite „Pridať prechod“ a zvoľte „Ľubovoľný stav“.",
         "selected": "{count, plural, one {Vybraté: #} few {Vybraté: #} many {Vybraté: #} other {Vybraté: #}}",
         "errors": {
           "required": "Zadajte názov.",

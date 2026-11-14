@@ -167,6 +167,11 @@
         "create_option": "创建“{name}”",
         "allow_any": "允许从任意状态转换",
         "none": "没有匹配的状态。",
+        "any_title": "指向所添加状态的转换",
+        "any_help": "每个添加的状态都可以从任意其他状态转换而来。",
+        "any_needs_selection": "请先选择或创建一个状态，以启用此选项。",
+        "all_used": "所有可用状态都已在此工作流中。请输入名称以创建新状态。",
+        "any_existing_hint": "对于已在工作流中的状态，请使用“添加转换”并选择“任意状态”。",
         "selected": "{count, plural, one {已选择 # 个} other {已选择 # 个}}",
         "errors": {
           "required": "请输入名称。",

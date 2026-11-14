@@ -167,6 +167,11 @@
         "create_option": "建立「{name}」",
         "allow_any": "允許從任何狀態轉換",
         "none": "沒有符合的狀態。",
+        "any_title": "指向所新增狀態的轉換",
+        "any_help": "每個新增的狀態都可以從任何其他狀態轉換而來。",
+        "any_needs_selection": "請先選取或建立一個狀態，以啟用此選項。",
+        "all_used": "所有可用的狀態都已在此工作流程中。請輸入名稱以建立新狀態。",
+        "any_existing_hint": "對於已在工作流程中的狀態，請使用「新增轉換」並選取「任何狀態」。",
         "selected": "{count, plural, one {已選取 # 個} other {已選取 # 個}}",
         "errors": {
           "required": "請輸入名稱。",

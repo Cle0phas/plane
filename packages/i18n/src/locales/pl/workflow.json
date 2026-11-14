@@ -167,6 +167,11 @@
         "create_option": "Utwórz „{name}”",
         "allow_any": "Zezwalaj na przejścia z dowolnego stanu",
         "none": "Brak pasujących stanów.",
+        "any_title": "Przejścia do dodanych stanów",
+        "any_help": "Każdy dodany stan będzie osiągalny z dowolnego innego stanu.",
+        "any_needs_selection": "Najpierw wybierz lub utwórz stan, aby włączyć tę opcję.",
+        "all_used": "Wszystkie dostępne stany są już w tym workflow. Wpisz nazwę, aby utworzyć nowy.",
+        "any_existing_hint": "Dla stanu, który jest już w workflow, użyj „Dodaj przejście” i wybierz „Dowolny stan”.",
         "selected": "{count, plural, one {Wybrano: #} few {Wybrano: #} many {Wybrano: #} other {Wybrano: #}}",
         "errors": {
           "required": "Wpisz nazwę.",

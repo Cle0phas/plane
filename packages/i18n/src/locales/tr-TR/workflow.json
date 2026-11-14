@@ -167,6 +167,11 @@
         "create_option": "\"{name}\" oluştur",
         "allow_any": "Herhangi bir durumdan geçişlere izin ver",
         "none": "Eşleşen durum yok.",
+        "any_title": "Eklenen durumlara geçişler",
+        "any_help": "Eklenen her duruma, herhangi bir başka durumdan ulaşılabilir.",
+        "any_needs_selection": "Bu seçeneği etkinleştirmek için önce bir durum seçin veya oluşturun.",
+        "all_used": "Kullanılabilir tüm durumlar zaten bu iş akışında. Yeni bir durum oluşturmak için bir ad yazın.",
+        "any_existing_hint": "İş akışında zaten bulunan bir durum için \"Geçiş ekle\" seçeneğini kullanın ve \"Herhangi bir durum\" seçeneğini seçin.",
         "selected": "{count, plural, one {# seçildi} other {# seçildi}}",
         "errors": {
           "required": "Bir ad girin.",

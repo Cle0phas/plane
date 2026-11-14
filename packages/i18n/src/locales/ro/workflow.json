@@ -167,6 +167,11 @@
         "create_option": "Creează „{name}”",
         "allow_any": "Permite tranziții din orice stare",
         "none": "Nicio stare nu corespunde.",
+        "any_title": "Tranziții către stările adăugate",
+        "any_help": "Fiecare stare adăugată va putea fi atinsă din orice altă stare.",
+        "any_needs_selection": "Selectați sau creați mai întâi o stare pentru a activa această opțiune.",
+        "all_used": "Toate stările disponibile sunt deja în acest flux de lucru. Introduceți un nume pentru a crea una.",
+        "any_existing_hint": "Pentru o stare care se află deja în fluxul de lucru, folosiți „Adaugă o tranziție” și alegeți „Orice stare”.",
         "selected": "{count, plural, one {# stare selectată} few {# stări selectate} other {# de stări selectate}}",
         "errors": {
           "required": "Introduceți un nume.",

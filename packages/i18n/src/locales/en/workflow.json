@@ -167,6 +167,11 @@
         "create_option": "Create \"{name}\"",
         "allow_any": "Allow transitions from any state",
         "none": "No state matches.",
+        "any_title": "Transitions to the added states",
+        "any_help": "Each added state can be reached from any other state.",
+        "any_needs_selection": "Select or create a state first to enable this option.",
+        "all_used": "Every available state is already in this workflow. Type a name to create one.",
+        "any_existing_hint": "For a state already in the workflow, use \"Add a transition\" and choose \"Any state\".",
         "selected": "{count, plural, one {# selected} other {# selected}}",
         "errors": {
           "required": "Enter a name.",

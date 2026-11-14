@@ -167,6 +167,11 @@
         "create_option": "„{name}“ erstellen",
         "allow_any": "Übergänge aus jedem Status erlauben",
         "none": "Kein passender Status.",
+        "any_title": "Übergänge zu den hinzugefügten Status",
+        "any_help": "Jeder hinzugefügte Status ist von jedem anderen Status aus erreichbar.",
+        "any_needs_selection": "Wählen Sie zuerst einen Status aus oder erstellen Sie einen, um diese Option zu aktivieren.",
+        "all_used": "Alle verfügbaren Status sind bereits in diesem Workflow. Geben Sie einen Namen ein, um einen neuen zu erstellen.",
+        "any_existing_hint": "Für einen Status, der bereits im Workflow ist, verwenden Sie „Übergang hinzufügen“ und wählen Sie „Beliebiger Status“.",
         "selected": "{count, plural, one {# ausgewählt} other {# ausgewählt}}",
         "errors": {
           "required": "Geben Sie einen Namen ein.",
