@@ -206,6 +206,14 @@ describe("startPlacement", () => {
     expect(startPlacement(draft)).toEqual({ x: 264, y: 120, sides: { source: "top", target: "bottom" } });
   });
 
+  it("goes below as the last resort, even when a state is there too", () => {
+    const draft: TDraftGraph = {
+      states: [at("a", 0, 0), at("b", 240, 0, true), at("c", 240, -180), at("d", 240, 150)],
+      transitions: [],
+    };
+    expect(startPlacement(draft)).toEqual({ x: 264, y: 120, sides: { source: "top", target: "bottom" } });
+  });
+
   // The arrow would run over the "any state" pill drawn above the initial state.
   it("leaves the top to the any-state pill of the initial state", () => {
     const draft: TDraftGraph = {

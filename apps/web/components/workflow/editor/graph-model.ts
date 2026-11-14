@@ -319,8 +319,8 @@ export const closestSides = (source: TPoint, target: TPoint): { source: TWorkflo
 
 const START_SIZE = 80;
 const START_ARROW = 80;
-// shortcut: a state is taken at its minimum drawn size (min-w-32), its any-state pill included above it;
-// a wider name is not measured, pass the measured sizes in if long names start to overlap.
+// shortcut: the state and its any-state pill above it are taken at their minimum width (min-w-32); a wider
+// name or pill is not measured, pass the measured sizes in if long names start to overlap.
 const STATE_BOX = { width: 128, height: 40, pill: 28 };
 
 type TBox = { x0: number; y0: number; x1: number; y1: number };
@@ -328,7 +328,10 @@ const overlaps = (a: TBox, b: TBox) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1
 
 type TStartPlacement = { x: number; y: number; sides: { source: TWorkflowSide; target: TWorkflowSide } };
 
-/** Start node place (X7, display only): left of the initial state, else above, else below; never on a state. */
+/**
+ * Start node place (X7, display only): left of the initial state, else above, else below as the last resort,
+ * even if taken.
+ */
 export const startPlacement = (draft: TDraftGraph): TStartPlacement | null => {
   const initial = draft.states.find((state) => state.is_initial);
   if (!initial) return null;
