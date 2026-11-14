@@ -25,12 +25,15 @@ type Props = {
   onClose: () => void;
 };
 
+const USED_IN_CLASS =
+  "inline-flex items-center gap-1 rounded-sm border border-subtle px-2 py-0.5 text-caption-sm-medium text-secondary max-md:min-h-11";
 const TOOL_CLASS =
   "flex flex-col items-center gap-1 rounded-md px-3 py-1 text-caption-sm-regular text-secondary hover:bg-layer-1 max-md:min-h-11";
 
 export function EditorHeader(props: Props) {
   const { name, projectCount, projects, canEdit, dirty, canSave, isSaving } = props;
   const { t } = useTranslation();
+  const usedIn = t("workflows.editor.used_in", { count: projectCount });
   const tools = [
     { label: t("workflows.editor.add_state.title"), Icon: StateOutline, onClick: props.onAddState },
     { label: t("workflows.editor.add_transition.title"), Icon: WorkflowsOutline, onClick: props.onAddTransition },
@@ -41,20 +44,25 @@ export function EditorHeader(props: Props) {
     <header className="flex flex-wrap items-center gap-4 border-b border-subtle px-6 py-3">
       <div className="min-w-0 flex-1 space-y-1">
         <h1 className="truncate text-body-sm-semibold text-primary">{name}</h1>
-        <details className="relative">
-          <summary className="inline-flex cursor-pointer items-center gap-1 rounded-sm border border-subtle px-2 py-0.5 text-caption-sm-medium text-secondary max-md:min-h-11">
-            <CopyOutline className="size-3" aria-hidden />
-            {t("workflows.editor.used_in", { count: projectCount })}
-          </summary>
-          {/* Names only reach workspace admins (P6 of the workflows plan). */}
-          {projects && projects.length > 0 && (
+        {/* Names only reach workspace admins (P6 of the workflows plan): without them the count is plain text. */}
+        {projects && projects.length > 0 ? (
+          <details className="relative">
+            <summary className={`cursor-pointer ${USED_IN_CLASS}`}>
+              <CopyOutline className="size-3" aria-hidden />
+              {usedIn}
+            </summary>
             <ul className="shadow-md absolute z-10 mt-1 min-w-48 rounded-md border border-subtle bg-layer-1 p-2 text-body-xs-regular text-primary">
               {projects.map((project) => (
                 <li key={project.id}>{project.name}</li>
               ))}
             </ul>
-          )}
-        </details>
+          </details>
+        ) : (
+          <p className={USED_IN_CLASS}>
+            <CopyOutline className="size-3" aria-hidden />
+            {usedIn}
+          </p>
+        )}
       </div>
       {canEdit && (
         <div className="flex items-center gap-1">

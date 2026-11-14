@@ -91,6 +91,15 @@ describe("WorkflowEditor", () => {
     expect(screen.getByRole("button", { name: "workflows.editor.close" })).toBeTruthy();
   });
 
+  // Project names only reach admins (P6): without them the count is plain text, not a toggle that opens on nothing.
+  it("lists the projects behind the count only when it receives their names", () => {
+    const view = renderEditor();
+    expect(screen.getByText("workflows.editor.used_in").closest("summary")).toBeTruthy();
+    view.unmount();
+    renderEditor({ workflow: { ...workflow, projects: undefined }, readOnly: true });
+    expect(screen.getByText("workflows.editor.used_in").closest("summary, details")).toBeNull();
+  });
+
   it("adds a ticked state and saves the graph", async () => {
     const onSave = vi.fn(async (_payload: TWorkflowGraphPayload) => workflow);
     renderEditor({ onSave });
