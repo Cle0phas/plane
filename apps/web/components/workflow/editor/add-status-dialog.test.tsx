@@ -179,6 +179,9 @@ describe("AddStatusDialog", () => {
     it("is set apart from the list under its own heading, with what it does and how to do the same for an existing state", () => {
       open();
       const option = screen.getByRole("group", { name: K + "any_title" });
+      // X8: native elements, named by their legend.
+      expect(option.tagName).toBe("FIELDSET");
+      expect(option.querySelector(":scope > legend")?.textContent).toBe(K + "any_title");
       expect(option.contains(screen.getByRole("checkbox", { name: ANY }))).toBe(true);
       expect(option.textContent).toContain(K + "any_help");
       expect(option.textContent).toContain(K + "any_existing_hint");

@@ -204,35 +204,34 @@ export function AddStatusDialog({ isOpen, draft: liveDraft, options: liveOptions
                     />
                   </div>
                 ))}
-                <div
-                  role="group"
-                  aria-labelledby={`${optionId}-title`}
-                  className="space-y-1.5 border-t border-subtle pt-3"
-                >
-                  <p id={`${optionId}-title`} className="text-body-sm-medium text-primary">
-                    {t("workflows.editor.add_state.any_title")}
-                  </p>
-                  <label className="flex items-center gap-2 text-body-sm-regular text-secondary">
-                    <input
-                      type="checkbox"
-                      checked={allowAny}
-                      disabled={count === 0}
-                      aria-describedby={`${optionId}-help${count === 0 ? ` ${optionId}-needs` : ""}`}
-                      onChange={(event) => setAllowAny(event.target.checked)}
-                    />
-                    {t("workflows.editor.add_state.allow_any")}
-                  </label>
-                  <p id={`${optionId}-help`} className="text-caption-sm-regular text-tertiary">
-                    {t("workflows.editor.add_state.any_help")}
-                  </p>
-                  {count === 0 && (
-                    <p id={`${optionId}-needs`} className="text-caption-sm-regular text-tertiary">
-                      {t("workflows.editor.add_state.any_needs_selection")}
+                {/* The rule sits on a wrapper: on the fieldset itself the legend would be drawn across it. */}
+                <div className="border-t border-subtle pt-3">
+                  <fieldset className="m-0 min-w-0 space-y-1.5 border-0 p-0">
+                    <legend className="p-0 text-body-sm-medium text-primary">
+                      {t("workflows.editor.add_state.any_title")}
+                    </legend>
+                    <label className="flex items-center gap-2 text-body-sm-regular text-secondary">
+                      <input
+                        type="checkbox"
+                        checked={allowAny}
+                        disabled={count === 0}
+                        aria-describedby={`${optionId}-help${count === 0 ? ` ${optionId}-needs` : ""}`}
+                        onChange={(event) => setAllowAny(event.target.checked)}
+                      />
+                      {t("workflows.editor.add_state.allow_any")}
+                    </label>
+                    <p id={`${optionId}-help`} className="text-caption-sm-regular text-tertiary">
+                      {t("workflows.editor.add_state.any_help")}
                     </p>
-                  )}
-                  <p className="text-caption-sm-regular text-tertiary">
-                    {t("workflows.editor.add_state.any_existing_hint")}
-                  </p>
+                    {count === 0 && (
+                      <p id={`${optionId}-needs`} className="text-caption-sm-regular text-tertiary">
+                        {t("workflows.editor.add_state.any_needs_selection")}
+                      </p>
+                    )}
+                    <p className="text-caption-sm-regular text-tertiary">
+                      {t("workflows.editor.add_state.any_existing_hint")}
+                    </p>
+                  </fieldset>
                 </div>
                 <p aria-live="polite" className="text-caption-sm-regular text-tertiary">
                   {count > 0 ? t("workflows.editor.add_state.selected", { count }) : ""}
