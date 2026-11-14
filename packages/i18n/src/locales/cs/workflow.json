@@ -175,7 +175,7 @@
         "none": "Žádný stav neodpovídá.",
         "selected": "{count, plural, one {Vybráno: #} few {Vybráno: #} many {Vybráno: #} other {Vybráno: #}}",
         "errors": {
-          "required": "Zadej název.",
+          "required": "Zadejte název.",
           "too_long": "Název může mít nejvýše 255 znaků.",
           "present": "Tento pracovní tok již má stav s tímto názvem.",
           "reserved": "Tento název je vyhrazen."

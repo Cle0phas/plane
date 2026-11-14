@@ -175,7 +175,7 @@
         "none": "Žiadny stav nezodpovedá.",
         "selected": "{count, plural, one {Vybraté: #} few {Vybraté: #} many {Vybraté: #} other {Vybraté: #}}",
         "errors": {
-          "required": "Zadaj názov.",
+          "required": "Zadajte názov.",
           "too_long": "Názov môže mať najviac 255 znakov.",
           "present": "Tento pracovný postup už má stav s týmto názvom.",
           "reserved": "Tento názov je vyhradený."
