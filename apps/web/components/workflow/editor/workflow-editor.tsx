@@ -21,6 +21,7 @@ import { AddRuleDialog } from "./add-rule-dialog";
 import { AddStatusDialog } from "./add-status-dialog";
 import { AddTransitionDialog } from "./add-transition-dialog";
 import { EditorHeader } from "./editor-header";
+import { focusWhenReady } from "./focus-when-ready";
 import {
   addStates,
   addTransition,
@@ -59,8 +60,6 @@ type TPreset = { sourceKey?: string; targetKey?: string };
 type TDialog = { kind: "state" } | { kind: "transition"; preset: TPreset | null } | { kind: "rule" } | null;
 
 const VIEW_CLASS = "rounded-sm px-3 py-1 text-body-xs-medium max-md:min-h-11";
-// About one second: React Flow shows a new node once measured, and the closing dialog keeps the page inert.
-const FOCUS_ATTEMPTS = 60;
 
 export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
   const { workflow, statuses, candidates, readOnly, onSave, onClose } = props;
@@ -83,6 +82,9 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
   const savedRef = useRef(saved);
   const draftRef = useRef(draft);
   draftRef.current = draft;
+  // The store refreshes the statuses before a save resolves: the save reads them here, not from its closure.
+  const statusesRef = useRef(statuses);
+  statusesRef.current = statuses;
 
   // A refresh (focus revalidation, status counts) must never wipe unsaved edits.
   useEffect(() => {
@@ -93,26 +95,20 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
 
   useEffect(() => {
     if (addedKey === null) return;
-    let frame = 0;
-    let attempts = 0;
-    const attempt = () => {
-      const target = Array.from(
-        mainRef.current?.querySelectorAll<HTMLElement>(".react-flow__node, [data-state-key]") ?? []
-      ).find((element) => (element.dataset.id ?? element.dataset.stateKey) === addedKey);
-      target?.focus();
-      attempts += 1;
-      if ((!target || document.activeElement !== target) && attempts < FOCUS_ATTEMPTS)
-        frame = requestAnimationFrame(attempt);
-    };
-    attempt();
-    return () => cancelAnimationFrame(frame);
+    return focusWhenReady(() =>
+      Array.from(mainRef.current?.querySelectorAll<HTMLElement>(".react-flow__node, [data-state-key]") ?? []).find(
+        (element) => (element.dataset.id ?? element.dataset.stateKey) === addedKey
+      )
+    );
   }, [addedKey]);
 
-  // A selection whose element left the draft (removed, discarded, replaced on save) reads as none.
-  const selection =
-    picked && (picked.kind === "state" ? draft.states : draft.transitions).some((item) => item.key === picked.key)
-      ? picked
-      : null;
+  // The one guard of the selection: once its element leaves the draft (removed, replaced on save) it is
+  // dropped for good, so a discard that brings the element back does not reselect it.
+  const isPickedInDraft =
+    picked !== null &&
+    (picked.kind === "state" ? draft.states : draft.transitions).some((item) => item.key === picked.key);
+  if (picked !== null && !isPickedInDraft) setSelection(null);
+  const selection = isPickedInDraft ? picked : null;
   const errors = validateDraft(draft);
   const dirty = isDraftDirty(draft, saved);
   const options = useMemo(() => statusOptions(statuses, candidates, draft), [statuses, candidates, draft]);
@@ -123,8 +119,7 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
     setIsSaving(true);
     try {
       const result = await onSave(toPayload(draft));
-      setDraft(fromDetail(result, statuses));
-      setSelection(null);
+      setDraft(fromDetail(result, statusesRef.current));
       setToast({ type: "success", title: t("workflows.editor.saved"), message: "" });
     } catch (error) {
       setServerError(getGraphErrorKey(error));
@@ -138,7 +133,7 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
   return (
     <div className="flex size-full flex-col bg-surface-1">
       <a href="#workflow-editor-main" className="sr-only focus:not-sr-only">
-        {t("workflows.editor.diagram_label")}
+        {t(view === "diagram" ? "workflows.editor.diagram_label" : "workflows.editor.view.text")}
       </a>
       <EditorHeader
         name={workflow.name}
@@ -154,7 +149,6 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
         onSave={save}
         onDiscard={() => {
           setDraft(saved);
-          setSelection(null);
           setServerError(null);
         }}
         onClose={onClose}
@@ -228,7 +222,7 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
         )}
       </div>
       <div className="relative flex min-h-0 flex-1">
-        <main ref={mainRef} id="workflow-editor-main" className="min-w-0 flex-1">
+        <main ref={mainRef} id="workflow-editor-main" tabIndex={-1} className="min-w-0 flex-1">
           {view === "diagram" ? (
             <WorkflowCanvas
               draft={draft}

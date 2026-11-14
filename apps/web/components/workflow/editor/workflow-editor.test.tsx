@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { TWorkflowDetail, TWorkflowGraphPayload, TWorkflowStatus, TWorkflowStatusCandidate } from "@plane/types";
@@ -42,20 +42,29 @@ const workflow: TWorkflowDetail = {
 const statuses = [statusOf("sa", "Todo"), statusOf("sb", "Done")];
 const candidates: TWorkflowStatusCandidate[] = [{ name: "Review", color: "#333333", group: "started" }];
 
-const renderEditor = (props: Partial<React.ComponentProps<typeof WorkflowEditor>> = {}) =>
-  render(
-    <div style={{ width: 1280, height: 800 }}>
-      <WorkflowEditor
-        workflow={workflow}
-        statuses={statuses}
-        candidates={candidates}
-        readOnly={false}
-        onSave={async () => workflow}
-        onClose={() => {}}
-        {...props}
-      />
-    </div>
-  );
+const editorOf = (props: Partial<React.ComponentProps<typeof WorkflowEditor>> = {}) => (
+  <div style={{ width: 1280, height: 800 }}>
+    <WorkflowEditor
+      workflow={workflow}
+      statuses={statuses}
+      candidates={candidates}
+      readOnly={false}
+      onSave={async () => workflow}
+      onClose={() => {}}
+      {...props}
+    />
+  </div>
+);
+const renderEditor = (props: Partial<React.ComponentProps<typeof WorkflowEditor>> = {}) => render(editorOf(props));
+const TOOLS = [
+  "workflows.editor.add_state.title",
+  "workflows.editor.add_transition.title",
+  "workflows.editor.add_rule.title",
+  "workflows.editor.save",
+];
+const expectNoEditingTool = () => {
+  for (const name of TOOLS) expect(screen.queryByRole("button", { name })).toBeNull();
+};
 
 const addReview = async (user: ReturnType<typeof userEvent.setup>) => {
   await user.click(screen.getByRole("button", { name: "workflows.editor.add_state.title" }));
@@ -78,8 +87,7 @@ describe("WorkflowEditor", () => {
   it("shows no editing tool to a reader", () => {
     renderEditor({ readOnly: true });
     expect(screen.getByRole("status").textContent).toBe("workflows.editor.read_only");
-    expect(screen.queryByRole("button", { name: "workflows.editor.add_state.title" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "workflows.editor.save" })).toBeNull();
+    expectNoEditingTool();
     expect(screen.getByRole("button", { name: "workflows.editor.close" })).toBeTruthy();
   });
 
@@ -150,6 +158,80 @@ describe("WorkflowEditor", () => {
     await waitFor(() => expect(document.activeElement).toBe(trigger));
   });
 
+  it("forgets a removed transition, even once a discard brings it back", async () => {
+    renderEditor();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "workflows.editor.view.text" }));
+    await user.click(screen.getByRole("button", { name: /^Finish/ }));
+    expect(screen.getByRole("heading", { name: "workflows.editor.panel.transition" })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "workflows.editor.panel.remove_transition" }));
+    await user.click(screen.getByRole("button", { name: "workflows.editor.discard" }));
+    expect(screen.getByRole("button", { name: /^Finish/ })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "workflows.editor.panel.transition" })).toBeNull();
+    expect(screen.getByRole("heading", { name: "workflows.editor.panel.empty_title" })).toBeTruthy();
+  });
+
+  it("keeps the selection of a state still in the graph after a discard", async () => {
+    renderEditor();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "workflows.editor.view.text" }));
+    await user.click(screen.getByRole("button", { name: "Done" }));
+    await user.type(screen.getByRole("textbox", { name: "workflows.editor.add_state.name" }), "!");
+    await user.click(screen.getByRole("button", { name: "workflows.editor.discard" }));
+    expect(screen.getByRole("textbox", { name: "workflows.editor.add_state.name" })).toHaveProperty("value", "Done");
+  });
+
+  it("shows the shared warning from the statuses refreshed by the save (W17)", async () => {
+    const reviewed: TWorkflowDetail = {
+      ...workflow,
+      states: [
+        ...workflow.states,
+        { id: "c", status: statusOf("sr", "Review"), position_x: 480, position_y: 0, is_initial: false },
+      ],
+    };
+    // The store refreshes the statuses before saveGraph resolves; the page re-renders with them.
+    const fresh = [...statuses, { ...statusOf("sr", "Review"), workflow_count: 2 }];
+    const view = renderEditor({
+      onSave: async () => {
+        view.rerender(editorOf({ statuses: fresh, onSave: async () => reviewed }));
+        return reviewed;
+      },
+    });
+    const user = userEvent.setup();
+    await addReview(user);
+    await user.click(screen.getByRole("button", { name: "workflows.editor.save" }));
+    await user.click(screen.getByRole("button", { name: "workflows.editor.view.text" }));
+    await user.click(screen.getByRole("button", { name: "Review" }));
+    expect(screen.getByRole("note").textContent).toBe("workflows.editor.panel.shared");
+  });
+
+  it("expands the collapsed panel on a new selection and focuses its heading", async () => {
+    renderEditor();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "workflows.editor.panel.collapse" }));
+    await user.click(screen.getByRole("button", { name: "workflows.editor.view.text" }));
+    await user.click(screen.getByRole("button", { name: "Done" }));
+    const heading = screen.getByRole("heading", { name: "workflows.editor.panel.state" });
+    await waitFor(() => expect(document.activeElement).toBe(heading));
+  });
+
+  it("expands the collapsed panel on a selection in the diagram", async () => {
+    renderEditor();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "workflows.editor.panel.collapse" }));
+    // A click without the mousedown that React Flow's drag handler cannot run under jsdom.
+    fireEvent.click(screen.getByText("Done"));
+    expect(screen.getByRole("heading", { name: "workflows.editor.panel.state" })).toBeTruthy();
+  });
+
+  it("points the skip link at the view shown", async () => {
+    renderEditor();
+    expect(screen.getByRole("link", { name: "workflows.editor.diagram_label" })).toBeTruthy();
+    expect(screen.getByRole("main").getAttribute("tabindex")).toBe("-1");
+    await userEvent.setup().click(screen.getByRole("button", { name: "workflows.editor.view.text" }));
+    expect(screen.getByRole("link", { name: "workflows.editor.view.text" })).toBeTruthy();
+  });
+
   it("shows the empty panel once the selected state is removed", async () => {
     renderEditor();
     const user = userEvent.setup();
@@ -196,7 +278,6 @@ describe("WorkflowEditor", () => {
     renderEditor();
     expect(screen.getByRole("table")).toBeTruthy();
     expect(screen.getByRole("status").textContent).toBe("workflows.editor.small_screen");
-    expect(screen.queryByRole("button", { name: "workflows.editor.add_state.title" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "workflows.editor.save" })).toBeNull();
+    expectNoEditingTool();
   });
 });

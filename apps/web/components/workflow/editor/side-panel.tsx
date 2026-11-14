@@ -51,12 +51,22 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
   const headingRef = useRef<HTMLHeadingElement>(null);
   const handledSignal = useRef(0);
 
+  // Any new selection opens the panel (spec 3.7).
+  const selectionKey = selection ? `${selection.kind}:${selection.key}` : null;
+  useEffect(() => {
+    if (selectionKey !== null) setIsCollapsed(false);
+  }, [selectionKey]);
+
+  // A collapsed panel renders its heading only on the next pass, so the hand-off waits for it.
   useEffect(() => {
     if (focusSignal === handledSignal.current) return;
+    if (isCollapsed) {
+      setIsCollapsed(false);
+      return;
+    }
     handledSignal.current = focusSignal;
-    setIsCollapsed(false);
     headingRef.current?.focus();
-  }, [focusSignal]);
+  }, [focusSignal, isCollapsed]);
 
   const state = selection?.kind === "state" ? draft.states.find((item) => item.key === selection.key) : undefined;
   const transition =
@@ -77,7 +87,13 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
     </button>
   );
 
-  if (isCollapsed) return <div className="border-l border-subtle p-2">{toggle}</div>;
+  // Below 1024px the strip overlays the content like the open panel instead of taking its width.
+  if (isCollapsed)
+    return (
+      <div className="border-l border-subtle bg-layer-2 p-2 max-lg:absolute max-lg:top-0 max-lg:right-0 max-lg:z-10">
+        {toggle}
+      </div>
+    );
 
   return (
     <aside
