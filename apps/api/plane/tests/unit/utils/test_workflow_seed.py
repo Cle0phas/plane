@@ -133,10 +133,17 @@ class TestGraphFromProject:
         assert names(graph, [item["target_key"] for item in anywhere]) == ["Backlog", "Cancelled"]
         assert all(item["source_keys"] == [] and item["rules"] == [] for item in anywhere)
 
-    def test_the_first_state_starts_when_the_default_is_missing_or_cancelled(self, workspace):
+    def test_the_first_state_starts_when_the_default_is_cancelled(self, workspace):
         project = make_project(workspace, "First", "ONE")
         make_state(project, "Todo", "unstarted")
         make_state(project, "Dropped", "cancelled", default=True)
+        graph = graph_from_project(project)
+        assert [state["status"]["name"] for state in graph["states"] if state["is_initial"]] == ["Todo"]
+
+    def test_the_first_state_starts_when_the_project_has_no_default(self, workspace):
+        project = make_project(workspace, "First", "ONE")
+        make_state(project, "Todo", "unstarted")
+        make_state(project, "Doing", "started")
         graph = graph_from_project(project)
         assert [state["status"]["name"] for state in graph["states"] if state["is_initial"]] == ["Todo"]
 

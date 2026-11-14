@@ -5,6 +5,7 @@
 from uuid import uuid4
 
 import pytest
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -388,6 +389,9 @@ class TestCreateFromProject:
         entry = AuditLog.objects.get(action="workflow.created", target_id=response.data["id"])
         assert entry.after["source_project_id"] == str(project.id)
         assert entry.actor_id == users["admin"].id
+        # X1: the graph save leaves its own entry, after the creation one.
+        graph_entry = AuditLog.objects.get(action="workflow.graph_updated", target_id=response.data["id"])
+        assert graph_entry.created_at > entry.created_at
 
     def test_without_a_source_the_workflow_is_empty(self, workspace, users):
         response = self._post(users["admin"], workspace, name="Empty")
@@ -417,6 +421,15 @@ class TestCreateFromProject:
         missing = self._post(users["admin"], workspace, name="B", source_project_id=str(uuid4()))
         assert hidden.status_code == missing.status_code == status.HTTP_404_NOT_FOUND
         assert hidden.data == missing.data
+        assert not Workflow.objects.filter(workspace=workspace).exists()
+
+    def test_a_deleted_project_looks_missing(self, workspace, users, project):
+        _seed_project(project)
+        Project.objects.filter(pk=project.pk).update(deleted_at=timezone.now())
+        gone = self._post(users["admin"], workspace, name="A", source_project_id=str(project.id))
+        missing = self._post(users["admin"], workspace, name="B", source_project_id=str(uuid4()))
+        assert gone.status_code == missing.status_code == status.HTTP_404_NOT_FOUND
+        assert gone.data == missing.data
         assert not Workflow.objects.filter(workspace=workspace).exists()
 
     def test_a_malformed_project_id_is_refused(self, workspace, users):
