@@ -100,6 +100,30 @@ describe("WorkflowEditor", () => {
     expect(screen.getByText("workflows.editor.used_in").closest("summary, details")).toBeNull();
   });
 
+  // Spec 3.8: a reader gets the panel without any action.
+  it("shows a reader the panel of a state and of a transition without any action", async () => {
+    renderEditor({ readOnly: true });
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "workflows.editor.view.text" }));
+    await user.click(screen.getByRole("button", { name: "Done" }));
+    // Disabled through the panel's fieldset, so :disabled rather than the element's own attribute.
+    expect(screen.getByRole("textbox", { name: "workflows.editor.add_state.name" }).matches(":disabled")).toBe(true);
+    for (const name of [
+      "workflows.editor.panel.remove_state",
+      "workflows.editor.panel.set_initial",
+      "workflows.editor.panel.add_incoming",
+      "workflows.editor.panel.add_outgoing",
+    ])
+      expect(screen.queryByRole("button", { name })).toBeNull();
+    await user.click(screen.getByRole("button", { name: /^Finish/ }));
+    expect(screen.getByRole("heading", { name: "workflows.editor.panel.transition" })).toBeTruthy();
+    expect(screen.getByRole("textbox", { name: "workflows.editor.add_transition.name" }).matches(":disabled")).toBe(
+      true
+    );
+    expect(screen.queryByRole("button", { name: "workflows.editor.panel.remove_transition" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /workflows\.editor\.panel\.remove_source/ })).toBeNull();
+  });
+
   it("adds a ticked state and saves the graph", async () => {
     const onSave = vi.fn(async (_payload: TWorkflowGraphPayload) => workflow);
     renderEditor({ onSave });
@@ -288,6 +312,10 @@ describe("WorkflowEditor", () => {
     const banner = await screen.findByRole("alert");
     expect(banner.textContent).toContain("workflows.editor.errors.status_in_use");
     expect(banner.textContent).toContain("workflows.editor.errors.status_in_use_project");
+    // Spec 3.8: a refused save keeps every edit, ready to be corrected and saved again.
+    expect(screen.getAllByText("Review").length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "workflows.editor.discard" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "workflows.editor.save" })).toHaveProperty("disabled", false);
   });
 
   it("opens on the text view without editing tools below 768px (X13)", () => {
