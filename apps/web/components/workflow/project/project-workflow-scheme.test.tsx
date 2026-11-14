@@ -11,8 +11,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TProjectWorkflowScheme } from "@plane/types";
 import { ProjectWorkflowScheme } from "./project-workflow-scheme";
 
-// Real t is a new function on every render, which would re-run effects guarded by it.
-vi.mock("@plane/i18n", () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
+// Real t is a new function on every render, which would re-run effects guarded by it. A name is echoed
+// so the accessible names built from it can be asserted.
+vi.mock("@plane/i18n", () => ({
+  useTranslation: () => ({
+    t: (key: string, params?: { name?: string }) => (params?.name === undefined ? key : `${key} ${params.name}`),
+  }),
+}));
 const setToast = vi.hoisted(() => vi.fn());
 vi.mock("@plane/blocks/toast", () => ({ setToast }));
 
@@ -22,6 +27,7 @@ const state = vi.hoisted(() => ({
   isWorkspaceAdmin: true,
   isProjectAdmin: true,
   detachProjectScheme: vi.fn(),
+  permissionCalls: [] as unknown[][],
 }));
 vi.mock("@/hooks/store/use-workflow", () => ({
   useWorkflow: () => ({
@@ -43,8 +49,10 @@ vi.mock("@/hooks/store/use-project-state", () => ({
 }));
 vi.mock("@/hooks/store/user", () => ({
   useUserPermissions: () => ({
-    allowPermissions: (_roles: unknown, level: string) =>
-      level === "PROJECT" ? state.isProjectAdmin : state.isWorkspaceAdmin,
+    allowPermissions: (...args: unknown[]) => {
+      state.permissionCalls.push(args);
+      return args[1] === "PROJECT" ? state.isProjectAdmin : state.isWorkspaceAdmin;
+    },
   }),
 }));
 
@@ -72,6 +80,8 @@ const LINK = "workflows.scheme.link";
 const CHANGE = "workflows.scheme.change";
 const DETACH = "workflows.scheme.detach";
 const EDIT = "workflows.scheme.edit_workflow";
+const UNKNOWN_WORKFLOW = "workflows.scheme.table.unknown_workflow";
+const editNamed = (name: string) => `workflows.scheme.table.edit_named ${name}`;
 
 beforeEach(() => {
   state.scheme = linked();
@@ -82,6 +92,7 @@ beforeEach(() => {
   state.isWorkspaceAdmin = true;
   state.isProjectAdmin = true;
   state.detachProjectScheme = vi.fn().mockResolvedValue(undefined);
+  state.permissionCalls = [];
   setToast.mockClear();
 });
 
@@ -138,22 +149,41 @@ describe("linked project", () => {
     open();
     const rows = within(screen.getByRole("table")).getAllByRole("row").slice(1);
     expect(rows).toHaveLength(2);
-    expect(within(rows[1]).getByRole("link", { name: "-" }).getAttribute("href")).toMatch(
+    expect(within(rows[1]).getByRole("link", { name: UNKNOWN_WORKFLOW }).getAttribute("href")).toMatch(
       new RegExp("^/ws/settings/workflows/w-gone/?$")
     );
+    expect(within(rows[1]).getByRole("link", { name: editNamed(UNKNOWN_WORKFLOW) })).toBeTruthy();
     expect(within(rows[1]).getAllByText("-").length).toBeGreaterThan(1);
   });
 
   it("shows the edit link only to a workspace admin", () => {
     state.isWorkspaceAdmin = false;
     open();
-    expect(screen.queryByRole("link", { name: EDIT })).toBeNull();
+    expect(screen.queryByText(EDIT)).toBeNull();
     expect(screen.getByRole("link", { name: "Software" })).toBeTruthy();
   });
 
-  it("shows the edit link to a workspace admin", () => {
+  it("shows the edit link to a workspace admin, named after its workflow", () => {
     open();
-    expect(screen.getAllByRole("link", { name: EDIT })).toHaveLength(2);
+    expect(screen.getAllByText(EDIT)).toHaveLength(2);
+    expect(hrefOf(screen.getByRole("link", { name: editNamed("Software") }))).toBe("/ws/settings/workflows/w-default");
+    expect(hrefOf(screen.getByRole("link", { name: editNamed("Strict") }))).toBe("/ws/settings/workflows/w-strict");
+  });
+
+  it("checks both roles in the workspace of the page", () => {
+    open();
+    expect(state.permissionCalls).toContainEqual([expect.anything(), "WORKSPACE", "ws"]);
+    expect(state.permissionCalls).toContainEqual([expect.anything(), "PROJECT", "ws", "p1"]);
+  });
+
+  it("clears a failed detach's error when the wizard opens", async () => {
+    state.detachProjectScheme = vi.fn().mockRejectedValue({ scheme: ["invalid_scheme"] });
+    const user = open();
+    await user.click(screen.getByRole("button", { name: DETACH }));
+    await user.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: DETACH }));
+    expect((await screen.findByRole("alert")).textContent).toBe("workflows.scheme.errors.invalid_scheme");
+    await user.click(screen.getByRole("button", { name: CHANGE }));
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 
   it("shows change and detach to who may change the scheme", () => {
@@ -168,7 +198,7 @@ describe("linked project", () => {
     open();
     expect(screen.getByRole("table")).toBeTruthy();
     expect(screen.queryByRole("button")).toBeNull();
-    expect(screen.queryByRole("link", { name: EDIT })).toBeNull();
+    expect(screen.queryByText(EDIT)).toBeNull();
   });
 
   it("offers no link button to a reader of a project without a scheme", () => {

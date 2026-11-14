@@ -65,7 +65,7 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
   const [isEditing, setIsEditing] = useState(false);
   const { allowPermissions } = useUserPermissions();
   // Display only (A2, A4): the server refuses every write from anyone else.
-  const isWorkspaceAdmin = allowPermissions([EUserPermissions.ADMIN], EUserPermissionsLevel.WORKSPACE);
+  const isWorkspaceAdmin = allowPermissions([EUserPermissions.ADMIN], EUserPermissionsLevel.WORKSPACE, workspaceSlug);
   const canManage = allowPermissions([EUserPermissions.ADMIN], EUserPermissionsLevel.PROJECT, workspaceSlug, projectId);
   const rows = scheme ? schemeRows(scheme) : [];
   const isLinked = rows.length > 0;
@@ -150,6 +150,11 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
 
   const workflowName = (workflowId: string) => workflows.find((workflow) => workflow.id === workflowId)?.name ?? "";
 
+  const startEditing = () => {
+    setErrorKey(null);
+    setIsEditing(true);
+  };
+
   const cancelEditing = () => {
     isPristine.current = true;
     setSyncTick((tick) => tick + 1);
@@ -169,7 +174,7 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
               size="md"
               stretch="auto"
               label={t("workflows.scheme.link")}
-              onClick={() => setIsEditing(true)}
+              onClick={startEditing}
             />
           )}
         </div>
@@ -183,7 +188,7 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
                 size="md"
                 stretch="auto"
                 label={t("workflows.scheme.change")}
-                onClick={() => setIsEditing(true)}
+                onClick={startEditing}
               />
               <Button
                 variant="danger-outline"
@@ -211,14 +216,20 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
               <tbody>
                 {rows.map((row) => {
                   const href = `/${workspaceSlug}/settings/workflows/${row.workflowId}`;
+                  const name = workflowName(row.workflowId);
+                  const unknownName = t("workflows.scheme.table.unknown_workflow");
                   const typeNames = row.typeIds.map(
                     (typeId) => types.find((type) => type.id === typeId)?.name ?? UNKNOWN
                   );
                   return (
                     <tr key={row.workflowId} className="align-top text-body-sm-regular text-primary">
                       <td className="border-b border-subtle p-2">
-                        <Link href={href} className="text-body-sm-medium hover:underline">
-                          {workflowName(row.workflowId) || UNKNOWN}
+                        <Link
+                          href={href}
+                          className="text-body-sm-medium hover:underline"
+                          aria-label={name ? undefined : unknownName}
+                        >
+                          {name || UNKNOWN}
                         </Link>
                       </td>
                       <td className="border-b border-subtle p-2 text-secondary">
@@ -226,7 +237,11 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
                       </td>
                       {isWorkspaceAdmin && (
                         <td className="border-b border-subtle p-2">
-                          <Link href={href} className="text-body-xs-medium text-accent-primary hover:underline">
+                          <Link
+                            href={href}
+                            className="text-body-xs-medium text-accent-primary hover:underline"
+                            aria-label={t("workflows.scheme.table.edit_named", { name: name || unknownName })}
+                          >
                             {t("workflows.scheme.edit_workflow")}
                           </Link>
                         </td>
