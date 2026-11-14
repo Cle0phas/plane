@@ -46,7 +46,14 @@ type Props = {
 // Stable reference: React Flow re-mounts nodes when nodeTypes changes.
 const NODE_TYPES = { workflowState: WorkflowStateNode, workflowStart: WorkflowStartNode };
 const START_GAP = 160;
-const ARROW = { type: MarkerType.ArrowClosed };
+// Theme text colours, so the arrows keep their contrast on the canvas in both themes; inline styles beat
+// React Flow's own grey edge rules. A fixed head size keeps the selected arrow's head the same.
+const arrowLook = (color: string, strokeWidth: number) => ({
+  style: { stroke: color, strokeWidth },
+  markerEnd: { type: MarkerType.ArrowClosed, color, width: 32, height: 32, markerUnits: "userSpaceOnUse" },
+});
+const ARROW = arrowLook("var(--text-color-secondary)", 2);
+const SELECTED_ARROW = arrowLook("var(--text-color-accent-primary)", 3);
 const MINIMAP_HEIGHT = 150;
 // Margin of every React Flow panel (.react-flow__panel): keeps the slider clear of the minimap.
 const PANEL_MARGIN = 15;
@@ -182,7 +189,7 @@ export function WorkflowCanvas({
             target: initial.key,
             targetHandle: "left",
             type: "step",
-            markerEnd: ARROW,
+            ...ARROW,
             selectable: false,
             deletable: false,
             focusable: false,
@@ -200,6 +207,7 @@ export function WorkflowCanvas({
             const to = positionOf(transition.target_key);
             if (!from || !to) return [];
             const sides = transition.sides?.[source] ?? closestSides(from, to);
+            const isSelected = selection?.kind === "transition" && selection.key === transition.key;
             return [
               {
                 id: `${transition.key}:${source}`,
@@ -209,8 +217,8 @@ export function WorkflowCanvas({
                 targetHandle: sides.target,
                 type: "step",
                 label: showLabels && transition.name ? transition.name : undefined,
-                markerEnd: ARROW,
-                selected: selection?.kind === "transition" && selection.key === transition.key,
+                ...(isSelected ? SELECTED_ARROW : ARROW),
+                selected: isSelected,
                 deletable: canEdit,
                 reconnectable: false,
                 ariaLabel: transitionLabel(transition.name, nameOf(source), nameOf(transition.target_key)),

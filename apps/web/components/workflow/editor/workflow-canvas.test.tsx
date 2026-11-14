@@ -136,6 +136,32 @@ describe("WorkflowCanvas", () => {
     expect(flow().edges).toBe(first);
   });
 
+  it("draws the arrows thick and in a text colour, the selected transition thicker in the accent colour", () => {
+    const { rerender } = renderCanvas();
+    const plain = { stroke: "var(--text-color-secondary)", strokeWidth: 2 };
+    for (const id of ["t:a", "__start_edge__"]) {
+      expect(edgeById(id).style).toEqual(plain);
+      expect(edgeById(id).markerEnd).toMatchObject({ color: plain.stroke });
+    }
+    rerender(
+      <WorkflowCanvas
+        draft={draft}
+        canEdit
+        showLabels={false}
+        selection={{ kind: "transition", key: "t" }}
+        onSelect={noop}
+        onMove={noop}
+        onConnect={noop}
+        onSetInitial={noop}
+        onRemoveState={noop}
+        onRemoveTransition={noop}
+      />
+    );
+    expect(edgeById("t:a").style).toEqual({ stroke: "var(--text-color-accent-primary)", strokeWidth: 3 });
+    expect(edgeById("t:a").markerEnd).toMatchObject({ color: "var(--text-color-accent-primary)" });
+    expect(edgeById("__start_edge__").style).toEqual(plain);
+  });
+
   // fireEvent rather than userEvent for clicks: d3-drag reads the view of a mousedown, null under user-event.
   it("selects a state on a click and a global transition on a click on its pill", () => {
     const onSelect = vi.fn();
