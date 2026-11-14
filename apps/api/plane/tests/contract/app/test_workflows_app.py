@@ -13,6 +13,7 @@ from plane.db.models import (
     Issue,
     Project,
     ProjectMember,
+    ProjectWorkflowScheme,
     State,
     Workflow,
     WorkflowState,
@@ -342,3 +343,101 @@ class TestStatusCandidates:
         WorkspaceMember.objects.create(workspace=WorkspaceFactory(), member=outsider, role=20)
         response = _client(outsider).get(CANDIDATES_URL.format(slug=workspace.slug))
         assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def _seed_project(project):
+    _state(project, "Backlog", "backlog", default=True)
+    _state(project, "Doing", "started")
+    _state(project, "Dropped", "cancelled")
+    State.objects.create(project=project, workspace=project.workspace, name="Triage", group="triage", color="#3A3A3A")
+
+
+@pytest.mark.contract
+@pytest.mark.django_db
+class TestCreateFromProject:
+    def _post(self, user, workspace, **body):
+        return _client(user).post(WORKFLOWS_URL.format(slug=workspace.slug), body, format="json")
+
+    def _refused(self, user, workspace, project):
+        _seed_project(project)
+        response = self._post(user, workspace, name="Nope", source_project_id=str(project.id))
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert not Workflow.objects.filter(name="Nope").exists()
+        assert not WorkflowStatus.objects.filter(workspace=workspace).exists()
+
+    def test_admin_creates_a_workflow_holding_the_project_graph(self, workspace, users, project):
+        _seed_project(project)
+        response = self._post(users["admin"], workspace, name="From project", source_project_id=str(project.id))
+        assert response.status_code == status.HTTP_201_CREATED
+        states = response.data["states"]
+        assert [state["status"]["name"] for state in states] == ["Backlog", "Doing", "Dropped"]
+        assert [state["status"]["name"] for state in states if state["is_initial"]] == ["Backlog"]
+        by_id = {state["id"]: state["status"]["name"] for state in states}
+        transitions = response.data["transitions"]
+        assert sorted(
+            ([by_id[source] for source in item["source_ids"]], by_id[item["target_id"]], item["from_any"])
+            for item in transitions
+        ) == [([], "Backlog", True), ([], "Dropped", True), (["Backlog"], "Doing", False)]
+        assert response.data["project_count"] == 0
+        assert not ProjectWorkflowScheme.objects.filter(project=project).exists()
+
+    def test_the_creation_is_audited_with_its_source(self, workspace, users, project):
+        _seed_project(project)
+        response = self._post(users["admin"], workspace, name="From project", source_project_id=str(project.id))
+        entry = AuditLog.objects.get(action="workflow.created", target_id=response.data["id"])
+        assert entry.after["source_project_id"] == str(project.id)
+        assert entry.actor_id == users["admin"].id
+
+    def test_without_a_source_the_workflow_is_empty(self, workspace, users):
+        response = self._post(users["admin"], workspace, name="Empty")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["states"] == []
+        assert "source_project_id" not in AuditLog.objects.get(action="workflow.created").after
+
+    @pytest.mark.parametrize("role", ["member", "guest"])
+    def test_other_roles_cannot_create_from_a_project(self, workspace, users, project, role):
+        self._refused(users[role], workspace, project)
+
+    def test_a_project_admin_who_is_only_a_workspace_member_is_refused(self, workspace, users, project):
+        ProjectMember.objects.create(project=project, member=users["member"], role=20)
+        self._refused(users["member"], workspace, project)
+
+    def test_a_user_with_no_membership_is_refused(self, workspace, project):
+        self._refused(UserFactory(), workspace, project)
+
+    def test_an_admin_of_another_workspace_is_refused(self, workspace, project):
+        outsider = UserFactory()
+        WorkspaceMember.objects.create(workspace=WorkspaceFactory(), member=outsider, role=20)
+        self._refused(outsider, workspace, project)
+
+    def test_a_project_of_another_workspace_looks_missing(self, workspace, users):
+        foreign = Project.objects.create(name="Foreign", identifier="FOR", workspace=WorkspaceFactory())
+        hidden = self._post(users["admin"], workspace, name="A", source_project_id=str(foreign.id))
+        missing = self._post(users["admin"], workspace, name="B", source_project_id=str(uuid4()))
+        assert hidden.status_code == missing.status_code == status.HTTP_404_NOT_FOUND
+        assert hidden.data == missing.data
+        assert not Workflow.objects.filter(workspace=workspace).exists()
+
+    def test_a_malformed_project_id_is_refused(self, workspace, users):
+        response = self._post(users["admin"], workspace, name="A", source_project_id=123)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "source_project_id" in response.data
+
+    def test_too_many_states_create_nothing(self, workspace, users, project):
+        State.objects.bulk_create(
+            State(
+                project=project,
+                workspace=workspace,
+                name=f"State {index}",
+                slug=f"state-{index}",
+                group="started",
+                color="#3A3A3A",
+                sequence=index,
+            )
+            for index in range(201)
+        )
+        response = self._post(users["admin"], workspace, name="Huge", source_project_id=str(project.id))
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert not Workflow.objects.filter(name="Huge").exists()
+        assert not WorkflowStatus.objects.filter(workspace=workspace).exists()
+        assert not AuditLog.objects.filter(action="workflow.created").exists()

@@ -7,7 +7,7 @@ from django.db import IntegrityError, transaction
 from django.db.models import Count
 
 # Third party imports
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.response import Response
 
 # Module imports
@@ -30,8 +30,9 @@ from plane.db.models import (
     WorkspaceMember,
 )
 from plane.utils.audit import record_audit
+from plane.utils.issue_types import StrictUUIDField
 from plane.utils.workflow_graph import GraphError, save_workflow_graph, workflow_graph
-from plane.utils.workflow_seed import candidate_statuses
+from plane.utils.workflow_seed import candidate_statuses, graph_from_project
 from plane.utils.workflow_sync import (
     SchemeError,
     apply_scheme,
@@ -73,6 +74,20 @@ def workflow_detail(workflow, is_admin):
 
 def _workflow_snapshot(workflow):
     return {"name": workflow.name, "description": workflow.description}
+
+
+class SeedError(Exception):
+    def __init__(self, body):
+        super().__init__("seed")
+        self.body = body
+
+
+def _seed(workflow, graph, actor_id):
+    """Check a server-built graph like a client payload, then save it (X1)."""
+    serializer = WorkflowGraphInputSerializer(data=graph, context={"workspace_id": workflow.workspace_id})
+    if not serializer.is_valid():
+        raise SeedError(serializer.errors)
+    save_workflow_graph(workflow=workflow, graph=serializer.validated_data, actor_id=actor_id)
 
 
 class WorkflowStatusEndpoint(BaseAPIView):
@@ -134,21 +149,42 @@ class WorkflowEndpoint(BaseAPIView):
         serializer = WorkflowSerializer(data=request.data, context={"workspace_id": workspace.id})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        source = None
+        source_id = request.data.get("source_project_id") if isinstance(request.data, dict) else None
+        if source_id is not None:
+            try:
+                source_id = StrictUUIDField().run_validation(source_id)
+            except serializers.ValidationError as error:
+                return Response({"source_project_id": error.detail}, status=status.HTTP_400_BAD_REQUEST)
+            # A project of another workspace raises DoesNotExist: same 404 as a missing one (A5).
+            source = Project.objects.get(workspace_id=workspace.id, pk=source_id)
         try:
             with transaction.atomic():
                 workflow = serializer.save(workspace_id=workspace.id)
+                snapshot = _workflow_snapshot(workflow)
+                if source is not None:
+                    snapshot["source_project_id"] = str(source.id)
                 record_audit(
                     workspace_id=workspace.id,
                     actor_id=request.user.id,
                     action="workflow.created",
                     target_type="workflow",
                     target_id=workflow.id,
-                    after=_workflow_snapshot(workflow),
+                    after=snapshot,
                 )
+                if source is not None:
+                    _seed(workflow, graph_from_project(source), request.user.id)
+        except SeedError as error:
+            return Response(error.body, status=status.HTTP_400_BAD_REQUEST)
+        except GraphError as error:
+            return Response({"graph": [error.code]}, status=status.HTTP_400_BAD_REQUEST)
         except IntegrityError as error:
+            if _constraint_name(error) == STATUS_NAME_CONSTRAINT:
+                return Response({"graph": ["duplicate_status_name"]}, status=status.HTTP_400_BAD_REQUEST)
             if _constraint_name(error) != WORKFLOW_NAME_CONSTRAINT:
                 raise
             return Response({"name": [DUPLICATE_WORKFLOW_NAME_MESSAGE]}, status=status.HTTP_400_BAD_REQUEST)
+        workflow.refresh_from_db()
         return Response(workflow_detail(workflow, True), status=status.HTTP_201_CREATED)
 
     @allow_permission(allowed_roles=[ROLE.ADMIN], level="WORKSPACE")
