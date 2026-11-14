@@ -25,6 +25,7 @@ import { useAppRouter } from "@/hooks/use-app-router";
 import { useUserPermissions } from "@/hooks/store/user";
 // local imports
 import type { Route } from "./+types/page";
+import { closeTarget } from "./close-target";
 
 const SWR_OPTIONS = { revalidateOnFocus: false, revalidateIfStale: false };
 
@@ -72,7 +73,11 @@ function WorkflowEditorPage({ params }: Route.ComponentProps) {
           candidates={getWorkspaceCandidates(workspaceSlug)}
           readOnly={!isWorkspaceAdmin}
           onSave={(payload) => saveGraph(workspaceSlug, workflow.id, payload)}
-          onClose={() => router.push(`/${workspaceSlug}/settings/workflows`)}
+          onClose={() => {
+            const target = closeTarget(workspaceSlug, isWorkspaceAdmin, window.history.state?.idx);
+            if (target.kind === "back") router.back();
+            else router.push(target.href);
+          }}
         />
       )}
     </div>
