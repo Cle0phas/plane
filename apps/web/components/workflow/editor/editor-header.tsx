@@ -66,7 +66,8 @@ export function EditorHeader(props: Props) {
           ))}
         </div>
       )}
-      <div className="flex flex-1 items-center justify-end gap-2">
+      {/* The propel Button takes no class: the 44px touch target below 768px is set from here (spec 3.8). */}
+      <div className="flex flex-1 items-center justify-end gap-2 max-md:[&_button]:min-h-11 max-md:[&_button]:min-w-11">
         {canEdit && (
           <Button
             variant="primary"

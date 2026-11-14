@@ -54,7 +54,7 @@ export function WorkflowTextView({ draft, selection, onSelect }: Props) {
                 <td className="border-b border-subtle p-2">
                   <button
                     type="button"
-                    className="flex size-8 items-center justify-center rounded-md hover:bg-layer-1"
+                    className="flex size-8 items-center justify-center rounded-md hover:bg-layer-1 max-md:size-11"
                     aria-expanded={isOpen}
                     aria-label={t("workflows.editor.text.toggle", { name: row.name })}
                     onClick={() =>
@@ -73,7 +73,7 @@ export function WorkflowTextView({ draft, selection, onSelect }: Props) {
                 <td className={`border-b border-subtle p-2 ${isSelected ? "bg-layer-1-selected" : ""}`}>
                   <button
                     type="button"
-                    className={`rounded-sm border px-2 py-1 text-caption-sm-medium uppercase ${TONE_CLASS[toneOf(row.group)]}`}
+                    className={`rounded-sm border px-2 py-1 text-caption-sm-medium uppercase max-md:min-h-11 max-md:min-w-11 ${TONE_CLASS[toneOf(row.group)]}`}
                     aria-current={isSelected ? "true" : undefined}
                     // The editor focuses this row after adding the state (spec 3.3).
                     data-state-key={row.key}
@@ -101,7 +101,7 @@ export function WorkflowTextView({ draft, selection, onSelect }: Props) {
                             ) : (
                               <button
                                 type="button"
-                                className="rounded-sm text-left hover:underline"
+                                className="rounded-sm text-left hover:underline max-md:min-h-11"
                                 aria-current={
                                   selection?.kind === "transition" && selection.key === key ? "true" : undefined
                                 }
