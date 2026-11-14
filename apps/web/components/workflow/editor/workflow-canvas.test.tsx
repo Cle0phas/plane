@@ -4,13 +4,13 @@
  * See the LICENSE file for details.
  */
 
-import { createElement, type ComponentProps } from "react";
+import { createElement, useState, type ComponentProps } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { MiniMap as TMiniMap, ReactFlowInstance, ReactFlow as TReactFlow } from "@xyflow/react";
 import { describe, expect, it, vi } from "vitest";
 import type { TDraftGraph } from "./graph-model";
-import { WorkflowCanvas } from "./workflow-canvas";
+import { WorkflowCanvas, type TEditorSelection } from "./workflow-canvas";
 
 const { translate, flowProps, miniMapProps, flowInstance } = vi.hoisted(() => ({
   // Parameters are echoed so the accessible names built from them can be asserted.
@@ -85,6 +85,28 @@ const renderCanvas = (props: Partial<ComponentProps<typeof WorkflowCanvas>> = {}
       />
     </div>
   );
+
+// The editor owns the selection: this harness keeps it like the editor does, so React Flow sees it come back.
+function SelectingCanvas(props: Partial<ComponentProps<typeof WorkflowCanvas>>) {
+  const [selection, setSelection] = useState<TEditorSelection>(null);
+  return (
+    <div style={{ width: 800, height: 600 }}>
+      <WorkflowCanvas
+        draft={draft}
+        canEdit
+        showLabels={false}
+        selection={selection}
+        onSelect={setSelection}
+        onMove={noop}
+        onConnect={noop}
+        onSetInitial={noop}
+        onRemoveState={noop}
+        onRemoveTransition={noop}
+        {...props}
+      />
+    </div>
+  );
+}
 
 const flow = () => {
   if (!flowProps.current) throw new Error("ReactFlow was not rendered");
@@ -339,19 +361,44 @@ describe("WorkflowCanvas", () => {
     expect(onSetInitial).toHaveBeenCalledWith("b");
   });
 
+  // A click on the pill reaches the node too: React Flow must not keep that state selected behind the editor.
+  it("never removes the state of a pill clicked twice when Delete is pressed", async () => {
+    const onRemoveState = vi.fn();
+    render(<SelectingCanvas onRemoveState={onRemoveState} />);
+    fireEvent.click(pill());
+    fireEvent.click(pill());
+    expect(pill().getAttribute("aria-pressed")).toBe("true");
+    pill().blur();
+    await userEvent.setup().keyboard("{Delete}");
+    expect(onRemoveState).not.toHaveBeenCalled();
+    expect(nodeById("a").selected).toBe(false);
+  });
+
+  it("still selects a state with Enter on its focused node", async () => {
+    const onSelect = vi.fn();
+    const { container } = renderCanvas({ onSelect });
+    const node = container.querySelector<HTMLElement>('.react-flow__node[data-id="b"]');
+    if (!node) throw new Error("No node b");
+    node.focus();
+    await userEvent.setup().keyboard("{Enter}");
+    expect(onSelect).toHaveBeenLastCalledWith({ kind: "state", key: "b" });
+  });
+
   it("removes a deleted state without removing a transition it shared with another source", async () => {
     const onRemoveState = vi.fn();
     const onRemoveTransition = vi.fn();
-    renderCanvas({
-      draft: {
-        states: [state("a", "Todo", 0, true), state("b", "Doing", 240), state("c", "Done", 480)],
-        transitions: [
-          { key: "t", name: "Finish", from_any: false, source_keys: ["a", "b"], target_key: "c", rules: [] },
-        ],
-      },
-      onRemoveState,
-      onRemoveTransition,
-    });
+    render(
+      <SelectingCanvas
+        draft={{
+          states: [state("a", "Todo", 0, true), state("b", "Doing", 240), state("c", "Done", 480)],
+          transitions: [
+            { key: "t", name: "Finish", from_any: false, source_keys: ["a", "b"], target_key: "c", rules: [] },
+          ],
+        }}
+        onRemoveState={onRemoveState}
+        onRemoveTransition={onRemoveTransition}
+      />
+    );
     fireEvent.click(screen.getByText("Doing"));
     await userEvent.setup().keyboard("{Delete}");
     await waitFor(() => expect(onRemoveState).toHaveBeenCalledWith("b"));

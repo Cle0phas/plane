@@ -277,7 +277,14 @@ export function WorkflowCanvas({
           flowRef.current = instance;
         }}
         onNodesChange={(changes) => {
-          setNodes((current) => applyNodeChanges(changes, current));
+          // The editor owns the selection: a select change kept here could outlive it, so selected comes
+          // from the specs only (a click on a pill would leave its state selected for Delete).
+          setNodes((current) =>
+            applyNodeChanges(
+              changes.filter((change) => change.type !== "select"),
+              current
+            )
+          );
           // Keyboard use never goes through onNodeClick: Enter selects a focused node and the arrow keys
           // move it, both reported here only, like the drop of a drag (dragging false, spec 3.9).
           const picked = changes.find(
