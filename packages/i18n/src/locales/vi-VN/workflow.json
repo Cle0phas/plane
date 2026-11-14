@@ -187,27 +187,44 @@
         "target": "Đến",
         "choose_state": "Chọn trạng thái",
         "name": "Tên (tùy chọn)",
-        "submit": "Thêm chuyển tiếp"
+        "submit": "Thêm chuyển tiếp",
+        "in_workflow": "Trong quy trình làm việc này",
+        "other_states": "Các trạng thái hiện có khác",
+        "other_states_hint": "Được thêm vào sơ đồ khi chọn.",
+        "locked": "Cố định ở trạng thái đã chọn.",
+        "duplicate": "Chuyển tiếp này đã tồn tại."
       },
       "panel": {
         "state": "Trạng thái",
         "transition": "Chuyển tiếp",
         "set_initial": "Đặt làm trạng thái ban đầu",
-        "initial": "Trạng thái ban đầu",
+        "initial": "Trạng thái ban đầu của quy trình làm việc",
         "shared": "{count, plural, one {Dùng chung với # quy trình làm việc khác: thay đổi cũng áp dụng ở đó.} other {Dùng chung với # quy trình làm việc khác: thay đổi cũng áp dụng ở đó.}}",
-        "remove_state": "Gỡ trạng thái",
-        "remove_transition": "Gỡ chuyển tiếp",
+        "remove_state": "Gỡ khỏi quy trình làm việc",
+        "remove_transition": "Xóa chuyển tiếp",
         "remove_source": "Gỡ trạng thái nguồn {name}",
         "empty_title": "Xây dựng quy trình làm việc tùy chỉnh",
         "empty_body": "Quy trình làm việc phản ánh cách nhóm của bạn làm việc. Thêm các trạng thái, chúng sẽ trở thành các cột trên bảng của dự án, sau đó nối chúng bằng các chuyển tiếp và dùng quy tắc để giới hạn ai được sử dụng.",
         "empty_hint": "Chọn một trạng thái để xem chi tiết.",
-        "color": "Màu cột trên bảng",
+        "color": "Màu cột",
         "incoming": "Chuyển tiếp đến",
         "outgoing": "Chuyển tiếp đi",
         "add_incoming": "Thêm chuyển tiếp đến",
         "add_outgoing": "Thêm chuyển tiếp đi",
         "collapse": "Thu gọn bảng điều khiển",
-        "expand": "Mở rộng bảng điều khiển"
+        "expand": "Mở rộng bảng điều khiển",
+        "shared_named": "{count, plural, one {Trạng thái này cũng được dùng trong # quy trình làm việc khác: {names}. Đổi tên hoặc đổi màu hay danh mục của nó cũng sẽ thay đổi ở đó.} other {Trạng thái này cũng được dùng trong # quy trình làm việc khác: {names}. Đổi tên hoặc đổi màu hay danh mục của nó cũng sẽ thay đổi ở đó.}}",
+        "more_names": "{count, plural, one {{names} và # mục khác} other {{names} và # mục khác}}",
+        "incoming_count": "Chuyển tiếp đến · {count}",
+        "outgoing_count": "Chuyển tiếp đi · {count}",
+        "add": "Thêm",
+        "path": "Đường đi",
+        "add_source": "Thêm trạng thái nguồn",
+        "rule": "Quy tắc",
+        "edit": "Chỉnh sửa",
+        "remove": "Gỡ",
+        "edit_rule": "Chỉnh sửa quy tắc",
+        "remove_rule": "Gỡ quy tắc"
       },
       "restrict": {
         "title": "Giới hạn người được chuyển",
@@ -216,10 +233,12 @@
         "users": "Người",
         "assignee": "Người được giao mục công việc",
         "creator": "Người tạo mục công việc",
-        "clear": "Gỡ giới hạn"
+        "clear": "Gỡ giới hạn",
+        "summary_roles": "Vai trò: {roles}",
+        "summary_users": "{count, plural, one {# người} other {# người}}"
       },
       "errors": {
-        "initial_state_required": "Hãy chọn đúng một trạng thái ban đầu.",
+        "initial_state_required": "Hãy liên kết BẮT ĐẦU với một trạng thái.",
         "duplicate_state_key": "Một trạng thái xuất hiện hai lần. Hãy tải lại trang.",
         "duplicate_status": "Một trạng thái xuất hiện hai lần trong quy trình làm việc này.",
         "duplicate_status_name": "Hai trạng thái có cùng tên, hoặc đã có trạng thái với tên này: hãy chọn từ các trạng thái hiện có.",
@@ -231,7 +250,9 @@
         "status_limit": "Không gian làm việc đã đạt 1.000 trạng thái.",
         "status_in_use": "Các trạng thái này vẫn chứa mục công việc, hãy chuyển chúng trước:",
         "status_in_use_project": "{project}: {count, plural, one {# mục công việc} other {# mục công việc}}",
-        "default": "Không thể lưu quy trình làm việc."
+        "default": "Không thể lưu quy trình làm việc.",
+        "stale_graph": "Quy trình làm việc này đã bị thay đổi trong lúc đó. Hãy tải lại.",
+        "duplicate_transition": "Hai chuyển tiếp nối cùng các trạng thái."
       },
       "close": "Đóng",
       "small_screen": "Hãy mở quy trình làm việc này trên màn hình rộng hơn để chỉnh sửa.",
@@ -262,6 +283,31 @@
         "unnamed": "Chuyển tiếp không tên",
         "toggle": "Hiện hoặc ẩn các chuyển tiếp của {name}",
         "empty": "Quy trình làm việc này chưa có trạng thái nào."
+      },
+      "start_panel": {
+        "title": "Điểm bắt đầu của quy trình làm việc",
+        "field": "Mỗi mục công việc mới bắt đầu ở trạng thái",
+        "unlink": "Gỡ liên kết"
+      },
+      "reload": "Tải lại",
+      "presence": "{count, plural, one {{names} cũng đang chỉnh sửa quy trình làm việc này.} other {{names} cũng đang chỉnh sửa quy trình làm việc này.}}",
+      "rename": {
+        "title": "Đổi tên ở mọi nơi?",
+        "line": "Đổi tên \"{from}\" thành \"{to}\" cũng đổi tên nó trong: {names}.",
+        "confirm": "Đổi tên ở mọi nơi"
+      },
+      "leave": {
+        "title": "Rời đi mà không lưu?",
+        "body": "Các thay đổi của quy trình làm việc này chưa được lưu.",
+        "confirm": "Rời đi mà không lưu",
+        "stay": "Ở lại"
+      },
+      "a11y": {
+        "node": "Nhấn Enter hoặc Space để chọn một trạng thái. Dùng các phím mũi tên để di chuyển và Delete để gỡ nó. Nhấn Esc để hủy.",
+        "node_read_only": "Nhấn Enter hoặc Space để chọn một trạng thái.",
+        "edge": "Nhấn Enter hoặc Space để chọn một chuyển tiếp. Nhấn Delete để xóa hoặc Esc để hủy.",
+        "moved": "Đã di chuyển trạng thái. Vị trí mới: x {x}, y {y}.",
+        "handle": "Điểm kết nối"
       }
     },
     "scheme": {
@@ -301,7 +347,25 @@
         "actions": "Thao tác",
         "unknown_workflow": "Quy trình làm việc không xác định",
         "edit_named": "Chỉnh sửa quy trình làm việc {name}"
-      }
+      },
+      "add": "Thêm quy trình làm việc",
+      "add_submit": "Thêm",
+      "link_submit": "Liên kết",
+      "default_badge": "mặc định",
+      "replace": "Thay thế",
+      "replace_title": "Thay thế quy trình làm việc mặc định",
+      "edit_types": "Chỉnh sửa loại",
+      "edit_types_named": "Chỉnh sửa các loại của {name}",
+      "remove": "Gỡ",
+      "remove_named": "Gỡ {name}",
+      "remove_title": "Gỡ {name}?",
+      "remove_confirm": "{count, plural, one {{types} sẽ theo quy trình làm việc mặc định {default}.} other {{types} sẽ theo quy trình làm việc mặc định {default}.}}",
+      "types_field": "Các loại mục công việc liên quan",
+      "link_note": "Nó sẽ áp dụng cho mọi loại mục công việc, kể cả các loại được tạo sau này.",
+      "taken_note": "{count, plural, one {{types} không có trong danh sách: đã theo {workflow}.} other {{types} không có trong danh sách: đã theo {workflow}.}}",
+      "unchecked_note": "Loại không được chọn sẽ ở lại quy trình làm việc mặc định.",
+      "no_workflow": "Mọi quy trình làm việc của không gian làm việc đã có trong bảng.",
+      "no_type": "Mọi loại mục công việc đều đã theo một quy trình làm việc riêng."
     },
     "managed_states": {
       "banner": "Các trạng thái này đến từ quy trình làm việc của dự án. Hãy thay đổi chúng trong Cài đặt không gian làm việc, Quy trình làm việc."

@@ -187,27 +187,44 @@
         "target": "Do",
         "choose_state": "Vybrať stav",
         "name": "Názov (voliteľné)",
-        "submit": "Pridať prechod"
+        "submit": "Pridať prechod",
+        "in_workflow": "V tomto pracovnom postupe",
+        "other_states": "Ďalšie existujúce stavy",
+        "other_states_hint": "Po začiarknutí sa pridajú do diagramu.",
+        "locked": "Nastavené na vybraný stav.",
+        "duplicate": "Tento prechod už existuje."
       },
       "panel": {
         "state": "Stav",
         "transition": "Prechod",
         "set_initial": "Nastaviť ako počiatočný stav",
-        "initial": "Počiatočný stav",
+        "initial": "Počiatočný stav pracovného postupu",
         "shared": "{count, plural, one {Zdieľané s # ďalším pracovným postupom: zmeny platia aj tam.} few {Zdieľané s # ďalšími pracovnými postupmi: zmeny platia aj tam.} many {Zdieľané s # ďalšieho pracovného postupu: zmeny platia aj tam.} other {Zdieľané s # ďalšími pracovnými postupmi: zmeny platia aj tam.}}",
-        "remove_state": "Odstrániť stav",
-        "remove_transition": "Odstrániť prechod",
+        "remove_state": "Odstrániť z pracovného postupu",
+        "remove_transition": "Zmazať prechod",
         "remove_source": "Odstrániť zdrojový stav {name}",
         "empty_title": "Vytvárajte vlastné pracovné postupy",
         "empty_body": "Pracovné postupy zodpovedajú spôsobu práce vášho tímu. Pridajte stavy, ktoré sa stanú stĺpcami nástenky projektu, prepojte ich prechodmi a pomocou pravidiel obmedzte, kto ich smie používať.",
         "empty_hint": "Vyberte stav a zobrazte jeho podrobnosti.",
-        "color": "Farba stĺpca na nástenke",
+        "color": "Farba stĺpca",
         "incoming": "Prichádzajúce",
         "outgoing": "Odchádzajúce",
         "add_incoming": "Pridať prichádzajúci prechod",
         "add_outgoing": "Pridať odchádzajúci prechod",
         "collapse": "Zbaliť panel",
-        "expand": "Rozbaliť panel"
+        "expand": "Rozbaliť panel",
+        "shared_named": "{count, plural, one {Tento stav sa používa aj v # ďalšom pracovnom postupe: {names}. Jeho premenovanie alebo zmena farby či kategórie ho zmení aj tam.} few {Tento stav sa používa aj v # ďalších pracovných postupoch: {names}. Jeho premenovanie alebo zmena farby či kategórie ho zmení aj tam.} many {Tento stav sa používa aj v # ďalšieho pracovného postupu: {names}. Jeho premenovanie alebo zmena farby či kategórie ho zmení aj tam.} other {Tento stav sa používa aj v # ďalších pracovných postupoch: {names}. Jeho premenovanie alebo zmena farby či kategórie ho zmení aj tam.}}",
+        "more_names": "{count, plural, one {{names} a # ďalší} few {{names} a # ďalšie} many {{names} a # ďalšieho} other {{names} a # ďalších}}",
+        "incoming_count": "Prichádzajúce prechody · {count}",
+        "outgoing_count": "Odchádzajúce prechody · {count}",
+        "add": "Pridať",
+        "path": "Cesta",
+        "add_source": "Pridať zdrojový stav",
+        "rule": "Pravidlo",
+        "edit": "Upraviť",
+        "remove": "Odstrániť",
+        "edit_rule": "Upraviť pravidlo",
+        "remove_rule": "Odstrániť pravidlo"
       },
       "restrict": {
         "title": "Obmedziť, kto môže presúvať",
@@ -216,10 +233,12 @@
         "users": "Ľudia",
         "assignee": "Riešiteľ pracovnej položky",
         "creator": "Autor pracovnej položky",
-        "clear": "Odstrániť obmedzenie"
+        "clear": "Odstrániť obmedzenie",
+        "summary_roles": "Roly: {roles}",
+        "summary_users": "{count, plural, one {# osoba} few {# osoby} many {# osoby} other {# osôb}}"
       },
       "errors": {
-        "initial_state_required": "Vyberte presne jeden počiatočný stav.",
+        "initial_state_required": "Prepojte START so stavom.",
         "duplicate_state_key": "Stav sa objavuje dvakrát. Načítajte stránku znova.",
         "duplicate_status": "Status sa v tomto pracovnom postupe objavuje dvakrát.",
         "duplicate_status_name": "Dva stavy majú rovnaký názov, alebo status s týmto názvom už existuje: vyberte ho z existujúcich statusov.",
@@ -231,7 +250,9 @@
         "status_limit": "Pracovný priestor dosiahol 1 000 statusov.",
         "status_in_use": "Tieto stavy stále obsahujú pracovné položky, najprv ich presuňte:",
         "status_in_use_project": "{project}: {count, plural, one {# pracovná položka} few {# pracovné položky} many {# pracovnej položky} other {# pracovných položiek}}",
-        "default": "Pracovný postup sa nepodarilo uložiť."
+        "default": "Pracovný postup sa nepodarilo uložiť.",
+        "stale_graph": "Tento pracovný postup bol medzitým zmenený. Načítajte ho znova.",
+        "duplicate_transition": "Dva prechody spájajú rovnaké stavy."
       },
       "close": "Zavrieť",
       "small_screen": "Ak chcete tento pracovný postup upraviť, otvorte ho na širšej obrazovke.",
@@ -262,6 +283,31 @@
         "unnamed": "Nepomenovaný prechod",
         "toggle": "Zobraziť alebo skryť prechody stavu {name}",
         "empty": "Tento pracovný postup zatiaľ nemá žiadny stav."
+      },
+      "start_panel": {
+        "title": "Začiatok pracovného postupu",
+        "field": "Každá nová pracovná položka začína v stave",
+        "unlink": "Odstrániť prepojenie"
+      },
+      "reload": "Načítať znova",
+      "presence": "{count, plural, one {{names} tiež upravuje tento pracovný postup.} few {{names} tiež upravujú tento pracovný postup.} many {{names} tiež upravujú tento pracovný postup.} other {{names} tiež upravujú tento pracovný postup.}}",
+      "rename": {
+        "title": "Premenovať všade?",
+        "line": "Premenovanie „{from}“ na „{to}“ ho premenuje aj v: {names}.",
+        "confirm": "Premenovať všade"
+      },
+      "leave": {
+        "title": "Odísť bez uloženia?",
+        "body": "Zmeny tohto pracovného postupu nie sú uložené.",
+        "confirm": "Odísť bez uloženia",
+        "stay": "Zostať"
+      },
+      "a11y": {
+        "node": "Stlačením Enter alebo Space vyberiete stav. Šípkami ho presuniete a klávesom Delete odstránite. Stlačením Esc akciu zrušíte.",
+        "node_read_only": "Stlačením Enter alebo Space vyberiete stav.",
+        "edge": "Stlačením Enter alebo Space vyberiete prechod. Klávesom Delete ho odstránite, klávesom Esc akciu zrušíte.",
+        "moved": "Stav presunutý. Nová pozícia: x {x}, y {y}.",
+        "handle": "Bod pripojenia"
       }
     },
     "scheme": {
@@ -301,7 +347,25 @@
         "actions": "Akcie",
         "unknown_workflow": "Neznámy pracovný postup",
         "edit_named": "Upraviť pracovný postup {name}"
-      }
+      },
+      "add": "Pridať pracovný postup",
+      "add_submit": "Pridať",
+      "link_submit": "Prepojiť",
+      "default_badge": "predvolený",
+      "replace": "Nahradiť",
+      "replace_title": "Nahradiť predvolený pracovný postup",
+      "edit_types": "Upraviť typy",
+      "edit_types_named": "Upraviť typy pre {name}",
+      "remove": "Odstrániť",
+      "remove_named": "Odstrániť {name}",
+      "remove_title": "Odstrániť {name}?",
+      "remove_confirm": "{count, plural, one {{types} sa bude riadiť predvoleným pracovným postupom {default}.} few {{types} sa budú riadiť predvoleným pracovným postupom {default}.} many {{types} sa budú riadiť predvoleným pracovným postupom {default}.} other {{types} sa budú riadiť predvoleným pracovným postupom {default}.}}",
+      "types_field": "Dotknuté typy pracovných položiek",
+      "link_note": "Bude platiť pre každý typ pracovnej položky vrátane tých, ktoré vzniknú neskôr.",
+      "taken_note": "{count, plural, one {{types} nie je v zozname: už sa riadi pracovným postupom {workflow}.} few {{types} nie sú v zozname: už sa riadia pracovným postupom {workflow}.} many {{types} nie sú v zozname: už sa riadia pracovným postupom {workflow}.} other {{types} nie sú v zozname: už sa riadia pracovným postupom {workflow}.}}",
+      "unchecked_note": "Nezačiarknutý typ zostane pri predvolenom pracovnom postupe.",
+      "no_workflow": "Všetky pracovné postupy pracovného priestoru už sú v tabuľke.",
+      "no_type": "Každý typ pracovnej položky sa už riadi vlastným pracovným postupom."
     },
     "managed_states": {
       "banner": "Tieto stavy pochádzajú z pracovných postupov projektu. Zmeňte ich v Nastaveniach pracovného priestoru, Pracovné postupy."

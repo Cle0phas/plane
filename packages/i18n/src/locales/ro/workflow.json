@@ -187,27 +187,44 @@
         "target": "În",
         "choose_state": "Alege o stare",
         "name": "Nume (opțional)",
-        "submit": "Adaugă tranziția"
+        "submit": "Adaugă tranziția",
+        "in_workflow": "În acest flux de lucru",
+        "other_states": "Alte stări existente",
+        "other_states_hint": "Adăugate în diagramă când sunt bifate.",
+        "locked": "Fixat pe starea selectată.",
+        "duplicate": "Această tranziție există deja."
       },
       "panel": {
         "state": "Stare",
         "transition": "Tranziție",
-        "set_initial": "Fă din ea starea inițială",
-        "initial": "Stare inițială",
+        "set_initial": "Setează ca stare inițială",
+        "initial": "Starea inițială a fluxului de lucru",
         "shared": "{count, plural, one {Partajată cu # alt flux de lucru: modificările se aplică și acolo.} few {Partajată cu # alte fluxuri de lucru: modificările se aplică și acolo.} other {Partajată cu # de alte fluxuri de lucru: modificările se aplică și acolo.}}",
-        "remove_state": "Elimină starea",
-        "remove_transition": "Elimină tranziția",
+        "remove_state": "Elimină din fluxul de lucru",
+        "remove_transition": "Șterge tranziția",
         "remove_source": "Elimină starea sursă {name}",
         "empty_title": "Creați fluxuri de lucru personalizate",
         "empty_body": "Fluxurile de lucru reflectă modul de lucru al echipei dumneavoastră. Adăugați stări, care devin coloanele tablei proiectului, legați-le prin tranziții și limitați prin reguli cine le poate folosi.",
         "empty_hint": "Selectați o stare pentru a-i vedea detaliile.",
-        "color": "Culoarea coloanei pe tablă",
+        "color": "Culoarea coloanei",
         "incoming": "De intrare",
         "outgoing": "De ieșire",
         "add_incoming": "Adaugă o tranziție de intrare",
         "add_outgoing": "Adaugă o tranziție de ieșire",
         "collapse": "Restrânge panoul",
-        "expand": "Extinde panoul"
+        "expand": "Extinde panoul",
+        "shared_named": "{count, plural, one {Această stare este folosită și în # alt flux de lucru: {names}. Redenumirea ei sau schimbarea culorii ori a categoriei o modifică și acolo.} few {Această stare este folosită și în # alte fluxuri de lucru: {names}. Redenumirea ei sau schimbarea culorii ori a categoriei o modifică și acolo.} other {Această stare este folosită și în # de alte fluxuri de lucru: {names}. Redenumirea ei sau schimbarea culorii ori a categoriei o modifică și acolo.}}",
+        "more_names": "{count, plural, one {{names} și încă #} few {{names} și încă #} other {{names} și încă #}}",
+        "incoming_count": "Tranziții de intrare · {count}",
+        "outgoing_count": "Tranziții de ieșire · {count}",
+        "add": "Adaugă",
+        "path": "Traseu",
+        "add_source": "Adaugă o stare sursă",
+        "rule": "Regulă",
+        "edit": "Editează",
+        "remove": "Elimină",
+        "edit_rule": "Editează regula",
+        "remove_rule": "Elimină regula"
       },
       "restrict": {
         "title": "Restricționează cine poate muta",
@@ -216,10 +233,12 @@
         "users": "Persoane",
         "assignee": "Responsabilul elementului de lucru",
         "creator": "Creatorul elementului de lucru",
-        "clear": "Elimină restricția"
+        "clear": "Elimină restricția",
+        "summary_roles": "Roluri: {roles}",
+        "summary_users": "{count, plural, one {# persoană} few {# persoane} other {# de persoane}}"
       },
       "errors": {
-        "initial_state_required": "Alege exact o stare inițială.",
+        "initial_state_required": "Legați START de o stare.",
         "duplicate_state_key": "O stare apare de două ori. Reîncarcă pagina.",
         "duplicate_status": "Un status apare de două ori în acest flux de lucru.",
         "duplicate_status_name": "Două stări au același nume sau există deja un status cu acest nume: alege-l dintre statusurile existente.",
@@ -231,7 +250,9 @@
         "status_limit": "Spațiul de lucru a atins 1.000 de statusuri.",
         "status_in_use": "Aceste stări conțin încă elemente de lucru, mută-le mai întâi:",
         "status_in_use_project": "{project}: {count, plural, one {# element de lucru} few {# elemente de lucru} other {# de elemente de lucru}}",
-        "default": "Fluxul de lucru nu a putut fi salvat."
+        "default": "Fluxul de lucru nu a putut fi salvat.",
+        "stale_graph": "Acest flux de lucru a fost modificat între timp. Reîncărcați-l.",
+        "duplicate_transition": "Două tranziții leagă aceleași stări."
       },
       "close": "Închide",
       "small_screen": "Deschideți acest flux de lucru pe un ecran mai lat pentru a-l modifica.",
@@ -262,6 +283,31 @@
         "unnamed": "Tranziție fără nume",
         "toggle": "Afișează sau ascunde tranzițiile stării {name}",
         "empty": "Acest flux de lucru nu are încă nicio stare."
+      },
+      "start_panel": {
+        "title": "Începutul fluxului de lucru",
+        "field": "Fiecare element de lucru nou începe în starea",
+        "unlink": "Elimină legătura"
+      },
+      "reload": "Reîncarcă",
+      "presence": "{count, plural, one {Și {names} editează acest flux de lucru.} few {Și {names} editează acest flux de lucru.} other {Și {names} editează acest flux de lucru.}}",
+      "rename": {
+        "title": "Redenumiți peste tot?",
+        "line": "Redenumirea „{from}” în „{to}” o redenumește și în: {names}.",
+        "confirm": "Redenumește peste tot"
+      },
+      "leave": {
+        "title": "Ieșiți fără să salvați?",
+        "body": "Modificările acestui flux de lucru nu sunt salvate.",
+        "confirm": "Ieși fără salvare",
+        "stay": "Rămâi"
+      },
+      "a11y": {
+        "node": "Apăsați Enter sau Space pentru a selecta o stare. Folosiți tastele săgeți pentru a o muta și Delete pentru a o elimina. Apăsați Esc pentru a anula.",
+        "node_read_only": "Apăsați Enter sau Space pentru a selecta o stare.",
+        "edge": "Apăsați Enter sau Space pentru a selecta o tranziție. Apăsați Delete pentru a o șterge sau Esc pentru a anula.",
+        "moved": "Stare mutată. Poziție nouă: x {x}, y {y}.",
+        "handle": "Punct de conexiune"
       }
     },
     "scheme": {
@@ -301,7 +347,25 @@
         "actions": "Acțiuni",
         "unknown_workflow": "Flux de lucru necunoscut",
         "edit_named": "Editează fluxul de lucru {name}"
-      }
+      },
+      "add": "Adaugă un flux de lucru",
+      "add_submit": "Adaugă",
+      "link_submit": "Asociază",
+      "default_badge": "implicit",
+      "replace": "Înlocuiește",
+      "replace_title": "Înlocuiește fluxul de lucru implicit",
+      "edit_types": "Editează tipurile",
+      "edit_types_named": "Editează tipurile pentru {name}",
+      "remove": "Elimină",
+      "remove_named": "Elimină {name}",
+      "remove_title": "Eliminați {name}?",
+      "remove_confirm": "{count, plural, one {{types} va urma fluxul de lucru implicit {default}.} few {{types} vor urma fluxul de lucru implicit {default}.} other {{types} vor urma fluxul de lucru implicit {default}.}}",
+      "types_field": "Tipuri de elemente de lucru vizate",
+      "link_note": "Se va aplica fiecărui tip de element de lucru, inclusiv celor create ulterior.",
+      "taken_note": "{count, plural, one {{types} nu apare în listă: urmează deja {workflow}.} few {{types} nu apar în listă: urmează deja {workflow}.} other {{types} nu apar în listă: urmează deja {workflow}.}}",
+      "unchecked_note": "Un tip nebifat rămâne pe fluxul de lucru implicit.",
+      "no_workflow": "Toate fluxurile de lucru ale spațiului de lucru sunt deja în tabel.",
+      "no_type": "Fiecare tip de element de lucru urmează deja un flux de lucru propriu."
     },
     "managed_states": {
       "banner": "Aceste stări provin din fluxurile de lucru ale proiectului. Modifică-le în Setările spațiului de lucru, Fluxuri de lucru."

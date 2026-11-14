@@ -187,27 +187,44 @@
         "target": "Hacia",
         "choose_state": "Elegir un estado",
         "name": "Nombre (opcional)",
-        "submit": "Añadir transición"
+        "submit": "Añadir transición",
+        "in_workflow": "En este workflow",
+        "other_states": "Otros estados existentes",
+        "other_states_hint": "Se añaden al diagrama al seleccionarlos.",
+        "locked": "Fijado en el estado seleccionado.",
+        "duplicate": "Esta transición ya existe."
       },
       "panel": {
         "state": "Estado",
         "transition": "Transición",
-        "set_initial": "Convertir en estado inicial",
-        "initial": "Estado inicial",
+        "set_initial": "Definir como estado inicial",
+        "initial": "Estado inicial del workflow",
         "shared": "{count, plural, one {Compartido con # otro workflow: los cambios se aplican también allí.} other {Compartido con # otros workflows: los cambios se aplican también allí.}}",
-        "remove_state": "Quitar estado",
-        "remove_transition": "Quitar transición",
+        "remove_state": "Quitar del workflow",
+        "remove_transition": "Eliminar la transición",
         "remove_source": "Quitar el estado de origen {name}",
         "empty_title": "Crear workflows personalizados",
         "empty_body": "Los workflows se adaptan a la forma de trabajar de su equipo. Añada estados, que se convierten en las columnas del tablero de su proyecto, conéctelos con transiciones y limite con reglas quién puede usarlas.",
         "empty_hint": "Seleccione un estado para ver sus detalles.",
-        "color": "Color de la columna del tablero",
+        "color": "Color de columna",
         "incoming": "Entrantes",
         "outgoing": "Salientes",
         "add_incoming": "Añadir una transición entrante",
         "add_outgoing": "Añadir una transición saliente",
         "collapse": "Contraer el panel",
-        "expand": "Expandir el panel"
+        "expand": "Expandir el panel",
+        "shared_named": "{count, plural, one {Este estado también se usa en # otro workflow: {names}. Si cambia su nombre, su color o su categoría, también cambia allí.} other {Este estado también se usa en # otros workflows: {names}. Si cambia su nombre, su color o su categoría, también cambia allí.}}",
+        "more_names": "{count, plural, one {{names} y # más} other {{names} y # más}}",
+        "incoming_count": "Transiciones entrantes · {count}",
+        "outgoing_count": "Transiciones salientes · {count}",
+        "add": "Añadir",
+        "path": "Ruta",
+        "add_source": "Añadir un estado de origen",
+        "rule": "Regla",
+        "edit": "Editar",
+        "remove": "Quitar",
+        "edit_rule": "Editar la regla",
+        "remove_rule": "Quitar la regla"
       },
       "restrict": {
         "title": "Restringir quién puede mover",
@@ -216,10 +233,12 @@
         "users": "Personas",
         "assignee": "Responsable del elemento de trabajo",
         "creator": "Creador del elemento de trabajo",
-        "clear": "Quitar restricción"
+        "clear": "Quitar restricción",
+        "summary_roles": "Roles: {roles}",
+        "summary_users": "{count, plural, one {# persona} other {# personas}}"
       },
       "errors": {
-        "initial_state_required": "Elige exactamente un estado inicial.",
+        "initial_state_required": "Vincule INICIO a un estado.",
         "duplicate_state_key": "Un estado aparece dos veces. Recarga la página.",
         "duplicate_status": "Un estatus aparece dos veces en este workflow.",
         "duplicate_status_name": "Dos estados tienen el mismo nombre, o ya existe un estatus con este nombre: elígelo entre los estatus existentes.",
@@ -231,7 +250,9 @@
         "status_limit": "El espacio de trabajo ha alcanzado los 1000 estatus.",
         "status_in_use": "Estos estados aún contienen elementos de trabajo, muévelos primero:",
         "status_in_use_project": "{project}: {count, plural, one {# elemento de trabajo} other {# elementos de trabajo}}",
-        "default": "No se pudo guardar el workflow."
+        "default": "No se pudo guardar el workflow.",
+        "stale_graph": "Este workflow se ha modificado mientras tanto. Vuelva a cargarlo.",
+        "duplicate_transition": "Dos transiciones unen los mismos estados."
       },
       "close": "Cerrar",
       "small_screen": "Abra este workflow en una pantalla más ancha para editarlo.",
@@ -262,6 +283,31 @@
         "unnamed": "Transición sin nombre",
         "toggle": "Mostrar u ocultar las transiciones de {name}",
         "empty": "Este workflow aún no tiene estados."
+      },
+      "start_panel": {
+        "title": "Inicio del workflow",
+        "field": "Todo nuevo elemento de trabajo empieza en el estado",
+        "unlink": "Quitar el vínculo"
+      },
+      "reload": "Recargar",
+      "presence": "{count, plural, one {{names} también está editando este workflow.} other {{names} también están editando este workflow.}}",
+      "rename": {
+        "title": "¿Cambiar el nombre en todas partes?",
+        "line": "Cambiar el nombre de «{from}» a «{to}» también lo cambia en: {names}.",
+        "confirm": "Cambiar el nombre en todas partes"
+      },
+      "leave": {
+        "title": "¿Salir sin guardar?",
+        "body": "Los cambios de este workflow no se han guardado.",
+        "confirm": "Salir sin guardar",
+        "stay": "Quedarse"
+      },
+      "a11y": {
+        "node": "Pulse Enter o Space para seleccionar un estado. Use las teclas de flecha para moverlo y Delete para quitarlo. Pulse Esc para cancelar.",
+        "node_read_only": "Pulse Enter o Space para seleccionar un estado.",
+        "edge": "Pulse Enter o Space para seleccionar una transición. Pulse Delete para eliminarla o Esc para cancelar.",
+        "moved": "Estado movido. Nueva posición: x {x}, y {y}.",
+        "handle": "Punto de conexión"
       }
     },
     "scheme": {
@@ -301,7 +347,25 @@
         "actions": "Acciones",
         "unknown_workflow": "Workflow desconocido",
         "edit_named": "Editar workflow {name}"
-      }
+      },
+      "add": "Añadir un workflow",
+      "add_submit": "Añadir",
+      "link_submit": "Vincular",
+      "default_badge": "predeterminado",
+      "replace": "Reemplazar",
+      "replace_title": "Reemplazar el workflow predeterminado",
+      "edit_types": "Editar los tipos",
+      "edit_types_named": "Editar los tipos de {name}",
+      "remove": "Quitar",
+      "remove_named": "Quitar {name}",
+      "remove_title": "¿Quitar {name}?",
+      "remove_confirm": "{count, plural, one {{types} seguirá el workflow predeterminado {default}.} other {{types} seguirán el workflow predeterminado {default}.}}",
+      "types_field": "Tipos de elemento de trabajo afectados",
+      "link_note": "Se aplicará a todos los tipos de elemento de trabajo, incluidos los que se creen más adelante.",
+      "taken_note": "{count, plural, one {{types} no aparece: ya sigue {workflow}.} other {{types} no aparecen: ya siguen {workflow}.}}",
+      "unchecked_note": "Un tipo no marcado se queda en el workflow predeterminado.",
+      "no_workflow": "Todos los workflows del espacio de trabajo ya están en la tabla.",
+      "no_type": "Todos los tipos de elemento de trabajo ya siguen un workflow propio."
     },
     "managed_states": {
       "banner": "Estos estados provienen de los workflows del proyecto. Modifícalos en Configuración del espacio de trabajo, Workflows."

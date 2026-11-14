@@ -187,27 +187,44 @@
         "target": "到",
         "choose_state": "選擇狀態",
         "name": "名稱（選填）",
-        "submit": "新增轉換"
+        "submit": "新增轉換",
+        "in_workflow": "此工作流程中",
+        "other_states": "其他現有狀態",
+        "other_states_hint": "勾選後會加入圖表。",
+        "locked": "已固定為所選狀態。",
+        "duplicate": "此轉換已存在。"
       },
       "panel": {
         "state": "狀態",
         "transition": "轉換",
         "set_initial": "設為初始狀態",
-        "initial": "初始狀態",
+        "initial": "工作流程的初始狀態",
         "shared": "{count, plural, one {與另外 # 個工作流程共用：變更也會套用到那裡。} other {與另外 # 個工作流程共用：變更也會套用到那裡。}}",
-        "remove_state": "移除狀態",
-        "remove_transition": "移除轉換",
+        "remove_state": "從工作流程中移除",
+        "remove_transition": "刪除轉換",
         "remove_source": "移除來源狀態 {name}",
         "empty_title": "建立自訂工作流程",
         "empty_body": "工作流程符合您團隊的工作方式。新增狀態（它們會成為專案看板的欄），再以轉換將其連接，並透過規則限制誰可以使用這些轉換。",
         "empty_hint": "選取一個狀態以檢視其詳細資訊。",
-        "color": "看板欄顏色",
+        "color": "欄顏色",
         "incoming": "傳入",
         "outgoing": "傳出",
         "add_incoming": "新增傳入轉換",
         "add_outgoing": "新增傳出轉換",
         "collapse": "收合面板",
-        "expand": "展開面板"
+        "expand": "展開面板",
+        "shared_named": "{count, plural, one {此狀態也用於另外 # 個工作流程：{names}。重新命名此狀態或變更其顏色或類別，也會在那裡生效。} other {此狀態也用於另外 # 個工作流程：{names}。重新命名此狀態或變更其顏色或類別，也會在那裡生效。}}",
+        "more_names": "{count, plural, one {{names} 及另外 # 個} other {{names} 及另外 # 個}}",
+        "incoming_count": "傳入轉換 · {count}",
+        "outgoing_count": "傳出轉換 · {count}",
+        "add": "新增",
+        "path": "路徑",
+        "add_source": "新增來源狀態",
+        "rule": "規則",
+        "edit": "編輯",
+        "remove": "移除",
+        "edit_rule": "編輯規則",
+        "remove_rule": "移除規則"
       },
       "restrict": {
         "title": "限制可移動的人員",
@@ -216,10 +233,12 @@
         "users": "人員",
         "assignee": "工作項目的負責人",
         "creator": "工作項目的建立者",
-        "clear": "移除限制"
+        "clear": "移除限制",
+        "summary_roles": "角色：{roles}",
+        "summary_users": "{count, plural, one {# 人} other {# 人}}"
       },
       "errors": {
-        "initial_state_required": "請選擇且僅選擇一個初始狀態。",
+        "initial_state_required": "請將「開始」連接到一個狀態。",
         "duplicate_state_key": "有狀態出現了兩次。請重新載入頁面。",
         "duplicate_status": "此工作流程中有狀態出現了兩次。",
         "duplicate_status_name": "有兩個狀態同名，或已存在同名的狀態：請從現有狀態中選擇。",
@@ -231,7 +250,9 @@
         "status_limit": "工作區的狀態數已達 1000 個上限。",
         "status_in_use": "這些狀態中仍有工作項目，請先移走：",
         "status_in_use_project": "{project}：{count, plural, one {# 個工作項目} other {# 個工作項目}}",
-        "default": "無法儲存工作流程。"
+        "default": "無法儲存工作流程。",
+        "stale_graph": "此工作流程已在這段期間被修改。請重新載入。",
+        "duplicate_transition": "兩個轉換連接了相同的狀態。"
       },
       "close": "關閉",
       "small_screen": "請在較寬的螢幕上開啟此工作流程以進行編輯。",
@@ -262,6 +283,31 @@
         "unnamed": "未命名的轉換",
         "toggle": "顯示或隱藏 {name} 的轉換",
         "empty": "此工作流程尚未有任何狀態。"
+      },
+      "start_panel": {
+        "title": "工作流程起點",
+        "field": "每個新工作項目的起始狀態",
+        "unlink": "移除連結"
+      },
+      "reload": "重新載入",
+      "presence": "{count, plural, one {{names} 也正在編輯此工作流程。} other {{names} 也正在編輯此工作流程。}}",
+      "rename": {
+        "title": "在所有位置重新命名？",
+        "line": "將「{from}」重新命名為「{to}」，也會在以下工作流程中重新命名：{names}。",
+        "confirm": "在所有位置重新命名"
+      },
+      "leave": {
+        "title": "不儲存就離開？",
+        "body": "此工作流程的變更尚未儲存。",
+        "confirm": "不儲存並離開",
+        "stay": "留在此頁"
+      },
+      "a11y": {
+        "node": "按 Enter 或 Space 鍵選取狀態。使用方向鍵移動它，按 Delete 鍵移除它。按 Esc 鍵取消。",
+        "node_read_only": "按 Enter 或 Space 鍵選取狀態。",
+        "edge": "按 Enter 或 Space 鍵選取轉換。按 Delete 鍵刪除它，或按 Esc 鍵取消。",
+        "moved": "狀態已移動。新位置：x {x}，y {y}。",
+        "handle": "連接點"
       }
     },
     "scheme": {
@@ -301,7 +347,25 @@
         "actions": "動作",
         "unknown_workflow": "未知工作流程",
         "edit_named": "編輯工作流程 {name}"
-      }
+      },
+      "add": "新增工作流程",
+      "add_submit": "新增",
+      "link_submit": "連結",
+      "default_badge": "預設",
+      "replace": "取代",
+      "replace_title": "取代預設工作流程",
+      "edit_types": "編輯類型",
+      "edit_types_named": "編輯 {name} 的類型",
+      "remove": "移除",
+      "remove_named": "移除 {name}",
+      "remove_title": "移除 {name}？",
+      "remove_confirm": "{count, plural, one {{types} 將遵循預設工作流程 {default}。} other {{types} 將遵循預設工作流程 {default}。}}",
+      "types_field": "相關工作項目類型",
+      "link_note": "它將套用至每種工作項目類型，包括之後建立的類型。",
+      "taken_note": "{count, plural, one {{types} 未列出：已遵循 {workflow}。} other {{types} 未列出：已遵循 {workflow}。}}",
+      "unchecked_note": "未勾選的類型會保留預設工作流程。",
+      "no_workflow": "工作區的所有工作流程都已在表格中。",
+      "no_type": "每種工作項目類型都已遵循各自的工作流程。"
     },
     "managed_states": {
       "banner": "這些狀態來自專案的工作流程。請在工作區設定的工作流程中變更。"

@@ -187,27 +187,44 @@
         "target": "Naar",
         "choose_state": "Kies een status",
         "name": "Naam (optioneel)",
-        "submit": "Overgang toevoegen"
+        "submit": "Overgang toevoegen",
+        "in_workflow": "In deze workflow",
+        "other_states": "Andere bestaande statussen",
+        "other_states_hint": "Worden aan het diagram toegevoegd wanneer ze zijn geselecteerd.",
+        "locked": "Vastgezet op de geselecteerde status.",
+        "duplicate": "Deze overgang bestaat al."
       },
       "panel": {
         "state": "Status",
         "transition": "Overgang",
-        "set_initial": "Maak dit de beginstatus",
-        "initial": "Beginstatus",
+        "set_initial": "Instellen als beginstatus",
+        "initial": "Beginstatus van de workflow",
         "shared": "{count, plural, one {Gedeeld met # andere workflow: wijzigingen gelden daar ook.} other {Gedeeld met # andere workflows: wijzigingen gelden daar ook.}}",
-        "remove_state": "Status verwijderen",
+        "remove_state": "Uit de workflow verwijderen",
         "remove_transition": "Overgang verwijderen",
         "remove_source": "Bronstatus {name} verwijderen",
         "empty_title": "Aangepaste workflows maken",
         "empty_body": "Workflows sluiten aan bij de manier waarop je team werkt. Voeg statussen toe, die de kolommen van je projectbord worden, verbind ze met overgangen en beperk met regels wie ze mag gebruiken.",
         "empty_hint": "Selecteer een status om de details te bekijken.",
-        "color": "Kleur van de bordkolom",
+        "color": "Kolomkleur",
         "incoming": "Inkomend",
         "outgoing": "Uitgaand",
         "add_incoming": "Een inkomende overgang toevoegen",
         "add_outgoing": "Een uitgaande overgang toevoegen",
         "collapse": "Paneel samenvouwen",
-        "expand": "Paneel uitvouwen"
+        "expand": "Paneel uitvouwen",
+        "shared_named": "{count, plural, one {Deze status wordt ook gebruikt in # andere workflow: {names}. Als u de naam, kleur of categorie wijzigt, verandert die daar ook.} other {Deze status wordt ook gebruikt in # andere workflows: {names}. Als u de naam, kleur of categorie wijzigt, verandert die daar ook.}}",
+        "more_names": "{count, plural, one {{names} en # andere} other {{names} en # andere}}",
+        "incoming_count": "Inkomende overgangen · {count}",
+        "outgoing_count": "Uitgaande overgangen · {count}",
+        "add": "Toevoegen",
+        "path": "Pad",
+        "add_source": "Een bronstatus toevoegen",
+        "rule": "Regel",
+        "edit": "Bewerken",
+        "remove": "Verwijderen",
+        "edit_rule": "De regel bewerken",
+        "remove_rule": "De regel verwijderen"
       },
       "restrict": {
         "title": "Beperken wie mag verplaatsen",
@@ -216,10 +233,12 @@
         "users": "Personen",
         "assignee": "Toegewezene van het werkitem",
         "creator": "Maker van het werkitem",
-        "clear": "Beperking verwijderen"
+        "clear": "Beperking verwijderen",
+        "summary_roles": "Rollen: {roles}",
+        "summary_users": "{count, plural, one {# persoon} other {# personen}}"
       },
       "errors": {
-        "initial_state_required": "Kies precies één beginstatus.",
+        "initial_state_required": "Koppel START aan een status.",
         "duplicate_state_key": "Een status komt twee keer voor. Laad de pagina opnieuw.",
         "duplicate_status": "Een status komt twee keer voor in deze workflow.",
         "duplicate_status_name": "Twee statussen hebben dezelfde naam, of er bestaat al een status met deze naam: kies die uit de bestaande statussen.",
@@ -231,7 +250,9 @@
         "status_limit": "De werkruimte heeft 1.000 statussen bereikt.",
         "status_in_use": "Deze statussen bevatten nog werkitems, verplaats ze eerst:",
         "status_in_use_project": "{project}: {count, plural, one {# werkitem} other {# werkitems}}",
-        "default": "De workflow kon niet worden opgeslagen."
+        "default": "De workflow kon niet worden opgeslagen.",
+        "stale_graph": "Deze workflow is intussen gewijzigd. Laad hem opnieuw.",
+        "duplicate_transition": "Twee overgangen verbinden dezelfde statussen."
       },
       "close": "Sluiten",
       "small_screen": "Open deze workflow op een breder scherm om hem te bewerken.",
@@ -262,6 +283,31 @@
         "unnamed": "Naamloze overgang",
         "toggle": "Overgangen van {name} tonen of verbergen",
         "empty": "Deze workflow heeft nog geen status."
+      },
+      "start_panel": {
+        "title": "Start van de workflow",
+        "field": "Elk nieuw werkitem begint in de status",
+        "unlink": "Koppeling verwijderen"
+      },
+      "reload": "Opnieuw laden",
+      "presence": "{count, plural, one {{names} bewerkt deze workflow ook.} other {{names} bewerken deze workflow ook.}}",
+      "rename": {
+        "title": "Overal hernoemen?",
+        "line": "Als u \"{from}\" hernoemt naar \"{to}\", wordt de status ook hernoemd in: {names}.",
+        "confirm": "Overal hernoemen"
+      },
+      "leave": {
+        "title": "Verlaten zonder op te slaan?",
+        "body": "De wijzigingen aan deze workflow zijn niet opgeslagen.",
+        "confirm": "Verlaten zonder op te slaan",
+        "stay": "Blijven"
+      },
+      "a11y": {
+        "node": "Druk op Enter of Space om een status te selecteren. Gebruik de pijltoetsen om hem te verplaatsen en Delete om hem te verwijderen. Druk op Esc om te annuleren.",
+        "node_read_only": "Druk op Enter of Space om een status te selecteren.",
+        "edge": "Druk op Enter of Space om een overgang te selecteren. Druk op Delete om hem te verwijderen of op Esc om te annuleren.",
+        "moved": "Status verplaatst. Nieuwe positie: x {x}, y {y}.",
+        "handle": "Verbindingspunt"
       }
     },
     "scheme": {
@@ -301,7 +347,25 @@
         "actions": "Acties",
         "unknown_workflow": "Onbekende workflow",
         "edit_named": "Workflow bewerken: {name}"
-      }
+      },
+      "add": "Een workflow toevoegen",
+      "add_submit": "Toevoegen",
+      "link_submit": "Koppelen",
+      "default_badge": "standaard",
+      "replace": "Vervangen",
+      "replace_title": "De standaardworkflow vervangen",
+      "edit_types": "Typen bewerken",
+      "edit_types_named": "Typen van {name} bewerken",
+      "remove": "Verwijderen",
+      "remove_named": "{name} verwijderen",
+      "remove_title": "{name} verwijderen?",
+      "remove_confirm": "{count, plural, one {{types} volgt dan de standaardworkflow {default}.} other {{types} volgen dan de standaardworkflow {default}.}}",
+      "types_field": "Betrokken werkitemtypen",
+      "link_note": "Hij geldt voor elk werkitemtype, ook voor typen die later worden gemaakt.",
+      "taken_note": "{count, plural, one {{types} staat niet in de lijst: het volgt al {workflow}.} other {{types} staan niet in de lijst: ze volgen al {workflow}.}}",
+      "unchecked_note": "Een niet-aangevinkt type blijft op de standaardworkflow.",
+      "no_workflow": "Alle workflows van de werkruimte staan al in de tabel.",
+      "no_type": "Elk werkitemtype volgt al een eigen workflow."
     },
     "managed_states": {
       "banner": "Deze statussen komen uit de projectworkflows. Wijzig ze in Werkruimte-instellingen, Workflows."

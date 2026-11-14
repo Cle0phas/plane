@@ -187,27 +187,44 @@
         "target": "到",
         "choose_state": "选择状态",
         "name": "名称（可选）",
-        "submit": "添加转换"
+        "submit": "添加转换",
+        "in_workflow": "此工作流中",
+        "other_states": "其他现有状态",
+        "other_states_hint": "勾选后将添加到图中。",
+        "locked": "已固定为所选状态。",
+        "duplicate": "此转换已存在。"
       },
       "panel": {
         "state": "状态",
         "transition": "转换",
         "set_initial": "设为初始状态",
-        "initial": "初始状态",
+        "initial": "工作流的初始状态",
         "shared": "{count, plural, one {与另外 # 个工作流共享：更改也会应用到那里。} other {与另外 # 个工作流共享：更改也会应用到那里。}}",
-        "remove_state": "移除状态",
-        "remove_transition": "移除转换",
+        "remove_state": "从工作流中移除",
+        "remove_transition": "删除转换",
         "remove_source": "移除源状态 {name}",
         "empty_title": "构建自定义工作流",
         "empty_body": "工作流与您团队的工作方式相匹配。添加状态（它们会成为项目看板的列），再用转换将其连接，并通过规则限制谁可以使用这些转换。",
         "empty_hint": "选择一个状态以查看其详细信息。",
-        "color": "看板列颜色",
+        "color": "列颜色",
         "incoming": "传入",
         "outgoing": "传出",
         "add_incoming": "添加传入转换",
         "add_outgoing": "添加传出转换",
         "collapse": "收起面板",
-        "expand": "展开面板"
+        "expand": "展开面板",
+        "shared_named": "{count, plural, one {此状态也用于另外 # 个工作流：{names}。重命名此状态或更改其颜色或类别，也会在那里生效。} other {此状态也用于另外 # 个工作流：{names}。重命名此状态或更改其颜色或类别，也会在那里生效。}}",
+        "more_names": "{count, plural, one {{names} 及另外 # 个} other {{names} 及另外 # 个}}",
+        "incoming_count": "传入转换 · {count}",
+        "outgoing_count": "传出转换 · {count}",
+        "add": "添加",
+        "path": "路径",
+        "add_source": "添加源状态",
+        "rule": "规则",
+        "edit": "编辑",
+        "remove": "移除",
+        "edit_rule": "编辑规则",
+        "remove_rule": "移除规则"
       },
       "restrict": {
         "title": "限制可移动的人员",
@@ -216,10 +233,12 @@
         "users": "人员",
         "assignee": "工作项的负责人",
         "creator": "工作项的创建者",
-        "clear": "移除限制"
+        "clear": "移除限制",
+        "summary_roles": "角色：{roles}",
+        "summary_users": "{count, plural, one {# 人} other {# 人}}"
       },
       "errors": {
-        "initial_state_required": "请选择且仅选择一个初始状态。",
+        "initial_state_required": "请将“开始”连接到一个状态。",
         "duplicate_state_key": "有状态出现了两次。请刷新页面。",
         "duplicate_status": "此工作流中有状态出现了两次。",
         "duplicate_status_name": "有两个状态同名，或已存在同名状态：请从现有状态中选择。",
@@ -231,7 +250,9 @@
         "status_limit": "工作区的状态数已达到 1000 个上限。",
         "status_in_use": "这些状态中仍有工作项，请先移走：",
         "status_in_use_project": "{project}：{count, plural, one {# 个工作项} other {# 个工作项}}",
-        "default": "无法保存工作流。"
+        "default": "无法保存工作流。",
+        "stale_graph": "此工作流已在此期间被修改。请重新加载。",
+        "duplicate_transition": "两个转换连接了相同的状态。"
       },
       "close": "关闭",
       "small_screen": "请在更宽的屏幕上打开此工作流以进行编辑。",
@@ -262,6 +283,31 @@
         "unnamed": "未命名转换",
         "toggle": "显示或隐藏 {name} 的转换",
         "empty": "此工作流还没有任何状态。"
+      },
+      "start_panel": {
+        "title": "工作流起点",
+        "field": "每个新工作项的起始状态",
+        "unlink": "移除链接"
+      },
+      "reload": "重新加载",
+      "presence": "{count, plural, one {{names} 也在编辑此工作流。} other {{names} 也在编辑此工作流。}}",
+      "rename": {
+        "title": "在所有位置重命名？",
+        "line": "将“{from}”重命名为“{to}”，也会在以下工作流中重命名：{names}。",
+        "confirm": "在所有位置重命名"
+      },
+      "leave": {
+        "title": "不保存就离开？",
+        "body": "此工作流的更改尚未保存。",
+        "confirm": "不保存并离开",
+        "stay": "留在此页"
+      },
+      "a11y": {
+        "node": "按 Enter 或 Space 键选择状态。使用方向键移动它，按 Delete 键移除它。按 Esc 键取消。",
+        "node_read_only": "按 Enter 或 Space 键选择状态。",
+        "edge": "按 Enter 或 Space 键选择转换。按 Delete 键删除它，或按 Esc 键取消。",
+        "moved": "状态已移动。新位置：x {x}，y {y}。",
+        "handle": "连接点"
       }
     },
     "scheme": {
@@ -301,7 +347,25 @@
         "actions": "操作",
         "unknown_workflow": "未知工作流",
         "edit_named": "编辑工作流 {name}"
-      }
+      },
+      "add": "添加工作流",
+      "add_submit": "添加",
+      "link_submit": "关联",
+      "default_badge": "默认",
+      "replace": "替换",
+      "replace_title": "替换默认工作流",
+      "edit_types": "编辑类型",
+      "edit_types_named": "编辑 {name} 的类型",
+      "remove": "移除",
+      "remove_named": "移除 {name}",
+      "remove_title": "移除 {name}？",
+      "remove_confirm": "{count, plural, one {{types} 将遵循默认工作流 {default}。} other {{types} 将遵循默认工作流 {default}。}}",
+      "types_field": "相关工作项类型",
+      "link_note": "它将应用于每种工作项类型，包括以后创建的类型。",
+      "taken_note": "{count, plural, one {{types} 未列出：已遵循 {workflow}。} other {{types} 未列出：已遵循 {workflow}。}}",
+      "unchecked_note": "未勾选的类型保留默认工作流。",
+      "no_workflow": "工作区的所有工作流都已在表中。",
+      "no_type": "每种工作项类型都已遵循各自的工作流。"
     },
     "managed_states": {
       "banner": "这些状态来自项目的工作流。请在工作区设置的工作流中更改。"

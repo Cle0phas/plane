@@ -187,27 +187,44 @@
         "target": "Ke",
         "choose_state": "Pilih status",
         "name": "Nama (opsional)",
-        "submit": "Tambah transisi"
+        "submit": "Tambah transisi",
+        "in_workflow": "Di workflow ini",
+        "other_states": "Status lain yang ada",
+        "other_states_hint": "Ditambahkan ke diagram jika dipilih.",
+        "locked": "Ditetapkan ke status yang dipilih.",
+        "duplicate": "Transisi ini sudah ada."
       },
       "panel": {
         "state": "Status",
         "transition": "Transisi",
         "set_initial": "Jadikan status awal",
-        "initial": "Status awal",
+        "initial": "Status awal workflow",
         "shared": "{count, plural, one {Dibagikan dengan # workflow lain: perubahan berlaku juga di sana.} other {Dibagikan dengan # workflow lain: perubahan berlaku juga di sana.}}",
-        "remove_state": "Hapus status",
+        "remove_state": "Hapus dari workflow",
         "remove_transition": "Hapus transisi",
         "remove_source": "Hapus status asal {name}",
         "empty_title": "Buat workflow kustom",
         "empty_body": "Workflow menyesuaikan cara kerja tim Anda. Tambahkan status, yang menjadi kolom papan proyek Anda, lalu hubungkan dengan transisi dan batasi siapa yang boleh menggunakannya dengan aturan.",
         "empty_hint": "Pilih status untuk melihat detailnya.",
-        "color": "Warna kolom papan",
+        "color": "Warna kolom",
         "incoming": "Transisi masuk",
         "outgoing": "Transisi keluar",
         "add_incoming": "Tambah transisi masuk",
         "add_outgoing": "Tambah transisi keluar",
         "collapse": "Ciutkan panel",
-        "expand": "Bentangkan panel"
+        "expand": "Bentangkan panel",
+        "shared_named": "{count, plural, one {Status ini juga digunakan di # workflow lain: {names}. Mengganti namanya atau mengubah warna atau kategorinya juga mengubahnya di sana.} other {Status ini juga digunakan di # workflow lain: {names}. Mengganti namanya atau mengubah warna atau kategorinya juga mengubahnya di sana.}}",
+        "more_names": "{count, plural, one {{names} dan # lainnya} other {{names} dan # lainnya}}",
+        "incoming_count": "Transisi masuk · {count}",
+        "outgoing_count": "Transisi keluar · {count}",
+        "add": "Tambah",
+        "path": "Jalur",
+        "add_source": "Tambah status asal",
+        "rule": "Aturan",
+        "edit": "Edit",
+        "remove": "Hapus",
+        "edit_rule": "Edit aturan",
+        "remove_rule": "Hapus aturan"
       },
       "restrict": {
         "title": "Batasi siapa yang dapat memindahkan",
@@ -216,10 +233,12 @@
         "users": "Orang",
         "assignee": "Penerima tugas item kerja",
         "creator": "Pembuat item kerja",
-        "clear": "Hapus pembatasan"
+        "clear": "Hapus pembatasan",
+        "summary_roles": "Peran: {roles}",
+        "summary_users": "{count, plural, one {# orang} other {# orang}}"
       },
       "errors": {
-        "initial_state_required": "Pilih tepat satu status awal.",
+        "initial_state_required": "Hubungkan MULAI ke sebuah status.",
         "duplicate_state_key": "Sebuah status muncul dua kali. Muat ulang halaman.",
         "duplicate_status": "Sebuah status muncul dua kali di workflow ini.",
         "duplicate_status_name": "Dua status memiliki nama yang sama, atau status dengan nama ini sudah ada: pilih dari status yang ada.",
@@ -231,7 +250,9 @@
         "status_limit": "Ruang kerja telah mencapai 1.000 status.",
         "status_in_use": "Status ini masih berisi item kerja, pindahkan terlebih dahulu:",
         "status_in_use_project": "{project}: {count, plural, one {# item kerja} other {# item kerja}}",
-        "default": "Workflow tidak dapat disimpan."
+        "default": "Workflow tidak dapat disimpan.",
+        "stale_graph": "Workflow ini telah diubah sementara itu. Muat ulang.",
+        "duplicate_transition": "Dua transisi menghubungkan status yang sama."
       },
       "close": "Tutup",
       "small_screen": "Buka workflow ini di layar yang lebih lebar untuk mengeditnya.",
@@ -262,6 +283,31 @@
         "unnamed": "Transisi tanpa nama",
         "toggle": "Tampilkan atau sembunyikan transisi {name}",
         "empty": "Workflow ini belum memiliki status."
+      },
+      "start_panel": {
+        "title": "Awal workflow",
+        "field": "Setiap item kerja baru dimulai di status",
+        "unlink": "Hapus tautan"
+      },
+      "reload": "Muat ulang",
+      "presence": "{count, plural, one {{names} juga sedang mengedit workflow ini.} other {{names} juga sedang mengedit workflow ini.}}",
+      "rename": {
+        "title": "Ganti nama di semua tempat?",
+        "line": "Mengganti nama \"{from}\" menjadi \"{to}\" juga mengganti namanya di: {names}.",
+        "confirm": "Ganti nama di semua tempat"
+      },
+      "leave": {
+        "title": "Keluar tanpa menyimpan?",
+        "body": "Perubahan pada workflow ini belum disimpan.",
+        "confirm": "Keluar tanpa menyimpan",
+        "stay": "Tetap di sini"
+      },
+      "a11y": {
+        "node": "Tekan Enter atau Space untuk memilih status. Gunakan tombol panah untuk memindahkannya dan Delete untuk menghapusnya. Tekan Esc untuk membatalkan.",
+        "node_read_only": "Tekan Enter atau Space untuk memilih status.",
+        "edge": "Tekan Enter atau Space untuk memilih transisi. Tekan Delete untuk menghapusnya atau Esc untuk membatalkan.",
+        "moved": "Status dipindahkan. Posisi baru: x {x}, y {y}.",
+        "handle": "Titik koneksi"
       }
     },
     "scheme": {
@@ -301,7 +347,25 @@
         "actions": "Tindakan",
         "unknown_workflow": "Workflow tidak dikenal",
         "edit_named": "Edit workflow {name}"
-      }
+      },
+      "add": "Tambah workflow",
+      "add_submit": "Tambah",
+      "link_submit": "Tautkan",
+      "default_badge": "default",
+      "replace": "Ganti",
+      "replace_title": "Ganti workflow default",
+      "edit_types": "Edit jenis",
+      "edit_types_named": "Edit jenis {name}",
+      "remove": "Hapus",
+      "remove_named": "Hapus {name}",
+      "remove_title": "Hapus {name}?",
+      "remove_confirm": "{count, plural, one {{types} akan mengikuti workflow default {default}.} other {{types} akan mengikuti workflow default {default}.}}",
+      "types_field": "Jenis item kerja yang terkait",
+      "link_note": "Workflow ini akan berlaku untuk setiap jenis item kerja, termasuk yang dibuat nanti.",
+      "taken_note": "{count, plural, one {{types} tidak tercantum: sudah mengikuti {workflow}.} other {{types} tidak tercantum: sudah mengikuti {workflow}.}}",
+      "unchecked_note": "Jenis yang tidak dicentang tetap menggunakan workflow default.",
+      "no_workflow": "Semua workflow di ruang kerja sudah ada di tabel.",
+      "no_type": "Setiap jenis item kerja sudah mengikuti workflow tersendiri."
     },
     "managed_states": {
       "banner": "Status ini berasal dari workflow proyek. Ubah di Pengaturan ruang kerja, Workflow."

@@ -187,27 +187,44 @@
         "target": "To",
         "choose_state": "Choose a state",
         "name": "Name (optional)",
-        "submit": "Add transition"
+        "submit": "Add transition",
+        "in_workflow": "In this workflow",
+        "other_states": "Other existing states",
+        "other_states_hint": "Added to the diagram when selected.",
+        "locked": "Set to the selected state.",
+        "duplicate": "This transition already exists."
       },
       "panel": {
         "state": "State",
         "transition": "Transition",
-        "set_initial": "Make it the initial state",
-        "initial": "Initial state",
+        "set_initial": "Set as start state",
+        "initial": "Start state of the workflow",
         "shared": "{count, plural, one {Shared with # other workflow: changes apply there too.} other {Shared with # other workflows: changes apply there too.}}",
-        "remove_state": "Remove state",
-        "remove_transition": "Remove transition",
+        "remove_state": "Remove from workflow",
+        "remove_transition": "Delete transition",
         "remove_source": "Remove the source state {name}",
         "empty_title": "Build custom workflows",
         "empty_body": "Workflows match the way your team works. Add states, which become the columns of your project board, then link them with transitions and limit who may use them with rules.",
         "empty_hint": "Select a state to see its details.",
-        "color": "Board column color",
+        "color": "Column color",
         "incoming": "Incoming",
         "outgoing": "Outgoing",
         "add_incoming": "Add an incoming transition",
         "add_outgoing": "Add an outgoing transition",
         "collapse": "Collapse panel",
-        "expand": "Expand panel"
+        "expand": "Expand panel",
+        "shared_named": "{count, plural, one {This state is also used in # other workflow: {names}. Renaming it or changing its color or category changes it there too.} other {This state is also used in # other workflows: {names}. Renaming it or changing its color or category changes it there too.}}",
+        "more_names": "{count, plural, one {{names} and # more} other {{names} and # more}}",
+        "incoming_count": "Incoming transitions · {count}",
+        "outgoing_count": "Outgoing transitions · {count}",
+        "add": "Add",
+        "path": "Path",
+        "add_source": "Add a source state",
+        "rule": "Rule",
+        "edit": "Edit",
+        "remove": "Remove",
+        "edit_rule": "Edit the rule",
+        "remove_rule": "Remove the rule"
       },
       "restrict": {
         "title": "Restrict who can move",
@@ -216,10 +233,12 @@
         "users": "People",
         "assignee": "Assignee of the work item",
         "creator": "Creator of the work item",
-        "clear": "Remove restriction"
+        "clear": "Remove restriction",
+        "summary_roles": "Roles: {roles}",
+        "summary_users": "{count, plural, one {# person} other {# people}}"
       },
       "errors": {
-        "initial_state_required": "Choose exactly one initial state.",
+        "initial_state_required": "Link START to a state.",
         "duplicate_state_key": "A state appears twice. Reload the page.",
         "duplicate_status": "A status appears twice in this workflow.",
         "duplicate_status_name": "Two states have the same name, or a status with this name already exists: pick it from the existing statuses.",
@@ -231,7 +250,9 @@
         "status_limit": "The workspace has reached 1,000 statuses.",
         "status_in_use": "These states still hold work items, move them first:",
         "status_in_use_project": "{project}: {count, plural, one {# work item} other {# work items}}",
-        "default": "The workflow could not be saved."
+        "default": "The workflow could not be saved.",
+        "stale_graph": "This workflow was changed in the meantime. Reload it.",
+        "duplicate_transition": "Two transitions link the same states."
       },
       "close": "Close",
       "small_screen": "Open this workflow on a wider screen to edit it.",
@@ -262,6 +283,31 @@
         "unnamed": "Unnamed transition",
         "toggle": "Show or hide the transitions of {name}",
         "empty": "This workflow has no state yet."
+      },
+      "start_panel": {
+        "title": "Workflow start",
+        "field": "Every new work item starts in the state",
+        "unlink": "Remove the link"
+      },
+      "reload": "Reload",
+      "presence": "{count, plural, one {{names} is also editing this workflow.} other {{names} are also editing this workflow.}}",
+      "rename": {
+        "title": "Rename everywhere?",
+        "line": "Renaming \"{from}\" to \"{to}\" also renames it in: {names}.",
+        "confirm": "Rename everywhere"
+      },
+      "leave": {
+        "title": "Leave without saving?",
+        "body": "The changes to this workflow are not saved.",
+        "confirm": "Leave without saving",
+        "stay": "Stay"
+      },
+      "a11y": {
+        "node": "Press Enter or Space to select a state. Use the arrow keys to move it and Delete to remove it. Press Escape to cancel.",
+        "node_read_only": "Press Enter or Space to select a state.",
+        "edge": "Press Enter or Space to select a transition. Press Delete to remove it or Escape to cancel.",
+        "moved": "State moved. New position: x {x}, y {y}.",
+        "handle": "Connection point"
       }
     },
     "scheme": {
@@ -301,7 +347,25 @@
         "actions": "Actions",
         "unknown_workflow": "Unknown workflow",
         "edit_named": "Edit workflow {name}"
-      }
+      },
+      "add": "Add a workflow",
+      "add_submit": "Add",
+      "link_submit": "Link",
+      "default_badge": "default",
+      "replace": "Replace",
+      "replace_title": "Replace the default workflow",
+      "edit_types": "Edit types",
+      "edit_types_named": "Edit the types of {name}",
+      "remove": "Remove",
+      "remove_named": "Remove {name}",
+      "remove_title": "Remove {name}?",
+      "remove_confirm": "{count, plural, one {{types} will follow the default workflow {default}.} other {{types} will follow the default workflow {default}.}}",
+      "types_field": "Work item types concerned",
+      "link_note": "It will apply to every work item type, including those created later.",
+      "taken_note": "{count, plural, one {{types} is not listed: it already follows {workflow}.} other {{types} are not listed: they already follow {workflow}.}}",
+      "unchecked_note": "An unchecked type stays on the default workflow.",
+      "no_workflow": "Every workflow of the workspace is already in the table.",
+      "no_type": "Every work item type already follows a workflow of its own."
     },
     "managed_states": {
       "banner": "These states come from the project workflows. Change them in Workspace settings, Workflows."

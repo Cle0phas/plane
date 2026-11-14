@@ -187,27 +187,44 @@
         "target": "Do",
         "choose_state": "Vybrat stav",
         "name": "Název (volitelné)",
-        "submit": "Přidat přechod"
+        "submit": "Přidat přechod",
+        "in_workflow": "V tomto pracovním toku",
+        "other_states": "Další existující stavy",
+        "other_states_hint": "Po zaškrtnutí se přidají do diagramu.",
+        "locked": "Nastaveno na vybraný stav.",
+        "duplicate": "Tento přechod už existuje."
       },
       "panel": {
         "state": "Stav",
         "transition": "Přechod",
         "set_initial": "Nastavit jako počáteční stav",
-        "initial": "Počáteční stav",
+        "initial": "Počáteční stav pracovního toku",
         "shared": "{count, plural, one {Sdíleno s # dalším pracovním tokem: změny platí i tam.} few {Sdíleno s # dalšími pracovními toky: změny platí i tam.} many {Sdíleno s # dalšího pracovního toku: změny platí i tam.} other {Sdíleno s # dalšími pracovními toky: změny platí i tam.}}",
-        "remove_state": "Odebrat stav",
-        "remove_transition": "Odebrat přechod",
+        "remove_state": "Odebrat z pracovního toku",
+        "remove_transition": "Smazat přechod",
         "remove_source": "Odebrat zdrojový stav {name}",
         "empty_title": "Vytvářejte vlastní pracovní toky",
         "empty_body": "Pracovní toky odpovídají způsobu práce vašeho týmu. Přidejte stavy, které se stanou sloupci nástěnky projektu, propojte je přechody a pomocí pravidel omezte, kdo je smí používat.",
         "empty_hint": "Vyberte stav a zobrazte jeho podrobnosti.",
-        "color": "Barva sloupce na nástěnce",
+        "color": "Barva sloupce",
         "incoming": "Příchozí",
         "outgoing": "Odchozí",
         "add_incoming": "Přidat příchozí přechod",
         "add_outgoing": "Přidat odchozí přechod",
         "collapse": "Sbalit panel",
-        "expand": "Rozbalit panel"
+        "expand": "Rozbalit panel",
+        "shared_named": "{count, plural, one {Tento stav se používá i v # dalším pracovním toku: {names}. Jeho přejmenování nebo změna barvy či kategorie ho změní i tam.} few {Tento stav se používá i v # dalších pracovních tocích: {names}. Jeho přejmenování nebo změna barvy či kategorie ho změní i tam.} many {Tento stav se používá i v # dalšího pracovního toku: {names}. Jeho přejmenování nebo změna barvy či kategorie ho změní i tam.} other {Tento stav se používá i v # dalších pracovních tocích: {names}. Jeho přejmenování nebo změna barvy či kategorie ho změní i tam.}}",
+        "more_names": "{count, plural, one {{names} a # další} few {{names} a # další} many {{names} a # dalšího} other {{names} a # dalších}}",
+        "incoming_count": "Příchozí přechody · {count}",
+        "outgoing_count": "Odchozí přechody · {count}",
+        "add": "Přidat",
+        "path": "Cesta",
+        "add_source": "Přidat zdrojový stav",
+        "rule": "Pravidlo",
+        "edit": "Upravit",
+        "remove": "Odebrat",
+        "edit_rule": "Upravit pravidlo",
+        "remove_rule": "Odebrat pravidlo"
       },
       "restrict": {
         "title": "Omezit, kdo může přesouvat",
@@ -216,10 +233,12 @@
         "users": "Lidé",
         "assignee": "Řešitel pracovní položky",
         "creator": "Autor pracovní položky",
-        "clear": "Odebrat omezení"
+        "clear": "Odebrat omezení",
+        "summary_roles": "Role: {roles}",
+        "summary_users": "{count, plural, one {# osoba} few {# osoby} many {# osoby} other {# osob}}"
       },
       "errors": {
-        "initial_state_required": "Vyberte právě jeden počáteční stav.",
+        "initial_state_required": "Propojte START se stavem.",
         "duplicate_state_key": "Stav se objevuje dvakrát. Načtěte stránku znovu.",
         "duplicate_status": "Status se v tomto pracovním toku objevuje dvakrát.",
         "duplicate_status_name": "Dva stavy mají stejný název, nebo status s tímto názvem již existuje: vyberte ho z existujících statusů.",
@@ -231,7 +250,9 @@
         "status_limit": "Pracovní prostor dosáhl 1 000 statusů.",
         "status_in_use": "Tyto stavy stále obsahují pracovní položky, nejprve je přesuňte:",
         "status_in_use_project": "{project}: {count, plural, one {# pracovní položka} few {# pracovní položky} many {# pracovní položky} other {# pracovních položek}}",
-        "default": "Pracovní tok se nepodařilo uložit."
+        "default": "Pracovní tok se nepodařilo uložit.",
+        "stale_graph": "Tento pracovní tok byl mezitím změněn. Načtěte ho znovu.",
+        "duplicate_transition": "Dva přechody spojují stejné stavy."
       },
       "close": "Zavřít",
       "small_screen": "Chcete-li tento pracovní tok upravit, otevřete jej na širší obrazovce.",
@@ -262,6 +283,31 @@
         "unnamed": "Nepojmenovaný přechod",
         "toggle": "Zobrazit nebo skrýt přechody stavu {name}",
         "empty": "Tento pracovní tok zatím nemá žádný stav."
+      },
+      "start_panel": {
+        "title": "Začátek pracovního toku",
+        "field": "Každá nová pracovní položka začíná ve stavu",
+        "unlink": "Odebrat propojení"
+      },
+      "reload": "Načíst znovu",
+      "presence": "{count, plural, one {{names} tento pracovní tok také upravuje.} few {{names} tento pracovní tok také upravují.} many {{names} tento pracovní tok také upravují.} other {{names} tento pracovní tok také upravují.}}",
+      "rename": {
+        "title": "Přejmenovat všude?",
+        "line": "Přejmenování „{from}“ na „{to}“ ho přejmenuje také v: {names}.",
+        "confirm": "Přejmenovat všude"
+      },
+      "leave": {
+        "title": "Odejít bez uložení?",
+        "body": "Změny tohoto pracovního toku nejsou uložené.",
+        "confirm": "Odejít bez uložení",
+        "stay": "Zůstat"
+      },
+      "a11y": {
+        "node": "Stisknutím Enter nebo Space vyberete stav. Šipkami ho přesunete a klávesou Delete odeberete. Stisknutím Esc akci zrušíte.",
+        "node_read_only": "Stisknutím Enter nebo Space vyberete stav.",
+        "edge": "Stisknutím Enter nebo Space vyberete přechod. Klávesou Delete ho odstraníte, klávesou Esc akci zrušíte.",
+        "moved": "Stav přesunut. Nová pozice: x {x}, y {y}.",
+        "handle": "Bod připojení"
       }
     },
     "scheme": {
@@ -301,7 +347,25 @@
         "actions": "Akce",
         "unknown_workflow": "Neznámý pracovní tok",
         "edit_named": "Upravit pracovní tok {name}"
-      }
+      },
+      "add": "Přidat pracovní tok",
+      "add_submit": "Přidat",
+      "link_submit": "Propojit",
+      "default_badge": "výchozí",
+      "replace": "Nahradit",
+      "replace_title": "Nahradit výchozí pracovní tok",
+      "edit_types": "Upravit typy",
+      "edit_types_named": "Upravit typy pro {name}",
+      "remove": "Odebrat",
+      "remove_named": "Odebrat {name}",
+      "remove_title": "Odebrat {name}?",
+      "remove_confirm": "{count, plural, one {{types} se bude řídit výchozím pracovním tokem {default}.} few {{types} se budou řídit výchozím pracovním tokem {default}.} many {{types} se budou řídit výchozím pracovním tokem {default}.} other {{types} se budou řídit výchozím pracovním tokem {default}.}}",
+      "types_field": "Dotčené typy pracovních položek",
+      "link_note": "Bude platit pro každý typ pracovní položky, včetně těch vytvořených později.",
+      "taken_note": "{count, plural, one {{types} není v seznamu: už se řídí pracovním tokem {workflow}.} few {{types} nejsou v seznamu: už se řídí pracovním tokem {workflow}.} many {{types} nejsou v seznamu: už se řídí pracovním tokem {workflow}.} other {{types} nejsou v seznamu: už se řídí pracovním tokem {workflow}.}}",
+      "unchecked_note": "Nezaškrtnutý typ zůstane u výchozího pracovního toku.",
+      "no_workflow": "Všechny pracovní toky pracovního prostoru už jsou v tabulce.",
+      "no_type": "Každý typ pracovní položky se už řídí vlastním pracovním tokem."
     },
     "managed_states": {
       "banner": "Tyto stavy pocházejí z pracovních toků projektu. Změňte je v Nastavení pracovního prostoru, Pracovní toky."

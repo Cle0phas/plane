@@ -187,27 +187,44 @@
         "target": "A",
         "choose_state": "Scegli uno stato",
         "name": "Nome (facoltativo)",
-        "submit": "Aggiungi transizione"
+        "submit": "Aggiungi transizione",
+        "in_workflow": "In questo flusso di lavoro",
+        "other_states": "Altri stati esistenti",
+        "other_states_hint": "Aggiunti al diagramma se selezionati.",
+        "locked": "Impostato sullo stato selezionato.",
+        "duplicate": "Questa transizione esiste già."
       },
       "panel": {
         "state": "Stato",
         "transition": "Transizione",
         "set_initial": "Imposta come stato iniziale",
-        "initial": "Stato iniziale",
+        "initial": "Stato iniziale del flusso di lavoro",
         "shared": "{count, plural, one {Condiviso con # altro flusso di lavoro: le modifiche si applicano anche lì.} many {Condiviso con # altri flussi di lavoro: le modifiche si applicano anche lì.} other {Condiviso con # altri flussi di lavoro: le modifiche si applicano anche lì.}}",
-        "remove_state": "Rimuovi stato",
-        "remove_transition": "Rimuovi transizione",
+        "remove_state": "Rimuovi dal flusso di lavoro",
+        "remove_transition": "Elimina la transizione",
         "remove_source": "Rimuovi lo stato di origine {name}",
         "empty_title": "Crea flussi di lavoro personalizzati",
         "empty_body": "I flussi di lavoro rispecchiano il modo di lavorare del team. Aggiungere stati, che diventano le colonne della bacheca del progetto, collegarli con transizioni e limitare con regole chi può usarle.",
         "empty_hint": "Selezionare uno stato per vederne i dettagli.",
-        "color": "Colore della colonna della bacheca",
+        "color": "Colore della colonna",
         "incoming": "In entrata",
         "outgoing": "In uscita",
         "add_incoming": "Aggiungi una transizione in entrata",
         "add_outgoing": "Aggiungi una transizione in uscita",
         "collapse": "Comprimi il pannello",
-        "expand": "Espandi il pannello"
+        "expand": "Espandi il pannello",
+        "shared_named": "{count, plural, one {Questo stato è usato anche in # altro flusso di lavoro: {names}. Rinominarlo o cambiarne il colore o la categoria lo modifica anche lì.} many {Questo stato è usato anche in # altri flussi di lavoro: {names}. Rinominarlo o cambiarne il colore o la categoria lo modifica anche lì.} other {Questo stato è usato anche in # altri flussi di lavoro: {names}. Rinominarlo o cambiarne il colore o la categoria lo modifica anche lì.}}",
+        "more_names": "{count, plural, one {{names} e # altro} many {{names} e altri #} other {{names} e altri #}}",
+        "incoming_count": "Transizioni in entrata · {count}",
+        "outgoing_count": "Transizioni in uscita · {count}",
+        "add": "Aggiungi",
+        "path": "Percorso",
+        "add_source": "Aggiungi uno stato di origine",
+        "rule": "Regola",
+        "edit": "Modifica",
+        "remove": "Rimuovi",
+        "edit_rule": "Modifica la regola",
+        "remove_rule": "Rimuovi la regola"
       },
       "restrict": {
         "title": "Limita chi può spostare",
@@ -216,10 +233,12 @@
         "users": "Persone",
         "assignee": "Assegnatario dell'elemento di lavoro",
         "creator": "Creatore dell'elemento di lavoro",
-        "clear": "Rimuovi limitazione"
+        "clear": "Rimuovi limitazione",
+        "summary_roles": "Ruoli: {roles}",
+        "summary_users": "{count, plural, one {# persona} many {# persone} other {# persone}}"
       },
       "errors": {
-        "initial_state_required": "Scegli esattamente uno stato iniziale.",
+        "initial_state_required": "Colleghi INIZIO a uno stato.",
         "duplicate_state_key": "Uno stato compare due volte. Ricarica la pagina.",
         "duplicate_status": "Uno stato compare due volte in questo flusso di lavoro.",
         "duplicate_status_name": "Due stati hanno lo stesso nome, oppure esiste già uno stato con questo nome: sceglilo tra gli stati esistenti.",
@@ -231,7 +250,9 @@
         "status_limit": "Lo spazio di lavoro ha raggiunto i 1.000 stati.",
         "status_in_use": "Questi stati contengono ancora elementi di lavoro, spostali prima:",
         "status_in_use_project": "{project}: {count, plural, one {# elemento di lavoro} many {# elementi di lavoro} other {# elementi di lavoro}}",
-        "default": "Impossibile salvare il flusso di lavoro."
+        "default": "Impossibile salvare il flusso di lavoro.",
+        "stale_graph": "Questo flusso di lavoro è stato modificato nel frattempo. Lo ricarichi.",
+        "duplicate_transition": "Due transizioni collegano gli stessi stati."
       },
       "close": "Chiudi",
       "small_screen": "Aprire questo flusso di lavoro su uno schermo più ampio per modificarlo.",
@@ -262,6 +283,31 @@
         "unnamed": "Transizione senza nome",
         "toggle": "Mostra o nascondi le transizioni di {name}",
         "empty": "Questo flusso di lavoro non ha ancora stati."
+      },
+      "start_panel": {
+        "title": "Inizio del flusso di lavoro",
+        "field": "Ogni nuovo elemento di lavoro inizia nello stato",
+        "unlink": "Rimuovi il collegamento"
+      },
+      "reload": "Ricarica",
+      "presence": "{count, plural, one {Anche {names} sta modificando questo flusso di lavoro.} many {Anche {names} stanno modificando questo flusso di lavoro.} other {Anche {names} stanno modificando questo flusso di lavoro.}}",
+      "rename": {
+        "title": "Rinominare ovunque?",
+        "line": "Rinominare «{from}» in «{to}» lo rinomina anche in: {names}.",
+        "confirm": "Rinomina ovunque"
+      },
+      "leave": {
+        "title": "Uscire senza salvare?",
+        "body": "Le modifiche a questo flusso di lavoro non sono salvate.",
+        "confirm": "Esci senza salvare",
+        "stay": "Resta"
+      },
+      "a11y": {
+        "node": "Prema Enter o Space per selezionare uno stato. Usi i tasti freccia per spostarlo e Delete per rimuoverlo. Prema Esc per annullare.",
+        "node_read_only": "Prema Enter o Space per selezionare uno stato.",
+        "edge": "Prema Enter o Space per selezionare una transizione. Prema Delete per eliminarla o Esc per annullare.",
+        "moved": "Stato spostato. Nuova posizione: x {x}, y {y}.",
+        "handle": "Punto di connessione"
       }
     },
     "scheme": {
@@ -301,7 +347,25 @@
         "actions": "Azioni",
         "unknown_workflow": "Flusso di lavoro sconosciuto",
         "edit_named": "Modifica flusso di lavoro {name}"
-      }
+      },
+      "add": "Aggiungi un flusso di lavoro",
+      "add_submit": "Aggiungi",
+      "link_submit": "Collega",
+      "default_badge": "predefinito",
+      "replace": "Sostituisci",
+      "replace_title": "Sostituisci il flusso di lavoro predefinito",
+      "edit_types": "Modifica i tipi",
+      "edit_types_named": "Modifica i tipi di {name}",
+      "remove": "Rimuovi",
+      "remove_named": "Rimuovi {name}",
+      "remove_title": "Rimuovere {name}?",
+      "remove_confirm": "{count, plural, one {{types} seguirà il flusso di lavoro predefinito {default}.} many {{types} seguiranno il flusso di lavoro predefinito {default}.} other {{types} seguiranno il flusso di lavoro predefinito {default}.}}",
+      "types_field": "Tipi di elemento di lavoro interessati",
+      "link_note": "Si applicherà a ogni tipo di elemento di lavoro, compresi quelli creati in seguito.",
+      "taken_note": "{count, plural, one {{types} non è elencato: segue già {workflow}.} many {{types} non sono elencati: seguono già {workflow}.} other {{types} non sono elencati: seguono già {workflow}.}}",
+      "unchecked_note": "Un tipo non selezionato resta sul flusso di lavoro predefinito.",
+      "no_workflow": "Tutti i flussi di lavoro dello spazio di lavoro sono già nella tabella.",
+      "no_type": "Ogni tipo di elemento di lavoro segue già un proprio flusso di lavoro."
     },
     "managed_states": {
       "banner": "Questi stati provengono dai flussi di lavoro del progetto. Modificali in Impostazioni dello spazio di lavoro, Flussi di lavoro."
