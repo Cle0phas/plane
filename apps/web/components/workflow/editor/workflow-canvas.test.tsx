@@ -241,6 +241,26 @@ describe("WorkflowCanvas", () => {
     expect(onSelect).toHaveBeenLastCalledWith({ kind: "transition", key: "g" });
   });
 
+  // Spec 3.9 "Suppr retire": the pill is the only handle of a global transition in the diagram.
+  it("removes the global transition with Delete on its focused pill, never in read-only mode", async () => {
+    const onRemoveTransition = vi.fn();
+    const onRemoveState = vi.fn();
+    const view = renderCanvas({ onRemoveTransition, onRemoveState });
+    const user = userEvent.setup();
+    pill().focus();
+    await user.keyboard("{Backspace}");
+    expect(onRemoveTransition).not.toHaveBeenCalled();
+    await user.keyboard("{Delete}");
+    expect(onRemoveTransition).toHaveBeenCalledExactlyOnceWith("g");
+    expect(onRemoveState).not.toHaveBeenCalled();
+    view.unmount();
+    onRemoveTransition.mockClear();
+    renderCanvas({ onRemoveTransition, canEdit: false });
+    pill().focus();
+    await user.keyboard("{Delete}");
+    expect(onRemoveTransition).not.toHaveBeenCalled();
+  });
+
   it("marks the pill and every arrow of the selected transition as selected", () => {
     renderCanvas({
       draft: {

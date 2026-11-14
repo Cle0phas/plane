@@ -252,6 +252,9 @@ export function WorkflowCanvas({
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.ctrlKey || event.metaKey || event.altKey || isTextField(event.target)) return;
+    // The pill is the only handle of a global transition and React Flow skips it (nokey); same key as deleteKeyCode.
+    const globalKey = (event.target as HTMLElement).closest("[data-global-key]")?.getAttribute("data-global-key");
+    if (canEdit && globalKey && event.key === "Delete") return onRemoveTransition(globalKey);
     // "=" is the unshifted "+" key (spec 3.9).
     if (event.key === "+" || event.key === "=") void flowRef.current?.zoomIn();
     else if (event.key === "-") void flowRef.current?.zoomOut();
