@@ -21,6 +21,7 @@ import type {
  * group null: the server deduces it (W5). known_group: category already known, display only (X5).
  * group_locked: chosen by hand on the server, which then ignores a return to automatic (W5); display only.
  * shared_count: other workflows using the status (W17).
+ * server_name, shared_names: name known to the server and the other workflows using the status (W17).
  */
 export type TDraftStatus = {
   id?: string;
@@ -30,6 +31,8 @@ export type TDraftStatus = {
   known_group?: TStateGroups;
   group_locked?: boolean;
   shared_count: number;
+  server_name?: string;
+  shared_names?: string[];
 };
 
 export type TDraftState = {
@@ -51,6 +54,8 @@ export type TDraftTransition = {
 };
 export type TDraftGraph = { states: TDraftState[]; transitions: TDraftTransition[] };
 
+export type TSelectionTarget = { kind: "state" | "transition"; key: string } | { kind: "start" };
+
 const RESERVED_STATUS_NAMES = new Set(["triage"]);
 const GRAPH_ERROR_CODES = new Set([
   "initial_state_required",
@@ -64,11 +69,14 @@ const GRAPH_ERROR_CODES = new Set([
   "status_changed",
   "status_limit",
   "status_in_use",
+  "stale_graph",
+  "duplicate_transition",
 ]);
 
 export const fromDetail = (detail: TWorkflowDetail, statuses: TWorkflowStatus[]): TDraftGraph => ({
   states: detail.states.map((state) => {
-    const usage = statuses.find((status) => status.id === state.status.id)?.workflow_count ?? 1;
+    const known = statuses.find((status) => status.id === state.status.id);
+    const usage = known?.workflow_count ?? 1;
     return {
       key: state.id,
       status: {
@@ -79,6 +87,8 @@ export const fromDetail = (detail: TWorkflowDetail, statuses: TWorkflowStatus[])
         known_group: state.status.group,
         group_locked: !state.status.group_is_auto,
         shared_count: Math.max(usage - 1, 0),
+        server_name: state.status.name,
+        shared_names: (known?.workflows ?? []).filter((item) => item.id !== detail.id).map((item) => item.name),
       },
       position_x: state.position_x,
       position_y: state.position_y,
@@ -157,7 +167,8 @@ type TNewState = { key: string; status: TDraftStatus; globalKey?: string };
 // globalKey adds a transition from any state.
 export const addStates = (draft: TDraftGraph, entries: TNewState[]): TDraftGraph => {
   const last = draft.states[draft.states.length - 1];
-  const hasInitial = draft.states.some((state) => state.is_initial);
+  // Only the first state of an empty workflow is linked to the start by itself (D4).
+  const linksStart = draft.states.length === 0;
   const taken = draft.states.map((state) => stateBox(state.position_x, state.position_y));
   const y = last?.position_y ?? 0;
   let x = last ? last.position_x : -PLACEMENT_STEP;
@@ -169,7 +180,7 @@ export const addStates = (draft: TDraftGraph, entries: TNewState[]): TDraftGraph
       status: entry.status,
       position_x: x,
       position_y: y,
-      is_initial: !hasInitial && index === 0,
+      is_initial: linksStart && index === 0,
     };
   });
   const transitions = entries.flatMap((entry) =>
@@ -195,11 +206,14 @@ export const setInitial = (draft: TDraftGraph, key: string): TDraftGraph => ({
   states: draft.states.map((state) => ({ ...state, is_initial: state.key === key })),
 });
 
+export const clearInitial = (draft: TDraftGraph): TDraftGraph => ({
+  ...draft,
+  states: draft.states.map((state) => (state.is_initial ? { ...state, is_initial: false } : state)),
+});
+
 export const removeState = (draft: TDraftGraph, key: string): TDraftGraph => {
-  const removed = draft.states.find((state) => state.key === key);
-  let states = draft.states.filter((state) => state.key !== key);
-  if (removed?.is_initial && states.length > 0)
-    states = states.map((state, index) => ({ ...state, is_initial: index === 0 }));
+  // The start link is not moved to another state: the admin chooses it again (E4).
+  const states = draft.states.filter((state) => state.key !== key);
   const transitions = draft.transitions
     .filter((transition) => transition.target_key !== key)
     .map((transition) =>
@@ -274,11 +288,46 @@ export const isRuleComplete = ({ params }: TWorkflowRule) =>
 type TStateCheck = (state: TDraftState, index: number) => boolean;
 type TTransitionCheck = (transition: TDraftTransition) => boolean;
 
+type TRoute = Pick<TDraftTransition, "from_any" | "source_keys" | "target_key">;
+
+const routePairs = (route: TRoute) =>
+  route.from_any ? [`*>${route.target_key}`] : route.source_keys.map((source) => `${source}>${route.target_key}`);
+
+/** True when another transition already links one of these sources, or any state, to this target (spec 6.4). */
+export const isDuplicateRoute = (draft: TDraftGraph, route: TRoute, exceptKey?: string) => {
+  const pairs = new Set(routePairs(route));
+  return draft.transitions.some((item) => item.key !== exceptKey && routePairs(item).some((pair) => pairs.has(pair)));
+};
+
+/** States that can become one more source: not a source, not the target, no duplicate route (E9). */
+export const sourceCandidates = (draft: TDraftGraph, transitionKey: string): TDraftState[] => {
+  const transition = draft.transitions.find((item) => item.key === transitionKey);
+  if (!transition || transition.from_any) return [];
+  return draft.states.filter(
+    (state) =>
+      state.key !== transition.target_key &&
+      !transition.source_keys.includes(state.key) &&
+      !isDuplicateRoute(
+        draft,
+        { from_any: false, source_keys: [state.key], target_key: transition.target_key },
+        transitionKey
+      )
+  );
+};
+
 // Each check is written once, for validateDraft and for errorTarget; a state check is true on the faulty state.
 const draftChecks = (draft: TDraftGraph) => {
   const keys = new Set(draft.states.map((state) => state.key));
   const names = draft.states.map((state) => state.status.name.trim().toLowerCase());
   const ids = draft.states.map((state) => state.status.id);
+  // The later of two transitions sharing a route is the faulty one.
+  const seenPairs = new Set<string>();
+  const duplicates = new Set<string>();
+  for (const transition of draft.transitions) {
+    const pairs = routePairs({ ...transition, source_keys: transition.from_any ? [] : transition.source_keys });
+    if (pairs.some((pair) => seenPairs.has(pair))) duplicates.add(transition.key);
+    for (const pair of pairs) seenPairs.add(pair);
+  }
   const states: [string, TStateCheck][] = [
     ["status_name_required", (_, index) => names[index] === ""],
     ["reserved_status_name", (_, index) => RESERVED_STATUS_NAMES.has(names[index])],
@@ -299,6 +348,7 @@ const draftChecks = (draft: TDraftGraph) => {
       },
     ],
     ["invalid_rule", (transition) => transition.rules.length > 1 || !transition.rules.every(isRuleComplete)],
+    ["duplicate_transition", (transition) => duplicates.has(transition.key)],
   ];
   return { states, transitions };
 };
@@ -315,7 +365,9 @@ export const validateDraft = (draft: TDraftGraph): string[] => {
 };
 
 /** Element a validateDraft code points at, so the error banner can select it (spec 3.8). */
-export const errorTarget = (draft: TDraftGraph, code: string): { kind: "state" | "transition"; key: string } | null => {
+export const errorTarget = (draft: TDraftGraph, code: string): TSelectionTarget | null => {
+  // The missing start link is fixed in the start panel (spec 4.2).
+  if (code === "initial_state_required") return draft.states.length > 0 ? { kind: "start" } : null;
   const checks = draftChecks(draft);
   const stateTest = checks.states.find(([name]) => name === code)?.[1];
   const transitionTest = checks.transitions.find(([name]) => name === code)?.[1];
@@ -362,7 +414,20 @@ type TStartPlacement = { x: number; y: number; sides: { source: TWorkflowSide; t
  */
 export const startPlacement = (draft: TDraftGraph): TStartPlacement | null => {
   const initial = draft.states.find((state) => state.is_initial);
-  if (!initial) return null;
+  if (!initial) {
+    if (draft.states.length === 0) return null;
+    // Unlinked (spec 4.2): left of the leftmost state, the topmost one on a tie.
+    const first = draft.states.reduce((best, item) =>
+      item.position_x < best.position_x || (item.position_x === best.position_x && item.position_y < best.position_y)
+        ? item
+        : best
+    );
+    return {
+      x: first.position_x - START_ARROW - START_SIZE,
+      y: first.position_y + (STATE_BOX.height - START_SIZE) / 2,
+      sides: { source: "right", target: "left" },
+    };
+  }
   const { position_x: x, position_y: y } = initial;
   const centredX = x + (STATE_BOX.width - START_SIZE) / 2;
   const left = { x: x - START_ARROW - START_SIZE, y: y + (STATE_BOX.height - START_SIZE) / 2 };
@@ -390,7 +455,8 @@ export const connectStates = (
   targetSide: TWorkflowSide
 ): TDraftGraph => {
   const known = (stateKey: string) => draft.states.some((state) => state.key === stateKey);
-  if (sourceKey === targetKey || !known(sourceKey) || !known(targetKey)) return draft;
+  const route = { from_any: false, source_keys: [sourceKey], target_key: targetKey };
+  if (sourceKey === targetKey || !known(sourceKey) || !known(targetKey) || isDuplicateRoute(draft, route)) return draft;
   return addTransition(draft, {
     key,
     name: "",
@@ -401,6 +467,43 @@ export const connectStates = (
     sides: { [sourceKey]: { source: sourceSide, target: targetSide } },
   });
 };
+
+export type TStateRef = { kind: "state"; key: string } | { kind: "new"; key: string; status: TDraftStatus };
+export type TNewTransition = {
+  key: string;
+  name: string;
+  from_any: boolean;
+  sources: TStateRef[];
+  target: TStateRef;
+};
+
+/** One draft change for the dialog (D1): states picked outside the workflow, then the transition. */
+export const addTransitionWithStates = (draft: TDraftGraph, input: TNewTransition): TDraftGraph => {
+  const sources = input.from_any ? [] : input.sources;
+  const fresh = [...sources, input.target].flatMap((ref) =>
+    ref.kind === "new" ? [{ key: ref.key, status: ref.status }] : []
+  );
+  return addTransition(fresh.length > 0 ? addStates(draft, fresh) : draft, {
+    key: input.key,
+    name: input.name.trim(),
+    from_any: input.from_any,
+    source_keys: sources.map((ref) => ref.key),
+    target_key: input.target.key,
+    rules: [],
+    sides: {},
+  });
+};
+
+export type TSharedRename = { key: string; from: string; to: string; workflows: string[] };
+
+/** Renamed statuses that other workflows use: the save asks before renaming them everywhere (D12). */
+export const renamedSharedStatuses = (draft: TDraftGraph): TSharedRename[] =>
+  draft.states.flatMap((state) => {
+    const { server_name: from, shared_names: workflows = [] } = state.status;
+    const to = state.status.name.trim();
+    if (from === undefined || workflows.length === 0 || from.trim() === to) return [];
+    return [{ key: state.key, from, to, workflows }];
+  });
 
 /** Category shown for a state: chosen, else known, else deduced like the server does (W5, X5). */
 export const displayGroup = (draft: TDraftGraph, state: TDraftState): TStateGroups => {
@@ -438,6 +541,7 @@ export type TStatusOption = {
   group: TStateGroups;
   group_is_auto: boolean;
   workflow_count: number;
+  workflow_names: string[];
 };
 
 /** "Search or create" list (R7): workspace statuses, then project states, minus names already used. */
@@ -457,8 +561,9 @@ export const statusOptions = (
       group: item.group,
       group_is_auto: item.group_is_auto,
       workflow_count: item.workflow_count ?? 0,
+      workflow_names: (item.workflows ?? []).map((workflow) => workflow.name),
     })),
-    ...candidates.map((item) => ({ ...item, group_is_auto: false, workflow_count: 0 })),
+    ...candidates.map((item) => ({ ...item, group_is_auto: false, workflow_count: 0, workflow_names: [] })),
   ];
   return all.filter((option) => {
     const key = option.name.trim().toLowerCase();
@@ -470,13 +575,14 @@ export const statusOptions = (
 };
 
 export const optionToStatus = (option: TStatusOption): TDraftStatus => ({
-  ...(option.id ? { id: option.id } : {}),
+  ...(option.id ? { id: option.id, server_name: option.name } : {}),
   name: option.name,
   color: option.color,
   group: option.group_is_auto ? null : option.group,
   known_group: option.group,
   group_locked: Boolean(option.id) && !option.group_is_auto,
   shared_count: option.workflow_count,
+  shared_names: option.workflow_names,
 });
 
 export const createdStatus = (name: string, group: TStateGroups | null): TDraftStatus => ({

@@ -90,11 +90,12 @@ describe("addStates", () => {
     ]);
   });
 
-  it("makes a state initial only when the draft has none", () => {
+  it("links the start only to the first state of an empty draft", () => {
     const withInitial: TDraftGraph = { states: [state("a", { is_initial: true })], transitions: [] };
     expect(addStates(withInitial, [{ key: "b", status: status("B") }]).states[1].is_initial).toBe(false);
     const withoutInitial: TDraftGraph = { states: [state("a")], transitions: [] };
-    expect(addStates(withoutInitial, [{ key: "b", status: status("B") }]).states[1].is_initial).toBe(true);
+    expect(addStates(withoutInitial, [{ key: "b", status: status("B") }]).states[1].is_initial).toBe(false);
+    expect(addStates(EMPTY, [{ key: "b", status: status("B") }]).states[0].is_initial).toBe(true);
   });
 
   it("keeps exactly one initial state after setInitial", () => {
@@ -200,8 +201,8 @@ describe("startPlacement", () => {
   const at = (key: string, x: number, y: number, isInitial = false) =>
     state(key, { position_x: x, position_y: y, is_initial: isInitial });
 
-  it("places nothing without an initial state", () => {
-    expect(startPlacement({ states: [at("a", 0, 0)], transitions: [] })).toBeNull();
+  it("places nothing in an empty draft", () => {
+    expect(startPlacement({ states: [], transitions: [] })).toBeNull();
   });
 
   it("goes to the left of the initial state when that place is free", () => {
@@ -320,6 +321,8 @@ describe("status options", () => {
       known_group: "unstarted",
       group_locked: true,
       shared_count: 2,
+      server_name: "Todo",
+      shared_names: [],
     });
     expect(optionToStatus(candidate)).toEqual({
       name: "Review",
@@ -328,6 +331,7 @@ describe("status options", () => {
       known_group: "started",
       group_locked: false,
       shared_count: 0,
+      shared_names: [],
     });
     const automatic = optionToStatus({ ...existing, group_is_auto: true });
     expect(automatic.group).toBeNull();
@@ -426,7 +430,8 @@ describe("errorTarget", () => {
     expect(errorTarget(draft, "status_name_required")).toEqual({ kind: "state", key: "c" });
     expect(errorTarget(draft, "invalid_transition")).toEqual({ kind: "transition", key: "bad" });
     expect(errorTarget(draft, "invalid_rule")).toEqual({ kind: "transition", key: "rule" });
-    expect(errorTarget(draft, "initial_state_required")).toBeNull();
+    expect(errorTarget(draft, "initial_state_required")).toEqual({ kind: "start" });
+    expect(errorTarget({ states: [], transitions: [] }, "initial_state_required")).toBeNull();
   });
 
   it("points at the second state holding the same status", () => {

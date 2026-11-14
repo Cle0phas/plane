@@ -14,9 +14,17 @@ import type { TDraftGraph, TStatusOption } from "./graph-model";
 vi.mock("@plane/i18n", () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 
 const options: TStatusOption[] = [
-  { id: "s1", name: "Todo", color: "#111111", group: "unstarted", group_is_auto: false, workflow_count: 2 },
-  { name: "Review", color: "#333333", group: "started", group_is_auto: false, workflow_count: 0 },
-  { name: "Done", color: "#444444", group: "completed", group_is_auto: false, workflow_count: 0 },
+  {
+    id: "s1",
+    name: "Todo",
+    color: "#111111",
+    group: "unstarted",
+    group_is_auto: false,
+    workflow_count: 2,
+    workflow_names: [],
+  },
+  { name: "Review", color: "#333333", group: "started", group_is_auto: false, workflow_count: 0, workflow_names: [] },
+  { name: "Done", color: "#444444", group: "completed", group_is_auto: false, workflow_count: 0, workflow_names: [] },
 ];
 const draft: TDraftGraph = {
   states: [
@@ -65,6 +73,8 @@ describe("AddStatusDialog", () => {
           known_group: "unstarted",
           group_locked: true,
           shared_count: 2,
+          server_name: "Todo",
+          shared_names: [],
         },
         {
           name: "Review",
@@ -73,6 +83,7 @@ describe("AddStatusDialog", () => {
           known_group: "started",
           group_locked: false,
           shared_count: 0,
+          shared_names: [],
         },
       ],
       false

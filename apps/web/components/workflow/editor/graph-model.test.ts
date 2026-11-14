@@ -67,6 +67,8 @@ describe("graph model", () => {
       known_group: "unstarted",
       group_locked: false,
       shared_count: 1,
+      server_name: "Open",
+      shared_names: [],
     });
     expect(draft.states[1].status.group).toBe("cancelled");
     // Set by hand on the server: the server ignores a return to automatic (W5).
@@ -105,12 +107,12 @@ describe("graph model", () => {
     expect(isDraftDirty(flipped, draft)).toBe(false);
   });
 
-  it("removing a state drops its arrows and hands the initial flag over", () => {
+  it("removing a state drops its arrows and leaves the start link unset", () => {
     let draft: TDraftGraph = fromDetail(detail, statuses);
     draft = addTransition(draft, { key: "g", name: "", from_any: true, source_keys: [], target_key: "a", rules: [] });
     const without = removeState(draft, "a");
     expect(without.states.map((state) => state.key)).toEqual(["b"]);
-    expect(without.states[0].is_initial).toBe(true);
+    expect(without.states[0].is_initial).toBe(false);
     expect(without.transitions).toEqual([]);
   });
 

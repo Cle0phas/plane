@@ -106,7 +106,9 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
   // dropped for good, so a discard that brings the element back does not reselect it.
   const isPickedInDraft =
     picked !== null &&
-    (picked.kind === "state" ? draft.states : draft.transitions).some((item) => item.key === picked.key);
+    (picked.kind === "start"
+      ? true
+      : (picked.kind === "state" ? draft.states : draft.transitions).some((item) => item.key === picked.key));
   if (picked !== null && !isPickedInDraft) setSelection(null);
   const selection = isPickedInDraft ? picked : null;
   const errors = validateDraft(draft);

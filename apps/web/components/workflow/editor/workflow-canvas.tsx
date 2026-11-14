@@ -32,11 +32,12 @@ import {
   toneOf,
   transitionCounts,
   type TDraftGraph,
+  type TSelectionTarget,
 } from "./graph-model";
 import { START_EDGE_ID, START_NODE_ID, WorkflowStartNode } from "./start-node";
 import { SIDES, WorkflowStateNode } from "./state-node";
 
-export type TEditorSelection = { kind: "state" | "transition"; key: string } | null;
+export type TEditorSelection = TSelectionTarget | null;
 
 type Props = {
   draft: TDraftGraph;
