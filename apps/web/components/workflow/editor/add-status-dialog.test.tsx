@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { AddStatusDialog } from "./add-status-dialog";
@@ -107,6 +107,15 @@ describe("AddStatusDialog", () => {
     await user.click(screen.getByRole("button", { name: ADD }));
     expect(onAdd).toHaveBeenCalledTimes(1);
     expect(onAdd.mock.calls[0][0].map((status: { name: string }) => status.name)).toEqual(["Todo", "Fresh"]);
+  });
+
+  it("ignores the Enter that commits an IME composition", async () => {
+    const { user } = open();
+    const field = screen.getByRole("textbox", { name: NAME });
+    await user.type(field, "Fresh");
+    fireEvent.keyDown(field, { key: "Enter", isComposing: true });
+    expect(screen.getByRole("button", { name: CREATE })).toBeTruthy();
+    expect((field as HTMLInputElement).value).toBe("Fresh");
   });
 
   it("does nothing on Enter when the typed name cannot be created", async () => {

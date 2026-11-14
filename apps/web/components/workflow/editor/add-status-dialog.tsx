@@ -121,7 +121,8 @@ export function AddStatusDialog({ isOpen, draft, options, onClose, onAdd }: Prop
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => setQuery(event.target.value)}
                   // Enter must never submit the dialog and drop what was typed.
                   onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
-                    if (event.key !== "Enter") return;
+                    // An Enter that commits an IME composition is not a request to create.
+                    if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
                     event.preventDefault();
                     if (canCreate) create();
                   }}
