@@ -180,6 +180,7 @@
         "sources": "遷移元",
         "any_state": "任意の状態",
         "target": "遷移先",
+        "choose_state": "状態を選択",
         "name": "名前（任意）",
         "submit": "遷移を追加"
       },

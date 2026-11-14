@@ -180,6 +180,7 @@
         "sources": "Từ",
         "any_state": "Bất kỳ trạng thái nào",
         "target": "Đến",
+        "choose_state": "Chọn trạng thái",
         "name": "Tên (tùy chọn)",
         "submit": "Thêm chuyển tiếp"
       },

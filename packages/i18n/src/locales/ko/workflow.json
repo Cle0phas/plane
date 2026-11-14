@@ -180,6 +180,7 @@
         "sources": "시작",
         "any_state": "모든 스테이트",
         "target": "도착",
+        "choose_state": "스테이트 선택",
         "name": "이름(선택 사항)",
         "submit": "전환 추가"
       },

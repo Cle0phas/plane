@@ -180,6 +180,7 @@
         "sources": "從",
         "any_state": "任何狀態",
         "target": "到",
+        "choose_state": "選擇狀態",
         "name": "名稱（選填）",
         "submit": "新增轉換"
       },

@@ -180,6 +180,7 @@
         "sources": "Depuis",
         "any_state": "N’importe quel état",
         "target": "Vers",
+        "choose_state": "Choisir un état",
         "name": "Nom (facultatif)",
         "submit": "Ajouter la transition"
       },

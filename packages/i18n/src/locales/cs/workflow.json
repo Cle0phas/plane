@@ -180,6 +180,7 @@
         "sources": "Z",
         "any_state": "Libovolný stav",
         "target": "Do",
+        "choose_state": "Vybrat stav",
         "name": "Název (volitelné)",
         "submit": "Přidat přechod"
       },

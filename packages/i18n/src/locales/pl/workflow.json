@@ -180,6 +180,7 @@
         "sources": "Z",
         "any_state": "Dowolny stan",
         "target": "Do",
+        "choose_state": "Wybierz stan",
         "name": "Nazwa (opcjonalnie)",
         "submit": "Dodaj przejście"
       },

@@ -180,6 +180,7 @@
         "sources": "Kaynak",
         "any_state": "Herhangi bir durum",
         "target": "Hedef",
+        "choose_state": "Durum seçin",
         "name": "Ad (isteğe bağlı)",
         "submit": "Geçiş ekle"
       },

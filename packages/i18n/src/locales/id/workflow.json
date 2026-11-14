@@ -180,6 +180,7 @@
         "sources": "Dari",
         "any_state": "Status mana pun",
         "target": "Ke",
+        "choose_state": "Pilih status",
         "name": "Nama (opsional)",
         "submit": "Tambah transisi"
       },

@@ -180,6 +180,7 @@
         "sources": "Da",
         "any_state": "Qualsiasi stato",
         "target": "A",
+        "choose_state": "Scegli uno stato",
         "name": "Nome (facoltativo)",
         "submit": "Aggiungi transizione"
       },

@@ -180,6 +180,7 @@
         "sources": "Von",
         "any_state": "Beliebiger Status",
         "target": "Nach",
+        "choose_state": "Status auswählen",
         "name": "Name (optional)",
         "submit": "Übergang hinzufügen"
       },

@@ -180,6 +180,7 @@
         "sources": "Van",
         "any_state": "Elke status",
         "target": "Naar",
+        "choose_state": "Kies een status",
         "name": "Naam (optioneel)",
         "submit": "Overgang toevoegen"
       },

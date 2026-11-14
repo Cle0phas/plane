@@ -180,6 +180,7 @@
         "sources": "从",
         "any_state": "任意状态",
         "target": "到",
+        "choose_state": "选择状态",
         "name": "名称（可选）",
         "submit": "添加转换"
       },

@@ -180,6 +180,7 @@
         "sources": "De",
         "any_state": "Qualquer estado",
         "target": "Para",
+        "choose_state": "Escolher um estado",
         "name": "Nome (opcional)",
         "submit": "Adicionar transição"
       },

@@ -180,6 +180,7 @@
         "sources": "Din",
         "any_state": "Orice stare",
         "target": "În",
+        "choose_state": "Alege o stare",
         "name": "Nume (opțional)",
         "submit": "Adaugă tranziția"
       },

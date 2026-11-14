@@ -180,6 +180,7 @@
         "sources": "From",
         "any_state": "Any state",
         "target": "To",
+        "choose_state": "Choose a state",
         "name": "Name (optional)",
         "submit": "Add transition"
       },
