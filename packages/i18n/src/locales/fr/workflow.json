@@ -155,9 +155,9 @@
       "discard": "Annuler les changements",
       "saved": "Workflow enregistré.",
       "unsaved": "Modifications non enregistrées",
-      "read_only": "Vous n'êtes pas autorisé à modifier ce workflow.",
+      "read_only": "Vous n’êtes pas autorisé à modifier ce workflow.",
       "start": "DÉMARRER",
-      "global": "N'importe lequel",
+      "global": "N’importe lequel",
       "diagram_label": "Diagramme du workflow",
       "add_state": {
         "title": "Ajouter un état",
@@ -170,10 +170,10 @@
         "submit": "Ajouter l’état",
         "description": "Un état indique la progression du ticket. Choisissez des états existants ou saisissez un nom pour en créer un.",
         "search": "Rechercher ou créer",
-        "create_option": "Créer « {name} »",
-        "allow_any": "Autoriser les transitions depuis n'importe quel état",
+        "create_option": "Créer « {name} »",
+        "allow_any": "Autoriser les transitions depuis n’importe quel état",
         "none": "Aucun état ne correspond.",
-        "selected": "{count, plural, one {# sélectionné} other {# sélectionnés}}",
+        "selected": "{count, plural, one {# sélectionné} many {# sélectionnés} other {# sélectionnés}}",
         "errors": {
           "too_long": "Le nom doit faire 255 caractères au plus.",
           "present": "Ce workflow a déjà un état de ce nom.",
@@ -234,7 +234,7 @@
       },
       "close": "Fermer",
       "small_screen": "Ouvrez ce workflow sur un écran plus large pour le modifier.",
-      "used_in": "{count, plural, one {Utilisé dans # projet} other {Utilisé dans # projets}}",
+      "used_in": "{count, plural, one {Utilisé dans # projet} many {Utilisé dans # projets} other {Utilisé dans # projets}}",
       "show_labels": "Afficher les étiquettes de transition",
       "zoom": "Zoom",
       "minimap": "Mini-carte",
@@ -247,7 +247,7 @@
       "add_rule": {
         "title": "Ajouter une règle",
         "transition": "Transition",
-        "none": "Ajoutez d'abord une transition.",
+        "none": "Ajoutez d’abord une transition.",
         "submit": "Appliquer"
       },
       "text": {
@@ -257,7 +257,7 @@
         "origin_any": "Tous les états",
         "unnamed": "Transition sans nom",
         "toggle": "Afficher ou masquer les transitions de {name}",
-        "empty": "Ce workflow n'a encore aucun état."
+        "empty": "Ce workflow n’a encore aucun état."
       }
     },
     "scheme": {
