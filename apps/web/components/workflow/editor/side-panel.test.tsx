@@ -69,4 +69,21 @@ describe("WorkflowSidePanel", () => {
     renderPanel({ draft, selection: { kind: "state", key: "auto" } });
     expect(categoryOptions()).toContain(AUTO);
   });
+
+  // The server bound (255): longer names were refused with the generic error only.
+  it("caps the state name and the transition name at 255 characters", () => {
+    const draft: TDraftGraph = {
+      states: [state("a"), state("b")],
+      transitions: [{ key: "t", name: "", from_any: false, source_keys: ["a"], target_key: "b", rules: [] }],
+    };
+    const view = renderPanel({ draft, selection: { kind: "state", key: "a" } });
+    expect(screen.getByRole("textbox", { name: "workflows.editor.add_state.name" }).getAttribute("maxlength")).toBe(
+      "255"
+    );
+    view.unmount();
+    renderPanel({ draft, selection: { kind: "transition", key: "t" } });
+    expect(
+      screen.getByRole("textbox", { name: "workflows.editor.add_transition.name" }).getAttribute("maxlength")
+    ).toBe("255");
+  });
 });

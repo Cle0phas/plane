@@ -133,6 +133,7 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
             id="workflow-state-name"
             name="state-name"
             type="text"
+            maxLength={255}
             label={t("workflows.editor.add_state.name")}
             value={state.status.name}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -222,6 +223,7 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
               id="workflow-transition-name"
               name="transition-name"
               type="text"
+              maxLength={255}
               label={t("workflows.editor.add_transition.name")}
               value={transition.name}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>

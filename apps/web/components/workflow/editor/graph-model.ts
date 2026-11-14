@@ -289,7 +289,7 @@ const draftChecks = (draft: TDraftGraph) => {
   return { states, transitions };
 };
 
-/** Same checks as the server (Task 4), so the admin sees them before saving. */
+/** The server's checks of names and structure (Task 4); length and count bounds stay with fields and server. */
 export const validateDraft = (draft: TDraftGraph): string[] => {
   const checks = draftChecks(draft);
   const hasOneInitial = draft.states.length === 0 || draft.states.filter((state) => state.is_initial).length === 1;
