@@ -24,6 +24,7 @@ import { setToast } from "@plane/blocks/toast";
 import { useTranslation } from "@plane/i18n";
 import type { TWorkflowDetail, TWorkflowFormData } from "@plane/types";
 // hooks
+import { useProject } from "@/hooks/store/use-project";
 import { useWorkflow } from "@/hooks/store/use-workflow";
 
 type Props = {
@@ -33,12 +34,13 @@ type Props = {
   onCreated: (workflow: TWorkflowDetail) => void;
 };
 
-const EMPTY: TWorkflowFormData = { name: "", description: "" };
+const EMPTY: TWorkflowFormData = { name: "", description: "", source_project_id: "" };
 
 export const WorkflowCreateModal = observer(function WorkflowCreateModal(props: Props) {
   const { workspaceSlug, isOpen, onClose, onCreated } = props;
   const { t } = useTranslation();
   const { createWorkflow } = useWorkflow();
+  const { workspaceProjectIds, getProjectById } = useProject();
   const {
     control,
     handleSubmit,
@@ -56,6 +58,8 @@ export const WorkflowCreateModal = observer(function WorkflowCreateModal(props: 
       const workflow = await createWorkflow(workspaceSlug, {
         name: data.name.trim(),
         description: data.description?.trim(),
+        // An empty choice means an empty workflow: the field is then left out.
+        ...(data.source_project_id ? { source_project_id: data.source_project_id } : {}),
       });
       onCreated(workflow);
     } catch (error) {
@@ -136,6 +140,30 @@ export const WorkflowCreateModal = observer(function WorkflowCreateModal(props: 
                     />
                   )}
                 />
+                <label className="flex flex-col gap-1 text-body-xs-medium text-secondary">
+                  {t("workflows.settings.form.source_project")}
+                  <Controller
+                    control={control}
+                    name="source_project_id"
+                    render={({ field: { value, onChange } }) => (
+                      <select
+                        className="rounded-md border border-subtle bg-layer-1 px-2 py-1.5 text-body-sm-regular"
+                        value={value ?? ""}
+                        onChange={onChange}
+                      >
+                        <option value="">{t("workflows.settings.form.source_project_none")}</option>
+                        {(workspaceProjectIds ?? []).map((projectId) => {
+                          const project = getProjectById(projectId);
+                          return project ? (
+                            <option key={projectId} value={projectId}>
+                              {project.name}
+                            </option>
+                          ) : null;
+                        })}
+                      </select>
+                    )}
+                  />
+                </label>
               </div>
             </DialogBody>
           </DialogMain>

@@ -13,6 +13,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL(".", import.meta.url)),
+      // same compat shim as vite.config.ts, so components importing next/link render under test
+      "next/link": fileURLToPath(new URL("./app/compat/next/link.tsx", import.meta.url)),
     },
   },
   test: {
