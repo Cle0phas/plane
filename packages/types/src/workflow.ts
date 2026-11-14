@@ -25,6 +25,13 @@ export type TWorkflowRestrictActorsParams = {
 
 export type TWorkflowRule = { type: "restrict_actors"; params: TWorkflowRestrictActorsParams };
 
+export type TWorkflowSide = "top" | "right" | "bottom" | "left";
+
+/** Sides an arrow leaves and enters by, keyed by source state id (response) or source key (payload). */
+export type TWorkflowSides = Record<string, { source: TWorkflowSide; target: TWorkflowSide }>;
+
+export type TWorkflowStatusCandidate = { name: string; color: string; group: TStateGroups };
+
 export type TWorkflowState = {
   id: string;
   status: TWorkflowStatus;
@@ -40,6 +47,7 @@ export type TWorkflowTransition = {
   source_ids: string[];
   target_id: string;
   rules: TWorkflowRule[];
+  sides?: TWorkflowSides;
 };
 
 export type TWorkflowProjectRef = { id: string; name: string };
@@ -66,7 +74,7 @@ export type TWorkflowSummary = {
   projects?: TWorkflowProjectRef[];
 };
 
-export type TWorkflowFormData = { name: string; description?: string };
+export type TWorkflowFormData = { name: string; description?: string; source_project_id?: string };
 
 export type TWorkflowGraphPayloadState = {
   key: string;
@@ -82,6 +90,7 @@ export type TWorkflowGraphPayloadTransition = {
   source_keys: string[];
   target_key: string;
   rules: TWorkflowRule[];
+  sides?: TWorkflowSides;
 };
 
 export type TWorkflowGraphPayload = {

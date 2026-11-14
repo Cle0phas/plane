@@ -15,6 +15,7 @@ import type {
   TWorkflowGraphPayload,
   TWorkflowMappingNeed,
   TWorkflowStatus,
+  TWorkflowStatusCandidate,
   TWorkflowSummary,
 } from "@plane/types";
 import { WorkflowService } from "@/services/workflow.service";
@@ -24,13 +25,16 @@ export interface IWorkflowStore {
   detailsMap: Record<string, TWorkflowDetail>;
   statusesMap: Record<string, TWorkflowStatus[]>;
   schemesMap: Record<string, TProjectWorkflowScheme>;
+  candidatesMap: Record<string, TWorkflowStatusCandidate[]>;
   getWorkspaceWorkflows: (workspaceSlug: string) => TWorkflowSummary[];
   getWorkflowDetail: (workflowId: string) => TWorkflowDetail | undefined;
   getWorkspaceStatuses: (workspaceSlug: string) => TWorkflowStatus[];
   getProjectScheme: (projectId: string) => TProjectWorkflowScheme | undefined;
+  getWorkspaceCandidates: (workspaceSlug: string) => TWorkflowStatusCandidate[];
   fetchWorkflows: (workspaceSlug: string) => Promise<TWorkflowSummary[]>;
   fetchWorkflowDetail: (workspaceSlug: string, workflowId: string) => Promise<TWorkflowDetail>;
   fetchStatuses: (workspaceSlug: string) => Promise<TWorkflowStatus[]>;
+  fetchCandidates: (workspaceSlug: string) => Promise<TWorkflowStatusCandidate[]>;
   createWorkflow: (workspaceSlug: string, data: TWorkflowFormData) => Promise<TWorkflowDetail>;
   updateWorkflow: (
     workspaceSlug: string,
@@ -38,6 +42,7 @@ export interface IWorkflowStore {
     data: Partial<TWorkflowFormData>
   ) => Promise<TWorkflowDetail>;
   removeWorkflow: (workspaceSlug: string, workflowId: string) => Promise<void>;
+  duplicateWorkflow: (workspaceSlug: string, workflowId: string, name: string) => Promise<TWorkflowDetail>;
   saveGraph: (workspaceSlug: string, workflowId: string, payload: TWorkflowGraphPayload) => Promise<TWorkflowDetail>;
   removeStatus: (workspaceSlug: string, statusId: string) => Promise<void>;
   fetchProjectScheme: (workspaceSlug: string, projectId: string) => Promise<TProjectWorkflowScheme>;
@@ -63,12 +68,16 @@ const toGraph = ({ id, name, description, updated_at, states, transitions }: TWo
   transitions,
 });
 
+// One shared array: a new [] on every read would look like a change to readers.
+const NO_CANDIDATES: TWorkflowStatusCandidate[] = [];
+
 export class WorkflowStore implements IWorkflowStore {
   // Keyed by workspace slug so a workspace switch or a late response never mixes workspaces.
   workflowsMap: Record<string, Record<string, TWorkflowSummary>> = {};
   detailsMap: Record<string, TWorkflowDetail> = {};
   statusesMap: Record<string, TWorkflowStatus[]> = {};
   schemesMap: Record<string, TProjectWorkflowScheme> = {};
+  candidatesMap: Record<string, TWorkflowStatusCandidate[]> = {};
   private service: WorkflowService;
 
   constructor(service: WorkflowService = new WorkflowService()) {
@@ -77,12 +86,15 @@ export class WorkflowStore implements IWorkflowStore {
       detailsMap: observable,
       statusesMap: observable,
       schemesMap: observable,
+      candidatesMap: observable,
       fetchWorkflows: action,
       fetchWorkflowDetail: action,
       fetchStatuses: action,
+      fetchCandidates: action,
       createWorkflow: action,
       updateWorkflow: action,
       removeWorkflow: action,
+      duplicateWorkflow: action,
       saveGraph: action,
       removeStatus: action,
       fetchProjectScheme: action,
@@ -99,6 +111,8 @@ export class WorkflowStore implements IWorkflowStore {
   getWorkflowDetail = computedFn((workflowId: string) => this.detailsMap[workflowId]);
 
   getWorkspaceStatuses = computedFn((workspaceSlug: string) => this.statusesMap[workspaceSlug] ?? []);
+
+  getWorkspaceCandidates = computedFn((workspaceSlug: string) => this.candidatesMap[workspaceSlug] ?? NO_CANDIDATES);
 
   getProjectScheme = computedFn((projectId: string) => this.schemesMap[projectId]);
 
@@ -124,6 +138,14 @@ export class WorkflowStore implements IWorkflowStore {
       this.statusesMap[workspaceSlug] = statuses;
     });
     return statuses;
+  };
+
+  fetchCandidates = async (workspaceSlug: string) => {
+    const candidates = await this.service.listCandidates(workspaceSlug);
+    runInAction(() => {
+      this.candidatesMap[workspaceSlug] = candidates;
+    });
+    return candidates;
   };
 
   createWorkflow = async (workspaceSlug: string, data: TWorkflowFormData) => {
@@ -152,6 +174,15 @@ export class WorkflowStore implements IWorkflowStore {
     });
   };
 
+  duplicateWorkflow = async (workspaceSlug: string, workflowId: string, name: string) => {
+    const workflow = await this.service.duplicate(workspaceSlug, workflowId, name);
+    runInAction(() => {
+      this.detailsMap[workflow.id] = workflow;
+    });
+    await this.fetchWorkflows(workspaceSlug).catch(() => undefined);
+    return workflow;
+  };
+
   saveGraph = async (workspaceSlug: string, workflowId: string, payload: TWorkflowGraphPayload) => {
     const workflow = await this.service.saveGraph(workspaceSlug, workflowId, payload);
     runInAction(() => {
@@ -161,8 +192,12 @@ export class WorkflowStore implements IWorkflowStore {
         scheme.workflows = scheme.workflows.map((graph) => (graph.id === workflowId ? toGraph(workflow) : graph));
       }
     });
-    // Counts and shared statuses changed too.
-    await Promise.allSettled([this.fetchWorkflows(workspaceSlug), this.fetchStatuses(workspaceSlug)]);
+    // Counts and shared statuses changed too; a saved candidate is now a status.
+    await Promise.allSettled([
+      this.fetchWorkflows(workspaceSlug),
+      this.fetchStatuses(workspaceSlug),
+      this.fetchCandidates(workspaceSlug),
+    ]);
     return workflow;
   };
 

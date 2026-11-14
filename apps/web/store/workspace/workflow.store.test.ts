@@ -33,6 +33,7 @@ const buildStore = (overrides: object = {}) =>
   new WorkflowStore({
     list: async () => [summary("b", "Beta"), summary("a", "Alpha")],
     listStatuses: async () => [],
+    listCandidates: async () => [],
     saveGraph: async (_slug: string, id: string) => detail(id, "Saved"),
     getProjectScheme: async (): Promise<TProjectWorkflowScheme> => ({
       default_workflow_id: "a",
@@ -69,5 +70,41 @@ describe("WorkflowStore", () => {
     await expect(store.saveGraph("acme", "a", { states: [], transitions: [] })).rejects.toEqual({
       graph: ["status_in_use"],
     });
+  });
+
+  it("keeps status candidates per workspace", async () => {
+    const store = buildStore({
+      listCandidates: async () => [{ name: "Review", color: "#3A3A3A", group: "started" }],
+    });
+    await store.fetchCandidates("acme");
+    expect(store.getWorkspaceCandidates("acme").map((candidate) => candidate.name)).toEqual(["Review"]);
+    expect(store.getWorkspaceCandidates("other")).toEqual([]);
+  });
+
+  it("stores a duplicated workflow and refreshes the list", async () => {
+    const calls: string[] = [];
+    const store = buildStore({
+      duplicate: async (_slug: string, id: string, name: string) => {
+        calls.push(`${id}:${name}`);
+        return detail("copy", name);
+      },
+    });
+    const copy = await store.duplicateWorkflow("acme", "a", "Copy of Alpha");
+    expect(calls).toEqual(["a:Copy of Alpha"]);
+    expect(copy.id).toBe("copy");
+    expect(store.getWorkflowDetail("copy")?.name).toBe("Copy of Alpha");
+    expect(store.getWorkspaceWorkflows("acme")).toHaveLength(2);
+  });
+
+  it("refreshes the candidates after a graph save", async () => {
+    let reads = 0;
+    const store = buildStore({
+      listCandidates: async () => {
+        reads += 1;
+        return [];
+      },
+    });
+    await store.saveGraph("acme", "a", { states: [], transitions: [] });
+    expect(reads).toBe(1);
   });
 });

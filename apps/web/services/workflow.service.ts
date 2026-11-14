@@ -13,6 +13,7 @@ import type {
   TWorkflowGraphPayload,
   TWorkflowMappingNeed,
   TWorkflowStatus,
+  TWorkflowStatusCandidate,
   TWorkflowSummary,
 } from "@plane/types";
 import { APIService } from "@/services/api.service";
@@ -61,6 +62,14 @@ export class WorkflowService extends APIService {
 
   removeStatus(workspaceSlug: string, statusId: string): Promise<void> {
     return this.unwrap(this.delete(`/api/workspaces/${workspaceSlug}/workflow-statuses/${statusId}/`));
+  }
+
+  listCandidates(workspaceSlug: string): Promise<TWorkflowStatusCandidate[]> {
+    return this.unwrap(this.get(`/api/workspaces/${workspaceSlug}/workflow-statuses/candidates/`));
+  }
+
+  duplicate(workspaceSlug: string, workflowId: string, name: string): Promise<TWorkflowDetail> {
+    return this.unwrap(this.post(`/api/workspaces/${workspaceSlug}/workflows/${workflowId}/duplicate/`, { name }));
   }
 
   getProjectScheme(workspaceSlug: string, projectId: string): Promise<TProjectWorkflowScheme> {
