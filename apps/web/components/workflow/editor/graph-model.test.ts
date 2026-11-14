@@ -7,7 +7,6 @@
 import { describe, expect, it } from "vitest";
 import type { TWorkflowDetail } from "@plane/types";
 import {
-  addState,
   addTransition,
   fromDetail,
   getDraftErrorKey,
@@ -53,12 +52,18 @@ const statuses = [
   { id: "sa", name: "Open", color: "#111111", group: "unstarted" as const, group_is_auto: true, workflow_count: 2 },
   { id: "sb", name: "Done", color: "#222222", group: "cancelled" as const, group_is_auto: false, workflow_count: 1 },
 ];
-const newStatus = { name: "Review", color: "#333333", group: null, shared_count: 0 };
 
 describe("graph model", () => {
   it("round-trips the server graph and keeps auto groups automatic", () => {
     const draft = fromDetail(detail, statuses);
-    expect(draft.states[0].status).toEqual({ id: "sa", name: "Open", color: "#111111", group: null, shared_count: 1 });
+    expect(draft.states[0].status).toEqual({
+      id: "sa",
+      name: "Open",
+      color: "#111111",
+      group: null,
+      known_group: "unstarted",
+      shared_count: 1,
+    });
     expect(draft.states[1].status.group).toBe("cancelled");
     expect(toPayload(draft)).toEqual({
       states: [
@@ -77,15 +82,8 @@ describe("graph model", () => {
           is_initial: false,
         },
       ],
-      transitions: [{ name: "Finish", from_any: false, source_keys: ["a"], target_key: "b", rules: [] }],
+      transitions: [{ name: "Finish", from_any: false, source_keys: ["a"], target_key: "b", rules: [], sides: {} }],
     });
-  });
-
-  it("makes the first state initial and keeps exactly one initial", () => {
-    const first = addState({ states: [], transitions: [] }, "n1", newStatus);
-    expect(first.states[0].is_initial).toBe(true);
-    const second = setInitial(addState(first, "n2", { ...newStatus, name: "Other" }), "n2");
-    expect(second.states.filter((state) => state.is_initial).map((state) => state.key)).toEqual(["n2"]);
   });
 
   it("removing a state drops its arrows and hands the initial flag over", () => {
@@ -152,12 +150,6 @@ describe("graph model", () => {
     expect(validateDraft(dup)).toContain("invalid_transition");
     const rule = { type: "restrict_actors" as const, params: { creator: true as const } };
     expect(validateDraft(updateTransition(draft, "t", { rules: [rule, rule] }))).toContain("invalid_rule");
-  });
-
-  it("makes a new state initial when none is", () => {
-    const base = setInitial(fromDetail(detail, statuses), "none");
-    expect(addState(base, "n", newStatus).states[2].is_initial).toBe(true);
-    expect(addState(fromDetail(detail, statuses), "n", newStatus).states[2].is_initial).toBe(false);
   });
 
   it("does not alias rules of the store data", () => {

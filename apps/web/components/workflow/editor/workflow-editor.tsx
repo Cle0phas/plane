@@ -18,7 +18,7 @@ import { useWorkflow } from "@/hooks/store/use-workflow";
 import { AddStateForm } from "./add-state-form";
 import { AddTransitionForm } from "./add-transition-form";
 import {
-  addState,
+  addStates,
   addTransition,
   fromDetail,
   getDraftErrorKey,
@@ -199,7 +199,7 @@ export const WorkflowEditor = observer(function WorkflowEditor({ workspaceSlug, 
         <div className="grid gap-6 md:grid-cols-2">
           <AddStateForm
             availableStatuses={statuses.filter((status) => !usedStatusIds.has(status.id))}
-            onAdd={(status) => setDraft((current) => addState(current, `new-${uuidv4()}`, status))}
+            onAdd={(status) => setDraft((current) => addStates(current, [{ key: `new-${uuidv4()}`, status }]))}
           />
           <AddTransitionForm
             draft={draft}

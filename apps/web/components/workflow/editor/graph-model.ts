@@ -10,18 +10,26 @@ import type {
   TWorkflowGraphPayload,
   TWorkflowRestrictActorsParams,
   TWorkflowRule,
+  TWorkflowSide,
+  TWorkflowSides,
   TWorkflowStatus,
+  TWorkflowStatusCandidate,
   TWorkflowStatusUsage,
 } from "@plane/types";
 
-/** group null: the server deduces it (W5). shared_count: other workflows using the status (W17). */
+/**
+ * group null: the server deduces it (W5). known_group: category already known, display only (X5).
+ * shared_count: other workflows using the status (W17).
+ */
 export type TDraftStatus = {
   id?: string;
   name: string;
   color: string;
   group: TStateGroups | null;
+  known_group?: TStateGroups;
   shared_count: number;
 };
+
 export type TDraftState = {
   key: string;
   status: TDraftStatus;
@@ -36,6 +44,8 @@ export type TDraftTransition = {
   source_keys: string[];
   target_key: string;
   rules: TWorkflowRule[];
+  /** Sides chosen while drawing, keyed by source key; a missing entry means automatic. */
+  sides?: TWorkflowSides;
 };
 export type TDraftGraph = { states: TDraftState[]; transitions: TDraftTransition[] };
 
@@ -64,6 +74,7 @@ export const fromDetail = (detail: TWorkflowDetail, statuses: TWorkflowStatus[])
         name: state.status.name,
         color: state.status.color,
         group: state.status.group_is_auto ? null : state.status.group,
+        known_group: state.status.group,
         shared_count: Math.max(usage - 1, 0),
       },
       position_x: state.position_x,
@@ -78,6 +89,7 @@ export const fromDetail = (detail: TWorkflowDetail, statuses: TWorkflowStatus[])
     source_keys: [...transition.source_ids],
     target_key: transition.target_id,
     rules: transition.rules.map((rule) => ({ ...rule, params: { ...rule.params } })),
+    sides: { ...transition.sides },
   })),
 });
 
@@ -100,6 +112,12 @@ export const toPayload = (draft: TDraftGraph): TWorkflowGraphPayload => ({
     source_keys: transition.from_any ? [] : transition.source_keys,
     target_key: transition.target_key,
     rules: transition.rules,
+    // Only the sides of sources the transition still has are sent.
+    sides: Object.fromEntries(
+      Object.entries(transition.sides ?? {}).filter(
+        ([key]) => !transition.from_any && transition.source_keys.includes(key)
+      )
+    ),
   })),
 });
 
@@ -110,22 +128,37 @@ export const isDraftDirty = (draft: TDraftGraph, saved: TDraftGraph) =>
 export const shouldResetDraft = (previousSaved: TDraftGraph, saved: TDraftGraph, draft: TDraftGraph) =>
   JSON.stringify(previousSaved) !== JSON.stringify(saved) && !isDraftDirty(draft, previousSaved);
 
-export const addState = (draft: TDraftGraph, key: string, status: TDraftStatus): TDraftGraph => {
-  const index = draft.states.length;
-  return {
-    ...draft,
-    states: [
-      ...draft.states,
-      // A new box lands on a 4-column grid; the admin can drag it afterwards.
-      {
-        key,
-        status,
-        position_x: (index % 4) * 240,
-        position_y: Math.floor(index / 4) * 160,
-        is_initial: !draft.states.some((state) => state.is_initial),
-      },
-    ],
-  };
+export const PLACEMENT_STEP = 240;
+
+export type TNewState = { key: string; status: TDraftStatus; globalKey?: string };
+
+// New states line up right of the last one (R12); globalKey adds a transition from any state.
+export const addStates = (draft: TDraftGraph, entries: TNewState[]): TDraftGraph => {
+  const last = draft.states[draft.states.length - 1];
+  const hasInitial = draft.states.some((state) => state.is_initial);
+  const states = entries.map((entry, index) => ({
+    key: entry.key,
+    status: entry.status,
+    position_x: last ? last.position_x + (index + 1) * PLACEMENT_STEP : index * PLACEMENT_STEP,
+    position_y: last?.position_y ?? 0,
+    is_initial: !hasInitial && index === 0,
+  }));
+  const transitions = entries.flatMap((entry) =>
+    entry.globalKey
+      ? [
+          {
+            key: entry.globalKey,
+            name: "",
+            from_any: true,
+            source_keys: [],
+            target_key: entry.key,
+            rules: [],
+            sides: {},
+          },
+        ]
+      : []
+  );
+  return { states: [...draft.states, ...states], transitions: [...draft.transitions, ...transitions] };
 };
 
 export const setInitial = (draft: TDraftGraph, key: string): TDraftGraph => ({
@@ -236,3 +269,176 @@ const DRAFT_ERROR_KEYS: Record<string, string> = {
 
 /** i18n key for a validateDraft code; status_name_required is client only. */
 export const getDraftErrorKey = (code: string): string => DRAFT_ERROR_KEYS[code] ?? `workflows.editor.errors.${code}`;
+
+type TPoint = { x: number; y: number };
+
+// Sides for an arrow not drawn by hand: the pair facing each other.
+export const closestSides = (source: TPoint, target: TPoint): { source: TWorkflowSide; target: TWorkflowSide } => {
+  const dx = target.x - source.x;
+  const dy = target.y - source.y;
+  if (Math.abs(dx) >= Math.abs(dy))
+    return dx >= 0 ? { source: "right", target: "left" } : { source: "left", target: "right" };
+  return dy >= 0 ? { source: "bottom", target: "top" } : { source: "top", target: "bottom" };
+};
+
+export const connectStates = (
+  draft: TDraftGraph,
+  key: string,
+  sourceKey: string,
+  sourceSide: TWorkflowSide,
+  targetKey: string,
+  targetSide: TWorkflowSide
+): TDraftGraph => {
+  const known = (stateKey: string) => draft.states.some((state) => state.key === stateKey);
+  if (sourceKey === targetKey || !known(sourceKey) || !known(targetKey)) return draft;
+  return addTransition(draft, {
+    key,
+    name: "",
+    from_any: false,
+    source_keys: [sourceKey],
+    target_key: targetKey,
+    rules: [],
+    sides: { [sourceKey]: { source: sourceSide, target: targetSide } },
+  });
+};
+
+/** Category shown for a state: chosen, else known, else deduced like the server does (W5, X5). */
+export const displayGroup = (draft: TDraftGraph, state: TDraftState): TStateGroups => {
+  if (state.status.group) return state.status.group;
+  if (state.status.known_group) return state.status.known_group;
+  if (state.is_initial) return "unstarted";
+  const leaves = draft.transitions.some(
+    (transition) => !transition.from_any && transition.source_keys.includes(state.key)
+  );
+  return leaves ? "started" : "completed";
+};
+
+export type TStateTone = "todo" | "progress" | "done" | "cancelled";
+
+export const toneOf = (group: TStateGroups): TStateTone => {
+  if (group === "started") return "progress";
+  if (group === "completed") return "done";
+  if (group === "cancelled") return "cancelled";
+  return "todo";
+};
+
+/** Colour given to a status created in the editor: the default Plane colour of its category. */
+export const GROUP_COLORS: Record<TStateGroups, string> = {
+  backlog: "#A3A3A3",
+  unstarted: "#3A3A3A",
+  started: "#F59E0B",
+  completed: "#16A34A",
+  cancelled: "#EF4444",
+};
+
+export type TStatusOption = {
+  id?: string;
+  name: string;
+  color: string;
+  group: TStateGroups;
+  group_is_auto: boolean;
+  workflow_count: number;
+};
+
+/** "Search or create" list (R7): workspace statuses, then project states, minus names already used. */
+export const statusOptions = (
+  statuses: TWorkflowStatus[],
+  candidates: TWorkflowStatusCandidate[],
+  draft: TDraftGraph
+): TStatusOption[] => {
+  const seen = new Set(draft.states.map((state) => state.status.name.trim().toLowerCase()));
+  const all: TStatusOption[] = [
+    ...statuses.map((item) => ({
+      id: item.id,
+      name: item.name,
+      color: item.color,
+      group: item.group,
+      group_is_auto: item.group_is_auto,
+      workflow_count: item.workflow_count ?? 0,
+    })),
+    ...candidates.map((item) => ({ ...item, group_is_auto: false, workflow_count: 0 })),
+  ];
+  return all.filter((option) => {
+    const key = option.name.trim().toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
+export const optionToStatus = (option: TStatusOption): TDraftStatus => ({
+  ...(option.id ? { id: option.id } : {}),
+  name: option.name,
+  color: option.color,
+  group: option.group_is_auto ? null : option.group,
+  known_group: option.group,
+  shared_count: option.workflow_count,
+});
+
+export const createdStatus = (name: string, group: TStateGroups | null): TDraftStatus => ({
+  name: name.trim(),
+  color: GROUP_COLORS[group ?? "unstarted"],
+  group,
+  shared_count: 0,
+});
+
+export const statusNameError = (
+  name: string,
+  draft: TDraftGraph
+): "required" | "too_long" | "reserved" | "present" | null => {
+  const key = name.trim().toLowerCase();
+  if (!key) return "required";
+  if (key.length > 255) return "too_long";
+  if (RESERVED_STATUS_NAMES.has(key)) return "reserved";
+  if (draft.states.some((state) => state.status.name.trim().toLowerCase() === key)) return "present";
+  return null;
+};
+
+export const transitionCounts = (draft: TDraftGraph, key: string) => ({
+  incoming: draft.transitions.filter((transition) => transition.target_key === key).length,
+  outgoing: draft.transitions.filter((transition) => !transition.from_any && transition.source_keys.includes(key))
+    .length,
+});
+
+export type TTextTransition = {
+  key: string | null;
+  name: string;
+  origin: "start" | "any" | "state";
+  sourceName?: string;
+};
+export type TTextRow = { key: string; name: string; group: TStateGroups; transitions: TTextTransition[] };
+
+/** Text view (spec 3.7): each state with the transitions that lead to it, the start first. */
+export const textRows = (draft: TDraftGraph): TTextRow[] => {
+  const nameOf = (key: string) => draft.states.find((state) => state.key === key)?.status.name ?? "";
+  return draft.states.map((state) => ({
+    key: state.key,
+    name: state.status.name,
+    group: displayGroup(draft, state),
+    transitions: [
+      ...(state.is_initial ? [{ key: null, name: "", origin: "start" as const }] : []),
+      ...draft.transitions
+        .filter((transition) => transition.target_key === state.key)
+        .flatMap((transition): TTextTransition[] =>
+          transition.from_any
+            ? [{ key: transition.key, name: transition.name, origin: "any" }]
+            : transition.source_keys.map((source) => ({
+                key: transition.key,
+                name: transition.name,
+                origin: "state",
+                sourceName: nameOf(source),
+              }))
+        ),
+    ],
+  }));
+};
+
+/** First free name among base, "base (2)", "base (3)"..., kept within 255 characters (spec 4.3). */
+export const uniqueName = (base: string, taken: string[]): string => {
+  const used = new Set(taken.map((name) => name.trim().toLowerCase()));
+  for (let index = 1; ; index += 1) {
+    const suffix = index === 1 ? "" : ` (${index})`;
+    const candidate = `${base.trim().slice(0, 255 - suffix.length)}${suffix}`;
+    if (!used.has(candidate.toLowerCase())) return candidate;
+  }
+};
