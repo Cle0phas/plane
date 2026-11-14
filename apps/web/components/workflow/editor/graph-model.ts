@@ -438,6 +438,7 @@ export type TTextTransition = {
   key: string | null;
   name: string;
   origin: "start" | "any" | "state";
+  sourceKey?: string;
   sourceName?: string;
 };
 export type TTextRow = { key: string; name: string; group: TStateGroups; transitions: TTextTransition[] };
@@ -460,6 +461,7 @@ export const textRows = (draft: TDraftGraph): TTextRow[] => {
                 key: transition.key,
                 name: transition.name,
                 origin: "state",
+                sourceKey: source,
                 sourceName: nameOf(source),
               }))
         ),

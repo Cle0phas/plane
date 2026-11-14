@@ -310,7 +310,7 @@ describe("text view and counts", () => {
         key: "b",
         name: "B",
         group: "completed",
-        transitions: [{ key: "t", name: "Go", origin: "state", sourceName: "A" }],
+        transitions: [{ key: "t", name: "Go", origin: "state", sourceKey: "a", sourceName: "A" }],
       },
     ]);
   });

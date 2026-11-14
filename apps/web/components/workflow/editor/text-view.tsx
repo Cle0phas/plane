@@ -93,11 +93,11 @@ export function WorkflowTextView({ draft, selection, onSelect }: Props) {
                         // A transition with several sources repeats its key under one state, so its source completes it.
                         return (
                           <li
-                            key={`${key ?? "start"}-${item.origin}-${item.sourceName ?? ""}`}
+                            key={`${key ?? "start"}-${item.origin}-${item.sourceKey ?? ""}`}
                             className="text-body-sm-regular text-primary"
                           >
                             {key === null ? (
-                              <span>{`${originOf(item)} → ${row.name}`}</span>
+                              <span>{route}</span>
                             ) : (
                               <button
                                 type="button"

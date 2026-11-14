@@ -101,6 +101,22 @@ describe("WorkflowTextView", () => {
     errors.mockRestore();
   });
 
+  it("keeps list keys unique when two sources share a name or are missing", () => {
+    const twins: TDraftGraph = {
+      states: [draft.states[0], { ...draft.states[1], status: { ...draft.states[1].status, name: "Todo" } }],
+      transitions: [
+        { key: "m", name: "Go", from_any: false, source_keys: ["a", "b"], target_key: "a", rules: [] },
+        { key: "n", name: "Lost", from_any: false, source_keys: ["x", "y"], target_key: "b", rules: [] },
+      ],
+    };
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    render(<WorkflowTextView draft={twins} selection={null} onSelect={() => {}} />);
+    expect(screen.getAllByRole("button", { name: /Go/ })).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: /Lost/ })).toHaveLength(2);
+    expect(errors).not.toHaveBeenCalled();
+    errors.mockRestore();
+  });
+
   it("writes the category as text next to the coloured state", () => {
     const started: TDraftGraph = {
       states: [{ ...draft.states[0], status: { ...draft.states[0].status, group: "started" } }],
