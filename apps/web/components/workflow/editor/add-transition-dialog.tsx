@@ -116,7 +116,7 @@ export function AddTransitionDialog({ isOpen, draft, preset, onClose, onAdd }: P
                     }}
                   >
                     <option value="" disabled>
-                      {t("workflows.scheme.choose")}
+                      {t("workflows.editor.add_transition.choose_state")}
                     </option>
                     {draft.states.map((state) => (
                       <option key={state.key} value={state.key}>

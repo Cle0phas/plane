@@ -75,6 +75,13 @@ describe("AddTransitionDialog", () => {
     });
   });
 
+  it("asks for a state, not a workflow, while no target is chosen", () => {
+    open();
+    const target = screen.getByRole("combobox", { name: TARGET }) as HTMLSelectElement;
+    expect(target.value).toBe("");
+    expect(target.selectedOptions[0].textContent).toBe("workflows.editor.add_transition.choose_state");
+  });
+
   it("keeps submit disabled until a source and a target are chosen", async () => {
     const { user } = open();
     const submit = screen.getByRole("button", { name: SUBMIT });
