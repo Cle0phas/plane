@@ -5,7 +5,7 @@
  */
 
 import { createElement, useState, type ComponentProps } from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { MiniMap as TMiniMap, ReactFlowInstance, ReactFlow as TReactFlow } from "@xyflow/react";
 import { describe, expect, it, vi } from "vitest";
@@ -79,6 +79,7 @@ const renderCanvas = (props: Partial<ComponentProps<typeof WorkflowCanvas>> = {}
         onMove={noop}
         onConnect={noop}
         onSetInitial={noop}
+        onClearInitial={noop}
         onRemoveState={noop}
         onRemoveTransition={noop}
         {...props}
@@ -100,6 +101,7 @@ function SelectingCanvas(props: Partial<ComponentProps<typeof WorkflowCanvas>>) 
         onMove={noop}
         onConnect={noop}
         onSetInitial={noop}
+        onClearInitial={noop}
         onRemoveState={noop}
         onRemoveTransition={noop}
         {...props}
@@ -153,6 +155,7 @@ describe("WorkflowCanvas", () => {
         onMove={noop}
         onConnect={noop}
         onSetInitial={noop}
+        onClearInitial={noop}
         onRemoveState={noop}
         onRemoveTransition={noop}
       />
@@ -180,6 +183,7 @@ describe("WorkflowCanvas", () => {
         onMove={noop}
         onConnect={noop}
         onSetInitial={noop}
+        onClearInitial={noop}
         onRemoveState={noop}
         onRemoveTransition={noop}
       />
@@ -425,12 +429,11 @@ describe("WorkflowCanvas", () => {
     expect(onRemoveTransition).not.toHaveBeenCalled();
   });
 
-  it("removes an arrow the user deleted, and never the start node or its arrow", async () => {
+  it("removes an arrow the user deleted, and never the start node", async () => {
     const onRemoveState = vi.fn();
     const onRemoveTransition = vi.fn();
     renderCanvas({ onRemoveState, onRemoveTransition });
     expect(nodeById("__start__").deletable).toBe(false);
-    expect(edgeById("__start_edge__").deletable).toBe(false);
     flow().onDelete?.({ nodes: [], edges: [edgeById("t:a")] });
     expect(onRemoveTransition).toHaveBeenCalledWith("t");
     expect(onRemoveState).not.toHaveBeenCalled();
@@ -446,5 +449,56 @@ describe("WorkflowCanvas", () => {
     const zoomed = scale(container);
     fireEvent.keyDown(node, { key: "-" });
     await waitFor(() => expect(scale(container)).toBeLessThan(zoomed));
+  });
+});
+
+const START_EDGE = "__start_edge__";
+const startEdge = () => flowProps.current?.edges?.find((edge) => edge.id === START_EDGE);
+
+describe("start link", () => {
+  it("selects the start from its node", () => {
+    const onSelect = vi.fn();
+    renderCanvas({ onSelect });
+    fireEvent.click(screen.getByText("workflows.editor.start"));
+    expect(onSelect).toHaveBeenCalledWith({ kind: "start" });
+  });
+
+  it("shows the start arrow as selected, and removable by who can edit", () => {
+    renderCanvas({ selection: { kind: "start" } });
+    expect(startEdge()).toMatchObject({ selected: true, deletable: true });
+  });
+
+  it("lets a reader select the start arrow but not remove it", () => {
+    renderCanvas({ canEdit: false });
+    expect(startEdge()).toMatchObject({ deletable: false });
+    expect(startEdge()?.selectable).not.toBe(false);
+  });
+
+  it("removes the link when the start arrow is deleted", () => {
+    const onClearInitial = vi.fn();
+    const onRemoveTransition = vi.fn();
+    renderCanvas({ onClearInitial, onRemoveTransition });
+    const edge = startEdge();
+    act(() => flowProps.current?.onDelete?.({ nodes: [], edges: edge ? [edge] : [] }));
+    expect(onClearInitial).toHaveBeenCalledTimes(1);
+    expect(onRemoveTransition).not.toHaveBeenCalled();
+  });
+
+  it("leaves the link to the state removal when the start state itself is deleted", () => {
+    const onClearInitial = vi.fn();
+    const onRemoveState = vi.fn();
+    renderCanvas({ onClearInitial, onRemoveState });
+    const edge = startEdge();
+    const node = flowProps.current?.nodes?.find((item) => item.id === "a");
+    act(() => flowProps.current?.onDelete?.({ nodes: node ? [node] : [], edges: edge ? [edge] : [] }));
+    expect(onRemoveState).toHaveBeenCalledWith("a");
+    expect(onClearInitial).not.toHaveBeenCalled();
+  });
+
+  it("keeps the start node, without an arrow, when nothing is linked", () => {
+    const unlinked = { ...draft, states: [state("a", "Todo", 0), state("b", "Done", 240)] };
+    renderCanvas({ draft: unlinked });
+    expect(startEdge()).toBeUndefined();
+    expect(screen.getByText("workflows.editor.start")).toBeTruthy();
   });
 });

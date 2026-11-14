@@ -27,6 +27,7 @@ import {
   type TDraftGraph,
 } from "./graph-model";
 import { RestrictActorsForm } from "./restrict-actors-form";
+import { StartPanel } from "./start-panel";
 import type { TEditorSelection } from "./workflow-canvas";
 
 const GROUPS: TStateGroups[] = ["backlog", "unstarted", "started", "completed", "cancelled"];
@@ -75,7 +76,12 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
   const state = selection?.kind === "state" ? draft.states.find((item) => item.key === selection.key) : undefined;
   const transition =
     selection?.kind === "transition" ? draft.transitions.find((item) => item.key === selection.key) : undefined;
-  const title = state ? "workflows.editor.panel.state" : "workflows.editor.panel.transition";
+  const isStart = selection?.kind === "start";
+  const title = isStart
+    ? "workflows.editor.start_panel.title"
+    : state
+      ? "workflows.editor.panel.state"
+      : "workflows.editor.panel.transition";
   const counts = state ? transitionCounts(draft, state.key) : null;
 
   const toggle = (
@@ -101,19 +107,19 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
   return (
     <aside
       // Below 1024px the panel overlays the canvas, and only while something is selected (spec 3.8).
-      className={`flex w-[400px] shrink-0 flex-col gap-4 overflow-y-auto border-l border-subtle bg-layer-2 p-4 max-lg:absolute max-lg:inset-y-0 max-lg:right-0 max-lg:z-10 max-lg:w-full max-lg:max-w-[400px] ${state || transition ? "" : "max-lg:hidden"}`}
-      aria-label={t(state || transition ? title : "workflows.editor.panel.empty_title")}
+      className={`flex w-[400px] shrink-0 flex-col gap-4 overflow-y-auto border-l border-subtle bg-layer-2 p-4 max-lg:absolute max-lg:inset-y-0 max-lg:right-0 max-lg:z-10 max-lg:w-full max-lg:max-w-[400px] ${state || transition || isStart ? "" : "max-lg:hidden"}`}
+      aria-label={t(state || transition || isStart ? title : "workflows.editor.panel.empty_title")}
     >
       <div className="flex items-start gap-2">
         {toggle}
-        {(state || transition) && (
+        {(state || transition || isStart) && (
           <h2 ref={headingRef} tabIndex={-1} className="flex-1 text-h5-semibold text-primary">
             {t(title)}
           </h2>
         )}
       </div>
 
-      {!state && !transition && (
+      {!state && !transition && !isStart && (
         <div className="space-y-3 pt-8 text-center">
           <WorkflowsOutline className="mx-auto size-12 text-tertiary" aria-hidden />
           <h2 className="text-h5-semibold text-primary">{t("workflows.editor.panel.empty_title")}</h2>
@@ -121,6 +127,8 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
           <p className="text-body-sm-regular text-secondary">{t("workflows.editor.panel.empty_hint")}</p>
         </div>
       )}
+
+      {isStart && <StartPanel draft={draft} canEdit={canEdit} onChange={onChange} />}
 
       {state && counts && (
         <fieldset className="space-y-4" disabled={!canEdit}>

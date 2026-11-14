@@ -14,9 +14,11 @@ export const START_EDGE_ID = "__start_edge__";
 type TStartNode = Node<{ label: string }, "workflowStart">;
 
 /** Display only (X7): derived from the initial state, never saved. */
-export function WorkflowStartNode({ data }: NodeProps<TStartNode>) {
+export function WorkflowStartNode({ data, selected }: NodeProps<TStartNode>) {
   return (
-    <div className={`flex size-20 items-center justify-center rounded-full text-caption-sm-medium ${INVERSE_CLASS}`}>
+    <div
+      className={`flex size-20 items-center justify-center rounded-full text-caption-sm-medium ${INVERSE_CLASS} ${selected ? "ring-2 ring-accent-strong ring-offset-2" : ""}`}
+    >
       {data.label}
       {/* The start arrow leaves from the side facing the initial state (startPlacement). */}
       <Handle id="right" type="source" position={Position.Right} className="opacity-0" />

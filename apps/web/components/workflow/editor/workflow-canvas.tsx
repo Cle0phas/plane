@@ -48,6 +48,7 @@ type Props = {
   onMove: (moves: { key: string; x: number; y: number }[]) => void;
   onConnect: (sourceKey: string, sourceSide: TWorkflowSide, targetKey: string, targetSide: TWorkflowSide) => void;
   onSetInitial: (key: string) => void;
+  onClearInitial: () => void;
   onRemoveState: (key: string) => void;
   onRemoveTransition: (key: string) => void;
 };
@@ -101,6 +102,7 @@ export function WorkflowCanvas({
   onMove,
   onConnect,
   onSetInitial,
+  onClearInitial,
   onRemoveState,
   onRemoveTransition,
 }: Props) {
@@ -119,12 +121,11 @@ export function WorkflowCanvas({
       type: "workflowStart",
       position: start ? { x: start.x, y: start.y } : { x: 0, y: 0 },
       draggable: false,
-      selectable: false,
+      // Selecting it opens the start panel, the only way in once the link is removed (E5).
+      selected: selection?.kind === "start",
       deletable: false,
-      // Nothing to do on it from the keyboard: the panel sets the initial state (spec 3.2).
-      focusable: false,
       connectable: canEdit,
-      ariaLabel: t("workflows.editor.start"),
+      ariaLabel: t("workflows.editor.start_panel.title"),
       data: { label: t("workflows.editor.start") },
     },
     ...draft.states.map((state) => {
@@ -198,10 +199,9 @@ export function WorkflowCanvas({
               target: initial.key,
               targetHandle: start.sides.target,
               type: "step",
-              ...ARROW,
-              selectable: false,
-              deletable: false,
-              focusable: false,
+              ...(selection?.kind === "start" ? SELECTED_ARROW : ARROW),
+              selected: selection?.kind === "start",
+              deletable: canEdit,
               // The only arrow that can be re-dropped: on another state it moves the start (spec 3.2).
               reconnectable: canEdit ? "target" : false,
               ariaLabel: t("workflows.editor.start_label", { name: initial.status.name }),
@@ -291,11 +291,13 @@ export function WorkflowCanvas({
           );
           // Keyboard use never goes through onNodeClick: Enter selects a focused node and the arrow keys
           // move it, both reported here only, like the drop of a drag (dragging false, spec 3.9).
-          const picked = changes.find(
-            (change) => change.type === "select" && change.selected && change.id !== START_NODE_ID
-          );
-          if (picked && picked.type === "select" && !(selection?.kind === "state" && selection.key === picked.id))
-            onSelect({ kind: "state", key: picked.id });
+          const picked = changes.find((change) => change.type === "select" && change.selected);
+          if (picked && picked.type === "select") {
+            if (picked.id === START_NODE_ID) {
+              if (selection?.kind !== "start") onSelect({ kind: "start" });
+            } else if (!(selection?.kind === "state" && selection.key === picked.id))
+              onSelect({ kind: "state", key: picked.id });
+          }
           const moves = changes.flatMap((change) =>
             change.type === "position" && change.position && change.dragging !== true && change.id !== START_NODE_ID
               ? [{ key: change.id, x: change.position.x, y: change.position.y }]
@@ -306,15 +308,18 @@ export function WorkflowCanvas({
         onEdgesChange={(changes) => {
           // Enter on a focused arrow: the only way a keyboard user selects a transition in the diagram.
           const picked = changes.find((change) => change.type === "select" && change.selected);
-          if (picked && picked.type === "select" && picked.id !== START_EDGE_ID)
-            onSelect({ kind: "transition", key: picked.id.split(":")[0] });
+          if (picked && picked.type === "select")
+            onSelect(
+              picked.id === START_EDGE_ID ? { kind: "start" } : { kind: "transition", key: picked.id.split(":")[0] }
+            );
         }}
         onNodeClick={(event, node) => {
-          if (node.id === START_NODE_ID) return;
+          if (node.id === START_NODE_ID) return onSelect({ kind: "start" });
           const globalKey = (event.target as HTMLElement).closest("[data-global-key]")?.getAttribute("data-global-key");
           onSelect(globalKey ? { kind: "transition", key: globalKey } : { kind: "state", key: node.id });
         }}
         onEdgeClick={(_, edge) => {
+          if (edge.id === START_EDGE_ID) return onSelect({ kind: "start" });
           const key = edge.data?.transitionKey;
           if (typeof key === "string") onSelect({ kind: "transition", key });
         }}
@@ -335,6 +340,8 @@ export function WorkflowCanvas({
               .map((edge) => edge.data?.transitionKey)
           );
           for (const key of transitionKeys) if (typeof key === "string") onRemoveTransition(key);
+          // The start arrow of a removed start state goes with it (removeState); alone, it is the link.
+          if (deletedEdges.some((edge) => edge.id === START_EDGE_ID && !removed.has(edge.target))) onClearInitial();
         }}
       >
         <MiniMap

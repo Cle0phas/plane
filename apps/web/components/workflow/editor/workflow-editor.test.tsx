@@ -361,3 +361,28 @@ describe("WorkflowEditor", () => {
     expectNoEditingTool();
   });
 });
+
+it("blocks the save until the start is linked again", async () => {
+  renderEditor();
+  const user = userEvent.setup();
+  const save = () => screen.getByRole("button", { name: "workflows.editor.save" }) as HTMLButtonElement;
+  fireEvent.click(screen.getByText("workflows.editor.start"));
+  await user.click(screen.getByRole("button", { name: "workflows.editor.start_panel.unlink" }));
+  const banner = screen.getByRole("alert");
+  expect(within(banner).getByRole("button", { name: "workflows.editor.errors.initial_state_required" })).toBeTruthy();
+  expect(save().disabled).toBe(true);
+  await user.selectOptions(screen.getByRole("combobox", { name: "workflows.editor.start_panel.field" }), "Done");
+  expect(screen.queryByRole("alert")).toBeNull();
+  expect(save().disabled).toBe(false);
+});
+
+it("opens the start panel from the banner line", async () => {
+  renderEditor();
+  const user = userEvent.setup();
+  fireEvent.click(screen.getByText("workflows.editor.start"));
+  await user.click(screen.getByRole("button", { name: "workflows.editor.start_panel.unlink" }));
+  // The panel select also lists "Todo": pick the node inside the diagram.
+  fireEvent.click(within(screen.getByRole("group", { name: "workflows.editor.diagram_label" })).getByText("Todo"));
+  await user.click(screen.getByRole("button", { name: "workflows.editor.errors.initial_state_required" }));
+  expect(screen.getByRole("combobox", { name: "workflows.editor.start_panel.field" })).toBeTruthy();
+});

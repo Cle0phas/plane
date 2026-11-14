@@ -25,6 +25,7 @@ import { focusWhenReady } from "./focus-when-ready";
 import {
   addStates,
   addTransitionWithStates,
+  clearInitial,
   connectStates,
   errorTarget,
   fromDetail,
@@ -243,6 +244,7 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
                 setDraft((current) => connectStates(current, `new-${uuidv4()}`, source, sourceSide, target, targetSide))
               }
               onSetInitial={(key) => setDraft((current) => setInitial(current, key))}
+              onClearInitial={() => setDraft((current) => clearInitial(current))}
               onRemoveState={(key) => setDraft((current) => removeState(current, key))}
               onRemoveTransition={(key) => setDraft((current) => removeTransition(current, key))}
             />
