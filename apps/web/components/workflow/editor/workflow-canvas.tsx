@@ -24,7 +24,15 @@ import "@xyflow/react/dist/style.css";
 import { useTranslation } from "@plane/i18n";
 import type { TWorkflowSide } from "@plane/types";
 // local imports
-import { closestSides, displayGroup, startPlacement, toneOf, transitionCounts, type TDraftGraph } from "./graph-model";
+import {
+  closestSides,
+  displayGroup,
+  startPlacement,
+  stateName,
+  toneOf,
+  transitionCounts,
+  type TDraftGraph,
+} from "./graph-model";
 import { START_EDGE_ID, START_NODE_ID, WorkflowStartNode } from "./start-node";
 import { SIDES, WorkflowStateNode } from "./state-node";
 
@@ -175,7 +183,6 @@ export function WorkflowCanvas({
 
   // A new array re-renders every edge, once per drag frame; t is new on each render, the locale stands for it.
   const edges = useMemo((): Edge[] => {
-    const nameOf = (key: string) => draft.states.find((item) => item.key === key)?.status.name ?? "";
     const positionOf = (key: string) => {
       const state = draft.states.find((item) => item.key === key);
       return state ? { x: state.position_x, y: state.position_y } : undefined;
@@ -222,7 +229,11 @@ export function WorkflowCanvas({
                 selected: isSelected,
                 deletable: canEdit,
                 reconnectable: false,
-                ariaLabel: transitionLabel(transition.name, nameOf(source), nameOf(transition.target_key)),
+                ariaLabel: transitionLabel(
+                  transition.name,
+                  stateName(draft, source),
+                  stateName(draft, transition.target_key)
+                ),
                 data: { transitionKey: transition.key },
               },
             ];

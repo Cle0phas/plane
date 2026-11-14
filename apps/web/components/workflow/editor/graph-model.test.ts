@@ -14,8 +14,10 @@ import {
   isDraftDirty,
   moveState,
   removeState,
+  routeLabel,
   setInitial,
   shouldResetDraft,
+  stateName,
   updateTransition,
   setRestriction,
   toPayload,
@@ -183,5 +185,16 @@ describe("shouldResetDraft", () => {
   });
   it("ignores an unchanged saved graph", () => {
     expect(shouldResetDraft(saved, fromDetail(detail, []), saved)).toBe(false);
+  });
+});
+
+describe("labels", () => {
+  it("names a state by its key, and an unknown key with an empty name", () => {
+    const draft = fromDetail(detail, statuses);
+    expect(stateName(draft, "b")).toBe("Done");
+    expect(stateName(draft, "gone")).toBe("");
+  });
+  it("joins the origin and the target of a route with an arrow", () => {
+    expect(routeLabel("Open, Doing", "Done")).toBe("Open, Doing → Done");
   });
 });

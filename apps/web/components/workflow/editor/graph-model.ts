@@ -124,6 +124,12 @@ export const toPayload = (draft: TDraftGraph): TWorkflowGraphPayload => ({
 export const isDraftDirty = (draft: TDraftGraph, saved: TDraftGraph) =>
   JSON.stringify(toPayload(draft)) !== JSON.stringify(toPayload(saved));
 
+export const stateName = (draft: TDraftGraph, key: string) =>
+  draft.states.find((state) => state.key === key)?.status.name ?? "";
+
+/** "origin → target" label of a route, the same in the panel, the rule dialog and the text view. */
+export const routeLabel = (origin: string, target: string) => `${origin} → ${target}`;
+
 // Take a refreshed saved graph only when its content changed and the user holds no unsaved edit.
 export const shouldResetDraft = (previousSaved: TDraftGraph, saved: TDraftGraph, draft: TDraftGraph) =>
   JSON.stringify(previousSaved) !== JSON.stringify(saved) && !isDraftDirty(draft, previousSaved);
@@ -483,7 +489,6 @@ type TTextRow = { key: string; name: string; group: TStateGroups; transitions: T
 
 /** Text view (spec 3.7): each state with the transitions that lead to it, the start first. */
 export const textRows = (draft: TDraftGraph): TTextRow[] => {
-  const nameOf = (key: string) => draft.states.find((state) => state.key === key)?.status.name ?? "";
   return draft.states.map((state) => ({
     key: state.key,
     name: state.status.name,
@@ -500,7 +505,7 @@ export const textRows = (draft: TDraftGraph): TTextRow[] => {
                 name: transition.name,
                 origin: "state",
                 sourceKey: source,
-                sourceName: nameOf(source),
+                sourceName: stateName(draft, source),
               }))
         ),
     ],

@@ -15,8 +15,10 @@ import type { TStateGroups } from "@plane/types";
 import {
   removeState,
   removeTransition,
+  routeLabel,
   setInitial,
   setRestriction,
+  stateName,
   transitionCounts,
   updateStatus,
   updateTransition,
@@ -73,7 +75,6 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
     selection?.kind === "transition" ? draft.transitions.find((item) => item.key === selection.key) : undefined;
   const title = state ? "workflows.editor.panel.state" : "workflows.editor.panel.transition";
   const counts = state ? transitionCounts(draft, state.key) : null;
-  const nameOf = (key: string) => draft.states.find((item) => item.key === key)?.status.name ?? "";
 
   const toggle = (
     <button
@@ -228,9 +229,12 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
               }
             />
             <p className="text-body-sm-regular text-secondary">
-              {transition.from_any ? t("workflows.editor.global") : transition.source_keys.map(nameOf).join(", ")}
-              {" → "}
-              {nameOf(transition.target_key)}
+              {routeLabel(
+                transition.from_any
+                  ? t("workflows.editor.global")
+                  : transition.source_keys.map((key) => stateName(draft, key)).join(", "),
+                stateName(draft, transition.target_key)
+              )}
             </p>
           </fieldset>
           <RestrictActorsForm

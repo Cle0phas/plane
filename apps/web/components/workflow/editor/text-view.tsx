@@ -8,7 +8,7 @@ import { useState } from "react";
 import { ChevronDownOutline, ChevronRightOutline } from "@makeplane/propel/icons";
 import { useTranslation } from "@plane/i18n";
 // local imports
-import { textRows, toneOf, type TDraftGraph, type TTextTransition } from "./graph-model";
+import { routeLabel, textRows, toneOf, type TDraftGraph, type TTextTransition } from "./graph-model";
 import { TONE_CLASS } from "./tones";
 import type { TEditorSelection } from "./workflow-canvas";
 
@@ -87,7 +87,7 @@ export function WorkflowTextView({ draft, selection, onSelect }: Props) {
                   {isOpen && (
                     <ul className="space-y-1">
                       {row.transitions.map((item) => {
-                        const route = `${originOf(item)} → ${row.name}`;
+                        const route = routeLabel(originOf(item), row.name);
                         const label = `${item.name || t("workflows.editor.text.unnamed")} (${route})`;
                         const key = item.key;
                         // A transition with several sources repeats its key under one state, so its source completes it.

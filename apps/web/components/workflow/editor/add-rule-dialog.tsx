@@ -19,7 +19,7 @@ import {
 import { useTranslation } from "@plane/i18n";
 import type { TWorkflowRestrictActorsParams } from "@plane/types";
 // local imports
-import { isRuleComplete, type TDraftGraph, type TDraftTransition } from "./graph-model";
+import { isRuleComplete, routeLabel, stateName, type TDraftGraph, type TDraftTransition } from "./graph-model";
 import { RestrictActorsForm } from "./restrict-actors-form";
 
 type Props = {
@@ -46,10 +46,11 @@ export function AddRuleDialog({ isOpen, draft, presetKey, onClose, onApply }: Pr
   // currentParams is left out on purpose: a draft update must not wipe the restriction being edited.
   useEffect(() => setParams(currentParams), [transitionKey, isOpen]); // oxlint-disable-line react-hooks/exhaustive-deps
 
-  const nameOf = (key: string) => draft.states.find((state) => state.key === key)?.status.name ?? "";
   const labelOf = (item: TDraftTransition) => {
-    const origin = item.from_any ? t("workflows.editor.global") : item.source_keys.map(nameOf).join(", ");
-    const route = `${origin} → ${nameOf(item.target_key)}`;
+    const origin = item.from_any
+      ? t("workflows.editor.global")
+      : item.source_keys.map((key) => stateName(draft, key)).join(", ");
+    const route = routeLabel(origin, stateName(draft, item.target_key));
     return item.name ? `${item.name} (${route})` : route;
   };
 
