@@ -117,7 +117,7 @@
       "columns": {
         "name": "სახელი",
         "states": "მდგომარეობები",
-        "projects": "პროექტები",
+        "projects": "გამოყენება",
         "description": "აღწერა",
         "updated": "განახლდა",
         "actions": "მოქმედებები"

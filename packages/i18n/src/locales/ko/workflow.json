@@ -117,7 +117,7 @@
       "columns": {
         "name": "이름",
         "states": "스테이트",
-        "projects": "프로젝트",
+        "projects": "사용 위치",
         "description": "설명",
         "updated": "업데이트",
         "actions": "작업"

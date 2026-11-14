@@ -117,7 +117,7 @@
       "columns": {
         "name": "Názov",
         "states": "Stavy",
-        "projects": "Projekty",
+        "projects": "Použitie",
         "description": "Popis",
         "updated": "Aktualizované",
         "actions": "Akcie"

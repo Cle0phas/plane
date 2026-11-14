@@ -117,7 +117,7 @@
       "columns": {
         "name": "Nama",
         "states": "Status",
-        "projects": "Proyek",
+        "projects": "Digunakan di",
         "description": "Deskripsi",
         "updated": "Diperbarui",
         "actions": "Tindakan"

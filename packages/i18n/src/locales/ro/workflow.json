@@ -117,7 +117,7 @@
       "columns": {
         "name": "Nume",
         "states": "Stări",
-        "projects": "Proiecte",
+        "projects": "Folosit în",
         "description": "Descriere",
         "updated": "Actualizat",
         "actions": "Acțiuni"

@@ -117,7 +117,7 @@
       "columns": {
         "name": "Nome",
         "states": "Estados",
-        "projects": "Projetos",
+        "projects": "Usado em",
         "description": "Descrição",
         "updated": "Atualizado em",
         "actions": "Ações"

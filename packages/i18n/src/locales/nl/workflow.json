@@ -117,7 +117,7 @@
       "columns": {
         "name": "Naam",
         "states": "Statussen",
-        "projects": "Projecten",
+        "projects": "Gebruikt in",
         "description": "Beschrijving",
         "updated": "Bijgewerkt",
         "actions": "Acties"

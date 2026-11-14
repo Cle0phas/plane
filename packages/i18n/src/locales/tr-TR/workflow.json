@@ -117,7 +117,7 @@
       "columns": {
         "name": "Ad",
         "states": "Durumlar",
-        "projects": "Projeler",
+        "projects": "Kullanım",
         "description": "Açıklama",
         "updated": "Güncellendi",
         "actions": "İşlemler"

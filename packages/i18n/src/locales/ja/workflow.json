@@ -117,7 +117,7 @@
       "columns": {
         "name": "名前",
         "states": "状態",
-        "projects": "プロジェクト",
+        "projects": "使用先",
         "description": "説明",
         "updated": "更新日",
         "actions": "操作"

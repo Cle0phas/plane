@@ -117,7 +117,7 @@
       "columns": {
         "name": "名称",
         "states": "状态",
-        "projects": "项目",
+        "projects": "使用位置",
         "description": "描述",
         "updated": "更新时间",
         "actions": "操作"

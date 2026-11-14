@@ -117,7 +117,7 @@
       "columns": {
         "name": "Tên",
         "states": "Trạng thái",
-        "projects": "Dự án",
+        "projects": "Được dùng trong",
         "description": "Mô tả",
         "updated": "Cập nhật lúc",
         "actions": "Thao tác"

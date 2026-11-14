@@ -117,7 +117,7 @@
       "columns": {
         "name": "Име",
         "states": "Състояния",
-        "projects": "Проекти",
+        "projects": "Използване",
         "description": "Описание",
         "updated": "Обновено",
         "actions": "Действия"
