@@ -168,7 +168,7 @@
         "allow_any": "Izinkan transisi dari status mana pun",
         "none": "Tidak ada status yang cocok.",
         "any_title": "Transisi ke status yang ditambahkan",
-        "any_help": "Setiap status yang ditambahkan dapat dicapai dari status mana pun.",
+        "any_help": "Setiap status yang ditambahkan dapat dicapai dari status lain mana pun.",
         "any_needs_selection": "Pilih atau buat status terlebih dahulu untuk mengaktifkan opsi ini.",
         "all_used": "Semua status yang tersedia sudah ada di workflow ini. Ketik nama untuk membuat status baru.",
         "any_existing_hint": "Untuk status yang sudah ada di workflow, gunakan \"Tambah transisi\" lalu pilih \"Status mana pun\".",
