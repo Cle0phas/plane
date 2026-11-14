@@ -5,42 +5,59 @@
  */
 
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
-import { useTranslation } from "@plane/i18n";
-import type { TStateGroups } from "@plane/types";
+import { AutomationsOutline } from "@makeplane/propel/icons";
+import type { TWorkflowSide } from "@plane/types";
+// local imports
+import type { TStateTone } from "./graph-model";
+import { INVERSE_CLASS, TONE_CLASS } from "./tones";
 
 export type TStateNodeData = {
   name: string;
-  color: string;
-  group: TStateGroups | null;
-  isInitial: boolean;
-  hasGlobalTransition: boolean;
+  tone: TStateTone;
+  groupLabel: string;
+  globalKey: string | null;
+  globalLabel: string;
+  globalSelected: boolean;
 };
 export type TStateNode = Node<TStateNodeData, "workflowState">;
 
+export const SIDES: TWorkflowSide[] = ["top", "right", "bottom", "left"];
+const POSITION: Record<TWorkflowSide, Position> = {
+  top: Position.Top,
+  right: Position.Right,
+  bottom: Position.Bottom,
+  left: Position.Left,
+};
+
 export function WorkflowStateNode({ data, selected }: NodeProps<TStateNode>) {
-  const { t } = useTranslation();
-  const globalLabel = data.hasGlobalTransition ? t("workflows.editor.global") : undefined;
   return (
-    <div
-      className={`min-w-40 rounded-md border-2 bg-layer-1 px-3 py-2 ${selected ? "ring-2 ring-accent-strong" : ""}`}
-      style={{ borderColor: data.color }}
-    >
-      <Handle type="target" position={Position.Top} />
-      {data.isInitial && (
-        <span className="mb-1 inline-block rounded-sm bg-accent-primary px-1 text-caption-sm-medium text-on-color">
-          {t("workflows.editor.start")}
+    <div className="relative">
+      {data.globalKey && (
+        // Read by the canvas click handler: the pill selects its transition, not the state.
+        <span
+          data-global-key={data.globalKey}
+          className={`absolute -top-7 left-1/2 flex -translate-x-1/2 cursor-pointer items-center gap-1 rounded-full px-2 py-0.5 text-caption-sm-medium whitespace-nowrap ${INVERSE_CLASS} ${data.globalSelected ? "ring-2 ring-accent-strong" : ""}`}
+        >
+          <AutomationsOutline className="size-3" aria-hidden />
+          {data.globalLabel}
         </span>
       )}
-      <div className="text-body-sm-medium text-primary">{data.name}</div>
-      <div className="text-caption-sm-regular text-tertiary">
-        {data.group ? t(`workflows.groups.${data.group}`) : t("workflows.editor.add_state.group_auto")}
+      <div
+        title={data.groupLabel}
+        className={`min-w-32 rounded-sm border-2 px-4 py-2 text-center text-caption-sm-medium uppercase ${TONE_CLASS[data.tone]} ${selected ? "ring-2 ring-accent-strong" : ""}`}
+      >
+        {data.name}
       </div>
-      {globalLabel && (
-        <div className="mt-1 text-caption-sm-regular text-secondary" title={globalLabel}>
-          {globalLabel}
-        </div>
-      )}
-      <Handle type="source" position={Position.Bottom} />
+      {SIDES.map((side) => (
+        // Every side both starts and receives arrows (loose connection mode, R17).
+        <Handle
+          key={side}
+          id={side}
+          type="source"
+          position={POSITION[side]}
+          className={selected ? "opacity-100" : "opacity-0"}
+        />
+      ))}
     </div>
   );
 }

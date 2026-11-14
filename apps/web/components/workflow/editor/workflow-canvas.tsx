@@ -4,105 +4,298 @@
  * See the LICENSE file for details.
  */
 
-import { useEffect, useMemo, useState } from "react";
-import { applyNodeChanges, Background, Controls, MarkerType, ReactFlow, type Edge } from "@xyflow/react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import {
+  applyNodeChanges,
+  ConnectionMode,
+  MarkerType,
+  MiniMap,
+  Panel,
+  ReactFlow,
+  useReactFlow,
+  useStore,
+  type Connection,
+  type Edge,
+  type Node,
+  type ReactFlowInstance,
+} from "@xyflow/react";
 // oxlint-disable-next-line import/no-unassigned-import -- React Flow stylesheet
 import "@xyflow/react/dist/style.css";
 import { useTranslation } from "@plane/i18n";
+import type { TWorkflowSide } from "@plane/types";
 // local imports
-import type { TDraftGraph } from "./graph-model";
-import { WorkflowStateNode, type TStateNode } from "./state-node";
+import { closestSides, displayGroup, toneOf, transitionCounts, type TDraftGraph } from "./graph-model";
+import { START_EDGE_ID, START_NODE_ID, WorkflowStartNode } from "./start-node";
+import { SIDES, WorkflowStateNode } from "./state-node";
 
 export type TEditorSelection = { kind: "state" | "transition"; key: string } | null;
 
 type Props = {
   draft: TDraftGraph;
-  readOnly: boolean;
+  canEdit: boolean;
+  showLabels: boolean;
   selection: TEditorSelection;
   onSelect: (selection: TEditorSelection) => void;
   onMove: (moves: { key: string; x: number; y: number }[]) => void;
-  onConnect: (sourceKey: string, targetKey: string) => void;
+  onConnect: (sourceKey: string, sourceSide: TWorkflowSide, targetKey: string, targetSide: TWorkflowSide) => void;
+  onSetInitial: (key: string) => void;
+  onRemoveState: (key: string) => void;
+  onRemoveTransition: (key: string) => void;
 };
 
-// Stable reference: React Flow warns and re-mounts nodes when nodeTypes changes.
-const NODE_TYPES = { workflowState: WorkflowStateNode };
+// Stable reference: React Flow re-mounts nodes when nodeTypes changes.
+const NODE_TYPES = { workflowState: WorkflowStateNode, workflowStart: WorkflowStartNode };
+const START_GAP = 160;
+const ARROW = { type: MarkerType.ArrowClosed };
+const MINIMAP_HEIGHT = 150;
+// Margin of every React Flow panel (.react-flow__panel): keeps the slider clear of the minimap.
+const PANEL_MARGIN = 15;
 
-export function WorkflowCanvas({ draft, readOnly, selection, onSelect, onMove, onConnect }: Props) {
+const toSide = (value: string | null | undefined, fallback: TWorkflowSide): TWorkflowSide =>
+  SIDES.includes(value as TWorkflowSide) ? (value as TWorkflowSide) : fallback;
+
+const isTextField = (target: EventTarget) =>
+  target instanceof HTMLElement && target.closest("input, textarea, select, [contenteditable='true']") !== null;
+
+function ZoomSlider({ label }: { label: string }) {
+  const zoom = useStore((state) => state.transform[2]);
+  const { zoomTo } = useReactFlow();
+  return (
+    <input
+      type="range"
+      className="w-40"
+      aria-label={label}
+      min={0.25}
+      max={2}
+      step={0.05}
+      value={zoom}
+      onChange={(event) => void zoomTo(Number(event.target.value))}
+    />
+  );
+}
+
+export function WorkflowCanvas({
+  draft,
+  canEdit,
+  showLabels,
+  selection,
+  onSelect,
+  onMove,
+  onConnect,
+  onSetInitial,
+  onRemoveState,
+  onRemoveTransition,
+}: Props) {
   const { t } = useTranslation();
+  const flowRef = useRef<ReactFlowInstance | null>(null);
+  const initial = draft.states.find((state) => state.is_initial);
 
-  // Labels are translated inside the node: useTranslation returns a new t on every render, and a memo
-  // depending on it would feed the effect below a new array each time, an endless render loop.
-  const derivedNodes = useMemo<TStateNode[]>(
-    () =>
-      draft.states.map((state) => ({
+  const specs: Node[] = [
+    {
+      id: START_NODE_ID,
+      type: "workflowStart",
+      position: initial ? { x: initial.position_x - START_GAP, y: initial.position_y - 22 } : { x: 0, y: 0 },
+      draggable: false,
+      selectable: false,
+      deletable: false,
+      // Nothing to do on it from the keyboard: the panel sets the initial state (spec 3.2).
+      focusable: false,
+      connectable: canEdit,
+      ariaLabel: t("workflows.editor.start"),
+      data: { label: t("workflows.editor.start") },
+    },
+    ...draft.states.map((state) => {
+      const group = displayGroup(draft, state);
+      const groupLabel = t(`workflows.groups.${group}`);
+      const globalKey =
+        draft.transitions.find((transition) => transition.from_any && transition.target_key === state.key)?.key ?? null;
+      return {
         id: state.key,
         type: "workflowState",
         position: { x: state.position_x, y: state.position_y },
         selected: selection?.kind === "state" && selection.key === state.key,
-        draggable: !readOnly,
-        connectable: !readOnly,
+        draggable: canEdit,
+        connectable: canEdit,
+        deletable: canEdit,
+        ariaLabel: t("workflows.editor.state_label", {
+          name: state.status.name,
+          group: groupLabel,
+          ...transitionCounts(draft, state.key),
+        }),
         data: {
           name: state.status.name,
-          color: state.status.color,
-          group: state.status.group,
-          isInitial: state.is_initial,
-          hasGlobalTransition: draft.transitions.some(
-            (transition) => transition.from_any && transition.target_key === state.key
-          ),
+          tone: toneOf(group),
+          groupLabel,
+          globalKey,
+          globalLabel: t("workflows.editor.global"),
+          globalSelected: globalKey !== null && selection?.kind === "transition" && selection.key === globalKey,
         },
-      })),
-    [draft, readOnly, selection]
-  );
-  // React Flow moves a dragged node through onNodesChange; the draft only learns the final position on drop.
-  const [nodes, setNodes] = useState<TStateNode[]>(derivedNodes);
-  useEffect(() => setNodes(derivedNodes), [derivedNodes]);
+      };
+    }),
+  ];
 
-  const edges = useMemo<Edge[]>(
-    () =>
-      draft.transitions.flatMap((transition) =>
-        transition.from_any
-          ? []
-          : transition.source_keys.map((source) => ({
-              id: `${transition.key}:${source}`,
-              source,
-              target: transition.target_key,
-              label: transition.name || undefined,
-              markerEnd: { type: MarkerType.ArrowClosed },
-              selected: selection?.kind === "transition" && selection.key === transition.key,
-              data: { transitionKey: transition.key },
-            }))
-      ),
-    [draft, selection]
-  );
+  // React Flow moves a dragged node through onNodesChange, so the nodes live in local state. They are
+  // re-read from the draft when their content changes, compared as a string: an effect keyed on the
+  // array, or on t, restarts on every render and loops with the node measurements (X6).
+  const signature = JSON.stringify(specs);
+  const specsRef = useRef(specs);
+  specsRef.current = specs;
+  const [nodes, setNodes] = useState<Node[]>(specs);
+  useEffect(() => {
+    setNodes((current) =>
+      // oxlint-disable-next-line oxc/no-map-spread -- React state is copy-on-write; a spec may already be in state
+      specsRef.current.map((spec) => {
+        const measured = current.find((node) => node.id === spec.id)?.measured;
+        return measured ? { ...spec, measured } : spec;
+      })
+    );
+  }, [signature]);
+
+  // Refit only when a state is added or removed, never on a pan or a drag (R12).
+  const stateCount = draft.states.length;
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => void flowRef.current?.fitView({ padding: 0.2 }));
+    return () => cancelAnimationFrame(frame);
+  }, [stateCount]);
+
+  const edges = useMemo<Edge[]>(() => {
+    const nameOf = (key: string) => draft.states.find((item) => item.key === key)?.status.name ?? "";
+    const positionOf = (key: string) => {
+      const state = draft.states.find((item) => item.key === key);
+      return state ? { x: state.position_x, y: state.position_y } : undefined;
+    };
+    const startEdge: Edge[] = initial
+      ? [
+          {
+            id: START_EDGE_ID,
+            source: START_NODE_ID,
+            sourceHandle: "right",
+            target: initial.key,
+            targetHandle: "left",
+            type: "step",
+            markerEnd: ARROW,
+            selectable: false,
+            deletable: false,
+            focusable: false,
+            // The only arrow that can be re-dropped: on another state it moves the start (spec 3.2).
+            reconnectable: canEdit ? "target" : false,
+          },
+        ]
+      : [];
+    const transitionEdges = draft.transitions.flatMap((transition) =>
+      transition.from_any
+        ? []
+        : transition.source_keys.flatMap((source): Edge[] => {
+            const from = positionOf(source);
+            const to = positionOf(transition.target_key);
+            if (!from || !to) return [];
+            const sides = transition.sides?.[source] ?? closestSides(from, to);
+            return [
+              {
+                id: `${transition.key}:${source}`,
+                source,
+                sourceHandle: sides.source,
+                target: transition.target_key,
+                targetHandle: sides.target,
+                type: "step",
+                label: showLabels && transition.name ? transition.name : undefined,
+                markerEnd: ARROW,
+                selected: selection?.kind === "transition" && selection.key === transition.key,
+                deletable: canEdit,
+                reconnectable: false,
+                ariaLabel: `${transition.name ? `${transition.name}: ` : ""}${nameOf(source)} → ${nameOf(transition.target_key)}`,
+                data: { transitionKey: transition.key },
+              },
+            ];
+          })
+    );
+    return [...startEdge, ...transitionEdges];
+  }, [draft, initial, selection, showLabels, canEdit]);
+
+  const handleConnect = ({ source, target, sourceHandle, targetHandle }: Connection) => {
+    if (!source || !target || source === target || target === START_NODE_ID) return;
+    // An arrow drawn from the start node moves the start (R18).
+    if (source === START_NODE_ID) return onSetInitial(target);
+    onConnect(source, toSide(sourceHandle, "right"), target, toSide(targetHandle, "left"));
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.ctrlKey || event.metaKey || event.altKey || isTextField(event.target)) return;
+    // "=" is the unshifted "+" key (spec 3.9).
+    if (event.key === "+" || event.key === "=") void flowRef.current?.zoomIn();
+    else if (event.key === "-") void flowRef.current?.zoomOut();
+  };
 
   return (
-    <div
-      role="group"
-      className="h-[560px] w-full rounded-md border border-subtle"
-      aria-label={t("workflows.editor.diagram_label")}
-    >
+    <div role="group" className="size-full" aria-label={t("workflows.editor.diagram_label")} onKeyDown={handleKeyDown}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={NODE_TYPES}
-        onNodesChange={(changes) => setNodes((current) => applyNodeChanges(changes, current))}
+        connectionMode={ConnectionMode.Loose}
         fitView
-        deleteKeyCode={null}
-        nodesDraggable={!readOnly}
-        nodesConnectable={!readOnly}
-        onNodeClick={(_, node) => onSelect({ kind: "state", key: node.id })}
-        onEdgeClick={(_, edge) => onSelect({ kind: "transition", key: String(edge.data?.transitionKey) })}
+        minZoom={0.25}
+        maxZoom={2}
+        nodesDraggable={canEdit}
+        nodesConnectable={canEdit}
+        deleteKeyCode={canEdit ? "Delete" : null}
+        onInit={(instance) => {
+          flowRef.current = instance;
+        }}
+        onNodesChange={(changes) => {
+          setNodes((current) => applyNodeChanges(changes, current));
+          // Keyboard use never goes through onNodeClick: Enter selects a focused node and the arrow keys
+          // move it, both reported here only, like the drop of a drag (dragging false, spec 3.9).
+          const picked = changes.find(
+            (change) => change.type === "select" && change.selected && change.id !== START_NODE_ID
+          );
+          if (picked && picked.type === "select" && !(selection?.kind === "state" && selection.key === picked.id))
+            onSelect({ kind: "state", key: picked.id });
+          const moves = changes.flatMap((change) =>
+            change.type === "position" && change.position && change.dragging !== true && change.id !== START_NODE_ID
+              ? [{ key: change.id, x: change.position.x, y: change.position.y }]
+              : []
+          );
+          if (moves.length > 0) onMove(moves);
+        }}
+        onEdgesChange={(changes) => {
+          // Enter on a focused arrow: the only way a keyboard user selects a transition in the diagram.
+          const picked = changes.find((change) => change.type === "select" && change.selected);
+          if (picked && picked.type === "select" && picked.id !== START_EDGE_ID)
+            onSelect({ kind: "transition", key: picked.id.split(":")[0] });
+        }}
+        onNodeClick={(event, node) => {
+          if (node.id === START_NODE_ID) return;
+          const globalKey = (event.target as HTMLElement).closest("[data-global-key]")?.getAttribute("data-global-key");
+          onSelect(globalKey ? { kind: "transition", key: globalKey } : { kind: "state", key: node.id });
+        }}
+        onEdgeClick={(_, edge) => {
+          const key = edge.data?.transitionKey;
+          if (typeof key === "string") onSelect({ kind: "transition", key });
+        }}
         onPaneClick={() => onSelect(null)}
-        onNodeDragStop={(_, __, dragged) =>
-          onMove(dragged.map((node) => ({ key: node.id, x: node.position.x, y: node.position.y })))
-        }
-        onConnect={(connection) => {
-          if (connection.source && connection.target && connection.source !== connection.target)
-            onConnect(connection.source, connection.target);
+        onConnect={handleConnect}
+        onReconnect={(edge, connection) => {
+          if (edge.id === START_EDGE_ID && connection.target && connection.target !== START_NODE_ID)
+            onSetInitial(connection.target);
+        }}
+        onDelete={({ nodes: deletedNodes, edges: deletedEdges }) => {
+          // React Flow also reports the arrows of a deleted state: removeState already trims those
+          // transitions to their other sources, so only arrows the user picked are removed whole.
+          const removed = new Set(deletedNodes.map((node) => node.id).filter((id) => id !== START_NODE_ID));
+          for (const key of removed) onRemoveState(key);
+          const transitionKeys = new Set(
+            deletedEdges
+              .filter((edge) => !removed.has(edge.source) && !removed.has(edge.target))
+              .map((edge) => edge.data?.transitionKey)
+          );
+          for (const key of transitionKeys) if (typeof key === "string") onRemoveTransition(key);
         }}
       >
-        <Background />
-        <Controls showInteractive={false} />
+        <MiniMap pannable zoomable style={{ height: MINIMAP_HEIGHT }} ariaLabel={t("workflows.editor.minimap")} />
+        <Panel position="bottom-right" style={{ bottom: MINIMAP_HEIGHT + PANEL_MARGIN }}>
+          <ZoomSlider label={t("workflows.editor.zoom")} />
+        </Panel>
       </ReactFlow>
     </div>
   );

@@ -20,11 +20,15 @@ import { AddTransitionForm } from "./add-transition-form";
 import {
   addStates,
   addTransition,
+  connectStates,
   fromDetail,
   getDraftErrorKey,
   getGraphErrorKey,
   isDraftDirty,
   moveState,
+  removeState,
+  removeTransition,
+  setInitial,
   shouldResetDraft,
   toPayload,
   validateDraft,
@@ -153,27 +157,22 @@ export const WorkflowEditor = observer(function WorkflowEditor({ workspaceSlug, 
         </div>
       )}
       <div className="flex gap-4">
-        <div className="min-w-0 flex-1">
+        <div className="h-[560px] min-w-0 flex-1 rounded-md border border-subtle">
           <WorkflowCanvas
             draft={draft}
-            readOnly={readOnly}
+            canEdit={!readOnly}
+            showLabels
             selection={selection}
             onSelect={setSelection}
             onMove={(moves) =>
               setDraft((current) => moves.reduce((acc, move) => moveState(acc, move.key, move.x, move.y), current))
             }
-            onConnect={(source, target) =>
-              setDraft((current) =>
-                addTransition(current, {
-                  key: `new-${uuidv4()}`,
-                  name: "",
-                  from_any: false,
-                  source_keys: [source],
-                  target_key: target,
-                  rules: [],
-                })
-              )
+            onConnect={(source, sourceSide, target, targetSide) =>
+              setDraft((current) => connectStates(current, `new-${uuidv4()}`, source, sourceSide, target, targetSide))
             }
+            onSetInitial={(key) => setDraft((current) => setInitial(current, key))}
+            onRemoveState={(key) => setDraft((current) => removeState(current, key))}
+            onRemoveTransition={(key) => setDraft((current) => removeTransition(current, key))}
           />
         </div>
         <WorkflowSidePanel

@@ -13,3 +13,6 @@ export const TONE_CLASS: Record<TStateTone, string> = {
   done: "border-success-subtle bg-success-subtle text-success-primary",
   cancelled: "border-danger-subtle bg-danger-subtle text-danger-primary",
 };
+
+/** Dark shape with light text in both themes: start node and "any state" pills. */
+export const INVERSE_CLASS = "bg-(--text-color-primary) text-(--background-color-surface-1)";

@@ -14,7 +14,12 @@ import { afterEach } from "vitest";
 class TestResizeObserver {
   constructor(private readonly callback: ResizeObserverCallback) {}
   observe(target: Element): void {
-    this.callback([{ target } as ResizeObserverEntry], this as unknown as ResizeObserver);
+    // The pan-zoom reads contentRect for its zoom extent.
+    const { offsetWidth: width, offsetHeight: height } = target as HTMLElement;
+    this.callback(
+      [{ target, contentRect: { width, height } } as ResizeObserverEntry],
+      this as unknown as ResizeObserver
+    );
   }
   unobserve(): void {}
   disconnect(): void {}
