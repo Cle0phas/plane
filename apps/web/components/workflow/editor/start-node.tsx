@@ -18,7 +18,10 @@ export function WorkflowStartNode({ data }: NodeProps<TStartNode>) {
   return (
     <div className={`flex size-20 items-center justify-center rounded-full text-caption-sm-medium ${INVERSE_CLASS}`}>
       {data.label}
+      {/* The start arrow leaves from the side facing the initial state (startPlacement). */}
       <Handle id="right" type="source" position={Position.Right} className="opacity-0" />
+      <Handle id="bottom" type="source" position={Position.Bottom} className="opacity-0" />
+      <Handle id="top" type="source" position={Position.Top} className="opacity-0" />
     </div>
   );
 }

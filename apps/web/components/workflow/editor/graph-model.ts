@@ -312,6 +312,44 @@ export const closestSides = (source: TPoint, target: TPoint): { source: TWorkflo
   return dy >= 0 ? { source: "bottom", target: "top" } : { source: "top", target: "bottom" };
 };
 
+const START_SIZE = 80;
+const START_ARROW = 80;
+// shortcut: a state is taken at its minimum drawn size (min-w-32), its any-state pill included above it;
+// a wider name is not measured, pass the measured sizes in if long names start to overlap.
+const STATE_BOX = { width: 128, height: 40, pill: 28 };
+
+type TBox = { x0: number; y0: number; x1: number; y1: number };
+const overlaps = (a: TBox, b: TBox) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+
+export type TStartPlacement = { x: number; y: number; sides: { source: TWorkflowSide; target: TWorkflowSide } };
+
+/** Start node place (X7, display only): left of the initial state, else above, else below; never on a state. */
+export const startPlacement = (draft: TDraftGraph): TStartPlacement | null => {
+  const initial = draft.states.find((state) => state.is_initial);
+  if (!initial) return null;
+  const { position_x: x, position_y: y } = initial;
+  const centredX = x + (STATE_BOX.width - START_SIZE) / 2;
+  const left = { x: x - START_ARROW - START_SIZE, y: y + (STATE_BOX.height - START_SIZE) / 2 };
+  const top = { x: centredX, y: y - START_ARROW - START_SIZE };
+  const bottom = { x: centredX, y: y + STATE_BOX.height + START_ARROW };
+  // Each place is taken with the room of its arrow up to the initial state.
+  const others = draft.states
+    .filter((state) => state.key !== initial.key)
+    .map((state) => ({
+      x0: state.position_x,
+      y0: state.position_y - STATE_BOX.pill,
+      x1: state.position_x + STATE_BOX.width,
+      y1: state.position_y + STATE_BOX.height,
+    }));
+  const isFree = (area: TBox) => !others.some((box) => overlaps(box, area));
+  const hasPill = draft.transitions.some((transition) => transition.from_any && transition.target_key === initial.key);
+  if (isFree({ x0: left.x, y0: left.y, x1: x, y1: left.y + START_SIZE }))
+    return { ...left, sides: { source: "right", target: "left" } };
+  if (!hasPill && isFree({ x0: top.x, y0: top.y, x1: top.x + START_SIZE, y1: y }))
+    return { ...top, sides: { source: "bottom", target: "top" } };
+  return { ...bottom, sides: { source: "top", target: "bottom" } };
+};
+
 export const connectStates = (
   draft: TDraftGraph,
   key: string,

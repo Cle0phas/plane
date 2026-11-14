@@ -24,7 +24,7 @@ import "@xyflow/react/dist/style.css";
 import { useTranslation } from "@plane/i18n";
 import type { TWorkflowSide } from "@plane/types";
 // local imports
-import { closestSides, displayGroup, toneOf, transitionCounts, type TDraftGraph } from "./graph-model";
+import { closestSides, displayGroup, startPlacement, toneOf, transitionCounts, type TDraftGraph } from "./graph-model";
 import { START_EDGE_ID, START_NODE_ID, WorkflowStartNode } from "./start-node";
 import { SIDES, WorkflowStateNode } from "./state-node";
 
@@ -45,7 +45,6 @@ type Props = {
 
 // Stable reference: React Flow re-mounts nodes when nodeTypes changes.
 const NODE_TYPES = { workflowState: WorkflowStateNode, workflowStart: WorkflowStartNode };
-const START_GAP = 160;
 // Theme text colours, so the arrows keep their contrast on the canvas in both themes; inline styles beat
 // React Flow's own grey edge rules. A fixed head size keeps the selected arrow's head the same.
 const arrowLook = (color: string, strokeWidth: number) => ({
@@ -99,6 +98,7 @@ export function WorkflowCanvas({
   const { t, currentLocale } = useTranslation();
   const flowRef = useRef<ReactFlowInstance | null>(null);
   const initial = draft.states.find((state) => state.is_initial);
+  const start = startPlacement(draft);
   const transitionLabel = (name: string, source: string, target: string) =>
     name
       ? t("workflows.editor.transition_label", { name, source, target })
@@ -108,7 +108,7 @@ export function WorkflowCanvas({
     {
       id: START_NODE_ID,
       type: "workflowStart",
-      position: initial ? { x: initial.position_x - START_GAP, y: initial.position_y - 22 } : { x: 0, y: 0 },
+      position: start ? { x: start.x, y: start.y } : { x: 0, y: 0 },
       draggable: false,
       selectable: false,
       deletable: false,
@@ -180,25 +180,26 @@ export function WorkflowCanvas({
       const state = draft.states.find((item) => item.key === key);
       return state ? { x: state.position_x, y: state.position_y } : undefined;
     };
-    const startEdge: Edge[] = initial
-      ? [
-          {
-            id: START_EDGE_ID,
-            source: START_NODE_ID,
-            sourceHandle: "right",
-            target: initial.key,
-            targetHandle: "left",
-            type: "step",
-            ...ARROW,
-            selectable: false,
-            deletable: false,
-            focusable: false,
-            // The only arrow that can be re-dropped: on another state it moves the start (spec 3.2).
-            reconnectable: canEdit ? "target" : false,
-            ariaLabel: t("workflows.editor.start_label", { name: initial.status.name }),
-          },
-        ]
-      : [];
+    const startEdge: Edge[] =
+      initial && start
+        ? [
+            {
+              id: START_EDGE_ID,
+              source: START_NODE_ID,
+              sourceHandle: start.sides.source,
+              target: initial.key,
+              targetHandle: start.sides.target,
+              type: "step",
+              ...ARROW,
+              selectable: false,
+              deletable: false,
+              focusable: false,
+              // The only arrow that can be re-dropped: on another state it moves the start (spec 3.2).
+              reconnectable: canEdit ? "target" : false,
+              ariaLabel: t("workflows.editor.start_label", { name: initial.status.name }),
+            },
+          ]
+        : [];
     const transitionEdges = draft.transitions.flatMap((transition) =>
       transition.from_any
         ? []
@@ -228,7 +229,7 @@ export function WorkflowCanvas({
           })
     );
     return [...startEdge, ...transitionEdges];
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- t and transitionLabel change identity on every render
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- t, transitionLabel and start (from draft) change identity on every render
   }, [draft, initial, selection, showLabels, canEdit, currentLocale]);
 
   const handleConnect = ({ source, target, sourceHandle, targetHandle }: Connection) => {

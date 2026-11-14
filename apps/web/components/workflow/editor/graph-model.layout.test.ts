@@ -16,6 +16,7 @@ import {
   fromDetail,
   optionToStatus,
   setInitial,
+  startPlacement,
   statusNameError,
   statusOptions,
   textRows,
@@ -176,6 +177,42 @@ describe("sides", () => {
     const copied = fromDetail({ ...detail, transitions: [{ ...detail.transitions[0], sides: source }] }, []);
     expect(copied.transitions[0].sides?.a).not.toBe(source.a);
     expect(toPayload(edited as TDraftGraph).transitions[0].sides).toEqual({ a: { source: "top", target: "left" } });
+  });
+});
+
+describe("startPlacement", () => {
+  const at = (key: string, x: number, y: number, isInitial = false) =>
+    state(key, { position_x: x, position_y: y, is_initial: isInitial });
+
+  it("places nothing without an initial state", () => {
+    expect(startPlacement({ states: [at("a", 0, 0)], transitions: [] })).toBeNull();
+  });
+
+  it("goes to the left of the initial state when that place is free", () => {
+    const draft: TDraftGraph = { states: [at("a", 0, 0, true), at("b", 240, 0)], transitions: [] };
+    expect(startPlacement(draft)).toEqual({ x: -160, y: -20, sides: { source: "right", target: "left" } });
+  });
+
+  it("goes above the initial state when a state sits on its left", () => {
+    const draft: TDraftGraph = { states: [at("a", 0, 0), at("b", 240, 0, true)], transitions: [] };
+    expect(startPlacement(draft)).toEqual({ x: 264, y: -160, sides: { source: "bottom", target: "top" } });
+  });
+
+  it("goes below the initial state when its left and its top are taken", () => {
+    const draft: TDraftGraph = {
+      states: [at("a", 0, 0), at("b", 240, 0, true), at("c", 240, -180)],
+      transitions: [],
+    };
+    expect(startPlacement(draft)).toEqual({ x: 264, y: 120, sides: { source: "top", target: "bottom" } });
+  });
+
+  // The arrow would run over the "any state" pill drawn above the initial state.
+  it("leaves the top to the any-state pill of the initial state", () => {
+    const draft: TDraftGraph = {
+      states: [at("a", 0, 0), at("b", 240, 0, true)],
+      transitions: [{ key: "g", name: "", from_any: true, source_keys: [], target_key: "b", rules: [] }],
+    };
+    expect(startPlacement(draft)?.sides.target).toBe("bottom");
   });
 });
 

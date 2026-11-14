@@ -283,6 +283,16 @@ describe("WorkflowCanvas", () => {
     });
   });
 
+  it("puts the start node above the initial state when another state sits on its left", () => {
+    renderCanvas({ draft: { ...draft, states: [state("a", "Todo", 0), state("b", "Done", 240, true)] } });
+    expect(nodeById("__start__").position).toEqual({ x: 264, y: -160 });
+    expect(edgeById("__start_edge__")).toMatchObject({
+      source: "__start__",
+      sourceHandle: "bottom",
+      targetHandle: "top",
+    });
+  });
+
   it("never zooms past 1 when it fits the view, so a lone node keeps its size", () => {
     renderCanvas({ draft: { states: [], transitions: [] } });
     expect(flow().fitViewOptions?.maxZoom).toBe(1);
