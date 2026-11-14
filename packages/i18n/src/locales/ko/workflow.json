@@ -240,6 +240,8 @@
       "zoom": "확대/축소",
       "minimap": "미니맵",
       "state_label": "스테이트 {name}, 카테고리 {group}, 들어오는 전환 {incoming}개, 나가는 전환 {outgoing}개",
+      "transition_label": "전환 {name}, 출발: {source}, 도착: {target}",
+      "start_label": "초기 스테이트: {name}",
       "view": {
         "label": "보기",
         "diagram": "다이어그램",

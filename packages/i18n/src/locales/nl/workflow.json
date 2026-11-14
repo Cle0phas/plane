@@ -240,6 +240,8 @@
       "zoom": "Zoomen",
       "minimap": "Minikaart",
       "state_label": "Status {name}, categorie {group}, {incoming} inkomend, {outgoing} uitgaand",
+      "transition_label": "Overgang {name}, van {source} naar {target}",
+      "start_label": "Beginstatus: {name}",
       "view": {
         "label": "Weergave",
         "diagram": "Diagram",

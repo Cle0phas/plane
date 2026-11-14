@@ -240,6 +240,8 @@
       "zoom": "Priblíženie",
       "minimap": "Minimapa",
       "state_label": "Stav {name}, kategória {group}, prichádzajúce: {incoming}, odchádzajúce: {outgoing}",
+      "transition_label": "Prechod {name}, zo stavu {source} do stavu {target}",
+      "start_label": "Počiatočný stav: {name}",
       "view": {
         "label": "Zobrazenie",
         "diagram": "Diagram",

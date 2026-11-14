@@ -240,6 +240,8 @@
       "zoom": "Zoom",
       "minimap": "Mini-map",
       "state_label": "State {name}, category {group}, {incoming} incoming, {outgoing} outgoing",
+      "transition_label": "Transition {name}, from {source} to {target}",
+      "start_label": "Start state: {name}",
       "view": {
         "label": "View",
         "diagram": "Diagram",

@@ -240,6 +240,8 @@
       "zoom": "Perbesaran",
       "minimap": "Peta mini",
       "state_label": "Status {name}, kategori {group}, {incoming} transisi masuk, {outgoing} transisi keluar",
+      "transition_label": "Transisi {name}, dari {source} ke {target}",
+      "start_label": "Status awal: {name}",
       "view": {
         "label": "Tampilan",
         "diagram": "Diagram",

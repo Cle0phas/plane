@@ -240,6 +240,8 @@
       "zoom": "Powiększenie",
       "minimap": "Minimapa",
       "state_label": "Stan {name}, kategoria {group}, przychodzące: {incoming}, wychodzące: {outgoing}",
+      "transition_label": "Przejście {name}, ze stanu {source} do stanu {target}",
+      "start_label": "Stan początkowy: {name}",
       "view": {
         "label": "Widok",
         "diagram": "Diagram",

@@ -240,6 +240,8 @@
       "zoom": "Масштаб",
       "minimap": "Мінікарта",
       "state_label": "Стан {name}, категорія {group}, вхідних: {incoming}, вихідних: {outgoing}",
+      "transition_label": "Перехід {name}, зі стану {source} до стану {target}",
+      "start_label": "Початковий стан: {name}",
       "view": {
         "label": "Вигляд",
         "diagram": "Діаграма",

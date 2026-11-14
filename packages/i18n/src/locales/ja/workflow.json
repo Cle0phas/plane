@@ -240,6 +240,8 @@
       "zoom": "ズーム",
       "minimap": "ミニマップ",
       "state_label": "状態「{name}」、カテゴリー「{group}」、この状態への遷移{incoming}件、この状態からの遷移{outgoing}件",
+      "transition_label": "遷移「{name}」、「{source}」から「{target}」へ",
+      "start_label": "初期状態「{name}」",
       "view": {
         "label": "表示",
         "diagram": "図",

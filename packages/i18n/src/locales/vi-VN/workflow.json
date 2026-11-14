@@ -240,6 +240,8 @@
       "zoom": "Thu phóng",
       "minimap": "Bản đồ thu nhỏ",
       "state_label": "Trạng thái {name}, danh mục {group}, {incoming} chuyển tiếp đến, {outgoing} chuyển tiếp đi",
+      "transition_label": "Chuyển tiếp {name}, từ {source} đến {target}",
+      "start_label": "Trạng thái ban đầu: {name}",
       "view": {
         "label": "Chế độ xem",
         "diagram": "Sơ đồ",

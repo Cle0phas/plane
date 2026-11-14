@@ -240,6 +240,8 @@
       "zoom": "缩放",
       "minimap": "小地图",
       "state_label": "状态 {name}，类别 {group}，{incoming} 个传入转换，{outgoing} 个传出转换",
+      "transition_label": "转换 {name}，从 {source} 到 {target}",
+      "start_label": "初始状态：{name}",
       "view": {
         "label": "视图",
         "diagram": "图表",
