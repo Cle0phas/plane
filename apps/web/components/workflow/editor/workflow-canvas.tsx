@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import {
   applyNodeChanges,
   ConnectionMode,
@@ -50,12 +50,15 @@ const ARROW = { type: MarkerType.ArrowClosed };
 const MINIMAP_HEIGHT = 150;
 // Margin of every React Flow panel (.react-flow__panel): keeps the slider clear of the minimap.
 const PANEL_MARGIN = 15;
+// One or two nodes keep their natural size instead of filling the canvas.
+const FIT_VIEW_OPTIONS = { padding: 0.2, maxZoom: 1 };
 
 const toSide = (value: string | null | undefined, fallback: TWorkflowSide): TWorkflowSide =>
   SIDES.includes(value as TWorkflowSide) ? (value as TWorkflowSide) : fallback;
 
 const isTextField = (target: EventTarget) =>
-  target instanceof HTMLElement && target.closest("input, textarea, select, [contenteditable='true']") !== null;
+  target instanceof HTMLElement &&
+  target.closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])") !== null;
 
 function ZoomSlider({ label }: { label: string }) {
   const zoom = useStore((state) => state.transform[2]);
@@ -107,8 +110,8 @@ export function WorkflowCanvas({
     ...draft.states.map((state) => {
       const group = displayGroup(draft, state);
       const groupLabel = t(`workflows.groups.${group}`);
-      const globalKey =
-        draft.transitions.find((transition) => transition.from_any && transition.target_key === state.key)?.key ?? null;
+      const global = draft.transitions.find((transition) => transition.from_any && transition.target_key === state.key);
+      const globalKey = global?.key ?? null;
       return {
         id: state.key,
         type: "workflowState",
@@ -128,6 +131,13 @@ export function WorkflowCanvas({
           groupLabel,
           globalKey,
           globalLabel: t("workflows.editor.global"),
+          globalName: global
+            ? t("workflows.editor.transition_label", {
+                name: global.name || t("workflows.editor.text.unnamed"),
+                source: t("workflows.editor.global"),
+                target: state.status.name,
+              })
+            : "",
           globalSelected: globalKey !== null && selection?.kind === "transition" && selection.key === globalKey,
         },
       };
@@ -154,12 +164,14 @@ export function WorkflowCanvas({
   // Refit only when a state is added or removed, never on a pan or a drag (R12).
   const stateCount = draft.states.length;
   useEffect(() => {
-    const frame = requestAnimationFrame(() => void flowRef.current?.fitView({ padding: 0.2 }));
+    const frame = requestAnimationFrame(() => void flowRef.current?.fitView(FIT_VIEW_OPTIONS));
     return () => cancelAnimationFrame(frame);
   }, [stateCount]);
 
-  const edges = useMemo<Edge[]>(() => {
+  // Rebuilt on every render like the nodes: t is new each time, and edges are props, not state.
+  const edges = ((): Edge[] => {
     const nameOf = (key: string) => draft.states.find((item) => item.key === key)?.status.name ?? "";
+    const unnamed = t("workflows.editor.text.unnamed");
     const positionOf = (key: string) => {
       const state = draft.states.find((item) => item.key === key);
       return state ? { x: state.position_x, y: state.position_y } : undefined;
@@ -179,6 +191,7 @@ export function WorkflowCanvas({
             focusable: false,
             // The only arrow that can be re-dropped: on another state it moves the start (spec 3.2).
             reconnectable: canEdit ? "target" : false,
+            ariaLabel: t("workflows.editor.start_label", { name: initial.status.name }),
           },
         ]
       : [];
@@ -203,14 +216,18 @@ export function WorkflowCanvas({
                 selected: selection?.kind === "transition" && selection.key === transition.key,
                 deletable: canEdit,
                 reconnectable: false,
-                ariaLabel: `${transition.name ? `${transition.name}: ` : ""}${nameOf(source)} → ${nameOf(transition.target_key)}`,
+                ariaLabel: t("workflows.editor.transition_label", {
+                  name: transition.name || unnamed,
+                  source: nameOf(source),
+                  target: nameOf(transition.target_key),
+                }),
                 data: { transitionKey: transition.key },
               },
             ];
           })
     );
     return [...startEdge, ...transitionEdges];
-  }, [draft, initial, selection, showLabels, canEdit]);
+  })();
 
   const handleConnect = ({ source, target, sourceHandle, targetHandle }: Connection) => {
     if (!source || !target || source === target || target === START_NODE_ID) return;
@@ -234,6 +251,7 @@ export function WorkflowCanvas({
         nodeTypes={NODE_TYPES}
         connectionMode={ConnectionMode.Loose}
         fitView
+        fitViewOptions={FIT_VIEW_OPTIONS}
         minZoom={0.25}
         maxZoom={2}
         nodesDraggable={canEdit}

@@ -17,6 +17,8 @@ export type TStateNodeData = {
   groupLabel: string;
   globalKey: string | null;
   globalLabel: string;
+  /** Accessible name of the global transition: the pill is its only handle in the diagram (spec 3.9). */
+  globalName: string;
   globalSelected: boolean;
 };
 export type TStateNode = Node<TStateNodeData, "workflowState">;
@@ -33,14 +35,18 @@ export function WorkflowStateNode({ data, selected }: NodeProps<TStateNode>) {
   return (
     <div className="relative">
       {data.globalKey && (
-        // Read by the canvas click handler: the pill selects its transition, not the state.
-        <span
+        // Read by the canvas click handler: the pill selects its transition, not the state. nokey keeps
+        // React Flow's node keys off it, nodrag and nopan let the click through.
+        <button
+          type="button"
           data-global-key={data.globalKey}
-          className={`absolute -top-7 left-1/2 flex -translate-x-1/2 cursor-pointer items-center gap-1 rounded-full px-2 py-0.5 text-caption-sm-medium whitespace-nowrap ${INVERSE_CLASS} ${data.globalSelected ? "ring-2 ring-accent-strong" : ""}`}
+          aria-label={data.globalName}
+          aria-pressed={data.globalSelected}
+          className={`nodrag nopan nokey absolute -top-7 left-1/2 flex -translate-x-1/2 cursor-pointer items-center gap-1 rounded-full px-2 py-0.5 text-caption-sm-medium whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-accent-strong focus-visible:ring-offset-1 ${INVERSE_CLASS} ${data.globalSelected ? "ring-2 ring-accent-strong" : ""}`}
         >
           <AutomationsOutline className="size-3" aria-hidden />
           {data.globalLabel}
-        </span>
+        </button>
       )}
       <div
         title={data.groupLabel}

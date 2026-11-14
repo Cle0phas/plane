@@ -7,14 +7,18 @@
 import { createElement, type ComponentProps } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ReactFlow as TReactFlow } from "@xyflow/react";
+import type { ReactFlowInstance, ReactFlow as TReactFlow } from "@xyflow/react";
 import { describe, expect, it, vi } from "vitest";
 import type { TDraftGraph } from "./graph-model";
 import { WorkflowCanvas } from "./workflow-canvas";
 
-const { translate, flowProps } = vi.hoisted(() => ({
-  translate: vi.fn((key: string, _params?: Record<string, unknown>) => key),
+const { translate, flowProps, flowInstance } = vi.hoisted(() => ({
+  // Parameters are echoed so the accessible names built from them can be asserted.
+  translate: vi.fn((key: string, params?: Record<string, unknown>) =>
+    params ? `${key} ${JSON.stringify(params)}` : key
+  ),
   flowProps: { current: undefined as ComponentProps<typeof TReactFlow> | undefined },
+  flowInstance: { current: undefined as ReactFlowInstance | undefined },
 }));
 
 // A new t on every render, like the real hook: with the immediate ResizeObserver of the setup file,
@@ -30,7 +34,13 @@ vi.mock("@xyflow/react", async (importOriginal) => {
     ...actual,
     ReactFlow: (props: ComponentProps<typeof TReactFlow>) => {
       flowProps.current = props;
-      return createElement(actual.ReactFlow, props);
+      return createElement(actual.ReactFlow, {
+        ...props,
+        onInit: (instance: ReactFlowInstance) => {
+          flowInstance.current = instance;
+          props.onInit?.(instance);
+        },
+      });
     },
   };
 });
@@ -85,6 +95,13 @@ const nodeById = (id: string) => {
   if (!node) throw new Error(`No node ${id}`);
   return node;
 };
+// Found by text: React Flow keeps nodes visibility:hidden until it has handle bounds, which jsdom never
+// gives, and a hidden element has no computed accessible name, so getByRole cannot match it by name.
+const pill = () => {
+  const button = screen.getByText("workflows.editor.global").closest("button");
+  if (!button) throw new Error("The any-state pill is not a button");
+  return button;
+};
 const scale = (container: HTMLElement) =>
   Number(
     container.querySelector<HTMLElement>(".react-flow__viewport")?.style.transform.match(/scale\(([0-9.]+)\)/)?.[1]
@@ -117,7 +134,117 @@ describe("WorkflowCanvas", () => {
       incoming: 1,
       outgoing: 0,
     });
-    expect(edgeById("t:a").ariaLabel).toBe("Finish: Todo → Done");
+  });
+
+  it("names the arrows and the any-state pill through translated labels", () => {
+    renderCanvas();
+    expect(edgeById("t:a").ariaLabel).toBe(
+      'workflows.editor.transition_label {"name":"Finish","source":"Todo","target":"Done"}'
+    );
+    expect(edgeById("__start_edge__").ariaLabel).toBe('workflows.editor.start_label {"name":"Todo"}');
+    expect(pill().getAttribute("aria-label")).toBe(
+      'workflows.editor.transition_label {"name":"workflows.editor.text.unnamed","source":"workflows.editor.global","target":"Todo"}'
+    );
+  });
+
+  it("selects the global transition from its pill with the keyboard, read-only too", async () => {
+    const onSelect = vi.fn();
+    renderCanvas({ onSelect, canEdit: false });
+    const button = pill();
+    expect(button.getAttribute("aria-pressed")).toBe("false");
+    const user = userEvent.setup();
+    button.focus();
+    expect(document.activeElement).toBe(button);
+    await user.keyboard("{Enter}");
+    expect(onSelect).toHaveBeenLastCalledWith({ kind: "transition", key: "g" });
+    onSelect.mockClear();
+    await user.keyboard(" ");
+    expect(onSelect).toHaveBeenLastCalledWith({ kind: "transition", key: "g" });
+  });
+
+  it("marks the pill and every arrow of the selected transition as selected", () => {
+    renderCanvas({
+      draft: {
+        states: [state("a", "Todo", 0, true), state("b", "Doing", 240), state("c", "Done", 480)],
+        transitions: [
+          { key: "t", name: "Finish", from_any: false, source_keys: ["a", "b"], target_key: "c", rules: [] },
+          { key: "g", name: "", from_any: true, source_keys: [], target_key: "a", rules: [] },
+        ],
+      },
+      selection: { kind: "transition", key: "t" },
+    });
+    expect(edgeById("t:a").selected).toBe(true);
+    expect(edgeById("t:b").selected).toBe(true);
+    expect(pill().getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("presses the pill of the selected global transition", () => {
+    renderCanvas({ selection: { kind: "transition", key: "g" } });
+    expect(pill().getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("creates a transition with the sides of the two handles, or moves the start from the start node", () => {
+    const onConnect = vi.fn();
+    const onSetInitial = vi.fn();
+    renderCanvas({ onConnect, onSetInitial });
+    flow().onConnect?.({ source: "a", sourceHandle: "bottom", target: "b", targetHandle: "top" });
+    expect(onConnect).toHaveBeenCalledWith("a", "bottom", "b", "top");
+    onConnect.mockClear();
+    flow().onConnect?.({ source: "__start__", sourceHandle: "right", target: "b", targetHandle: "left" });
+    expect(onSetInitial).toHaveBeenCalledWith("b");
+    expect(onConnect).not.toHaveBeenCalled();
+    onSetInitial.mockClear();
+    flow().onConnect?.({ source: "a", sourceHandle: "right", target: "a", targetHandle: "left" });
+    flow().onConnect?.({ source: "a", sourceHandle: "left", target: "__start__", targetHandle: "right" });
+    expect(onConnect).not.toHaveBeenCalled();
+    expect(onSetInitial).not.toHaveBeenCalled();
+  });
+
+  it("selects a transition from its arrow and reports a keyboard move", () => {
+    const onSelect = vi.fn();
+    const onMove = vi.fn();
+    renderCanvas({ onSelect, onMove });
+    flow().onEdgesChange?.([{ type: "select", id: "t:a", selected: true }]);
+    expect(onSelect).toHaveBeenLastCalledWith({ kind: "transition", key: "t" });
+    flow().onNodesChange?.([{ type: "position", id: "b", position: { x: 250, y: 10 }, dragging: true }]);
+    expect(onMove).not.toHaveBeenCalled();
+    flow().onNodesChange?.([{ type: "position", id: "b", position: { x: 255, y: 10 }, dragging: false }]);
+    expect(onMove).toHaveBeenCalledWith([{ key: "b", x: 255, y: 10 }]);
+  });
+
+  it("never zooms past 1 when it fits the view, so a lone node keeps its size", () => {
+    renderCanvas({ draft: { states: [], transitions: [] } });
+    expect(flow().fitViewOptions?.maxZoom).toBe(1);
+  });
+
+  it("leaves + to a contenteditable field, whatever its value", async () => {
+    const { container } = renderCanvas();
+    await waitFor(() => expect(flowInstance.current).toBeDefined());
+    const zoomIn = vi.spyOn(flowInstance.current as ReactFlowInstance, "zoomIn");
+    const field = document.createElement("div");
+    field.setAttribute("contenteditable", "");
+    container.querySelector(".react-flow")?.append(field);
+    fireEvent.keyDown(field, { key: "+" });
+    expect(zoomIn).not.toHaveBeenCalled();
+    fireEvent.keyDown(screen.getByText("Done"), { key: "+" });
+    expect(zoomIn).toHaveBeenCalledTimes(1);
+  });
+
+  it("allows no deletion, drag or connection in read-only mode", async () => {
+    const onRemoveState = vi.fn();
+    renderCanvas({ canEdit: false, onRemoveState });
+    expect(flow().deleteKeyCode).toBeNull();
+    expect(flow().nodesDraggable).toBe(false);
+    expect(flow().nodesConnectable).toBe(false);
+    for (const id of ["a", "b"]) {
+      expect(nodeById(id).deletable).toBe(false);
+      expect(nodeById(id).draggable).toBe(false);
+      expect(nodeById(id).connectable).toBe(false);
+    }
+    expect(edgeById("__start_edge__").reconnectable).toBe(false);
+    fireEvent.click(screen.getByText("Done"));
+    await userEvent.setup().keyboard("{Delete}");
+    expect(onRemoveState).not.toHaveBeenCalled();
   });
 
   it("moves the start only when the start arrow is dropped on another state", () => {
