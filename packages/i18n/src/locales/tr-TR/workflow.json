@@ -124,7 +124,6 @@
       },
       "state_count": "{count, plural, one {# durum} other {# durum}}",
       "project_count": "{count, plural, one {# proje} other {# proje}}",
-      "open": "Aç",
       "delete": {
         "action": "Sil",
         "title": "Bu iş akışı silinsin mi?",
@@ -150,21 +149,16 @@
       }
     },
     "editor": {
-      "back": "İş akışlarına dön",
       "save": "Kaydet",
       "discard": "Değişiklikleri at",
       "saved": "İş akışı kaydedildi.",
-      "unsaved": "Kaydedilmemiş değişiklikler",
       "read_only": "Bu iş akışını düzenleme izniniz yok.",
       "start": "BAŞLANGIÇ",
       "global": "Herhangi bir durum",
       "diagram_label": "İş akışı diyagramı",
       "add_state": {
         "title": "Durum ekle",
-        "existing": "Mevcut statü",
-        "new": "Yeni statü",
         "name": "Ad",
-        "color": "Renk",
         "group": "Kategori",
         "group_auto": "Otomatik",
         "submit": "Durum ekle",
@@ -190,7 +184,6 @@
         "submit": "Geçiş ekle"
       },
       "panel": {
-        "close": "Kapat",
         "state": "Durum",
         "transition": "Geçiş",
         "set_initial": "Başlangıç durumu yap",
@@ -293,7 +286,6 @@
       },
       "link": "Bir iş akışına bağla",
       "change": "İş akışlarını değiştir",
-      "view_workflow": "Görüntüle",
       "edit_workflow": "İş akışını düzenle",
       "other_types": "Diğer tüm türler",
       "table": {

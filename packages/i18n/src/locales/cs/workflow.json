@@ -124,7 +124,6 @@
       },
       "state_count": "{count, plural, one {# stav} few {# stavy} many {# stavu} other {# stavů}}",
       "project_count": "{count, plural, one {# projekt} few {# projekty} many {# projektu} other {# projektů}}",
-      "open": "Otevřít",
       "delete": {
         "action": "Smazat",
         "title": "Smazat tento pracovní tok?",
@@ -150,21 +149,16 @@
       }
     },
     "editor": {
-      "back": "Zpět na pracovní toky",
       "save": "Uložit",
       "discard": "Zahodit změny",
       "saved": "Pracovní tok byl uložen.",
-      "unsaved": "Neuložené změny",
       "read_only": "Nemáte oprávnění upravovat tento pracovní tok.",
       "start": "START",
       "global": "Libovolný stav",
       "diagram_label": "Diagram pracovního toku",
       "add_state": {
         "title": "Přidat stav",
-        "existing": "Existující status",
-        "new": "Nový status",
         "name": "Název",
-        "color": "Barva",
         "group": "Kategorie",
         "group_auto": "Automaticky",
         "submit": "Přidat stav",
@@ -190,7 +184,6 @@
         "submit": "Přidat přechod"
       },
       "panel": {
-        "close": "Zavřít",
         "state": "Stav",
         "transition": "Přechod",
         "set_initial": "Nastavit jako počáteční stav",
@@ -293,7 +286,6 @@
       },
       "link": "Propojit s pracovním tokem",
       "change": "Změnit pracovní toky",
-      "view_workflow": "Zobrazit",
       "edit_workflow": "Upravit pracovní tok",
       "other_types": "Všechny ostatní typy",
       "table": {

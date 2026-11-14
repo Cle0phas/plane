@@ -124,7 +124,6 @@
       },
       "state_count": "{count, plural, one {# état} many {# états} other {# états}}",
       "project_count": "{count, plural, one {# projet} many {# projets} other {# projets}}",
-      "open": "Ouvrir",
       "delete": {
         "action": "Supprimer",
         "title": "Supprimer ce workflow ?",
@@ -150,21 +149,16 @@
       }
     },
     "editor": {
-      "back": "Retour aux workflows",
       "save": "Enregistrer",
       "discard": "Annuler les changements",
       "saved": "Workflow enregistré.",
-      "unsaved": "Modifications non enregistrées",
       "read_only": "Vous n’êtes pas autorisé à modifier ce workflow.",
       "start": "DÉMARRER",
       "global": "N’importe lequel",
       "diagram_label": "Diagramme du workflow",
       "add_state": {
         "title": "Ajouter un état",
-        "existing": "Statut existant",
-        "new": "Nouveau statut",
         "name": "Nom",
-        "color": "Couleur",
         "group": "Catégorie",
         "group_auto": "Automatique",
         "submit": "Ajouter l’état",
@@ -190,7 +184,6 @@
         "submit": "Ajouter la transition"
       },
       "panel": {
-        "close": "Fermer",
         "state": "État",
         "transition": "Transition",
         "set_initial": "En faire l’état initial",
@@ -293,7 +286,6 @@
       },
       "link": "Relier à un workflow",
       "change": "Changer les workflows",
-      "view_workflow": "Voir",
       "edit_workflow": "Modifier le workflow",
       "other_types": "Tous les autres types",
       "table": {

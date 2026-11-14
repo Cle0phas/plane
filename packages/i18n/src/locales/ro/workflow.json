@@ -124,7 +124,6 @@
       },
       "state_count": "{count, plural, one {# stare} few {# stări} other {# de stări}}",
       "project_count": "{count, plural, one {# proiect} few {# proiecte} other {# de proiecte}}",
-      "open": "Deschide",
       "delete": {
         "action": "Șterge",
         "title": "Ștergi acest flux de lucru?",
@@ -150,21 +149,16 @@
       }
     },
     "editor": {
-      "back": "Înapoi la fluxurile de lucru",
       "save": "Salvează",
       "discard": "Renunță la modificări",
       "saved": "Flux de lucru salvat.",
-      "unsaved": "Modificări nesalvate",
       "read_only": "Nu aveți permisiunea să modificați acest flux de lucru.",
       "start": "START",
       "global": "Orice stare",
       "diagram_label": "Diagrama fluxului de lucru",
       "add_state": {
         "title": "Adaugă o stare",
-        "existing": "Status existent",
-        "new": "Status nou",
         "name": "Nume",
-        "color": "Culoare",
         "group": "Categorie",
         "group_auto": "Automată",
         "submit": "Adaugă starea",
@@ -190,7 +184,6 @@
         "submit": "Adaugă tranziția"
       },
       "panel": {
-        "close": "Închide",
         "state": "Stare",
         "transition": "Tranziție",
         "set_initial": "Fă din ea starea inițială",
@@ -293,7 +286,6 @@
       },
       "link": "Asociază cu un flux de lucru",
       "change": "Schimbă fluxurile de lucru",
-      "view_workflow": "Vezi",
       "edit_workflow": "Editează fluxul de lucru",
       "other_types": "Toate celelalte tipuri",
       "table": {

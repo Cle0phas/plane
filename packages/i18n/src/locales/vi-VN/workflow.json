@@ -124,7 +124,6 @@
       },
       "state_count": "{count, plural, one {# trạng thái} other {# trạng thái}}",
       "project_count": "{count, plural, one {# dự án} other {# dự án}}",
-      "open": "Mở",
       "delete": {
         "action": "Xóa",
         "title": "Xóa quy trình làm việc này?",
@@ -150,21 +149,16 @@
       }
     },
     "editor": {
-      "back": "Quay lại các quy trình làm việc",
       "save": "Lưu",
       "discard": "Bỏ thay đổi",
       "saved": "Đã lưu quy trình làm việc.",
-      "unsaved": "Thay đổi chưa lưu",
       "read_only": "Bạn không có quyền chỉnh sửa quy trình làm việc này.",
       "start": "BẮT ĐẦU",
       "global": "Bất kỳ trạng thái nào",
       "diagram_label": "Sơ đồ quy trình làm việc",
       "add_state": {
         "title": "Thêm trạng thái",
-        "existing": "Trạng thái hiện có",
-        "new": "Trạng thái mới",
         "name": "Tên",
-        "color": "Màu",
         "group": "Danh mục",
         "group_auto": "Tự động",
         "submit": "Thêm trạng thái",
@@ -190,7 +184,6 @@
         "submit": "Thêm chuyển tiếp"
       },
       "panel": {
-        "close": "Đóng",
         "state": "Trạng thái",
         "transition": "Chuyển tiếp",
         "set_initial": "Đặt làm trạng thái ban đầu",
@@ -293,7 +286,6 @@
       },
       "link": "Liên kết với quy trình làm việc",
       "change": "Thay đổi quy trình làm việc",
-      "view_workflow": "Xem",
       "edit_workflow": "Chỉnh sửa quy trình làm việc",
       "other_types": "Tất cả các loại khác",
       "table": {

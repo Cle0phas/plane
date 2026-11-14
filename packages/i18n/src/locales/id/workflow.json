@@ -124,7 +124,6 @@
       },
       "state_count": "{count, plural, one {# status} other {# status}}",
       "project_count": "{count, plural, one {# proyek} other {# proyek}}",
-      "open": "Buka",
       "delete": {
         "action": "Hapus",
         "title": "Hapus workflow ini?",
@@ -150,21 +149,16 @@
       }
     },
     "editor": {
-      "back": "Kembali ke workflow",
       "save": "Simpan",
       "discard": "Buang perubahan",
       "saved": "Workflow disimpan.",
-      "unsaved": "Perubahan belum disimpan",
       "read_only": "Anda tidak diizinkan mengedit workflow ini.",
       "start": "MULAI",
       "global": "Status mana pun",
       "diagram_label": "Diagram workflow",
       "add_state": {
         "title": "Tambah status",
-        "existing": "Status yang ada",
-        "new": "Status baru",
         "name": "Nama",
-        "color": "Warna",
         "group": "Kategori",
         "group_auto": "Otomatis",
         "submit": "Tambah status",
@@ -190,7 +184,6 @@
         "submit": "Tambah transisi"
       },
       "panel": {
-        "close": "Tutup",
         "state": "Status",
         "transition": "Transisi",
         "set_initial": "Jadikan status awal",
@@ -293,7 +286,6 @@
       },
       "link": "Tautkan ke workflow",
       "change": "Ubah workflow",
-      "view_workflow": "Lihat",
       "edit_workflow": "Edit workflow",
       "other_types": "Semua jenis lainnya",
       "table": {

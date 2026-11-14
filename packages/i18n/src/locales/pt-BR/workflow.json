@@ -124,7 +124,6 @@
       },
       "state_count": "{count, plural, one {# estado} many {# estados} other {# estados}}",
       "project_count": "{count, plural, one {# projeto} many {# projetos} other {# projetos}}",
-      "open": "Abrir",
       "delete": {
         "action": "Excluir",
         "title": "Excluir este fluxo de trabalho?",
@@ -150,21 +149,16 @@
       }
     },
     "editor": {
-      "back": "Voltar aos fluxos de trabalho",
       "save": "Salvar",
       "discard": "Descartar alterações",
       "saved": "Fluxo de trabalho salvo.",
-      "unsaved": "Alterações não salvas",
       "read_only": "Você não tem permissão para editar este fluxo de trabalho.",
       "start": "INÍCIO",
       "global": "Qualquer estado",
       "diagram_label": "Diagrama do fluxo de trabalho",
       "add_state": {
         "title": "Adicionar um estado",
-        "existing": "Status existente",
-        "new": "Novo status",
         "name": "Nome",
-        "color": "Cor",
         "group": "Categoria",
         "group_auto": "Automática",
         "submit": "Adicionar estado",
@@ -190,7 +184,6 @@
         "submit": "Adicionar transição"
       },
       "panel": {
-        "close": "Fechar",
         "state": "Estado",
         "transition": "Transição",
         "set_initial": "Tornar o estado inicial",
@@ -293,7 +286,6 @@
       },
       "link": "Vincular a um fluxo de trabalho",
       "change": "Alterar fluxos de trabalho",
-      "view_workflow": "Ver",
       "edit_workflow": "Editar fluxo de trabalho",
       "other_types": "Todos os outros tipos",
       "table": {

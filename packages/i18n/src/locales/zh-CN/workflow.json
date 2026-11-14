@@ -124,7 +124,6 @@
       },
       "state_count": "{count, plural, one {# 个状态} other {# 个状态}}",
       "project_count": "{count, plural, one {# 个项目} other {# 个项目}}",
-      "open": "打开",
       "delete": {
         "action": "删除",
         "title": "删除此工作流？",
@@ -150,21 +149,16 @@
       }
     },
     "editor": {
-      "back": "返回工作流",
       "save": "保存",
       "discard": "放弃更改",
       "saved": "工作流已保存。",
-      "unsaved": "未保存的更改",
       "read_only": "您无权编辑此工作流。",
       "start": "开始",
       "global": "任意状态",
       "diagram_label": "工作流图",
       "add_state": {
         "title": "添加状态",
-        "existing": "现有状态",
-        "new": "新状态",
         "name": "名称",
-        "color": "颜色",
         "group": "类别",
         "group_auto": "自动",
         "submit": "添加状态",
@@ -190,7 +184,6 @@
         "submit": "添加转换"
       },
       "panel": {
-        "close": "关闭",
         "state": "状态",
         "transition": "转换",
         "set_initial": "设为初始状态",
@@ -293,7 +286,6 @@
       },
       "link": "关联工作流",
       "change": "更改工作流",
-      "view_workflow": "查看",
       "edit_workflow": "编辑工作流",
       "other_types": "所有其他类型",
       "table": {

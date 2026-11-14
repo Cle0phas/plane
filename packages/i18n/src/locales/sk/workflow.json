@@ -124,7 +124,6 @@
       },
       "state_count": "{count, plural, one {# stav} few {# stavy} many {# stavu} other {# stavov}}",
       "project_count": "{count, plural, one {# projekt} few {# projekty} many {# projektu} other {# projektov}}",
-      "open": "Otvoriť",
       "delete": {
         "action": "Odstrániť",
         "title": "Odstrániť tento pracovný postup?",
@@ -150,21 +149,16 @@
       }
     },
     "editor": {
-      "back": "Späť na pracovné postupy",
       "save": "Uložiť",
       "discard": "Zahodiť zmeny",
       "saved": "Pracovný postup bol uložený.",
-      "unsaved": "Neuložené zmeny",
       "read_only": "Nemáte oprávnenie upravovať tento pracovný postup.",
       "start": "START",
       "global": "Ľubovoľný stav",
       "diagram_label": "Diagram pracovného postupu",
       "add_state": {
         "title": "Pridať stav",
-        "existing": "Existujúci status",
-        "new": "Nový status",
         "name": "Názov",
-        "color": "Farba",
         "group": "Kategória",
         "group_auto": "Automaticky",
         "submit": "Pridať stav",
@@ -190,7 +184,6 @@
         "submit": "Pridať prechod"
       },
       "panel": {
-        "close": "Zavrieť",
         "state": "Stav",
         "transition": "Prechod",
         "set_initial": "Nastaviť ako počiatočný stav",
@@ -293,7 +286,6 @@
       },
       "link": "Prepojiť s pracovným postupom",
       "change": "Zmeniť pracovné postupy",
-      "view_workflow": "Zobraziť",
       "edit_workflow": "Upraviť pracovný postup",
       "other_types": "Všetky ostatné typy",
       "table": {

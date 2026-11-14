@@ -124,7 +124,6 @@
       },
       "state_count": "{count, plural, one {# stato} many {# stati} other {# stati}}",
       "project_count": "{count, plural, one {# progetto} many {# progetti} other {# progetti}}",
-      "open": "Apri",
       "delete": {
         "action": "Elimina",
         "title": "Eliminare questo flusso di lavoro?",
@@ -150,21 +149,16 @@
       }
     },
     "editor": {
-      "back": "Torna ai flussi di lavoro",
       "save": "Salva",
       "discard": "Annulla le modifiche",
       "saved": "Flusso di lavoro salvato.",
-      "unsaved": "Modifiche non salvate",
       "read_only": "Non ha l'autorizzazione per modificare questo flusso di lavoro.",
       "start": "INIZIO",
       "global": "Qualsiasi stato",
       "diagram_label": "Diagramma del flusso di lavoro",
       "add_state": {
         "title": "Aggiungi uno stato",
-        "existing": "Stato esistente",
-        "new": "Nuovo stato",
         "name": "Nome",
-        "color": "Colore",
         "group": "Categoria",
         "group_auto": "Automatica",
         "submit": "Aggiungi stato",
@@ -190,7 +184,6 @@
         "submit": "Aggiungi transizione"
       },
       "panel": {
-        "close": "Chiudi",
         "state": "Stato",
         "transition": "Transizione",
         "set_initial": "Imposta come stato iniziale",
@@ -293,7 +286,6 @@
       },
       "link": "Collega a un flusso di lavoro",
       "change": "Cambia flussi di lavoro",
-      "view_workflow": "Visualizza",
       "edit_workflow": "Modifica flusso di lavoro",
       "other_types": "Tutti gli altri tipi",
       "table": {

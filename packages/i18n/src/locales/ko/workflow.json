@@ -124,7 +124,6 @@
       },
       "state_count": "{count, plural, one {스테이트 #개} other {스테이트 #개}}",
       "project_count": "{count, plural, one {프로젝트 #개} other {프로젝트 #개}}",
-      "open": "열기",
       "delete": {
         "action": "삭제",
         "title": "이 워크플로우를 삭제하시겠습니까?",
@@ -150,21 +149,16 @@
       }
     },
     "editor": {
-      "back": "워크플로우로 돌아가기",
       "save": "저장",
       "discard": "변경 사항 취소",
       "saved": "워크플로우가 저장되었습니다.",
-      "unsaved": "저장되지 않은 변경 사항",
       "read_only": "이 워크플로우를 편집할 권한이 없습니다.",
       "start": "시작",
       "global": "모든 스테이트",
       "diagram_label": "워크플로우 다이어그램",
       "add_state": {
         "title": "스테이트 추가",
-        "existing": "기존 상태 값",
-        "new": "새 상태 값",
         "name": "이름",
-        "color": "색상",
         "group": "카테고리",
         "group_auto": "자동",
         "submit": "스테이트 추가",
@@ -190,7 +184,6 @@
         "submit": "전환 추가"
       },
       "panel": {
-        "close": "닫기",
         "state": "스테이트",
         "transition": "전환",
         "set_initial": "초기 스테이트로 지정",
@@ -293,7 +286,6 @@
       },
       "link": "워크플로우 연결",
       "change": "워크플로우 변경",
-      "view_workflow": "보기",
       "edit_workflow": "워크플로우 편집",
       "other_types": "기타 모든 유형",
       "table": {

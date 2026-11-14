@@ -124,7 +124,6 @@
       },
       "state_count": "{count, plural, one {# status} other {# statussen}}",
       "project_count": "{count, plural, one {# project} other {# projecten}}",
-      "open": "Openen",
       "delete": {
         "action": "Verwijderen",
         "title": "Deze workflow verwijderen?",
@@ -150,21 +149,16 @@
       }
     },
     "editor": {
-      "back": "Terug naar workflows",
       "save": "Opslaan",
       "discard": "Wijzigingen negeren",
       "saved": "Workflow opgeslagen.",
-      "unsaved": "Niet-opgeslagen wijzigingen",
       "read_only": "Je mag deze workflow niet bewerken.",
       "start": "START",
       "global": "Elke status",
       "diagram_label": "Workflowdiagram",
       "add_state": {
         "title": "Een status toevoegen",
-        "existing": "Bestaande status",
-        "new": "Nieuwe status",
         "name": "Naam",
-        "color": "Kleur",
         "group": "Categorie",
         "group_auto": "Automatisch",
         "submit": "Status toevoegen",
@@ -190,7 +184,6 @@
         "submit": "Overgang toevoegen"
       },
       "panel": {
-        "close": "Sluiten",
         "state": "Status",
         "transition": "Overgang",
         "set_initial": "Maak dit de beginstatus",
@@ -293,7 +286,6 @@
       },
       "link": "Koppelen aan een workflow",
       "change": "Workflows wijzigen",
-      "view_workflow": "Bekijken",
       "edit_workflow": "Workflow bewerken",
       "other_types": "Alle andere typen",
       "table": {

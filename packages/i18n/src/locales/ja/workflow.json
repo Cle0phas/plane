@@ -124,7 +124,6 @@
       },
       "state_count": "{count, plural, one {#個の状態} other {#個の状態}}",
       "project_count": "{count, plural, one {#件のプロジェクト} other {#件のプロジェクト}}",
-      "open": "開く",
       "delete": {
         "action": "削除",
         "title": "このワークフローを削除しますか？",
@@ -150,21 +149,16 @@
       }
     },
     "editor": {
-      "back": "ワークフローに戻る",
       "save": "保存",
       "discard": "変更を破棄",
       "saved": "ワークフローを保存しました。",
-      "unsaved": "未保存の変更",
       "read_only": "このワークフローを編集する権限がありません。",
       "start": "開始",
       "global": "任意の状態",
       "diagram_label": "ワークフロー図",
       "add_state": {
         "title": "状態を追加",
-        "existing": "既存のステータス",
-        "new": "新しいステータス",
         "name": "名前",
-        "color": "色",
         "group": "カテゴリー",
         "group_auto": "自動",
         "submit": "状態を追加",
@@ -190,7 +184,6 @@
         "submit": "遷移を追加"
       },
       "panel": {
-        "close": "閉じる",
         "state": "状態",
         "transition": "遷移",
         "set_initial": "初期状態にする",
@@ -293,7 +286,6 @@
       },
       "link": "ワークフローにリンク",
       "change": "ワークフローを変更",
-      "view_workflow": "表示",
       "edit_workflow": "ワークフローを編集",
       "other_types": "その他すべてのタイプ",
       "table": {
