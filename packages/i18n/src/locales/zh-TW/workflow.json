@@ -197,6 +197,7 @@
         "shared": "{count, plural, one {與另外 # 個工作流程共用：變更也會套用到那裡。} other {與另外 # 個工作流程共用：變更也會套用到那裡。}}",
         "remove_state": "移除狀態",
         "remove_transition": "移除轉換",
+        "remove_source": "移除來源狀態 {name}",
         "empty_title": "建立自訂工作流程",
         "empty_body": "工作流程符合您團隊的工作方式。新增狀態（它們會成為專案看板的欄），再以轉換將其連接，並透過規則限制誰可以使用這些轉換。",
         "empty_hint": "選取一個狀態以檢視其詳細資訊。",

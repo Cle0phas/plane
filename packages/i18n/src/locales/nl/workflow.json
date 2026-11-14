@@ -197,6 +197,7 @@
         "shared": "{count, plural, one {Gedeeld met # andere workflow: wijzigingen gelden daar ook.} other {Gedeeld met # andere workflows: wijzigingen gelden daar ook.}}",
         "remove_state": "Status verwijderen",
         "remove_transition": "Overgang verwijderen",
+        "remove_source": "Bronstatus {name} verwijderen",
         "empty_title": "Aangepaste workflows maken",
         "empty_body": "Workflows sluiten aan bij de manier waarop je team werkt. Voeg statussen toe, die de kolommen van je projectbord worden, verbind ze met overgangen en beperk met regels wie ze mag gebruiken.",
         "empty_hint": "Selecteer een status om de details te bekijken.",

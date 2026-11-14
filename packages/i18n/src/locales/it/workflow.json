@@ -197,6 +197,7 @@
         "shared": "{count, plural, one {Condiviso con # altro flusso di lavoro: le modifiche si applicano anche lì.} many {Condiviso con # altri flussi di lavoro: le modifiche si applicano anche lì.} other {Condiviso con # altri flussi di lavoro: le modifiche si applicano anche lì.}}",
         "remove_state": "Rimuovi stato",
         "remove_transition": "Rimuovi transizione",
+        "remove_source": "Rimuovi lo stato di origine {name}",
         "empty_title": "Crea flussi di lavoro personalizzati",
         "empty_body": "I flussi di lavoro rispecchiano il modo di lavorare del team. Aggiungere stati, che diventano le colonne della bacheca del progetto, collegarli con transizioni e limitare con regole chi può usarle.",
         "empty_hint": "Selezionare uno stato per vederne i dettagli.",

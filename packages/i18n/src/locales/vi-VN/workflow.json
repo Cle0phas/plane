@@ -197,6 +197,7 @@
         "shared": "{count, plural, one {Dùng chung với # quy trình làm việc khác: thay đổi cũng áp dụng ở đó.} other {Dùng chung với # quy trình làm việc khác: thay đổi cũng áp dụng ở đó.}}",
         "remove_state": "Gỡ trạng thái",
         "remove_transition": "Gỡ chuyển tiếp",
+        "remove_source": "Gỡ trạng thái nguồn {name}",
         "empty_title": "Xây dựng quy trình làm việc tùy chỉnh",
         "empty_body": "Quy trình làm việc phản ánh cách nhóm của bạn làm việc. Thêm các trạng thái, chúng sẽ trở thành các cột trên bảng của dự án, sau đó nối chúng bằng các chuyển tiếp và dùng quy tắc để giới hạn ai được sử dụng.",
         "empty_hint": "Chọn một trạng thái để xem chi tiết.",

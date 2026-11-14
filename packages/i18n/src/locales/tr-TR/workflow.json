@@ -197,6 +197,7 @@
         "shared": "{count, plural, one {Başka # iş akışıyla paylaşılıyor: değişiklikler orada da geçerli olur.} other {Başka # iş akışıyla paylaşılıyor: değişiklikler orada da geçerli olur.}}",
         "remove_state": "Durumu kaldır",
         "remove_transition": "Geçişi kaldır",
+        "remove_source": "{name} kaynak durumunu kaldır",
         "empty_title": "Özel iş akışları oluşturun",
         "empty_body": "İş akışları ekibinizin çalışma biçimine uyar. Proje panonuzun sütunlarına dönüşen durumlar ekleyin, bunları geçişlerle bağlayın ve kimlerin kullanabileceğini kurallarla sınırlayın.",
         "empty_hint": "Ayrıntılarını görmek için bir durum seçin.",

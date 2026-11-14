@@ -197,6 +197,7 @@
         "shared": "{count, plural, one {Sdíleno s # dalším pracovním tokem: změny platí i tam.} few {Sdíleno s # dalšími pracovními toky: změny platí i tam.} many {Sdíleno s # dalšího pracovního toku: změny platí i tam.} other {Sdíleno s # dalšími pracovními toky: změny platí i tam.}}",
         "remove_state": "Odebrat stav",
         "remove_transition": "Odebrat přechod",
+        "remove_source": "Odebrat zdrojový stav {name}",
         "empty_title": "Vytvářejte vlastní pracovní toky",
         "empty_body": "Pracovní toky odpovídají způsobu práce vašeho týmu. Přidejte stavy, které se stanou sloupci nástěnky projektu, propojte je přechody a pomocí pravidel omezte, kdo je smí používat.",
         "empty_hint": "Vyberte stav a zobrazte jeho podrobnosti.",

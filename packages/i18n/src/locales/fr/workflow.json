@@ -197,6 +197,7 @@
         "shared": "{count, plural, one {Partagé avec # autre workflow : les changements s’y appliquent aussi.} many {Partagé avec # autres workflows : les changements s’y appliquent aussi.} other {Partagé avec # autres workflows : les changements s’y appliquent aussi.}}",
         "remove_state": "Retirer l’état",
         "remove_transition": "Retirer la transition",
+        "remove_source": "Retirer l’état d’origine {name}",
         "empty_title": "Créer des workflows sur mesure",
         "empty_body": "Les workflows correspondent à la façon de travailler de votre équipe. Ajoutez des états, qui deviennent les colonnes du tableau de votre projet, reliez-les par des transitions et limitez par des règles qui peut les emprunter.",
         "empty_hint": "Sélectionnez un état pour consulter ses informations.",

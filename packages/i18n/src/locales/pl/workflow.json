@@ -197,6 +197,7 @@
         "shared": "{count, plural, one {Współdzielony z # innym workflow: zmiany obowiązują tam także.} few {Współdzielony z # innymi workflowami: zmiany obowiązują tam także.} many {Współdzielony z # innymi workflowami: zmiany obowiązują tam także.} other {Współdzielony z # innego workflow: zmiany obowiązują tam także.}}",
         "remove_state": "Usuń stan",
         "remove_transition": "Usuń przejście",
+        "remove_source": "Usuń stan źródłowy {name}",
         "empty_title": "Tworzenie własnych workflowów",
         "empty_body": "Workflowy odzwierciedlają sposób pracy zespołu. Dodaj stany, które stają się kolumnami tablicy projektu, połącz je przejściami i za pomocą reguł ogranicz, kto może z nich korzystać.",
         "empty_hint": "Wybierz stan, aby zobaczyć jego szczegóły.",

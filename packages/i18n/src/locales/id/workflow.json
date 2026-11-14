@@ -197,6 +197,7 @@
         "shared": "{count, plural, one {Dibagikan dengan # workflow lain: perubahan berlaku juga di sana.} other {Dibagikan dengan # workflow lain: perubahan berlaku juga di sana.}}",
         "remove_state": "Hapus status",
         "remove_transition": "Hapus transisi",
+        "remove_source": "Hapus status asal {name}",
         "empty_title": "Buat workflow kustom",
         "empty_body": "Workflow menyesuaikan cara kerja tim Anda. Tambahkan status, yang menjadi kolom papan proyek Anda, lalu hubungkan dengan transisi dan batasi siapa yang boleh menggunakannya dengan aturan.",
         "empty_hint": "Pilih status untuk melihat detailnya.",

@@ -197,6 +197,7 @@
         "shared": "{count, plural, one {Shared with # other workflow: changes apply there too.} other {Shared with # other workflows: changes apply there too.}}",
         "remove_state": "Remove state",
         "remove_transition": "Remove transition",
+        "remove_source": "Remove the source state {name}",
         "empty_title": "Build custom workflows",
         "empty_body": "Workflows match the way your team works. Add states, which become the columns of your project board, then link them with transitions and limit who may use them with rules.",
         "empty_hint": "Select a state to see its details.",

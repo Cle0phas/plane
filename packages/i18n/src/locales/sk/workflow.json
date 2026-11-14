@@ -197,6 +197,7 @@
         "shared": "{count, plural, one {Zdieľané s # ďalším pracovným postupom: zmeny platia aj tam.} few {Zdieľané s # ďalšími pracovnými postupmi: zmeny platia aj tam.} many {Zdieľané s # ďalšieho pracovného postupu: zmeny platia aj tam.} other {Zdieľané s # ďalšími pracovnými postupmi: zmeny platia aj tam.}}",
         "remove_state": "Odstrániť stav",
         "remove_transition": "Odstrániť prechod",
+        "remove_source": "Odstrániť zdrojový stav {name}",
         "empty_title": "Vytvárajte vlastné pracovné postupy",
         "empty_body": "Pracovné postupy zodpovedajú spôsobu práce vášho tímu. Pridajte stavy, ktoré sa stanú stĺpcami nástenky projektu, prepojte ich prechodmi a pomocou pravidiel obmedzte, kto ich smie používať.",
         "empty_hint": "Vyberte stav a zobrazte jeho podrobnosti.",

@@ -197,6 +197,7 @@
         "shared": "{count, plural, one {Compartilhado com # outro fluxo de trabalho: as alterações valem lá também.} many {Compartilhado com # outros fluxos de trabalho: as alterações valem lá também.} other {Compartilhado com # outros fluxos de trabalho: as alterações valem lá também.}}",
         "remove_state": "Remover estado",
         "remove_transition": "Remover transição",
+        "remove_source": "Remover o estado de origem {name}",
         "empty_title": "Criar fluxos de trabalho personalizados",
         "empty_body": "Os fluxos de trabalho refletem a forma como sua equipe trabalha. Adicione estados, que se tornam as colunas do quadro do projeto, conecte-os com transições e limite com regras quem pode usá-las.",
         "empty_hint": "Selecione um estado para ver os detalhes.",

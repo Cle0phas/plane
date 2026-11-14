@@ -197,6 +197,7 @@
         "shared": "{count, plural, one {Partajată cu # alt flux de lucru: modificările se aplică și acolo.} few {Partajată cu # alte fluxuri de lucru: modificările se aplică și acolo.} other {Partajată cu # de alte fluxuri de lucru: modificările se aplică și acolo.}}",
         "remove_state": "Elimină starea",
         "remove_transition": "Elimină tranziția",
+        "remove_source": "Elimină starea sursă {name}",
         "empty_title": "Creați fluxuri de lucru personalizate",
         "empty_body": "Fluxurile de lucru reflectă modul de lucru al echipei dumneavoastră. Adăugați stări, care devin coloanele tablei proiectului, legați-le prin tranziții și limitați prin reguli cine le poate folosi.",
         "empty_hint": "Selectați o stare pentru a-i vedea detaliile.",
