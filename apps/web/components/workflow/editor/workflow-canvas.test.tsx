@@ -143,7 +143,13 @@ describe("WorkflowCanvas", () => {
     );
     expect(edgeById("__start_edge__").ariaLabel).toBe('workflows.editor.start_label {"name":"Todo"}');
     expect(pill().getAttribute("aria-label")).toBe(
-      'workflows.editor.transition_label {"name":"workflows.editor.text.unnamed","source":"workflows.editor.global","target":"Todo"}'
+      'workflows.editor.transition_label_unnamed {"source":"workflows.editor.global","target":"Todo"}'
+    );
+    renderCanvas({
+      draft: { ...draft, transitions: [{ ...draft.transitions[0], key: "u", name: "" }] },
+    });
+    expect(edgeById("u:a").ariaLabel).toBe(
+      'workflows.editor.transition_label_unnamed {"source":"Todo","target":"Done"}'
     );
   });
 

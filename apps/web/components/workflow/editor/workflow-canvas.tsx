@@ -92,6 +92,10 @@ export function WorkflowCanvas({
   const { t } = useTranslation();
   const flowRef = useRef<ReactFlowInstance | null>(null);
   const initial = draft.states.find((state) => state.is_initial);
+  const transitionLabel = (name: string, source: string, target: string) =>
+    name
+      ? t("workflows.editor.transition_label", { name, source, target })
+      : t("workflows.editor.transition_label_unnamed", { source, target });
 
   const specs: Node[] = [
     {
@@ -131,13 +135,7 @@ export function WorkflowCanvas({
           groupLabel,
           globalKey,
           globalLabel: t("workflows.editor.global"),
-          globalName: global
-            ? t("workflows.editor.transition_label", {
-                name: global.name || t("workflows.editor.text.unnamed"),
-                source: t("workflows.editor.global"),
-                target: state.status.name,
-              })
-            : "",
+          globalName: global ? transitionLabel(global.name, t("workflows.editor.global"), state.status.name) : "",
           globalSelected: globalKey !== null && selection?.kind === "transition" && selection.key === globalKey,
         },
       };
@@ -171,7 +169,6 @@ export function WorkflowCanvas({
   // Rebuilt on every render like the nodes: t is new each time, and edges are props, not state.
   const edges = ((): Edge[] => {
     const nameOf = (key: string) => draft.states.find((item) => item.key === key)?.status.name ?? "";
-    const unnamed = t("workflows.editor.text.unnamed");
     const positionOf = (key: string) => {
       const state = draft.states.find((item) => item.key === key);
       return state ? { x: state.position_x, y: state.position_y } : undefined;
@@ -216,11 +213,7 @@ export function WorkflowCanvas({
                 selected: selection?.kind === "transition" && selection.key === transition.key,
                 deletable: canEdit,
                 reconnectable: false,
-                ariaLabel: t("workflows.editor.transition_label", {
-                  name: transition.name || unnamed,
-                  source: nameOf(source),
-                  target: nameOf(transition.target_key),
-                }),
+                ariaLabel: transitionLabel(transition.name, nameOf(source), nameOf(transition.target_key)),
                 data: { transitionKey: transition.key },
               },
             ];
