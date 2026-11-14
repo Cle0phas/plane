@@ -13,6 +13,7 @@ import {
   getGraphErrorKey,
   isDraftDirty,
   moveState,
+  removeSource,
   removeState,
   routeLabel,
   setInitial,
@@ -212,5 +213,38 @@ describe("labels", () => {
   });
   it("joins the origin and the target of a route with an arrow", () => {
     expect(routeLabel("Open, Doing", "Done")).toBe("Open, Doing → Done");
+  });
+});
+
+describe("removeSource", () => {
+  const draft: TDraftGraph = {
+    states: [],
+    transitions: [
+      {
+        key: "t",
+        name: "Finish",
+        from_any: false,
+        source_keys: ["a", "b"],
+        target_key: "c",
+        rules: [],
+        sides: { a: { source: "right", target: "left" }, b: { source: "top", target: "bottom" } },
+      },
+      { key: "u", name: "", from_any: false, source_keys: ["a", "b"], target_key: "d", rules: [] },
+    ],
+  };
+
+  it("drops one source and its sides, and leaves the other transitions alone", () => {
+    const next = removeSource(draft, "t", "a");
+    expect(next.transitions[0]).toEqual({
+      ...draft.transitions[0],
+      source_keys: ["b"],
+      sides: { b: draft.transitions[0].sides?.b },
+    });
+    expect(next.transitions[1]).toBe(draft.transitions[1]);
+  });
+
+  it("keeps the last source: a transition from states needs one", () => {
+    const once = removeSource(draft, "t", "a");
+    expect(removeSource(once, "t", "b").transitions[0].source_keys).toEqual(["b"]);
   });
 });

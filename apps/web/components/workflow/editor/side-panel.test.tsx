@@ -6,6 +6,7 @@
 
 import type { ComponentProps } from "react";
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { TDraftGraph, TDraftStatus } from "./graph-model";
 import { WorkflowSidePanel } from "./side-panel";
@@ -19,6 +20,7 @@ vi.mock("@plane/i18n", () => ({
 vi.mock("./restrict-actors-form", () => ({ RestrictActorsForm: () => null }));
 
 const AUTO = "workflows.editor.add_state.group_auto";
+const removeLabel = (name: string) => `workflows.editor.panel.remove_source {"name":"${name}"}`;
 
 const state = (key: string, status: Partial<TDraftStatus> = {}) => ({
   key,
@@ -85,5 +87,40 @@ describe("WorkflowSidePanel", () => {
     expect(
       screen.getByRole("textbox", { name: "workflows.editor.add_transition.name" }).getAttribute("maxlength")
     ).toBe("255");
+  });
+
+  describe("sources of a transition", () => {
+    const draft: TDraftGraph = {
+      states: [state("a"), state("b"), state("c")],
+      transitions: [
+        {
+          key: "t",
+          name: "Finish",
+          from_any: false,
+          source_keys: ["a", "b"],
+          target_key: "c",
+          rules: [],
+          sides: { a: { source: "right", target: "left" } },
+        },
+        { key: "u", name: "", from_any: false, source_keys: ["a"], target_key: "b", rules: [] },
+      ],
+    };
+
+    it("removes one source of a transition that has several", async () => {
+      const onChange = vi.fn();
+      renderPanel({ draft, selection: { kind: "transition", key: "t" }, onChange });
+      expect(screen.getByRole("button", { name: removeLabel("B") })).toBeTruthy();
+      await userEvent.setup().click(screen.getByRole("button", { name: removeLabel("A") }));
+      const next = onChange.mock.calls[0][0] as TDraftGraph;
+      expect(next.transitions[0]).toMatchObject({ key: "t", name: "Finish", source_keys: ["b"], sides: {} });
+    });
+
+    it("offers no removal of the only source, nor in read-only mode", () => {
+      const view = renderPanel({ draft, selection: { kind: "transition", key: "u" } });
+      expect(screen.queryByRole("button", { name: removeLabel("A") })).toBeNull();
+      view.unmount();
+      renderPanel({ draft, selection: { kind: "transition", key: "t" }, canEdit: false });
+      expect(screen.queryByRole("button", { name: removeLabel("A") })).toBeNull();
+    });
   });
 });

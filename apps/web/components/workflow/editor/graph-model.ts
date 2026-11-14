@@ -237,6 +237,20 @@ export const updateTransition = (draft: TDraftGraph, key: string, patch: Partial
   ),
 });
 
+/** Drops one source of a transition with its sides; the last source stays, a transition from states needs one. */
+export const removeSource = (draft: TDraftGraph, key: string, source: string): TDraftGraph => ({
+  ...draft,
+  transitions: draft.transitions.map((transition) =>
+    transition.key !== key || transition.source_keys.length < 2
+      ? transition
+      : {
+          ...transition,
+          source_keys: transition.source_keys.filter((item) => item !== source),
+          sides: Object.fromEntries(Object.entries(transition.sides ?? {}).filter(([item]) => item !== source)),
+        }
+  ),
+});
+
 export const removeTransition = (draft: TDraftGraph, key: string): TDraftGraph => ({
   ...draft,
   transitions: draft.transitions.filter((transition) => transition.key !== key),

@@ -8,11 +8,12 @@ import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { Button } from "@makeplane/propel/components/button";
 import { InputField } from "@makeplane/propel/components/input-field";
-import { ChevronRightOutline, PlusCircleOutline, WorkflowsOutline } from "@makeplane/propel/icons";
+import { ChevronRightOutline, CloseOutline, PlusCircleOutline, WorkflowsOutline } from "@makeplane/propel/icons";
 import { useTranslation } from "@plane/i18n";
 import type { TStateGroups } from "@plane/types";
 // local imports
 import {
+  removeSource,
   removeState,
   removeTransition,
   routeLabel,
@@ -238,6 +239,27 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
                 stateName(draft, transition.target_key)
               )}
             </p>
+            {/* The last source has no remove button: a transition from states needs one. */}
+            {canEdit && !transition.from_any && transition.source_keys.length > 1 && (
+              <ul className="flex flex-wrap gap-1">
+                {transition.source_keys.map((key) => (
+                  <li
+                    key={key}
+                    className="flex items-center gap-1 rounded-full bg-layer-1 py-0.5 pr-0.5 pl-2 text-caption-sm-medium text-secondary"
+                  >
+                    {stateName(draft, key)}
+                    <button
+                      type="button"
+                      className="flex size-6 items-center justify-center rounded-full hover:bg-layer-1-hover max-md:size-11"
+                      aria-label={t("workflows.editor.panel.remove_source", { name: stateName(draft, key) })}
+                      onClick={() => onChange(removeSource(draft, transition.key, key))}
+                    >
+                      <CloseOutline className="size-3" aria-hidden />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </fieldset>
           <RestrictActorsForm
             params={transition.rules[0]?.params ?? null}
