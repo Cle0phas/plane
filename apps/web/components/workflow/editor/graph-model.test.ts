@@ -64,9 +64,12 @@ describe("graph model", () => {
       color: "#111111",
       group: null,
       known_group: "unstarted",
+      group_locked: false,
       shared_count: 1,
     });
     expect(draft.states[1].status.group).toBe("cancelled");
+    // Set by hand on the server: the server ignores a return to automatic (W5).
+    expect(draft.states[1].status.group_locked).toBe(true);
     expect(toPayload(draft)).toEqual({
       states: [
         {
@@ -86,6 +89,19 @@ describe("graph model", () => {
       ],
       transitions: [{ name: "Finish", from_any: false, source_keys: ["a"], target_key: "b", rules: [], sides: {} }],
     });
+  });
+
+  it("keeps the hand-set flag out of the payload and of the dirty check", () => {
+    const draft = fromDetail(detail, statuses);
+    const flipped: TDraftGraph = {
+      ...draft,
+      states: draft.states.map((item) => ({
+        ...item,
+        status: { ...item.status, group_locked: !item.status.group_locked },
+      })),
+    };
+    expect(toPayload(flipped)).toEqual(toPayload(draft));
+    expect(isDraftDirty(flipped, draft)).toBe(false);
   });
 
   it("removing a state drops its arrows and hands the initial flag over", () => {

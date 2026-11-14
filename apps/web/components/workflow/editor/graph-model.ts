@@ -19,6 +19,7 @@ import type {
 
 /**
  * group null: the server deduces it (W5). known_group: category already known, display only (X5).
+ * group_locked: chosen by hand on the server, which then ignores a return to automatic (W5); display only.
  * shared_count: other workflows using the status (W17).
  */
 export type TDraftStatus = {
@@ -27,6 +28,7 @@ export type TDraftStatus = {
   color: string;
   group: TStateGroups | null;
   known_group?: TStateGroups;
+  group_locked?: boolean;
   shared_count: number;
 };
 
@@ -75,6 +77,7 @@ export const fromDetail = (detail: TWorkflowDetail, statuses: TWorkflowStatus[])
         color: state.status.color,
         group: state.status.group_is_auto ? null : state.status.group,
         known_group: state.status.group,
+        group_locked: !state.status.group_is_auto,
         shared_count: Math.max(usage - 1, 0),
       },
       position_x: state.position_x,
@@ -186,15 +189,11 @@ export const removeState = (draft: TDraftGraph, key: string): TDraftGraph => {
   return { states, transitions };
 };
 
-// Choosing a category (or automatic) drops known_group so the display never shows a stale one.
 export const updateStatus = (draft: TDraftGraph, key: string, patch: Partial<TDraftStatus>): TDraftGraph => ({
   ...draft,
-  states: draft.states.map((state) => {
-    if (state.key !== key) return state;
-    const status = { ...state.status, ...patch };
-    if ("group" in patch) delete status.known_group;
-    return { ...state, status };
-  }),
+  states: draft.states.map((state) =>
+    state.key === key ? { ...state, status: { ...state.status, ...patch } } : state
+  ),
 });
 
 // The server refuses non-finite positions, so a bad drag value never enters the draft.
@@ -450,6 +449,7 @@ export const optionToStatus = (option: TStatusOption): TDraftStatus => ({
   color: option.color,
   group: option.group_is_auto ? null : option.group,
   known_group: option.group,
+  group_locked: Boolean(option.id) && !option.group_is_auto,
   shared_count: option.workflow_count,
 });
 

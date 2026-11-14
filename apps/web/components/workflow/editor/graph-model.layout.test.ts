@@ -240,7 +240,8 @@ describe("categories", () => {
     ]);
   });
 
-  it("falls back to the deduction once the category is set back to automatic", () => {
+  // X5 as written: the known category stays shown until a save brings the server's deduction (W5).
+  it("shows the known category again once the category is set back to automatic", () => {
     const draft: TDraftGraph = {
       states: [state("a", { is_initial: true, status: status("A", { known_group: "cancelled" }) })],
       transitions: [],
@@ -248,9 +249,10 @@ describe("categories", () => {
     const chosen = updateStatus(draft, "a", { group: "started" });
     expect(displayGroup(chosen, chosen.states[0])).toBe("started");
     const auto = updateStatus(chosen, "a", { group: null });
-    expect(displayGroup(auto, auto.states[0])).toBe("unstarted");
-    const renamed = updateStatus(draft, "a", { name: "B" });
-    expect(displayGroup(renamed, renamed.states[0])).toBe("cancelled");
+    expect(auto.states[0].status.known_group).toBe("cancelled");
+    expect(displayGroup(auto, auto.states[0])).toBe("cancelled");
+    const fresh: TDraftGraph = { states: [state("a", { is_initial: true })], transitions: [] };
+    expect(displayGroup(fresh, fresh.states[0])).toBe("unstarted");
   });
 
   it("maps the five categories to four tones", () => {
@@ -292,6 +294,7 @@ describe("status options", () => {
       color: "#111111",
       group: "unstarted",
       known_group: "unstarted",
+      group_locked: true,
       shared_count: 2,
     });
     expect(optionToStatus(candidate)).toEqual({
@@ -299,9 +302,12 @@ describe("status options", () => {
       color: "#333333",
       group: "started",
       known_group: "started",
+      group_locked: false,
       shared_count: 0,
     });
-    expect(optionToStatus({ ...existing, group_is_auto: true }).group).toBeNull();
+    const automatic = optionToStatus({ ...existing, group_is_auto: true });
+    expect(automatic.group).toBeNull();
+    expect(automatic.group_locked).toBe(false);
   });
 
   it("builds a created status with the colour of its category", () => {

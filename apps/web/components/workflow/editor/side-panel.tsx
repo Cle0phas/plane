@@ -148,7 +148,7 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
                 onChange(updateStatus(draft, state.key, { group: (event.target.value || null) as TStateGroups | null }))
               }
             >
-              <option value="">{t("workflows.editor.add_state.group_auto")}</option>
+              {!state.status.group_locked && <option value="">{t("workflows.editor.add_state.group_auto")}</option>}
               {GROUPS.map((group) => (
                 <option key={group} value={group}>
                   {t(`workflows.groups.${group}`)}

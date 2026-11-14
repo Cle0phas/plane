@@ -57,8 +57,23 @@ describe("AddStatusDialog", () => {
     await user.click(screen.getByRole("button", { name: ADD }));
     expect(onAdd).toHaveBeenCalledWith(
       [
-        { id: "s1", name: "Todo", color: "#111111", group: "unstarted", known_group: "unstarted", shared_count: 2 },
-        { name: "Review", color: "#333333", group: "started", known_group: "started", shared_count: 0 },
+        {
+          id: "s1",
+          name: "Todo",
+          color: "#111111",
+          group: "unstarted",
+          known_group: "unstarted",
+          group_locked: true,
+          shared_count: 2,
+        },
+        {
+          name: "Review",
+          color: "#333333",
+          group: "started",
+          known_group: "started",
+          group_locked: false,
+          shared_count: 0,
+        },
       ],
       false
     );
