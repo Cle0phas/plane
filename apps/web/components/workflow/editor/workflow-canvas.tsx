@@ -30,31 +30,28 @@ const NODE_TYPES = { workflowState: WorkflowStateNode };
 export function WorkflowCanvas({ draft, readOnly, selection, onSelect, onMove, onConnect }: Props) {
   const { t } = useTranslation();
 
+  // Labels are translated inside the node: useTranslation returns a new t on every render, and a memo
+  // depending on it would feed the effect below a new array each time, an endless render loop.
   const derivedNodes = useMemo<TStateNode[]>(
     () =>
-      draft.states.map((state) => {
-        const globals = draft.transitions.filter(
-          (transition) => transition.from_any && transition.target_key === state.key
-        );
-        const group = state.status.group;
-        return {
-          id: state.key,
-          type: "workflowState",
-          position: { x: state.position_x, y: state.position_y },
-          selected: selection?.kind === "state" && selection.key === state.key,
-          draggable: !readOnly,
-          connectable: !readOnly,
-          data: {
-            name: state.status.name,
-            color: state.status.color,
-            groupLabel: group ? t(`workflows.groups.${group}`) : t("workflows.editor.add_state.group_auto"),
-            isInitial: state.is_initial,
-            startLabel: t("workflows.editor.start"),
-            globalLabel: globals.length > 0 ? t("workflows.editor.global") : undefined,
-          },
-        };
-      }),
-    [draft, readOnly, selection, t]
+      draft.states.map((state) => ({
+        id: state.key,
+        type: "workflowState",
+        position: { x: state.position_x, y: state.position_y },
+        selected: selection?.kind === "state" && selection.key === state.key,
+        draggable: !readOnly,
+        connectable: !readOnly,
+        data: {
+          name: state.status.name,
+          color: state.status.color,
+          group: state.status.group,
+          isInitial: state.is_initial,
+          hasGlobalTransition: draft.transitions.some(
+            (transition) => transition.from_any && transition.target_key === state.key
+          ),
+        },
+      })),
+    [draft, readOnly, selection]
   );
   // React Flow moves a dragged node through onNodesChange; the draft only learns the final position on drop.
   const [nodes, setNodes] = useState<TStateNode[]>(derivedNodes);
