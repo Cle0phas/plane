@@ -238,7 +238,7 @@
       "show_labels": "Afficher les étiquettes de transition",
       "zoom": "Zoom",
       "minimap": "Mini-carte",
-      "state_label": "État {name}, catégorie {group}, {incoming} entrantes, {outgoing} sortantes",
+      "state_label": "État {name}, catégorie {group}, {incoming, plural, one {# transition entrante} many {# de transitions entrantes} other {# transitions entrantes}}, {outgoing, plural, one {# sortante} many {# de sortantes} other {# sortantes}}",
       "view": {
         "label": "Vue",
         "diagram": "Diagramme",

@@ -201,10 +201,10 @@
         "empty_body": "ワークフローはチームの働き方に合わせて作成できます。状態を追加すると、プロジェクトのボードの列になります。状態を遷移でつなぎ、ルールで遷移を使用できる人を制限します。",
         "empty_hint": "状態を選択すると詳細が表示されます。",
         "color": "ボードの列の色",
-        "incoming": "流入",
-        "outgoing": "流出",
-        "add_incoming": "流入遷移を追加",
-        "add_outgoing": "流出遷移を追加",
+        "incoming": "この状態への遷移",
+        "outgoing": "この状態からの遷移",
+        "add_incoming": "この状態への遷移を追加",
+        "add_outgoing": "この状態からの遷移を追加",
         "collapse": "パネルを折りたたむ",
         "expand": "パネルを展開"
       },
@@ -238,7 +238,7 @@
       "show_labels": "遷移ラベルを表示",
       "zoom": "ズーム",
       "minimap": "ミニマップ",
-      "state_label": "状態「{name}」、カテゴリー「{group}」、流入遷移{incoming}件、流出遷移{outgoing}件",
+      "state_label": "状態「{name}」、カテゴリー「{group}」、この状態への遷移{incoming}件、この状態からの遷移{outgoing}件",
       "view": {
         "label": "表示",
         "diagram": "図",
