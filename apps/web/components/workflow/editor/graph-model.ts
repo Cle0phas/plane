@@ -89,7 +89,7 @@ export const fromDetail = (detail: TWorkflowDetail, statuses: TWorkflowStatus[])
     source_keys: [...transition.source_ids],
     target_key: transition.target_id,
     rules: transition.rules.map((rule) => ({ ...rule, params: { ...rule.params } })),
-    sides: { ...transition.sides },
+    sides: Object.fromEntries(Object.entries(transition.sides ?? {}).map(([key, pair]) => [key, { ...pair }])),
   })),
 });
 
@@ -180,11 +180,15 @@ export const removeState = (draft: TDraftGraph, key: string): TDraftGraph => {
   return { states, transitions };
 };
 
+// Choosing a category (or automatic) drops known_group so the display never shows a stale one.
 export const updateStatus = (draft: TDraftGraph, key: string, patch: Partial<TDraftStatus>): TDraftGraph => ({
   ...draft,
-  states: draft.states.map((state) =>
-    state.key === key ? { ...state, status: { ...state.status, ...patch } } : state
-  ),
+  states: draft.states.map((state) => {
+    if (state.key !== key) return state;
+    const status = { ...state.status, ...patch };
+    if ("group" in patch) delete status.known_group;
+    return { ...state, status };
+  }),
 });
 
 // The server refuses non-finite positions, so a bad drag value never enters the draft.
@@ -347,6 +351,8 @@ export const statusOptions = (
   draft: TDraftGraph
 ): TStatusOption[] => {
   const seen = new Set(draft.states.map((state) => state.status.name.trim().toLowerCase()));
+  // A renamed status keeps its id: it must stay out of the list even though its name changed.
+  const usedIds = new Set(draft.states.flatMap((state) => (state.status.id ? [state.status.id] : [])));
   const all: TStatusOption[] = [
     ...statuses.map((item) => ({
       id: item.id,
@@ -360,9 +366,10 @@ export const statusOptions = (
   ];
   return all.filter((option) => {
     const key = option.name.trim().toLowerCase();
-    if (seen.has(key)) return false;
+    // The server name of a used status stays reserved, so a same-named project state is not offered.
+    const known = seen.has(key);
     seen.add(key);
-    return true;
+    return !known && !(option.id && usedIds.has(option.id));
   });
 };
 
@@ -438,7 +445,10 @@ export const uniqueName = (base: string, taken: string[]): string => {
   const used = new Set(taken.map((name) => name.trim().toLowerCase()));
   for (let index = 1; ; index += 1) {
     const suffix = index === 1 ? "" : ` (${index})`;
-    const candidate = `${base.trim().slice(0, 255 - suffix.length)}${suffix}`;
+    const candidate = `${base
+      .trim()
+      .slice(0, 255 - suffix.length)
+      .trimEnd()}${suffix}`;
     if (!used.has(candidate.toLowerCase())) return candidate;
   }
 };

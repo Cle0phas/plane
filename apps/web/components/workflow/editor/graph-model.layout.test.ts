@@ -20,6 +20,7 @@ import {
   textRows,
   toneOf,
   toPayload,
+  updateStatus,
   transitionCounts,
   uniqueName,
   type TDraftGraph,
@@ -170,6 +171,9 @@ describe("sides", () => {
         },
       ],
     };
+    const source = { a: { source: "right" as const, target: "left" as const } };
+    const copied = fromDetail({ ...detail, transitions: [{ ...detail.transitions[0], sides: source }] }, []);
+    expect(copied.transitions[0].sides?.a).not.toBe(source.a);
     expect(toPayload(edited as TDraftGraph).transitions[0].sides).toEqual({ a: { source: "top", target: "left" } });
   });
 });
@@ -198,6 +202,19 @@ describe("categories", () => {
     ]);
   });
 
+  it("falls back to the deduction once the category is set back to automatic", () => {
+    const draft: TDraftGraph = {
+      states: [state("a", { is_initial: true, status: status("A", { known_group: "cancelled" }) })],
+      transitions: [],
+    };
+    const chosen = updateStatus(draft, "a", { group: "started" });
+    expect(displayGroup(chosen, chosen.states[0])).toBe("started");
+    const auto = updateStatus(chosen, "a", { group: null });
+    expect(displayGroup(auto, auto.states[0])).toBe("unstarted");
+    const renamed = updateStatus(draft, "a", { name: "B" });
+    expect(displayGroup(renamed, renamed.states[0])).toBe("cancelled");
+  });
+
   it("maps the five categories to four tones", () => {
     expect((["backlog", "unstarted", "started", "completed", "cancelled"] as const).map(toneOf)).toEqual([
       "todo",
@@ -222,6 +239,11 @@ describe("status options", () => {
 
   it("lists statuses then candidates, without names already in the workflow or listed twice", () => {
     expect(statusOptions(statuses, candidates, draft).map((option) => option.name)).toEqual(["Todo", "Review"]);
+  });
+
+  it("keeps a renamed status of the draft out of the list by its id", () => {
+    const renamed: TDraftGraph = { states: [state("u", { status: status("Renamed", { id: "s1" }) })], transitions: [] };
+    expect(statusOptions(statuses, candidates, renamed).map((option) => option.name)).toEqual(["Used", "Review"]);
   });
 
   it("turns an option into a draft status", () => {
@@ -305,5 +327,7 @@ describe("uniqueName", () => {
     const long = uniqueName("x".repeat(300), ["x".repeat(255)]);
     expect(long).toHaveLength(255);
     expect(long.endsWith(" (2)")).toBe(true);
+    const spaced = uniqueName(`${"x".repeat(250)} yyyyyy`, [`${"x".repeat(250)} yyyyyy`.slice(0, 255)]);
+    expect(spaced).not.toContain("  ");
   });
 });
