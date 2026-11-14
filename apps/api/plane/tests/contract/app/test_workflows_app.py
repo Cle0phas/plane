@@ -525,8 +525,19 @@ class TestDuplicate:
     def test_the_copy_of_a_linked_workflow_is_linked_to_nothing(self, workspace, users, project, software):
         link_project(project, software)
         response = self._post(users["admin"], workspace, software.id, name="Copy")
+        assert response.status_code == status.HTTP_201_CREATED
         assert response.data["project_count"] == 0
         assert ProjectWorkflowScheme.objects.count() == 1
+
+    def test_a_rule_citing_a_deactivated_member_is_copied_unchanged(self, workspace, users):
+        params = {"user_ids": [str(users["member"].id)]}
+        source = build_workflow(workspace, "Named", ["To do", "Done"], [(["To do"], "Done", params)])
+        WorkspaceMember.objects.filter(workspace=workspace, member=users["member"]).update(is_active=False)
+        response = self._post(users["admin"], workspace, source.id, name="Copy of Named")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert [item["rules"] for item in response.data["transitions"]] == [
+            [{"type": "restrict_actors", "params": params}]
+        ]
 
     def test_the_duplication_is_audited(self, workspace, users, rich):
         response = self._post(users["admin"], workspace, rich.id, name="Copy of Rich")

@@ -281,6 +281,8 @@ class WorkflowDuplicateEndpoint(BaseAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         try:
             with transaction.atomic():
+                # Same lock as the graph save: the copy never reads a half-saved source.
+                source = Workflow.objects.select_for_update(of=("self",)).get(workspace_id=workspace.id, pk=pk)
                 copy = serializer.save(workspace_id=workspace.id)
                 record_audit(
                     workspace_id=workspace.id,
