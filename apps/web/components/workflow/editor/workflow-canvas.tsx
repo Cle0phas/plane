@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import {
   applyNodeChanges,
   ConnectionMode,
@@ -89,7 +89,7 @@ export function WorkflowCanvas({
   onRemoveState,
   onRemoveTransition,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, currentLocale } = useTranslation();
   const flowRef = useRef<ReactFlowInstance | null>(null);
   const initial = draft.states.find((state) => state.is_initial);
   const transitionLabel = (name: string, source: string, target: string) =>
@@ -166,8 +166,8 @@ export function WorkflowCanvas({
     return () => cancelAnimationFrame(frame);
   }, [stateCount]);
 
-  // Rebuilt on every render like the nodes: t is new each time, and edges are props, not state.
-  const edges = ((): Edge[] => {
+  // A new array re-renders every edge, once per drag frame; t is new on each render, the locale stands for it.
+  const edges = useMemo((): Edge[] => {
     const nameOf = (key: string) => draft.states.find((item) => item.key === key)?.status.name ?? "";
     const positionOf = (key: string) => {
       const state = draft.states.find((item) => item.key === key);
@@ -220,7 +220,8 @@ export function WorkflowCanvas({
           })
     );
     return [...startEdge, ...transitionEdges];
-  })();
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- t and transitionLabel change identity on every render
+  }, [draft, initial, selection, showLabels, canEdit, currentLocale]);
 
   const handleConnect = ({ source, target, sourceHandle, targetHandle }: Connection) => {
     if (!source || !target || source === target || target === START_NODE_ID) return;

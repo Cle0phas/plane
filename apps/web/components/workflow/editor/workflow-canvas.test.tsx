@@ -116,6 +116,26 @@ describe("WorkflowCanvas", () => {
     expect(screen.getByText("workflows.editor.global")).toBeTruthy();
   });
 
+  // A new edges array re-renders every edge: during a drag that is one full pass per frame.
+  it("gives React Flow the same edges array when it renders again with the same props", () => {
+    const props = { draft, canEdit: true, showLabels: true, selection: null };
+    const element = () => (
+      <WorkflowCanvas
+        {...props}
+        onSelect={noop}
+        onMove={noop}
+        onConnect={noop}
+        onSetInitial={noop}
+        onRemoveState={noop}
+        onRemoveTransition={noop}
+      />
+    );
+    const { rerender } = render(element());
+    const first = flow().edges;
+    rerender(element());
+    expect(flow().edges).toBe(first);
+  });
+
   // fireEvent rather than userEvent for clicks: d3-drag reads the view of a mousedown, null under user-event.
   it("selects a state on a click and a global transition on a click on its pill", () => {
     const onSelect = vi.fn();
