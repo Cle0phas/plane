@@ -238,7 +238,7 @@
       "show_labels": "Mostrar las etiquetas de las transiciones",
       "zoom": "Zoom",
       "minimap": "Minimapa",
-      "state_label": "Estado {name}, categoría {group}, {incoming, plural, one {# transición entrante} many {# de transiciones entrantes} other {# transiciones entrantes}}, {outgoing, plural, one {# saliente} many {# de salientes} other {# salientes}}",
+      "state_label": "Estado {name}, categoría {group}, {incoming, plural, one {# transición entrante} other {# transiciones entrantes}}, {outgoing, plural, one {# saliente} other {# salientes}}",
       "view": {
         "label": "Vista",
         "diagram": "Diagrama",
