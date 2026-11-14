@@ -94,6 +94,8 @@ export const PROJECT_WORK_ITEM_TYPES = (projectId: string) => `PROJECT_WORK_ITEM
 export const WORKSPACE_WORKFLOWS = (workspaceSlug: string) => `WORKSPACE_WORKFLOWS_${workspaceSlug.toUpperCase()}`;
 export const WORKSPACE_WORKFLOW_STATUSES = (workspaceSlug: string) =>
   `WORKSPACE_WORKFLOW_STATUSES_${workspaceSlug.toUpperCase()}`;
+export const WORKSPACE_WORKFLOW_CANDIDATES = (workspaceSlug: string) =>
+  `WORKSPACE_WORKFLOW_CANDIDATES_${workspaceSlug.toUpperCase()}`;
 export const WORKFLOW_DETAIL = (workflowId: string) => `WORKFLOW_DETAIL_${workflowId.toUpperCase()}`;
 export const PROJECT_WORKFLOW_SCHEME = (projectId: string) => `PROJECT_WORKFLOW_SCHEME_${projectId.toUpperCase()}`;
 

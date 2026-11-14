@@ -232,30 +232,57 @@ export const isRuleComplete = ({ params }: TWorkflowRule) =>
   params.assignee === true ||
   params.creator === true;
 
-/** Same checks as the server (Task 4), so the admin sees them before saving. */
-export const validateDraft = (draft: TDraftGraph): string[] => {
-  const errors = new Set<string>();
+type TStateCheck = (state: TDraftState, index: number) => boolean;
+type TTransitionCheck = (transition: TDraftTransition) => boolean;
+
+// Each check is written once, for validateDraft and for errorTarget; a state check is true on the faulty state.
+const draftChecks = (draft: TDraftGraph) => {
   const keys = new Set(draft.states.map((state) => state.key));
   const names = draft.states.map((state) => state.status.name.trim().toLowerCase());
-  if (names.some((name) => name === "")) errors.add("status_name_required");
-  if (names.some((name) => RESERVED_STATUS_NAMES.has(name))) errors.add("reserved_status_name");
-  if (new Set(names).size !== names.length) errors.add("duplicate_status_name");
-  const ids = draft.states.flatMap((state) => (state.status.id ? [state.status.id] : []));
-  if (new Set(ids).size !== ids.length) errors.add("duplicate_status");
-  if (draft.states.length > 0 && draft.states.filter((state) => state.is_initial).length !== 1)
-    errors.add("initial_state_required");
-  for (const transition of draft.transitions) {
-    const sources = transition.from_any ? [] : transition.source_keys;
-    if (
-      !keys.has(transition.target_key) ||
-      new Set(sources).size !== sources.length ||
-      sources.some((source) => !keys.has(source) || source === transition.target_key) ||
-      (!transition.from_any && sources.length === 0)
-    )
-      errors.add("invalid_transition");
-    if (transition.rules.length > 1 || !transition.rules.every(isRuleComplete)) errors.add("invalid_rule");
-  }
-  return [...errors];
+  const ids = draft.states.map((state) => state.status.id);
+  const states: [string, TStateCheck][] = [
+    ["status_name_required", (_, index) => names[index] === ""],
+    ["reserved_status_name", (_, index) => RESERVED_STATUS_NAMES.has(names[index])],
+    ["duplicate_status_name", (_, index) => names.indexOf(names[index]) !== index],
+    ["duplicate_status", (_, index) => ids[index] !== undefined && ids.indexOf(ids[index]) !== index],
+  ];
+  const transitions: [string, TTransitionCheck][] = [
+    [
+      "invalid_transition",
+      (transition) => {
+        const sources = transition.from_any ? [] : transition.source_keys;
+        return (
+          !keys.has(transition.target_key) ||
+          new Set(sources).size !== sources.length ||
+          sources.some((source) => !keys.has(source) || source === transition.target_key) ||
+          (!transition.from_any && sources.length === 0)
+        );
+      },
+    ],
+    ["invalid_rule", (transition) => transition.rules.length > 1 || !transition.rules.every(isRuleComplete)],
+  ];
+  return { states, transitions };
+};
+
+/** Same checks as the server (Task 4), so the admin sees them before saving. */
+export const validateDraft = (draft: TDraftGraph): string[] => {
+  const checks = draftChecks(draft);
+  const hasOneInitial = draft.states.length === 0 || draft.states.filter((state) => state.is_initial).length === 1;
+  return [
+    ...checks.states.filter(([, test]) => draft.states.some(test)).map(([code]) => code),
+    ...(hasOneInitial ? [] : ["initial_state_required"]),
+    ...checks.transitions.filter(([, test]) => draft.transitions.some(test)).map(([code]) => code),
+  ];
+};
+
+/** Element a validateDraft code points at, so the error banner can select it (spec 3.8). */
+export const errorTarget = (draft: TDraftGraph, code: string): { kind: "state" | "transition"; key: string } | null => {
+  const checks = draftChecks(draft);
+  const stateTest = checks.states.find(([name]) => name === code)?.[1];
+  const transitionTest = checks.transitions.find(([name]) => name === code)?.[1];
+  const found = stateTest ? draft.states.find(stateTest) : transitionTest && draft.transitions.find(transitionTest);
+  if (!found) return null;
+  return { kind: stateTest ? "state" : "transition", key: found.key };
 };
 
 export const getGraphErrorKey = (error: unknown): { key: string; projects: TWorkflowStatusUsage[] } => {

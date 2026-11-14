@@ -75,6 +75,8 @@ export function WorkflowTextView({ draft, selection, onSelect }: Props) {
                     type="button"
                     className={`rounded-sm border px-2 py-1 text-caption-sm-medium uppercase ${TONE_CLASS[toneOf(row.group)]}`}
                     aria-current={isSelected ? "true" : undefined}
+                    // The editor focuses this row after adding the state (spec 3.3).
+                    data-state-key={row.key}
                     onClick={() => onSelect({ kind: "state", key: row.key })}
                   >
                     {row.name}

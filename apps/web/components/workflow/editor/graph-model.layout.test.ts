@@ -12,6 +12,7 @@ import {
   connectStates,
   createdStatus,
   displayGroup,
+  errorTarget,
   fromDetail,
   optionToStatus,
   setInitial,
@@ -329,5 +330,44 @@ describe("uniqueName", () => {
     expect(long.endsWith(" (2)")).toBe(true);
     const spaced = uniqueName(`${"x".repeat(250)} yyyyyy`, [`${"x".repeat(250)} yyyyyy`.slice(0, 255)]);
     expect(spaced).not.toContain("  ");
+  });
+});
+
+describe("errorTarget", () => {
+  const draft: TDraftGraph = {
+    states: [
+      state("a", { status: status("Same") }),
+      state("b", { status: status("same") }),
+      state("c", { status: status(" ") }),
+    ],
+    transitions: [
+      { key: "ok", name: "", from_any: false, source_keys: ["a"], target_key: "b", rules: [] },
+      { key: "bad", name: "", from_any: false, source_keys: [], target_key: "b", rules: [] },
+      {
+        key: "rule",
+        name: "",
+        from_any: true,
+        source_keys: [],
+        target_key: "a",
+        rules: [{ type: "restrict_actors", params: {} }],
+      },
+    ],
+  };
+
+  it("points at the element behind a validation code", () => {
+    expect(errorTarget(draft, "duplicate_status_name")).toEqual({ kind: "state", key: "b" });
+    expect(errorTarget(draft, "status_name_required")).toEqual({ kind: "state", key: "c" });
+    expect(errorTarget(draft, "invalid_transition")).toEqual({ kind: "transition", key: "bad" });
+    expect(errorTarget(draft, "invalid_rule")).toEqual({ kind: "transition", key: "rule" });
+    expect(errorTarget(draft, "initial_state_required")).toBeNull();
+  });
+
+  it("points at the second state holding the same status", () => {
+    const twice: TDraftGraph = {
+      states: [state("a", { status: status("A", { id: "s" }) }), state("b", { status: status("B", { id: "s" }) })],
+      transitions: [],
+    };
+    expect(errorTarget(twice, "duplicate_status")).toEqual({ kind: "state", key: "b" });
+    expect(errorTarget(draft, "duplicate_status")).toBeNull();
   });
 });

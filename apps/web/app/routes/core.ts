@@ -51,6 +51,11 @@ export const coreRoutes: RouteConfigEntry[] = [
     // WORKSPACE-SCOPED ROUTES
     // ======================================================================
     layout("./(all)/[workspaceSlug]/layout.tsx", [
+      // Workflow editor: full screen, outside the settings shell; the address is unchanged (X11).
+      route(
+        ":workspaceSlug/settings/workflows/:workflowId",
+        "./(all)/[workspaceSlug]/workflow-editor/[workflowId]/page.tsx"
+      ),
       // ====================================================================
       // PROJECTS APP SECTION - WORKSPACE LEVEL ROUTES
       // ====================================================================
@@ -289,10 +294,6 @@ export const coreRoutes: RouteConfigEntry[] = [
           route(
             ":workspaceSlug/settings/workflows",
             "./(all)/[workspaceSlug]/(settings)/settings/(workspace)/workflows/page.tsx"
-          ),
-          route(
-            ":workspaceSlug/settings/workflows/:workflowId",
-            "./(all)/[workspaceSlug]/(settings)/settings/(workspace)/workflows/[workflowId]/page.tsx"
           ),
         ]),
 

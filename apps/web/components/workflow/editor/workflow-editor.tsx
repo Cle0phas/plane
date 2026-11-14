@@ -6,21 +6,26 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { observer } from "mobx-react";
-import Link from "next/link";
-import { Button } from "@makeplane/propel/components/button";
 import { setToast } from "@plane/blocks/toast";
 import { useTranslation } from "@plane/i18n";
 import { v4 as uuidv4 } from "uuid";
-import type { TWorkflowDetail, TWorkflowStatus, TWorkflowStatusUsage } from "@plane/types";
-// hooks
-import { useWorkflow } from "@/hooks/store/use-workflow";
+import type {
+  TWorkflowDetail,
+  TWorkflowGraphPayload,
+  TWorkflowStatus,
+  TWorkflowStatusCandidate,
+  TWorkflowStatusUsage,
+} from "@plane/types";
 // local imports
-import { AddStateForm } from "./add-state-form";
-import { AddTransitionForm } from "./add-transition-form";
+import { AddRuleDialog } from "./add-rule-dialog";
+import { AddStatusDialog } from "./add-status-dialog";
+import { AddTransitionDialog } from "./add-transition-dialog";
+import { EditorHeader } from "./editor-header";
 import {
   addStates,
   addTransition,
   connectStates,
+  errorTarget,
   fromDetail,
   getDraftErrorKey,
   getGraphErrorKey,
@@ -29,35 +34,52 @@ import {
   removeState,
   removeTransition,
   setInitial,
+  setRestriction,
   shouldResetDraft,
+  statusOptions,
   toPayload,
   validateDraft,
   type TDraftGraph,
 } from "./graph-model";
 import { WorkflowSidePanel } from "./side-panel";
-import { WorkflowElementList } from "./workflow-element-list";
+import { WorkflowTextView } from "./text-view";
 import { WorkflowCanvas, type TEditorSelection } from "./workflow-canvas";
 
 type Props = {
-  workspaceSlug: string;
   workflow: TWorkflowDetail;
   statuses: TWorkflowStatus[];
+  candidates: TWorkflowStatusCandidate[];
   readOnly: boolean;
+  // Injected by the page (X10): the editor knows neither the store nor the router.
+  onSave: (payload: TWorkflowGraphPayload) => Promise<TWorkflowDetail>;
+  onClose: () => void;
 };
 
-export const WorkflowEditor = observer(function WorkflowEditor({ workspaceSlug, workflow, statuses, readOnly }: Props) {
+type TPreset = { sourceKey?: string; targetKey?: string };
+type TDialog = { kind: "state" } | { kind: "transition"; preset: TPreset | null } | { kind: "rule" } | null;
+
+const VIEW_CLASS = "rounded-sm px-3 py-1 text-body-xs-medium max-md:min-h-11";
+// About one second: React Flow shows a new node once measured, and the closing dialog keeps the page inert.
+const FOCUS_ATTEMPTS = 60;
+
+export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
+  const { workflow, statuses, candidates, readOnly, onSave, onClose } = props;
   const { t } = useTranslation();
-  const { saveGraph, getWorkspaceStatuses } = useWorkflow();
+  // Read once (X13): below 768px the editor opens on the text view and does not edit.
+  const [isSmall] = useState(() => window.matchMedia("(max-width: 767px)").matches);
+  const canEdit = !readOnly && !isSmall;
   const saved = useMemo(() => fromDetail(workflow, statuses), [workflow, statuses]);
   const [draft, setDraft] = useState<TDraftGraph>(saved);
-  const [selection, setSelection] = useState<TEditorSelection>(null);
+  const [picked, setSelection] = useState<TEditorSelection>(null);
+  const [view, setView] = useState<"diagram" | "text">(isSmall ? "text" : "diagram");
+  const [showLabels, setShowLabels] = useState(false);
+  const [dialog, setDialog] = useState<TDialog>(null);
   const [serverError, setServerError] = useState<{ key: string; projects: TWorkflowStatusUsage[] } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-
   const [focusSignal, setFocusSignal] = useState(0);
-  const [returnSignal, setReturnSignal] = useState(0);
-  const triggerRef = useRef<HTMLElement | null>(null);
-  const listRef = useRef<HTMLDivElement>(null);
+  // Last state added through the dialog: its node or row takes the focus (spec 3.3).
+  const [addedKey, setAddedKey] = useState<string | null>(null);
+  const mainRef = useRef<HTMLElement>(null);
   const savedRef = useRef(saved);
   const draftRef = useRef(draft);
   draftRef.current = draft;
@@ -69,28 +91,39 @@ export const WorkflowEditor = observer(function WorkflowEditor({ workspaceSlug, 
     if (shouldResetDraft(previous, saved, draftRef.current)) setDraft(saved);
   }, [saved]);
 
-  // Back to the button that opened the panel, or to the list when that element is gone (removed).
   useEffect(() => {
-    if (returnSignal === 0) return;
-    const trigger = triggerRef.current;
-    (trigger?.isConnected ? trigger : listRef.current)?.focus();
-  }, [returnSignal]);
+    if (addedKey === null) return;
+    let frame = 0;
+    let attempts = 0;
+    const attempt = () => {
+      const target = Array.from(
+        mainRef.current?.querySelectorAll<HTMLElement>(".react-flow__node, [data-state-key]") ?? []
+      ).find((element) => (element.dataset.id ?? element.dataset.stateKey) === addedKey);
+      target?.focus();
+      attempts += 1;
+      if ((!target || document.activeElement !== target) && attempts < FOCUS_ATTEMPTS)
+        frame = requestAnimationFrame(attempt);
+    };
+    attempt();
+    return () => cancelAnimationFrame(frame);
+  }, [addedKey]);
 
-  const closePanel = () => {
-    setSelection(null);
-    setReturnSignal((value) => value + 1);
-  };
-
+  // A selection whose element left the draft (removed, discarded, replaced on save) reads as none.
+  const selection =
+    picked && (picked.kind === "state" ? draft.states : draft.transitions).some((item) => item.key === picked.key)
+      ? picked
+      : null;
   const errors = validateDraft(draft);
   const dirty = isDraftDirty(draft, saved);
-  const usedStatusIds = new Set(draft.states.flatMap((state) => (state.status.id ? [state.status.id] : [])));
+  const options = useMemo(() => statusOptions(statuses, candidates, draft), [statuses, candidates, draft]);
+  const selectedTransitionKey = selection?.kind === "transition" ? selection.key : null;
 
   const save = async () => {
     setServerError(null);
     setIsSaving(true);
     try {
-      const result = await saveGraph(workspaceSlug, workflow.id, toPayload(draft));
-      setDraft(fromDetail(result, getWorkspaceStatuses(workspaceSlug)));
+      const result = await onSave(toPayload(draft));
+      setDraft(fromDetail(result, statuses));
       setSelection(null);
       setToast({ type: "success", title: t("workflows.editor.saved"), message: "" });
     } catch (error) {
@@ -100,49 +133,62 @@ export const WorkflowEditor = observer(function WorkflowEditor({ workspaceSlug, 
     }
   };
 
+  const notice = readOnly ? "workflows.editor.read_only" : isSmall ? "workflows.editor.small_screen" : null;
+
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <Link
-          href={`/${workspaceSlug}/settings/workflows`}
-          className="text-body-sm-regular text-secondary hover:underline"
-        >
-          {t("workflows.editor.back")}
-        </Link>
-        <h2 className="flex-1 text-h5-semibold text-primary">{workflow.name}</h2>
-        {dirty && <span className="text-caption-sm-regular text-warning-primary">{t("workflows.editor.unsaved")}</span>}
-        {!readOnly && (
-          <>
-            <Button
-              variant="secondary"
-              size="md"
-              stretch="auto"
-              disabled={!dirty || isSaving}
-              label={t("workflows.editor.discard")}
-              onClick={() => setDraft(saved)}
-            />
-            <Button
-              variant="primary"
-              size="md"
-              stretch="auto"
-              disabled={!dirty || errors.length > 0}
-              loading={isSaving}
-              label={t("workflows.editor.save")}
-              onClick={save}
-            />
-          </>
-        )}
-      </div>
-      {readOnly && <p className="text-body-sm-regular text-secondary">{t("workflows.editor.read_only")}</p>}
+    <div className="flex size-full flex-col bg-surface-1">
+      <a href="#workflow-editor-main" className="sr-only focus:not-sr-only">
+        {t("workflows.editor.diagram_label")}
+      </a>
+      <EditorHeader
+        name={workflow.name}
+        projectCount={workflow.project_count}
+        projects={workflow.projects}
+        canEdit={canEdit}
+        dirty={dirty}
+        canSave={dirty && errors.length === 0}
+        isSaving={isSaving}
+        onAddState={() => setDialog({ kind: "state" })}
+        onAddTransition={() => setDialog({ kind: "transition", preset: null })}
+        onAddRule={() => setDialog({ kind: "rule" })}
+        onSave={save}
+        onDiscard={() => {
+          setDraft(saved);
+          setSelection(null);
+          setServerError(null);
+        }}
+        onClose={onClose}
+      />
+      {notice && (
+        <p role="status" className="border-b border-subtle bg-layer-1 px-6 py-2 text-body-sm-regular text-secondary">
+          {t(notice)}
+        </p>
+      )}
       {(errors.length > 0 || serverError) && (
-        <div className="space-y-2 rounded-md border border-danger-subtle bg-danger-subtle p-3 text-body-sm-regular text-danger-primary">
-          <div aria-live="polite">
-            {errors.map((code) => (
-              <p key={code}>{t(getDraftErrorKey(code))}</p>
-            ))}
-          </div>
+        <div
+          role="alert"
+          className="space-y-1 border-b border-danger-subtle bg-danger-subtle px-6 py-2 text-body-sm-regular text-danger-primary"
+        >
+          {errors.length > 0 && (
+            <ul>
+              {errors.map((code) => {
+                const target = errorTarget(draft, code);
+                return (
+                  <li key={code}>
+                    {target ? (
+                      <button type="button" className="text-left underline" onClick={() => setSelection(target)}>
+                        {t(getDraftErrorKey(code))}
+                      </button>
+                    ) : (
+                      t(getDraftErrorKey(code))
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
           {serverError && (
-            <div role="alert">
+            <>
               <p>{t(serverError.key)}</p>
               {serverError.projects.map((project) => (
                 <p key={project.project_id}>
@@ -152,62 +198,112 @@ export const WorkflowEditor = observer(function WorkflowEditor({ workspaceSlug, 
                   })}
                 </p>
               ))}
-            </div>
+            </>
           )}
         </div>
       )}
-      <div className="flex gap-4">
-        <div className="h-[560px] min-w-0 flex-1 rounded-md border border-subtle">
-          <WorkflowCanvas
-            draft={draft}
-            canEdit={!readOnly}
-            showLabels
-            selection={selection}
-            onSelect={setSelection}
-            onMove={(moves) =>
-              setDraft((current) => moves.reduce((acc, move) => moveState(acc, move.key, move.x, move.y), current))
-            }
-            onConnect={(source, sourceSide, target, targetSide) =>
-              setDraft((current) => connectStates(current, `new-${uuidv4()}`, source, sourceSide, target, targetSide))
-            }
-            onSetInitial={(key) => setDraft((current) => setInitial(current, key))}
-            onRemoveState={(key) => setDraft((current) => removeState(current, key))}
-            onRemoveTransition={(key) => setDraft((current) => removeTransition(current, key))}
-          />
+      <div className="flex flex-wrap items-center gap-4 px-6 py-3">
+        <div
+          role="group"
+          aria-label={t("workflows.editor.view.label")}
+          className="flex rounded-md border border-subtle p-0.5"
+        >
+          {(["diagram", "text"] as const).map((item) => (
+            <button
+              key={item}
+              type="button"
+              aria-pressed={view === item}
+              className={`${VIEW_CLASS} ${view === item ? "bg-layer-1-selected text-primary" : "text-secondary"}`}
+              onClick={() => setView(item)}
+            >
+              {t(`workflows.editor.view.${item}`)}
+            </button>
+          ))}
         </div>
+        {view === "diagram" && (
+          <label className="flex items-center gap-2 text-body-sm-regular text-secondary max-md:min-h-11">
+            <input type="checkbox" checked={showLabels} onChange={(event) => setShowLabels(event.target.checked)} />
+            {t("workflows.editor.show_labels")}
+          </label>
+        )}
+      </div>
+      <div className="relative flex min-h-0 flex-1">
+        <main ref={mainRef} id="workflow-editor-main" className="min-w-0 flex-1">
+          {view === "diagram" ? (
+            <WorkflowCanvas
+              draft={draft}
+              canEdit={canEdit}
+              showLabels={showLabels}
+              selection={selection}
+              onSelect={setSelection}
+              onMove={(moves) =>
+                setDraft((current) => moves.reduce((acc, move) => moveState(acc, move.key, move.x, move.y), current))
+              }
+              onConnect={(source, sourceSide, target, targetSide) =>
+                setDraft((current) => connectStates(current, `new-${uuidv4()}`, source, sourceSide, target, targetSide))
+              }
+              onSetInitial={(key) => setDraft((current) => setInitial(current, key))}
+              onRemoveState={(key) => setDraft((current) => removeState(current, key))}
+              onRemoveTransition={(key) => setDraft((current) => removeTransition(current, key))}
+            />
+          ) : (
+            <WorkflowTextView
+              draft={draft}
+              selection={selection}
+              onSelect={(next) => {
+                setSelection(next);
+                setFocusSignal((value) => value + 1);
+              }}
+            />
+          )}
+        </main>
         <WorkflowSidePanel
           draft={draft}
           selection={selection}
-          readOnly={readOnly}
+          canEdit={canEdit}
           onChange={setDraft}
-          onClose={closePanel}
+          onAddTransition={(preset) => setDialog({ kind: "transition", preset })}
           focusSignal={focusSignal}
         />
       </div>
-      <WorkflowElementList
+      <AddStatusDialog
+        isOpen={dialog?.kind === "state"}
         draft={draft}
-        selection={selection}
-        containerRef={listRef}
-        onOpen={(next, trigger) => {
-          triggerRef.current = trigger;
-          setSelection(next);
-          setFocusSignal((value) => value + 1);
+        options={options}
+        onClose={() => setDialog(null)}
+        onAdd={(chosen, allowAny) => {
+          const entries = chosen.map((status) => ({
+            key: `new-${uuidv4()}`,
+            status,
+            globalKey: allowAny ? `new-${uuidv4()}` : undefined,
+          }));
+          const lastKey = entries[entries.length - 1].key;
+          setDraft((current) => addStates(current, entries));
+          setSelection({ kind: "state", key: lastKey });
+          setAddedKey(lastKey);
+          setDialog(null);
         }}
       />
-      {!readOnly && (
-        <div className="grid gap-6 md:grid-cols-2">
-          <AddStateForm
-            availableStatuses={statuses.filter((status) => !usedStatusIds.has(status.id))}
-            onAdd={(status) => setDraft((current) => addStates(current, [{ key: `new-${uuidv4()}`, status }]))}
-          />
-          <AddTransitionForm
-            draft={draft}
-            onAdd={(transition) =>
-              setDraft((current) => addTransition(current, { ...transition, key: `new-${uuidv4()}` }))
-            }
-          />
-        </div>
-      )}
+      <AddTransitionDialog
+        isOpen={dialog?.kind === "transition"}
+        draft={draft}
+        preset={dialog?.kind === "transition" ? dialog.preset : null}
+        onClose={() => setDialog(null)}
+        onAdd={(transition) => {
+          setDraft((current) => addTransition(current, { ...transition, key: `new-${uuidv4()}` }));
+          setDialog(null);
+        }}
+      />
+      <AddRuleDialog
+        isOpen={dialog?.kind === "rule"}
+        draft={draft}
+        presetKey={selectedTransitionKey}
+        onClose={() => setDialog(null)}
+        onApply={(transitionKey, params) => {
+          setDraft((current) => setRestriction(current, transitionKey, params));
+          setDialog(null);
+        }}
+      />
     </div>
   );
 });

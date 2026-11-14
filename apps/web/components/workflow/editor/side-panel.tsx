@@ -4,10 +4,11 @@
  * See the LICENSE file for details.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { Button } from "@makeplane/propel/components/button";
 import { InputField } from "@makeplane/propel/components/input-field";
+import { ChevronRightOutline, PlusCircleOutline, WorkflowsOutline } from "@makeplane/propel/icons";
 import { useTranslation } from "@plane/i18n";
 import type { TStateGroups } from "@plane/types";
 // local imports
@@ -16,6 +17,7 @@ import {
   removeTransition,
   setInitial,
   setRestriction,
+  transitionCounts,
   updateStatus,
   updateTransition,
   type TDraftGraph,
@@ -27,49 +29,82 @@ const GROUPS: TStateGroups[] = ["backlog", "unstarted", "started", "completed", 
 
 type Props = {
   draft: TDraftGraph;
+  // Always an element of the draft: the editor drops a selection whose element is gone.
   selection: TEditorSelection;
-  readOnly: boolean;
+  canEdit: boolean;
   onChange: (draft: TDraftGraph) => void;
-  onClose: () => void;
-  // Bumped by the element list so keyboard users land in the panel; mouse selection keeps focus where it is.
+  onAddTransition: (preset: { sourceKey?: string; targetKey?: string }) => void;
+  // Bumped when the selection comes from the text view, so keyboard users land in the panel.
   focusSignal: number;
 };
 
 export const WorkflowSidePanel = observer(function WorkflowSidePanel({
   draft,
   selection,
-  readOnly,
+  canEdit,
   onChange,
-  onClose,
+  onAddTransition,
   focusSignal,
 }: Props) {
   const { t } = useTranslation();
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const handledSignal = useRef(0);
+
   useEffect(() => {
     if (focusSignal === handledSignal.current) return;
     handledSignal.current = focusSignal;
+    setIsCollapsed(false);
     headingRef.current?.focus();
   }, [focusSignal]);
-  if (!selection) return null;
-  const state = selection.kind === "state" ? draft.states.find((item) => item.key === selection.key) : undefined;
+
+  const state = selection?.kind === "state" ? draft.states.find((item) => item.key === selection.key) : undefined;
   const transition =
-    selection.kind === "transition" ? draft.transitions.find((item) => item.key === selection.key) : undefined;
-  if (!state && !transition) return null;
+    selection?.kind === "transition" ? draft.transitions.find((item) => item.key === selection.key) : undefined;
+  const title = state ? "workflows.editor.panel.state" : "workflows.editor.panel.transition";
+  const counts = state ? transitionCounts(draft, state.key) : null;
+  const nameOf = (key: string) => draft.states.find((item) => item.key === key)?.status.name ?? "";
+
+  const toggle = (
+    <button
+      type="button"
+      className="flex size-8 shrink-0 items-center justify-center rounded-full border border-subtle bg-layer-1 max-md:size-11"
+      aria-expanded={!isCollapsed}
+      aria-label={t(isCollapsed ? "workflows.editor.panel.expand" : "workflows.editor.panel.collapse")}
+      onClick={() => setIsCollapsed((value) => !value)}
+    >
+      <ChevronRightOutline className={`size-4 ${isCollapsed ? "rotate-180" : ""}`} aria-hidden />
+    </button>
+  );
+
+  if (isCollapsed) return <div className="border-l border-subtle p-2">{toggle}</div>;
 
   return (
     <aside
-      className="w-80 shrink-0 space-y-4 rounded-md border border-subtle p-4"
-      aria-label={t(state ? "workflows.editor.panel.state" : "workflows.editor.panel.transition")}
+      // Below 1024px the panel overlays the canvas, and only while something is selected (spec 3.8).
+      className={`flex w-[400px] shrink-0 flex-col gap-4 overflow-y-auto border-l border-subtle bg-layer-2 p-4 max-lg:absolute max-lg:inset-y-0 max-lg:right-0 max-lg:z-10 max-lg:w-full max-lg:max-w-[400px] ${state || transition ? "" : "max-lg:hidden"}`}
+      aria-label={t(state || transition ? title : "workflows.editor.panel.empty_title")}
     >
-      <div className="flex items-center justify-between">
-        <h3 ref={headingRef} tabIndex={-1} className="text-body-sm-medium text-primary">
-          {t(state ? "workflows.editor.panel.state" : "workflows.editor.panel.transition")}
-        </h3>
-        <Button variant="ghost" size="sm" stretch="auto" label={t("workflows.editor.panel.close")} onClick={onClose} />
+      <div className="flex items-start gap-2">
+        {toggle}
+        {(state || transition) && (
+          <h2 ref={headingRef} tabIndex={-1} className="flex-1 text-h5-semibold text-primary">
+            {t(title)}
+          </h2>
+        )}
       </div>
-      {state && (
-        <fieldset className="space-y-3" disabled={readOnly}>
+
+      {!state && !transition && (
+        <div className="space-y-3 pt-8 text-center">
+          <WorkflowsOutline className="mx-auto size-12 text-tertiary" aria-hidden />
+          <h2 className="text-h5-semibold text-primary">{t("workflows.editor.panel.empty_title")}</h2>
+          <p className="text-body-sm-regular text-secondary">{t("workflows.editor.panel.empty_body")}</p>
+          <p className="text-body-sm-regular text-secondary">{t("workflows.editor.panel.empty_hint")}</p>
+        </div>
+      )}
+
+      {state && counts && (
+        <fieldset className="space-y-4" disabled={!canEdit}>
           {state.status.shared_count > 0 && (
             <p role="note" className="text-caption-sm-regular text-warning-primary">
               {t("workflows.editor.panel.shared", { count: state.status.shared_count })}
@@ -87,14 +122,6 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
               onChange(updateStatus(draft, state.key, { name: event.target.value }))
             }
           />
-          <label className="flex items-center gap-2 text-body-xs-medium text-secondary">
-            {t("workflows.editor.add_state.color")}
-            <input
-              type="color"
-              value={state.status.color}
-              onChange={(event) => onChange(updateStatus(draft, state.key, { color: event.target.value }))}
-            />
-          </label>
           <label className="flex flex-col gap-1 text-body-xs-medium text-secondary">
             {t("workflows.editor.add_state.group")}
             <select
@@ -112,32 +139,66 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
               ))}
             </select>
           </label>
+          <label className="flex items-center gap-2 text-body-xs-medium text-secondary">
+            {t("workflows.editor.panel.color")}
+            <input
+              type="color"
+              value={state.status.color}
+              onChange={(event) => onChange(updateStatus(draft, state.key, { color: event.target.value }))}
+            />
+          </label>
+          <div className="space-y-2">
+            <h3 className="text-body-sm-medium text-primary">{t("workflows.editor.text.transitions")}</h3>
+            {(
+              [
+                ["incoming", counts.incoming, { targetKey: state.key }, "add_incoming"],
+                ["outgoing", counts.outgoing, { sourceKey: state.key }, "add_outgoing"],
+              ] as const
+            ).map(([kind, count, preset, addKey]) => (
+              <div key={kind} className="flex items-center gap-2 text-body-sm-regular text-secondary">
+                <span className="flex-1">{t(`workflows.editor.panel.${kind}`)}</span>
+                <span className="rounded-full bg-layer-1 px-2 text-caption-sm-medium">{count}</span>
+                {canEdit && (
+                  <button
+                    type="button"
+                    className="flex size-8 items-center justify-center rounded-md hover:bg-layer-1 max-md:size-11"
+                    aria-label={t(`workflows.editor.panel.${addKey}`)}
+                    onClick={() => onAddTransition(preset)}
+                  >
+                    <PlusCircleOutline className="size-4" aria-hidden />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
           {state.is_initial ? (
             <p className="text-body-xs-medium text-secondary">{t("workflows.editor.panel.initial")}</p>
           ) : (
+            canEdit && (
+              <Button
+                variant="secondary"
+                size="sm"
+                stretch="auto"
+                label={t("workflows.editor.panel.set_initial")}
+                onClick={() => onChange(setInitial(draft, state.key))}
+              />
+            )
+          )}
+          {canEdit && (
             <Button
-              variant="secondary"
+              variant="danger-outline"
               size="sm"
               stretch="auto"
-              label={t("workflows.editor.panel.set_initial")}
-              onClick={() => onChange(setInitial(draft, state.key))}
+              label={t("workflows.editor.panel.remove_state")}
+              onClick={() => onChange(removeState(draft, state.key))}
             />
           )}
-          <Button
-            variant="danger-outline"
-            size="sm"
-            stretch="auto"
-            label={t("workflows.editor.panel.remove_state")}
-            onClick={() => {
-              onChange(removeState(draft, state.key));
-              onClose();
-            }}
-          />
         </fieldset>
       )}
+
       {transition && (
-        <div className="space-y-3">
-          <fieldset className="space-y-3" disabled={readOnly}>
+        <div className="space-y-4">
+          <fieldset className="space-y-3" disabled={!canEdit}>
             <InputField
               size="md"
               orientation="vertical"
@@ -150,31 +211,24 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel({
                 onChange(updateTransition(draft, transition.key, { name: event.target.value }))
               }
             />
-            <p className="text-body-xs-regular text-secondary">
-              {transition.from_any
-                ? t("workflows.editor.global")
-                : transition.source_keys
-                    .map((key) => draft.states.find((item) => item.key === key)?.status.name)
-                    .join(", ")}
+            <p className="text-body-sm-regular text-secondary">
+              {transition.from_any ? t("workflows.editor.global") : transition.source_keys.map(nameOf).join(", ")}
               {" → "}
-              {draft.states.find((item) => item.key === transition.target_key)?.status.name}
+              {nameOf(transition.target_key)}
             </p>
           </fieldset>
           <RestrictActorsForm
             params={transition.rules[0]?.params ?? null}
-            readOnly={readOnly}
+            readOnly={!canEdit}
             onChange={(params) => onChange(setRestriction(draft, transition.key, params))}
           />
-          {!readOnly && (
+          {canEdit && (
             <Button
               variant="danger-outline"
               size="sm"
               stretch="auto"
               label={t("workflows.editor.panel.remove_transition")}
-              onClick={() => {
-                onChange(removeTransition(draft, transition.key));
-                onClose();
-              }}
+              onClick={() => onChange(removeTransition(draft, transition.key))}
             />
           )}
         </div>
