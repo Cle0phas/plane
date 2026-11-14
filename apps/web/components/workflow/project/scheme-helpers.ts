@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import type { TProjectWorkflowSchemePayload, TWorkflowMappingNeed } from "@plane/types";
+import type { TProjectWorkflowScheme, TProjectWorkflowSchemePayload, TWorkflowMappingNeed } from "@plane/types";
 
 const SCHEME_ERROR_CODES = new Set(["invalid_scheme", "mapping_incomplete", "invalid_mapping"]);
 
@@ -49,4 +49,21 @@ export const getSchemeErrorKey = (error: unknown) => {
   return typeof code === "string" && SCHEME_ERROR_CODES.has(code)
     ? `workflows.scheme.errors.${code}`
     : "workflows.scheme.errors.default";
+};
+
+export type TSchemeRow = { workflowId: string; isDefault: boolean; typeIds: string[] };
+
+/** Rows of the linked-project table: the default workflow first, then each other workflow. */
+export const schemeRows = (scheme: Pick<TProjectWorkflowScheme, "default_workflow_id" | "items">): TSchemeRow[] => {
+  if (!scheme.default_workflow_id) return [];
+  const rows: TSchemeRow[] = [{ workflowId: scheme.default_workflow_id, isDefault: true, typeIds: [] }];
+  for (const item of scheme.items) {
+    let row = rows.find((candidate) => candidate.workflowId === item.workflow_id);
+    if (!row) {
+      row = { workflowId: item.workflow_id, isDefault: false, typeIds: [] };
+      rows.push(row);
+    }
+    row.typeIds.push(item.issue_type_id);
+  }
+  return rows;
 };

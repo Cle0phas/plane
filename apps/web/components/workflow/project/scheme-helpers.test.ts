@@ -5,7 +5,14 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { buildSchemePayload, getSchemeErrorKey, getSchemeNeeds, mergeArrivals, pendingNeeds } from "./scheme-helpers";
+import {
+  buildSchemePayload,
+  getSchemeErrorKey,
+  getSchemeNeeds,
+  mergeArrivals,
+  pendingNeeds,
+  schemeRows,
+} from "./scheme-helpers";
 
 describe("scheme helpers", () => {
   it("drops types that follow the default and builds mappings", () => {
@@ -58,5 +65,27 @@ describe("scheme helpers", () => {
   it("falls back to the default key for codes without a message and field errors", () => {
     expect(getSchemeErrorKey({ scheme: ["status_in_use"] })).toBe("workflows.scheme.errors.default");
     expect(getSchemeErrorKey({ mappings: ["duplicate"] })).toBe("workflows.scheme.errors.default");
+  });
+});
+
+describe("schemeRows", () => {
+  it("returns nothing for a project without a scheme", () => {
+    expect(schemeRows({ default_workflow_id: null, items: [] })).toEqual([]);
+  });
+
+  it("puts the default workflow first and groups the types of each other workflow", () => {
+    expect(
+      schemeRows({
+        default_workflow_id: "default",
+        items: [
+          { issue_type_id: "bug", workflow_id: "strict" },
+          { issue_type_id: "task", workflow_id: "default" },
+          { issue_type_id: "story", workflow_id: "strict" },
+        ],
+      })
+    ).toEqual([
+      { workflowId: "default", isDefault: true, typeIds: ["task"] },
+      { workflowId: "strict", isDefault: false, typeIds: ["bug", "story"] },
+    ]);
   });
 });

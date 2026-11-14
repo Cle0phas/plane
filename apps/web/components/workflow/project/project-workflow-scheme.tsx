@@ -6,15 +6,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
+import Link from "next/link";
 import { Button } from "@makeplane/propel/components/button";
 import { ConfirmDialog } from "@plane/blocks/dialog";
 import { setToast } from "@plane/blocks/toast";
+import { EUserPermissions, EUserPermissionsLevel } from "@plane/constants";
 import { useTranslation } from "@plane/i18n";
 import type { TWorkflowMappingNeed } from "@plane/types";
 // hooks
 import { useProjectState } from "@/hooks/store/use-project-state";
 import { useWorkItemType } from "@/hooks/store/use-work-item-type";
 import { useWorkflow } from "@/hooks/store/use-workflow";
+import { useUserPermissions } from "@/hooks/store/user";
 // local imports
 import {
   buildSchemePayload,
@@ -23,9 +26,13 @@ import {
   mergeArrivals,
   needKey,
   pendingNeeds,
+  schemeRows,
 } from "./scheme-helpers";
 
 type Props = { workspaceSlug: string; projectId: string };
+
+// Shown when a workflow or a type is unknown to the stores (deleted meanwhile, or not loaded yet).
+const UNKNOWN = "-";
 
 const SELECT_CLASS = "rounded-md border border-subtle bg-layer-1 px-2 py-1.5 text-body-sm-regular";
 
@@ -54,6 +61,14 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [isDetachOpen, setIsDetachOpen] = useState(false);
+  // The wizard only shows while linking or changing; a linked project shows its table.
+  const [isEditing, setIsEditing] = useState(false);
+  const { allowPermissions } = useUserPermissions();
+  // Display only (A2, A4): the server refuses every write from anyone else.
+  const isWorkspaceAdmin = allowPermissions([EUserPermissions.ADMIN], EUserPermissionsLevel.WORKSPACE);
+  const canManage = allowPermissions([EUserPermissions.ADMIN], EUserPermissionsLevel.PROJECT, workspaceSlug, projectId);
+  const rows = scheme ? schemeRows(scheme) : [];
+  const isLinked = rows.length > 0;
 
   // A revalidated scheme must not overwrite what the user is editing.
   const isPristine = useRef(true);
@@ -101,6 +116,7 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
       isPristine.current = true;
       setSyncTick((tick) => tick + 1);
       setNeeds(null);
+      setIsEditing(false);
       setToast({ type: "success", title: t("workflows.scheme.applied"), message: "" });
     } catch (error) {
       const refreshed = getSchemeNeeds(error);
@@ -122,6 +138,7 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
       isPristine.current = true;
       setSyncTick((tick) => tick + 1);
       setIsDetachOpen(false);
+      setIsEditing(false);
       setToast({ type: "success", title: t("workflows.scheme.detached"), message: "" });
     } catch (error) {
       setIsDetachOpen(false);
@@ -133,69 +150,41 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
 
   const workflowName = (workflowId: string) => workflows.find((workflow) => workflow.id === workflowId)?.name ?? "";
 
+  const cancelEditing = () => {
+    isPristine.current = true;
+    setSyncTick((tick) => tick + 1);
+    setNeeds(null);
+    setErrorKey(null);
+    setIsEditing(false);
+  };
+
   return (
     <div className="space-y-6">
-      {!scheme?.default_workflow_id && (
-        <p className="text-body-sm-regular text-secondary">{t("workflows.scheme.free")}</p>
-      )}
-      {errorKey && (
-        <p role="alert" className="text-body-sm-regular text-danger-primary">
-          {t(errorKey)}
-        </p>
-      )}
-      {needs === null ? (
-        <div className="space-y-4">
-          <label className="flex flex-col gap-1 text-body-xs-medium text-secondary">
-            {t("workflows.scheme.default_workflow")}
-            <select
-              className={SELECT_CLASS}
-              value={defaultWorkflowId}
-              onChange={(event) => {
-                isPristine.current = false;
-                setDefaultWorkflowId(event.target.value);
-              }}
-            >
-              <option value="" disabled>
-                {t("workflows.scheme.choose")}
-              </option>
-              {workflows.map((workflow) => (
-                <option key={workflow.id} value={workflow.id}>
-                  {workflow.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          {types.map((type) => (
-            <label key={type.id} className="flex flex-col gap-1 text-body-xs-medium text-secondary">
-              {t("workflows.scheme.per_type", { type: type.name })}
-              <select
-                className={SELECT_CLASS}
-                value={typeChoices[type.id] ?? ""}
-                onChange={(event) => {
-                  isPristine.current = false;
-                  setTypeChoices((current) => ({ ...current, [type.id]: event.target.value }));
-                }}
-              >
-                <option value="">{t("workflows.scheme.same_as_default")}</option>
-                {workflows.map((workflow) => (
-                  <option key={workflow.id} value={workflow.id}>
-                    {workflow.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ))}
-          <div className="flex gap-2">
+      {!isLinked && !isEditing && (
+        <div className="space-y-3">
+          <p className="text-body-sm-regular text-secondary">{t("workflows.scheme.free")}</p>
+          {canManage && (
             <Button
               variant="primary"
               size="md"
               stretch="auto"
-              disabled={!defaultWorkflowId}
-              loading={isBusy}
-              label={t("workflows.scheme.next")}
-              onClick={goToMapping}
+              label={t("workflows.scheme.link")}
+              onClick={() => setIsEditing(true)}
             />
-            {scheme?.default_workflow_id && (
+          )}
+        </div>
+      )}
+      {isLinked && !isEditing && (
+        <div className="space-y-3">
+          {canManage && (
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button
+                variant="secondary"
+                size="md"
+                stretch="auto"
+                label={t("workflows.scheme.change")}
+                onClick={() => setIsEditing(true)}
+              />
               <Button
                 variant="danger-outline"
                 size="md"
@@ -203,64 +192,177 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
                 label={t("workflows.scheme.detach")}
                 onClick={() => setIsDetachOpen(true)}
               />
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <h3 className="text-body-md-medium text-primary">{t("workflows.scheme.mapping.title")}</h3>
-          {needs.length === 0 ? (
-            <p className="text-body-sm-regular text-secondary">{t("workflows.scheme.mapping.none")}</p>
-          ) : (
-            <>
-              <p className="text-body-sm-regular text-secondary">{t("workflows.scheme.mapping.description")}</p>
-              {needs.map((need) => (
-                <label key={needKey(need)} className="flex flex-col gap-1 text-body-xs-medium text-secondary">
-                  {t("workflows.scheme.mapping.row", {
-                    state: need.state_name,
-                    workflow: workflowName(need.workflow_id),
-                    count: need.issue_count,
-                  })}
-                  <select
-                    className={SELECT_CLASS}
-                    value={arrivals[needKey(need)] ?? ""}
-                    onChange={(event) =>
-                      setArrivals((current) => ({ ...current, [needKey(need)]: event.target.value }))
-                    }
-                  >
-                    <option value="" disabled>
-                      {t("workflows.scheme.mapping.pick")}
-                    </option>
-                    {(getWorkflowDetail(need.workflow_id)?.states ?? []).map((state) => (
-                      <option key={state.status.id} value={state.status.id}>
-                        {state.status.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ))}
-            </>
+            </div>
           )}
-          <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              size="md"
-              stretch="auto"
-              label={t("workflows.scheme.back")}
-              onClick={() => setNeeds(null)}
-            />
-            <Button
-              variant="primary"
-              size="md"
-              stretch="auto"
-              loading={isBusy}
-              disabled={needs.some((need) => !arrivals[needKey(need)])}
-              label={t("workflows.scheme.apply")}
-              onClick={apply}
-            />
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[560px] border-separate border-spacing-0" aria-label={t("workflows.label")}>
+              <thead>
+                <tr className="text-left text-body-xs-medium text-secondary">
+                  {(isWorkspaceAdmin
+                    ? (["workflow", "types", "actions"] as const)
+                    : (["workflow", "types"] as const)
+                  ).map((column) => (
+                    <th key={column} scope="col" className="border-b border-subtle p-2">
+                      {t(`workflows.scheme.table.${column}`)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => {
+                  const href = `/${workspaceSlug}/settings/workflows/${row.workflowId}`;
+                  const typeNames = row.typeIds.map(
+                    (typeId) => types.find((type) => type.id === typeId)?.name ?? UNKNOWN
+                  );
+                  return (
+                    <tr key={row.workflowId} className="align-top text-body-sm-regular text-primary">
+                      <td className="border-b border-subtle p-2">
+                        <Link href={href} className="text-body-sm-medium hover:underline">
+                          {workflowName(row.workflowId) || UNKNOWN}
+                        </Link>
+                      </td>
+                      <td className="border-b border-subtle p-2 text-secondary">
+                        {[...typeNames, ...(row.isDefault ? [t("workflows.scheme.other_types")] : [])].join(", ")}
+                      </td>
+                      {isWorkspaceAdmin && (
+                        <td className="border-b border-subtle p-2">
+                          <Link href={href} className="text-body-xs-medium text-accent-primary hover:underline">
+                            {t("workflows.scheme.edit_workflow")}
+                          </Link>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
+      {errorKey && (
+        <p role="alert" className="text-body-sm-regular text-danger-primary">
+          {t(errorKey)}
+        </p>
+      )}
+      {isEditing &&
+        canManage &&
+        (needs === null ? (
+          <div className="space-y-4">
+            <label className="flex flex-col gap-1 text-body-xs-medium text-secondary">
+              {t("workflows.scheme.default_workflow")}
+              <select
+                className={SELECT_CLASS}
+                value={defaultWorkflowId}
+                onChange={(event) => {
+                  isPristine.current = false;
+                  setDefaultWorkflowId(event.target.value);
+                }}
+              >
+                <option value="" disabled>
+                  {t("workflows.scheme.choose")}
+                </option>
+                {workflows.map((workflow) => (
+                  <option key={workflow.id} value={workflow.id}>
+                    {workflow.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {types.map((type) => (
+              <label key={type.id} className="flex flex-col gap-1 text-body-xs-medium text-secondary">
+                {t("workflows.scheme.per_type", { type: type.name })}
+                <select
+                  className={SELECT_CLASS}
+                  value={typeChoices[type.id] ?? ""}
+                  onChange={(event) => {
+                    isPristine.current = false;
+                    setTypeChoices((current) => ({ ...current, [type.id]: event.target.value }));
+                  }}
+                >
+                  <option value="">{t("workflows.scheme.same_as_default")}</option>
+                  {workflows.map((workflow) => (
+                    <option key={workflow.id} value={workflow.id}>
+                      {workflow.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+            <div className="flex gap-2">
+              <Button
+                variant="primary"
+                size="md"
+                stretch="auto"
+                disabled={!defaultWorkflowId}
+                loading={isBusy}
+                label={t("workflows.scheme.next")}
+                onClick={goToMapping}
+              />
+              <Button
+                variant="secondary"
+                size="md"
+                stretch="auto"
+                disabled={isBusy}
+                label={t("workflows.settings.form.cancel")}
+                onClick={cancelEditing}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <h3 className="text-body-md-medium text-primary">{t("workflows.scheme.mapping.title")}</h3>
+            {needs.length === 0 ? (
+              <p className="text-body-sm-regular text-secondary">{t("workflows.scheme.mapping.none")}</p>
+            ) : (
+              <>
+                <p className="text-body-sm-regular text-secondary">{t("workflows.scheme.mapping.description")}</p>
+                {needs.map((need) => (
+                  <label key={needKey(need)} className="flex flex-col gap-1 text-body-xs-medium text-secondary">
+                    {t("workflows.scheme.mapping.row", {
+                      state: need.state_name,
+                      workflow: workflowName(need.workflow_id),
+                      count: need.issue_count,
+                    })}
+                    <select
+                      className={SELECT_CLASS}
+                      value={arrivals[needKey(need)] ?? ""}
+                      onChange={(event) =>
+                        setArrivals((current) => ({ ...current, [needKey(need)]: event.target.value }))
+                      }
+                    >
+                      <option value="" disabled>
+                        {t("workflows.scheme.mapping.pick")}
+                      </option>
+                      {(getWorkflowDetail(need.workflow_id)?.states ?? []).map((state) => (
+                        <option key={state.status.id} value={state.status.id}>
+                          {state.status.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ))}
+              </>
+            )}
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                size="md"
+                stretch="auto"
+                label={t("workflows.scheme.back")}
+                onClick={() => setNeeds(null)}
+              />
+              <Button
+                variant="primary"
+                size="md"
+                stretch="auto"
+                loading={isBusy}
+                disabled={needs.some((need) => !arrivals[needKey(need)])}
+                label={t("workflows.scheme.apply")}
+                onClick={apply}
+              />
+            </div>
+          </div>
+        ))}
       <ConfirmDialog
         handleClose={() => setIsDetachOpen(false)}
         handleSubmit={detach}
