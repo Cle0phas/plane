@@ -291,7 +291,9 @@
       "table": {
         "workflow": "工作流程",
         "types": "工作項目類型",
-        "actions": "動作"
+        "actions": "動作",
+        "unknown_workflow": "未知工作流程",
+        "edit_named": "編輯工作流程 {name}"
       }
     },
     "managed_states": {

@@ -291,7 +291,9 @@
       "table": {
         "workflow": "Quy trình làm việc",
         "types": "Loại mục công việc",
-        "actions": "Thao tác"
+        "actions": "Thao tác",
+        "unknown_workflow": "Quy trình làm việc không xác định",
+        "edit_named": "Chỉnh sửa quy trình làm việc {name}"
       }
     },
     "managed_states": {

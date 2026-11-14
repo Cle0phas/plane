@@ -291,7 +291,9 @@
       "table": {
         "workflow": "Workflow",
         "types": "Werkitemtypen",
-        "actions": "Acties"
+        "actions": "Acties",
+        "unknown_workflow": "Onbekende workflow",
+        "edit_named": "Workflow bewerken: {name}"
       }
     },
     "managed_states": {

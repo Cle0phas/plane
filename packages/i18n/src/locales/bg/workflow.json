@@ -291,7 +291,9 @@
       "table": {
         "workflow": "Работен процес",
         "types": "Типове работни елементи",
-        "actions": "Действия"
+        "actions": "Действия",
+        "unknown_workflow": "Неизвестен работен процес",
+        "edit_named": "Редактирай работния процес {name}"
       }
     },
     "managed_states": {

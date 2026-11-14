@@ -291,7 +291,9 @@
       "table": {
         "workflow": "Flux de lucru",
         "types": "Tipuri de elemente de lucru",
-        "actions": "Acțiuni"
+        "actions": "Acțiuni",
+        "unknown_workflow": "Flux de lucru necunoscut",
+        "edit_named": "Editează fluxul de lucru {name}"
       }
     },
     "managed_states": {

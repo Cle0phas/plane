@@ -291,7 +291,9 @@
       "table": {
         "workflow": "Workflow",
         "types": "Jenis item kerja",
-        "actions": "Tindakan"
+        "actions": "Tindakan",
+        "unknown_workflow": "Workflow tidak dikenal",
+        "edit_named": "Edit workflow {name}"
       }
     },
     "managed_states": {

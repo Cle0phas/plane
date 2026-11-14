@@ -291,7 +291,9 @@
       "table": {
         "workflow": "Pracovný postup",
         "types": "Typy pracovných položiek",
-        "actions": "Akcie"
+        "actions": "Akcie",
+        "unknown_workflow": "Neznámy pracovný postup",
+        "edit_named": "Upraviť pracovný postup {name}"
       }
     },
     "managed_states": {

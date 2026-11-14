@@ -291,7 +291,9 @@
       "table": {
         "workflow": "워크플로우",
         "types": "워크 아이템 유형",
-        "actions": "작업"
+        "actions": "작업",
+        "unknown_workflow": "알 수 없는 워크플로우",
+        "edit_named": "워크플로우 편집: {name}"
       }
     },
     "managed_states": {

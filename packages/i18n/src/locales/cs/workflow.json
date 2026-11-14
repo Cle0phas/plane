@@ -291,7 +291,9 @@
       "table": {
         "workflow": "Pracovní tok",
         "types": "Typy pracovních položek",
-        "actions": "Akce"
+        "actions": "Akce",
+        "unknown_workflow": "Neznámý pracovní tok",
+        "edit_named": "Upravit pracovní tok {name}"
       }
     },
     "managed_states": {

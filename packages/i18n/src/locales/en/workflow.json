@@ -291,7 +291,9 @@
       "table": {
         "workflow": "Workflow",
         "types": "Work item types",
-        "actions": "Actions"
+        "actions": "Actions",
+        "unknown_workflow": "Unknown workflow",
+        "edit_named": "Edit workflow {name}"
       }
     },
     "managed_states": {

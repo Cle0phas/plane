@@ -291,7 +291,9 @@
       "table": {
         "workflow": "İş akışı",
         "types": "İş öğesi türleri",
-        "actions": "İşlemler"
+        "actions": "İşlemler",
+        "unknown_workflow": "Bilinmeyen iş akışı",
+        "edit_named": "İş akışını düzenle: {name}"
       }
     },
     "managed_states": {

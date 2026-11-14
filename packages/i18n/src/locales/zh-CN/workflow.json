@@ -291,7 +291,9 @@
       "table": {
         "workflow": "工作流",
         "types": "工作项类型",
-        "actions": "操作"
+        "actions": "操作",
+        "unknown_workflow": "未知工作流",
+        "edit_named": "编辑工作流 {name}"
       }
     },
     "managed_states": {

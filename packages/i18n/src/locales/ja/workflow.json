@@ -291,7 +291,9 @@
       "table": {
         "workflow": "ワークフロー",
         "types": "作業項目タイプ",
-        "actions": "操作"
+        "actions": "操作",
+        "unknown_workflow": "不明なワークフロー",
+        "edit_named": "ワークフローを編集（{name}）"
       }
     },
     "managed_states": {

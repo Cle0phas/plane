@@ -291,7 +291,9 @@
       "table": {
         "workflow": "Воркфлоу",
         "types": "Типи робочих елементів",
-        "actions": "Дії"
+        "actions": "Дії",
+        "unknown_workflow": "Невідомий воркфлоу",
+        "edit_named": "Редагувати воркфлоу {name}"
       }
     },
     "managed_states": {

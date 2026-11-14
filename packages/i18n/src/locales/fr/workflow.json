@@ -291,7 +291,9 @@
       "table": {
         "workflow": "Workflow",
         "types": "Types de ticket",
-        "actions": "Actions"
+        "actions": "Actions",
+        "unknown_workflow": "Workflow inconnu",
+        "edit_named": "Modifier le workflow {name}"
       }
     },
     "managed_states": {
