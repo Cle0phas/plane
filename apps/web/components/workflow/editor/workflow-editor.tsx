@@ -104,6 +104,11 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
   // The store refreshes the statuses before a save resolves: the save reads them here, not from its closure.
   const statusesRef = useRef(statuses);
   statusesRef.current = statuses;
+  // Read through refs so the heartbeat never restarts because the page passed a new function.
+  const onPresenceRef = useRef(onPresence);
+  onPresenceRef.current = onPresence;
+  const canEditRef = useRef(canEdit);
+  canEditRef.current = canEdit;
 
   // A refresh (focus revalidation, status counts) must never wipe unsaved edits.
   useEffect(() => {
@@ -153,12 +158,12 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
   // One call both signals this admin's unsaved changes and reads the others' (Y4): at once when the
   // draft becomes dirty or clean, then every 30 seconds. A failure only hides the banner.
   useEffect(() => {
-    if (!canEdit || !onPresence) return;
+    if (!canEdit || !onPresenceRef.current) return;
     let isCurrent = true;
     const beat = async () => {
       let next: TWorkflowEditor[] = [];
       try {
-        next = await onPresence(dirty);
+        next = (await onPresenceRef.current?.(dirty)) ?? [];
       } catch {
         // Presence is a courtesy: a failure only hides the banner.
       }
@@ -170,12 +175,16 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
       isCurrent = false;
       window.clearInterval(timer);
     };
-  }, [canEdit, dirty, onPresence]);
+  }, [canEdit, dirty]);
   useEffect(
     () => () => {
-      if (canEdit) void onPresence?.(false).catch(() => undefined);
+      if (!canEditRef.current) return;
+      try {
+        void Promise.resolve(onPresenceRef.current?.(false)).catch(() => undefined);
+      } catch {
+        // Closing must never fail on a courtesy signal.
+      }
     },
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- on unmount only
     []
   );
 

@@ -460,6 +460,33 @@ describe("presence", () => {
     }
   });
 
+  it("keeps its timer when the page hands over a new callback", async () => {
+    vi.useFakeTimers();
+    try {
+      const first = vi.fn(async () => []);
+      const second = vi.fn(async () => []);
+      const view = renderEditor({ onPresence: first });
+      await act(() => vi.advanceTimersByTimeAsync(10_000));
+      view.rerender(editorOf({ onPresence: second }));
+      expect(first).toHaveBeenCalledTimes(1);
+      expect(second).not.toHaveBeenCalled();
+      await act(() => vi.advanceTimersByTimeAsync(20_000));
+      expect(second).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("signals the end of its changes when they are discarded", async () => {
+    const onPresence = vi.fn(async () => []);
+    renderEditor({ onPresence });
+    const user = userEvent.setup();
+    await addReview(user);
+    await waitFor(() => expect(onPresence).toHaveBeenLastCalledWith(true));
+    await user.click(screen.getByRole("button", { name: "workflows.editor.discard" }));
+    await waitFor(() => expect(onPresence).toHaveBeenLastCalledWith(false));
+  });
+
   it("hides the banner when the call fails", async () => {
     const onPresence = vi.fn().mockRejectedValue(new Error("down"));
     renderEditor({ onPresence });
