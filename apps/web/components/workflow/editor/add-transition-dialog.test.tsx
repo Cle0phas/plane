@@ -99,7 +99,11 @@ describe("AddTransitionDialog", () => {
     expect(screen.queryByRole("combobox", { name: TARGET })).toBeNull();
     const locked = screen.getByRole("textbox", { name: TARGET }) as HTMLInputElement;
     expect(locked.value).toBe("Beta");
-    expect(locked.disabled).toBe(true);
+    // Read-only rather than disabled: reachable by Tab, so a screen reader announces the fixed state.
+    expect(locked.readOnly).toBe(true);
+    expect(locked.disabled).toBe(false);
+    locked.focus();
+    expect(document.activeElement).toBe(locked);
     expect(screen.getByText(`${PREFIX}.locked`)).toBeTruthy();
     await user.click(screen.getByRole("checkbox", { name: "Gamma" }));
     await user.click(submit());
@@ -120,6 +124,22 @@ describe("AddTransitionDialog", () => {
       sources: [{ kind: "state", key: "a" }],
       target: { kind: "state", key: "c" },
     });
+  });
+
+  // I3: picking the locked state as target used to drop it from the sources, with no way back.
+  it("keeps the locked source out of the targets", async () => {
+    const { onAdd, user } = open({ side: "source", key: "a" });
+    const target = screen.getByRole("combobox", { name: TARGET });
+    expect((within(target).getByRole("option", { name: "Alpha" }) as HTMLOptionElement).disabled).toBe(true);
+    await user.selectOptions(target, "Gamma");
+    expect(submit().disabled).toBe(false);
+    await user.click(submit());
+    expect(onAdd.mock.calls[0][0].sources).toEqual([{ kind: "state", key: "a" }]);
+  });
+
+  it("keeps the locked target out of the sources", () => {
+    open({ side: "target", key: "b" });
+    expect((screen.getByRole("checkbox", { name: "Beta" }) as HTMLInputElement).disabled).toBe(true);
   });
 
   it("refuses a transition that already exists", async () => {

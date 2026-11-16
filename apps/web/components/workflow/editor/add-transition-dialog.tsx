@@ -99,7 +99,6 @@ export function AddTransitionDialog({ isOpen, draft, options, lock, onClose, onA
       <input
         id="workflow-transition-locked"
         type="text"
-        disabled
         readOnly
         value={stateName(draft, stateKey)}
         aria-describedby="workflow-transition-locked-note"
@@ -194,7 +193,12 @@ export function AddTransitionDialog({ isOpen, draft, options, lock, onClose, onA
                       {groups.map((group) => (
                         <optgroup key={group.label} label={group.label}>
                           {group.entries.map((entry) => (
-                            <option key={entry.value} value={entry.value}>
+                            <option
+                              key={entry.value}
+                              value={entry.value}
+                              // A locked source can never become the target: nothing could put it back.
+                              disabled={lockSide === "source" && entry.value === `${STATE}${lockKey}`}
+                            >
                               {entry.name}
                             </option>
                           ))}

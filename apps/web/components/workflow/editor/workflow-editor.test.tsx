@@ -115,7 +115,7 @@ describe("WorkflowEditor", () => {
     await user.click(screen.getByRole("button", { name: "workflows.editor.panel.add_incoming" }));
     const locked = screen.getByRole("textbox", { name: "workflows.editor.add_transition.target" }) as HTMLInputElement;
     expect(locked.value).toBe("Done");
-    expect(locked.disabled).toBe(true);
+    expect(locked.readOnly).toBe(true);
   });
 
   it("opens a workflow that has states", () => {
