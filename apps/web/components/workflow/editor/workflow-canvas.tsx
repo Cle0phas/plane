@@ -103,15 +103,19 @@ type TReadableFitProps = { stateCount: number; startKeys: string[]; lastKey?: st
 
 // Refits when a state is added or removed, never on a pan or a drag (R12), and never below the
 // readable zoom (D9): a diagram too large opens on its start, then follows the state just added.
-function ReadableFit({ stateCount, startKeys, lastKey }: TReadableFitProps) {
+export function ReadableFit({ stateCount, startKeys, lastKey }: TReadableFitProps) {
   const isMeasured = useNodesInitialized();
   const { fitView, getNodes, getNodesBounds } = useReactFlow();
   const width = useStore((state) => state.width);
   const height = useStore((state) => state.height);
+  // The store takes the draft's nodes one effect after the props: until it holds as many states as the
+  // draft, getNodes() describes the previous diagram and no decision can rest on it.
+  const storeStateCount = useStore((state) => state.nodes.filter((node) => node.id !== START_NODE_ID).length);
+  const hasSize = width > 0 && height > 0;
   const previousCount = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!isMeasured) return;
+    if (!isMeasured || !hasSize || storeStateCount !== stateCount || previousCount.current === stateCount) return;
     const isOpening = previousCount.current === null;
     const hasGrown = previousCount.current !== null && stateCount > previousCount.current;
     previousCount.current = stateCount;
@@ -123,7 +127,7 @@ function ReadableFit({ stateCount, startKeys, lastKey }: TReadableFitProps) {
       focus ? { ...FIT_VIEW_OPTIONS, minZoom: READABLE_ZOOM, nodes: focus.map((id) => ({ id })) } : FIT_VIEW_OPTIONS
     );
     // oxlint-disable-next-line react-hooks/exhaustive-deps -- a resize or a new callback identity must not move the view
-  }, [isMeasured, stateCount]);
+  }, [isMeasured, hasSize, stateCount, storeStateCount]);
 
   return null;
 }
