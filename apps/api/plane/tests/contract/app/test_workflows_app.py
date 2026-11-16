@@ -5,6 +5,7 @@
 from uuid import uuid4
 
 import pytest
+from django.core.cache import cache
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -32,6 +33,7 @@ WORKFLOW_URL = "/api/workspaces/{slug}/workflows/{pk}/"
 GRAPH_URL = "/api/workspaces/{slug}/workflows/{pk}/graph/"
 CANDIDATES_URL = "/api/workspaces/{slug}/workflow-statuses/candidates/"
 DUPLICATE_URL = "/api/workspaces/{slug}/workflows/{pk}/duplicate/"
+PRESENCE_URL = "/api/workspaces/{slug}/workflows/{pk}/presence/"
 
 
 def _client(user):
@@ -701,3 +703,89 @@ class TestStaleGraph:
         response = self._put(user, workspace, software, _graph_payload(software, [_new_state("Review")]))
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert WorkflowState.objects.filter(workflow=software).count() == 2
+
+
+def _admin(workspace, name):
+    user = UserFactory(display_name=name)
+    WorkspaceMember.objects.create(workspace=workspace, member=user, role=20)
+    return user
+
+
+def _editing_key(workflow, user):
+    return f"workflow_editing:{workflow.id}:{user.id}"
+
+
+@pytest.mark.contract
+@pytest.mark.django_db
+class TestPresence:
+    def _post(self, user, workspace, workflow, body=None):
+        url = PRESENCE_URL.format(slug=workspace.slug, pk=workflow.id)
+        return _client(user).post(url, {"editing": True} if body is None else body, format="json")
+
+    def test_an_editing_admin_is_seen_by_the_others_and_not_by_themself(self, workspace, users, software):
+        awa = _admin(workspace, "Awa")
+        own = self._post(awa, workspace, software)
+        assert own.status_code == status.HTTP_200_OK
+        assert own.data == {"editors": []}
+        seen = self._post(users["admin"], workspace, software, {"editing": False})
+        assert seen.data == {"editors": [{"id": str(awa.id), "display_name": "Awa"}]}
+
+    def test_false_clears_the_signal(self, workspace, users, software):
+        awa = _admin(workspace, "Awa")
+        self._post(awa, workspace, software)
+        self._post(awa, workspace, software, {"editing": False})
+        assert self._post(users["admin"], workspace, software, {"editing": False}).data == {"editors": []}
+
+    def test_the_signal_expires_by_itself(self, workspace, users, software):
+        self._post(users["admin"], workspace, software)
+        assert 0 < cache.ttl(_editing_key(software, users["admin"])) <= 75
+
+    def test_a_signal_on_another_workflow_is_not_listed(self, workspace, users, software):
+        other = build_workflow(workspace, "Bug", ["Open"])
+        self._post(_admin(workspace, "Awa"), workspace, other)
+        assert self._post(users["admin"], workspace, software, {"editing": False}).data == {"editors": []}
+
+    def test_editors_are_sorted_by_name_and_capped_at_ten(self, workspace, users, software):
+        for index in range(12):
+            cache.set(_editing_key(software, _admin(workspace, f"Admin {11 - index:02d}")), 1, timeout=75)
+        names = [item["display_name"] for item in self._post(users["admin"], workspace, software).data["editors"]]
+        assert names == [f"Admin {index:02d}" for index in range(10)]
+
+    def test_a_deactivated_admin_is_not_listed(self, workspace, users, software):
+        awa = _admin(workspace, "Awa")
+        self._post(awa, workspace, software)
+        WorkspaceMember.objects.filter(workspace=workspace, member=awa).update(is_active=False)
+        assert self._post(users["admin"], workspace, software, {"editing": False}).data == {"editors": []}
+
+    def test_the_identity_comes_from_the_session_never_from_the_body(self, workspace, users, software):
+        awa = _admin(workspace, "Awa")
+        self._post(users["admin"], workspace, software, {"editing": True, "user_id": str(awa.id)})
+        assert cache.get(_editing_key(software, awa)) is None
+        assert cache.get(_editing_key(software, users["admin"])) == 1
+
+    @pytest.mark.parametrize(
+        "body",
+        [{}, {"editing": "yes"}, {"editing": 1}, {"editing": None}, []],
+        ids=["missing", "text", "number", "null", "list"],
+    )
+    def test_a_body_without_a_strict_boolean_is_refused(self, workspace, users, software, body):
+        response = self._post(users["admin"], workspace, software, body)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert cache.get(_editing_key(software, users["admin"])) is None
+
+    @pytest.mark.parametrize("actor", ["project_admin", "member", "guest", "stranger", "foreign_admin"])
+    def test_only_workspace_admins_use_the_route(self, workspace, users, project, software, actor):
+        user = _refused_actors(workspace, users, project)[actor]
+        self._post(_admin(workspace, "Awa"), workspace, software)
+        response = self._post(user, workspace, software)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert "editors" not in response.data
+        assert cache.get(_editing_key(software, user)) is None
+
+    def test_a_workflow_of_another_workspace_looks_missing(self, workspace, users):
+        foreign = build_workflow(WorkspaceFactory(), "Foreign", ["A"])
+        hidden = self._post(users["admin"], workspace, foreign)
+        url = PRESENCE_URL.format(slug=workspace.slug, pk=uuid4())
+        missing = _client(users["admin"]).post(url, {"editing": True}, format="json")
+        assert hidden.status_code == missing.status_code == status.HTTP_404_NOT_FOUND
+        assert cache.get(_editing_key(foreign, users["admin"])) is None

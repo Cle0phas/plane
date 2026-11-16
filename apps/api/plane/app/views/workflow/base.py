@@ -3,6 +3,7 @@
 # See the LICENSE file for details.
 
 # Django imports
+from django.core.cache import cache
 from django.db import IntegrityError, transaction
 from django.db.models import Count, Prefetch
 
@@ -47,6 +48,9 @@ METHOD_NOT_ALLOWED = {"error": "Method not allowed on this route."}
 NOT_AN_OBJECT = {"error": "The payload must be an object."}
 WORKFLOW_NAME_CONSTRAINT = "workflow_unique_lower_name_workspace_when_deleted_at_null"
 STATUS_NAME_CONSTRAINT = "workflow_status_unique_lower_name_ws_when_deleted_at_null"
+# Seconds an editing signal lives without being renewed; the editor renews it every 30 seconds (spec 6.2).
+EDITING_TTL = 75
+MAX_EDITORS = 10
 
 
 def _constraint_name(error):
@@ -366,6 +370,43 @@ def scheme_body(project):
             workflow_graph(workflow) for workflow in Workflow.objects.filter(pk__in=workflow_ids).order_by("name")
         ],
     }
+
+
+def _editing_key(workflow_id, user_id):
+    return f"workflow_editing:{workflow_id}:{user_id}"
+
+
+class WorkflowPresenceEndpoint(BaseAPIView):
+    # Ephemeral and informative only: nothing is stored in the database or the audit trail (spec 6.2).
+    @allow_permission(allowed_roles=[ROLE.ADMIN], level="WORKSPACE")
+    def post(self, request, slug, pk):
+        if not isinstance(request.data, dict):
+            return Response(NOT_AN_OBJECT, status=status.HTTP_400_BAD_REQUEST)
+        editing = request.data.get("editing")
+        if editing is not True and editing is not False:
+            return Response({"editing": ["Must be true or false."]}, status=status.HTTP_400_BAD_REQUEST)
+        workflow = Workflow.objects.get(workspace__slug=slug, pk=pk)
+        # The identity is the session's, never a value of the body.
+        own = _editing_key(workflow.id, request.user.id)
+        if editing:
+            cache.set(own, 1, timeout=EDITING_TTL)
+        else:
+            cache.delete(own)
+        # One key per admin (Y3): read for every other active admin in one round trip.
+        admins = {
+            _editing_key(workflow.id, membership.member_id): membership.member
+            for membership in WorkspaceMember.objects.filter(
+                workspace_id=workflow.workspace_id, role=ROLE.ADMIN.value, is_active=True
+            )
+            .exclude(member_id=request.user.id)
+            .select_related("member")
+        }
+        present = cache.get_many(list(admins))
+        editors = sorted(
+            ({"id": str(admins[key].id), "display_name": admins[key].display_name} for key in present),
+            key=lambda editor: editor["display_name"].lower(),
+        )
+        return Response({"editors": editors[:MAX_EDITORS]}, status=status.HTTP_200_OK)
 
 
 class ProjectWorkflowSchemeEndpoint(BaseAPIView):

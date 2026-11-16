@@ -10,6 +10,7 @@ from plane.app.views import (
     WorkflowDuplicateEndpoint,
     WorkflowEndpoint,
     WorkflowGraphEndpoint,
+    WorkflowPresenceEndpoint,
     WorkflowStatusCandidatesEndpoint,
     WorkflowStatusEndpoint,
 )
@@ -31,6 +32,11 @@ urlpatterns = [
         "workspaces/<str:slug>/workflows/<uuid:pk>/duplicate/",
         WorkflowDuplicateEndpoint.as_view(),
         name="workflow-duplicate",
+    ),
+    path(
+        "workspaces/<str:slug>/workflows/<uuid:pk>/presence/",
+        WorkflowPresenceEndpoint.as_view(),
+        name="workflow-presence",
     ),
     path(
         "workspaces/<str:slug>/projects/<uuid:project_id>/workflow-scheme/",
