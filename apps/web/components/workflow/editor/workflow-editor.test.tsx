@@ -9,6 +9,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type {
   TWorkflowDetail,
+  TWorkflowEditor,
   TWorkflowGraphSavePayload,
   TWorkflowStatus,
   TWorkflowStatusCandidate,
@@ -518,8 +519,22 @@ describe("presence", () => {
   it("shows the other admins who are editing", async () => {
     const onPresence = vi.fn(async () => [{ id: "u", display_name: "Awa" }]);
     renderEditor({ onPresence });
-    expect((await screen.findByRole("status")).textContent).toBe("workflows.editor.presence");
+    await waitFor(() => expect(screen.getByRole("status").textContent).toBe("workflows.editor.presence"));
     expect(onPresence).toHaveBeenCalledWith(false);
+  });
+
+  // Screen readers announce a change inside a live region that already exists, not a region added with its text.
+  it("fills a live region mounted before the names arrive", async () => {
+    let answer!: (editors: TWorkflowEditor[]) => void;
+    const editors = new Promise<TWorkflowEditor[]>((resolve) => {
+      answer = resolve;
+    });
+    renderEditor({ onPresence: vi.fn(() => editors) });
+    const region = screen.getByRole("status");
+    expect(region.textContent).toBe("");
+    await act(async () => answer([{ id: "u", display_name: "Awa" }]));
+    expect(screen.getByRole("status")).toBe(region);
+    expect(region.textContent).toBe("workflows.editor.presence");
   });
 
   it("signals its own unsaved changes, then their end when it closes", async () => {
@@ -575,7 +590,7 @@ describe("presence", () => {
     const onPresence = vi.fn().mockRejectedValue(new Error("down"));
     renderEditor({ onPresence });
     await waitFor(() => expect(onPresence).toHaveBeenCalled());
-    expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.getByRole("status").textContent).toBe("");
   });
 
   it("is silent for a reader", () => {

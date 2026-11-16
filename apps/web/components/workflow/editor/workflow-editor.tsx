@@ -271,21 +271,22 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
         }}
         onClose={onClose}
       />
-      {notice && (
-        <p role="status" className="border-b border-subtle bg-layer-1 px-6 py-2 text-body-sm-regular text-secondary">
-          {t(notice)}
-        </p>
-      )}
-      {editors.length > 0 && (
-        <p role="status" className="border-b border-subtle bg-layer-1 px-6 py-2 text-body-sm-regular text-secondary">
-          {t("workflows.editor.presence", {
-            count: editors.length,
-            names: new Intl.ListFormat(currentLocale, { style: "long", type: "conjunction" }).format(
-              editors.map((editor) => editor.display_name)
-            ),
-          })}
-        </p>
-      )}
+      {/* Mounted before its text: screen readers announce a change inside an existing live region only. */}
+      <div role="status">
+        {notice && (
+          <p className="border-b border-subtle bg-layer-1 px-6 py-2 text-body-sm-regular text-secondary">{t(notice)}</p>
+        )}
+        {editors.length > 0 && (
+          <p className="border-b border-subtle bg-layer-1 px-6 py-2 text-body-sm-regular text-secondary">
+            {t("workflows.editor.presence", {
+              count: editors.length,
+              names: new Intl.ListFormat(currentLocale, { style: "long", type: "conjunction" }).format(
+                editors.map((editor) => editor.display_name)
+              ),
+            })}
+          </p>
+        )}
+      </div>
       {(errors.length > 0 || serverError) && (
         <div
           role="alert"
