@@ -195,11 +195,9 @@
         "duplicate": "Tento přechod už existuje."
       },
       "panel": {
-        "state": "Stav",
         "transition": "Přechod",
         "set_initial": "Nastavit jako počáteční stav",
         "initial": "Počáteční stav pracovního toku",
-        "shared": "{count, plural, one {Sdíleno s # dalším pracovním tokem: změny platí i tam.} few {Sdíleno s # dalšími pracovními toky: změny platí i tam.} many {Sdíleno s # dalšího pracovního toku: změny platí i tam.} other {Sdíleno s # dalšími pracovními toky: změny platí i tam.}}",
         "remove_state": "Odebrat z pracovního toku",
         "remove_transition": "Smazat přechod",
         "remove_source": "Odebrat zdrojový stav {name}",
@@ -207,8 +205,6 @@
         "empty_body": "Pracovní toky odpovídají způsobu práce vašeho týmu. Přidejte stavy, které se stanou sloupci nástěnky projektu, propojte je přechody a pomocí pravidel omezte, kdo je smí používat.",
         "empty_hint": "Vyberte stav a zobrazte jeho podrobnosti.",
         "color": "Barva sloupce",
-        "incoming": "Příchozí",
-        "outgoing": "Odchozí",
         "add_incoming": "Přidat příchozí přechod",
         "add_outgoing": "Přidat odchozí přechod",
         "collapse": "Sbalit panel",
@@ -313,12 +309,7 @@
     "scheme": {
       "description": "Vyberte pracovní tok, kterým se v tomto projektu řídí každý typ pracovní položky.",
       "free": "Tento projekt nepoužívá pracovní toky: jakákoli změna stavu je povolena.",
-      "default_workflow": "Výchozí pracovní tok",
-      "per_type": "Pracovní tok pro {type}",
-      "same_as_default": "Stejný jako výchozí pracovní tok",
       "choose": "Vybrat pracovní tok",
-      "next": "Pokračovat",
-      "back": "Zpět",
       "apply": "Použít",
       "detach": "Přestat používat pracovní toky",
       "detach_confirm": "Stavy zůstanou, bude je opět možné upravovat a jakákoli změna stavu bude znovu povolena.",
@@ -338,15 +329,12 @@
         "default": "Změnu se nepodařilo použít."
       },
       "link": "Propojit s pracovním tokem",
-      "change": "Změnit pracovní toky",
-      "edit_workflow": "Upravit pracovní tok",
       "other_types": "Všechny ostatní typy",
       "table": {
         "workflow": "Pracovní tok",
         "types": "Typy pracovních položek",
         "actions": "Akce",
-        "unknown_workflow": "Neznámý pracovní tok",
-        "edit_named": "Upravit pracovní tok {name}"
+        "unknown_workflow": "Neznámý pracovní tok"
       },
       "add": "Přidat pracovní tok",
       "add_submit": "Přidat",

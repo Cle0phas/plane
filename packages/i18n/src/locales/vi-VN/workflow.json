@@ -195,11 +195,9 @@
         "duplicate": "Chuyển tiếp này đã tồn tại."
       },
       "panel": {
-        "state": "Trạng thái",
         "transition": "Chuyển tiếp",
         "set_initial": "Đặt làm trạng thái ban đầu",
         "initial": "Trạng thái ban đầu của quy trình làm việc",
-        "shared": "{count, plural, one {Dùng chung với # quy trình làm việc khác: thay đổi cũng áp dụng ở đó.} other {Dùng chung với # quy trình làm việc khác: thay đổi cũng áp dụng ở đó.}}",
         "remove_state": "Gỡ khỏi quy trình làm việc",
         "remove_transition": "Xóa chuyển tiếp",
         "remove_source": "Gỡ trạng thái nguồn {name}",
@@ -207,8 +205,6 @@
         "empty_body": "Quy trình làm việc phản ánh cách nhóm của bạn làm việc. Thêm các trạng thái, chúng sẽ trở thành các cột trên bảng của dự án, sau đó nối chúng bằng các chuyển tiếp và dùng quy tắc để giới hạn ai được sử dụng.",
         "empty_hint": "Chọn một trạng thái để xem chi tiết.",
         "color": "Màu cột",
-        "incoming": "Chuyển tiếp đến",
-        "outgoing": "Chuyển tiếp đi",
         "add_incoming": "Thêm chuyển tiếp đến",
         "add_outgoing": "Thêm chuyển tiếp đi",
         "collapse": "Thu gọn bảng điều khiển",
@@ -313,12 +309,7 @@
     "scheme": {
       "description": "Chọn quy trình làm việc mà mỗi loại mục công việc tuân theo trong dự án này.",
       "free": "Dự án này không dùng quy trình làm việc: mọi thay đổi trạng thái đều được phép.",
-      "default_workflow": "Quy trình làm việc mặc định",
-      "per_type": "Quy trình làm việc cho {type}",
-      "same_as_default": "Giống quy trình làm việc mặc định",
       "choose": "Chọn quy trình làm việc",
-      "next": "Tiếp tục",
-      "back": "Quay lại",
       "apply": "Áp dụng",
       "detach": "Ngừng dùng quy trình làm việc",
       "detach_confirm": "Các trạng thái được giữ lại, có thể chỉnh sửa trở lại, và mọi thay đổi trạng thái lại được phép.",
@@ -338,15 +329,12 @@
         "default": "Không thể áp dụng thay đổi."
       },
       "link": "Liên kết với quy trình làm việc",
-      "change": "Thay đổi quy trình làm việc",
-      "edit_workflow": "Chỉnh sửa quy trình làm việc",
       "other_types": "Tất cả các loại khác",
       "table": {
         "workflow": "Quy trình làm việc",
         "types": "Loại mục công việc",
         "actions": "Thao tác",
-        "unknown_workflow": "Quy trình làm việc không xác định",
-        "edit_named": "Chỉnh sửa quy trình làm việc {name}"
+        "unknown_workflow": "Quy trình làm việc không xác định"
       },
       "add": "Thêm quy trình làm việc",
       "add_submit": "Thêm",

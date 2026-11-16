@@ -195,11 +195,9 @@
         "duplicate": "Esta transición ya existe."
       },
       "panel": {
-        "state": "Estado",
         "transition": "Transición",
         "set_initial": "Definir como estado inicial",
         "initial": "Estado inicial del workflow",
-        "shared": "{count, plural, one {Compartido con # otro workflow: los cambios se aplican también allí.} other {Compartido con # otros workflows: los cambios se aplican también allí.}}",
         "remove_state": "Quitar del workflow",
         "remove_transition": "Eliminar la transición",
         "remove_source": "Quitar el estado de origen {name}",
@@ -207,8 +205,6 @@
         "empty_body": "Los workflows se adaptan a la forma de trabajar de su equipo. Añada estados, que se convierten en las columnas del tablero de su proyecto, conéctelos con transiciones y limite con reglas quién puede usarlas.",
         "empty_hint": "Seleccione un estado para ver sus detalles.",
         "color": "Color de columna",
-        "incoming": "Entrantes",
-        "outgoing": "Salientes",
         "add_incoming": "Añadir una transición entrante",
         "add_outgoing": "Añadir una transición saliente",
         "collapse": "Contraer el panel",
@@ -313,12 +309,7 @@
     "scheme": {
       "description": "Elige el workflow que sigue cada tipo de elemento de trabajo en este proyecto.",
       "free": "Este proyecto no usa workflows: se permite cualquier cambio de estado.",
-      "default_workflow": "Workflow predeterminado",
-      "per_type": "Workflow para {type}",
-      "same_as_default": "Igual que el workflow predeterminado",
       "choose": "Elegir un workflow",
-      "next": "Continuar",
-      "back": "Atrás",
       "apply": "Aplicar",
       "detach": "Dejar de usar workflows",
       "detach_confirm": "Los estados se conservan, vuelven a ser editables y se permite de nuevo cualquier cambio de estado.",
@@ -338,15 +329,12 @@
         "default": "No se pudo aplicar el cambio."
       },
       "link": "Vincular a un workflow",
-      "change": "Cambiar workflows",
-      "edit_workflow": "Editar workflow",
       "other_types": "Todos los demás tipos",
       "table": {
         "workflow": "Workflow",
         "types": "Tipos de elemento de trabajo",
         "actions": "Acciones",
-        "unknown_workflow": "Workflow desconocido",
-        "edit_named": "Editar workflow {name}"
+        "unknown_workflow": "Workflow desconocido"
       },
       "add": "Añadir un workflow",
       "add_submit": "Añadir",

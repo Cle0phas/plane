@@ -195,11 +195,9 @@
         "duplicate": "Această tranziție există deja."
       },
       "panel": {
-        "state": "Stare",
         "transition": "Tranziție",
         "set_initial": "Setează ca stare inițială",
         "initial": "Starea inițială a fluxului de lucru",
-        "shared": "{count, plural, one {Partajată cu # alt flux de lucru: modificările se aplică și acolo.} few {Partajată cu # alte fluxuri de lucru: modificările se aplică și acolo.} other {Partajată cu # de alte fluxuri de lucru: modificările se aplică și acolo.}}",
         "remove_state": "Elimină din fluxul de lucru",
         "remove_transition": "Șterge tranziția",
         "remove_source": "Elimină starea sursă {name}",
@@ -207,8 +205,6 @@
         "empty_body": "Fluxurile de lucru reflectă modul de lucru al echipei dumneavoastră. Adăugați stări, care devin coloanele tablei proiectului, legați-le prin tranziții și limitați prin reguli cine le poate folosi.",
         "empty_hint": "Selectați o stare pentru a-i vedea detaliile.",
         "color": "Culoarea coloanei",
-        "incoming": "De intrare",
-        "outgoing": "De ieșire",
         "add_incoming": "Adaugă o tranziție de intrare",
         "add_outgoing": "Adaugă o tranziție de ieșire",
         "collapse": "Restrânge panoul",
@@ -313,12 +309,7 @@
     "scheme": {
       "description": "Alege fluxul de lucru urmat de fiecare tip de element de lucru în acest proiect.",
       "free": "Acest proiect nu folosește fluxuri de lucru: orice schimbare de stare este permisă.",
-      "default_workflow": "Flux de lucru implicit",
-      "per_type": "Flux de lucru pentru {type}",
-      "same_as_default": "La fel ca fluxul de lucru implicit",
       "choose": "Alege un flux de lucru",
-      "next": "Continuă",
-      "back": "Înapoi",
       "apply": "Aplică",
       "detach": "Nu mai folosi fluxuri de lucru",
       "detach_confirm": "Stările rămân, devin din nou editabile, iar orice schimbare de stare este din nou permisă.",
@@ -338,15 +329,12 @@
         "default": "Modificarea nu a putut fi aplicată."
       },
       "link": "Asociază cu un flux de lucru",
-      "change": "Schimbă fluxurile de lucru",
-      "edit_workflow": "Editează fluxul de lucru",
       "other_types": "Toate celelalte tipuri",
       "table": {
         "workflow": "Flux de lucru",
         "types": "Tipuri de elemente de lucru",
         "actions": "Acțiuni",
-        "unknown_workflow": "Flux de lucru necunoscut",
-        "edit_named": "Editează fluxul de lucru {name}"
+        "unknown_workflow": "Flux de lucru necunoscut"
       },
       "add": "Adaugă un flux de lucru",
       "add_submit": "Adaugă",

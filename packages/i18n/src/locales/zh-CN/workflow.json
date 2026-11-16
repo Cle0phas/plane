@@ -195,11 +195,9 @@
         "duplicate": "此转换已存在。"
       },
       "panel": {
-        "state": "状态",
         "transition": "转换",
         "set_initial": "设为初始状态",
         "initial": "工作流的初始状态",
-        "shared": "{count, plural, one {与另外 # 个工作流共享：更改也会应用到那里。} other {与另外 # 个工作流共享：更改也会应用到那里。}}",
         "remove_state": "从工作流中移除",
         "remove_transition": "删除转换",
         "remove_source": "移除源状态 {name}",
@@ -207,8 +205,6 @@
         "empty_body": "工作流与您团队的工作方式相匹配。添加状态（它们会成为项目看板的列），再用转换将其连接，并通过规则限制谁可以使用这些转换。",
         "empty_hint": "选择一个状态以查看其详细信息。",
         "color": "列颜色",
-        "incoming": "传入",
-        "outgoing": "传出",
         "add_incoming": "添加传入转换",
         "add_outgoing": "添加传出转换",
         "collapse": "收起面板",
@@ -313,12 +309,7 @@
     "scheme": {
       "description": "选择此项目中每种工作项类型所遵循的工作流。",
       "free": "此项目未使用工作流：允许任意状态变更。",
-      "default_workflow": "默认工作流",
-      "per_type": "{type}的工作流",
-      "same_as_default": "与默认工作流相同",
       "choose": "选择工作流",
-      "next": "继续",
-      "back": "返回",
       "apply": "应用",
       "detach": "停止使用工作流",
       "detach_confirm": "状态会保留并可再次编辑，且再次允许任意状态变更。",
@@ -338,15 +329,12 @@
         "default": "无法应用此更改。"
       },
       "link": "关联工作流",
-      "change": "更改工作流",
-      "edit_workflow": "编辑工作流",
       "other_types": "所有其他类型",
       "table": {
         "workflow": "工作流",
         "types": "工作项类型",
         "actions": "操作",
-        "unknown_workflow": "未知工作流",
-        "edit_named": "编辑工作流 {name}"
+        "unknown_workflow": "未知工作流"
       },
       "add": "添加工作流",
       "add_submit": "添加",

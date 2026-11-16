@@ -195,11 +195,9 @@
         "duplicate": "Questa transizione esiste già."
       },
       "panel": {
-        "state": "Stato",
         "transition": "Transizione",
         "set_initial": "Imposta come stato iniziale",
         "initial": "Stato iniziale del flusso di lavoro",
-        "shared": "{count, plural, one {Condiviso con # altro flusso di lavoro: le modifiche si applicano anche lì.} many {Condiviso con # altri flussi di lavoro: le modifiche si applicano anche lì.} other {Condiviso con # altri flussi di lavoro: le modifiche si applicano anche lì.}}",
         "remove_state": "Rimuovi dal flusso di lavoro",
         "remove_transition": "Elimina la transizione",
         "remove_source": "Rimuovi lo stato di origine {name}",
@@ -207,8 +205,6 @@
         "empty_body": "I flussi di lavoro rispecchiano il modo di lavorare del team. Aggiungere stati, che diventano le colonne della bacheca del progetto, collegarli con transizioni e limitare con regole chi può usarle.",
         "empty_hint": "Selezionare uno stato per vederne i dettagli.",
         "color": "Colore della colonna",
-        "incoming": "In entrata",
-        "outgoing": "In uscita",
         "add_incoming": "Aggiungi una transizione in entrata",
         "add_outgoing": "Aggiungi una transizione in uscita",
         "collapse": "Comprimi il pannello",
@@ -313,12 +309,7 @@
     "scheme": {
       "description": "Scegli il flusso di lavoro seguito da ogni tipo di elemento di lavoro in questo progetto.",
       "free": "Questo progetto non usa flussi di lavoro: ogni cambio di stato è consentito.",
-      "default_workflow": "Flusso di lavoro predefinito",
-      "per_type": "Flusso di lavoro per {type}",
-      "same_as_default": "Come il flusso di lavoro predefinito",
       "choose": "Scegli un flusso di lavoro",
-      "next": "Continua",
-      "back": "Indietro",
       "apply": "Applica",
       "detach": "Non usare più flussi di lavoro",
       "detach_confirm": "Gli stati restano, tornano modificabili e ogni cambio di stato è di nuovo consentito.",
@@ -338,15 +329,12 @@
         "default": "Impossibile applicare la modifica."
       },
       "link": "Collega a un flusso di lavoro",
-      "change": "Cambia flussi di lavoro",
-      "edit_workflow": "Modifica flusso di lavoro",
       "other_types": "Tutti gli altri tipi",
       "table": {
         "workflow": "Flusso di lavoro",
         "types": "Tipi di elemento di lavoro",
         "actions": "Azioni",
-        "unknown_workflow": "Flusso di lavoro sconosciuto",
-        "edit_named": "Modifica flusso di lavoro {name}"
+        "unknown_workflow": "Flusso di lavoro sconosciuto"
       },
       "add": "Aggiungi un flusso di lavoro",
       "add_submit": "Aggiungi",

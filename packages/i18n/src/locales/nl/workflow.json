@@ -195,11 +195,9 @@
         "duplicate": "Deze overgang bestaat al."
       },
       "panel": {
-        "state": "Status",
         "transition": "Overgang",
         "set_initial": "Instellen als beginstatus",
         "initial": "Beginstatus van de workflow",
-        "shared": "{count, plural, one {Gedeeld met # andere workflow: wijzigingen gelden daar ook.} other {Gedeeld met # andere workflows: wijzigingen gelden daar ook.}}",
         "remove_state": "Uit de workflow verwijderen",
         "remove_transition": "Overgang verwijderen",
         "remove_source": "Bronstatus {name} verwijderen",
@@ -207,8 +205,6 @@
         "empty_body": "Workflows sluiten aan bij de manier waarop je team werkt. Voeg statussen toe, die de kolommen van je projectbord worden, verbind ze met overgangen en beperk met regels wie ze mag gebruiken.",
         "empty_hint": "Selecteer een status om de details te bekijken.",
         "color": "Kolomkleur",
-        "incoming": "Inkomend",
-        "outgoing": "Uitgaand",
         "add_incoming": "Een inkomende overgang toevoegen",
         "add_outgoing": "Een uitgaande overgang toevoegen",
         "collapse": "Paneel samenvouwen",
@@ -313,12 +309,7 @@
     "scheme": {
       "description": "Kies welke workflow elk werkitemtype in dit project volgt.",
       "free": "Dit project gebruikt geen workflows: elke statuswijziging is toegestaan.",
-      "default_workflow": "Standaardworkflow",
-      "per_type": "Workflow voor {type}",
-      "same_as_default": "Hetzelfde als de standaardworkflow",
       "choose": "Kies een workflow",
-      "next": "Doorgaan",
-      "back": "Terug",
       "apply": "Toepassen",
       "detach": "Geen workflows meer gebruiken",
       "detach_confirm": "De statussen blijven bestaan, zijn weer te bewerken en elke statuswijziging is weer toegestaan.",
@@ -338,15 +329,12 @@
         "default": "De wijziging kon niet worden toegepast."
       },
       "link": "Koppelen aan een workflow",
-      "change": "Workflows wijzigen",
-      "edit_workflow": "Workflow bewerken",
       "other_types": "Alle andere typen",
       "table": {
         "workflow": "Workflow",
         "types": "Werkitemtypen",
         "actions": "Acties",
-        "unknown_workflow": "Onbekende workflow",
-        "edit_named": "Workflow bewerken: {name}"
+        "unknown_workflow": "Onbekende workflow"
       },
       "add": "Een workflow toevoegen",
       "add_submit": "Toevoegen",

@@ -195,11 +195,9 @@
         "duplicate": "Dieser Übergang existiert bereits."
       },
       "panel": {
-        "state": "Status",
         "transition": "Übergang",
         "set_initial": "Als Startstatus festlegen",
         "initial": "Startstatus des Workflows",
-        "shared": "{count, plural, one {Mit # weiteren Workflow geteilt: Änderungen gelten auch dort.} other {Mit # weiteren Workflows geteilt: Änderungen gelten auch dort.}}",
         "remove_state": "Aus dem Workflow entfernen",
         "remove_transition": "Übergang löschen",
         "remove_source": "Quellstatus {name} entfernen",
@@ -207,8 +205,6 @@
         "empty_body": "Workflows bilden die Arbeitsweise Ihres Teams ab. Fügen Sie Status hinzu, die zu den Spalten Ihres Projekt-Boards werden, verbinden Sie sie mit Übergängen und legen Sie mit Regeln fest, wer sie verwenden darf.",
         "empty_hint": "Wählen Sie einen Status aus, um seine Details zu sehen.",
         "color": "Spaltenfarbe",
-        "incoming": "Eingehend",
-        "outgoing": "Ausgehend",
         "add_incoming": "Eingehenden Übergang hinzufügen",
         "add_outgoing": "Ausgehenden Übergang hinzufügen",
         "collapse": "Bereich einklappen",
@@ -313,12 +309,7 @@
     "scheme": {
       "description": "Wählen Sie den Workflow, dem jeder Arbeitsaufgabentyp in diesem Projekt folgt.",
       "free": "Dieses Projekt verwendet keine Workflows: Jeder Statuswechsel ist erlaubt.",
-      "default_workflow": "Standard-Workflow",
-      "per_type": "Workflow für {type}",
-      "same_as_default": "Wie der Standard-Workflow",
       "choose": "Workflow auswählen",
-      "next": "Weiter",
-      "back": "Zurück",
       "apply": "Anwenden",
       "detach": "Workflows nicht mehr verwenden",
       "detach_confirm": "Die Status bleiben erhalten, sind wieder bearbeitbar, und jeder Statuswechsel ist wieder erlaubt.",
@@ -338,15 +329,12 @@
         "default": "Die Änderung konnte nicht angewendet werden."
       },
       "link": "Mit einem Workflow verknüpfen",
-      "change": "Workflows ändern",
-      "edit_workflow": "Workflow bearbeiten",
       "other_types": "Alle anderen Typen",
       "table": {
         "workflow": "Workflow",
         "types": "Arbeitsaufgabentypen",
         "actions": "Aktionen",
-        "unknown_workflow": "Unbekannter Workflow",
-        "edit_named": "Workflow bearbeiten: {name}"
+        "unknown_workflow": "Unbekannter Workflow"
       },
       "add": "Workflow hinzufügen",
       "add_submit": "Hinzufügen",

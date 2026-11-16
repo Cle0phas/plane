@@ -195,11 +195,9 @@
         "duplicate": "This transition already exists."
       },
       "panel": {
-        "state": "State",
         "transition": "Transition",
         "set_initial": "Set as start state",
         "initial": "Start state of the workflow",
-        "shared": "{count, plural, one {Shared with # other workflow: changes apply there too.} other {Shared with # other workflows: changes apply there too.}}",
         "remove_state": "Remove from workflow",
         "remove_transition": "Delete transition",
         "remove_source": "Remove the source state {name}",
@@ -207,8 +205,6 @@
         "empty_body": "Workflows match the way your team works. Add states, which become the columns of your project board, then link them with transitions and limit who may use them with rules.",
         "empty_hint": "Select a state to see its details.",
         "color": "Column color",
-        "incoming": "Incoming",
-        "outgoing": "Outgoing",
         "add_incoming": "Add an incoming transition",
         "add_outgoing": "Add an outgoing transition",
         "collapse": "Collapse panel",
@@ -313,12 +309,7 @@
     "scheme": {
       "description": "Choose the workflow each work item type follows in this project.",
       "free": "This project does not use workflows: any state change is allowed.",
-      "default_workflow": "Default workflow",
-      "per_type": "Workflow for {type}",
-      "same_as_default": "Same as the default workflow",
       "choose": "Choose a workflow",
-      "next": "Continue",
-      "back": "Back",
       "apply": "Apply",
       "detach": "Stop using workflows",
       "detach_confirm": "The states stay, become editable again, and any state change is allowed again.",
@@ -338,15 +329,12 @@
         "default": "The change could not be applied."
       },
       "link": "Link to a workflow",
-      "change": "Change workflows",
-      "edit_workflow": "Edit workflow",
       "other_types": "All other types",
       "table": {
         "workflow": "Workflow",
         "types": "Work item types",
         "actions": "Actions",
-        "unknown_workflow": "Unknown workflow",
-        "edit_named": "Edit workflow {name}"
+        "unknown_workflow": "Unknown workflow"
       },
       "add": "Add a workflow",
       "add_submit": "Add",

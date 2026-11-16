@@ -195,11 +195,9 @@
         "duplicate": "此轉換已存在。"
       },
       "panel": {
-        "state": "狀態",
         "transition": "轉換",
         "set_initial": "設為初始狀態",
         "initial": "工作流程的初始狀態",
-        "shared": "{count, plural, one {與另外 # 個工作流程共用：變更也會套用到那裡。} other {與另外 # 個工作流程共用：變更也會套用到那裡。}}",
         "remove_state": "從工作流程中移除",
         "remove_transition": "刪除轉換",
         "remove_source": "移除來源狀態 {name}",
@@ -207,8 +205,6 @@
         "empty_body": "工作流程符合您團隊的工作方式。新增狀態（它們會成為專案看板的欄），再以轉換將其連接，並透過規則限制誰可以使用這些轉換。",
         "empty_hint": "選取一個狀態以檢視其詳細資訊。",
         "color": "欄顏色",
-        "incoming": "傳入",
-        "outgoing": "傳出",
         "add_incoming": "新增傳入轉換",
         "add_outgoing": "新增傳出轉換",
         "collapse": "收合面板",
@@ -313,12 +309,7 @@
     "scheme": {
       "description": "選擇此專案中每種工作項目類型所遵循的工作流程。",
       "free": "此專案未使用工作流程：允許任何狀態變更。",
-      "default_workflow": "預設工作流程",
-      "per_type": "{type}的工作流程",
-      "same_as_default": "與預設工作流程相同",
       "choose": "選擇工作流程",
-      "next": "繼續",
-      "back": "返回",
       "apply": "套用",
       "detach": "停止使用工作流程",
       "detach_confirm": "狀態會保留並可再次編輯，且再次允許任何狀態變更。",
@@ -338,15 +329,12 @@
         "default": "無法套用此變更。"
       },
       "link": "連結至工作流程",
-      "change": "變更工作流程",
-      "edit_workflow": "編輯工作流程",
       "other_types": "所有其他類型",
       "table": {
         "workflow": "工作流程",
         "types": "工作項目類型",
         "actions": "動作",
-        "unknown_workflow": "未知工作流程",
-        "edit_named": "編輯工作流程 {name}"
+        "unknown_workflow": "未知工作流程"
       },
       "add": "新增工作流程",
       "add_submit": "新增",

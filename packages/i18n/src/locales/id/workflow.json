@@ -195,11 +195,9 @@
         "duplicate": "Transisi ini sudah ada."
       },
       "panel": {
-        "state": "Status",
         "transition": "Transisi",
         "set_initial": "Jadikan status awal",
         "initial": "Status awal workflow",
-        "shared": "{count, plural, one {Dibagikan dengan # workflow lain: perubahan berlaku juga di sana.} other {Dibagikan dengan # workflow lain: perubahan berlaku juga di sana.}}",
         "remove_state": "Hapus dari workflow",
         "remove_transition": "Hapus transisi",
         "remove_source": "Hapus status asal {name}",
@@ -207,8 +205,6 @@
         "empty_body": "Workflow menyesuaikan cara kerja tim Anda. Tambahkan status, yang menjadi kolom papan proyek Anda, lalu hubungkan dengan transisi dan batasi siapa yang boleh menggunakannya dengan aturan.",
         "empty_hint": "Pilih status untuk melihat detailnya.",
         "color": "Warna kolom",
-        "incoming": "Transisi masuk",
-        "outgoing": "Transisi keluar",
         "add_incoming": "Tambah transisi masuk",
         "add_outgoing": "Tambah transisi keluar",
         "collapse": "Ciutkan panel",
@@ -313,12 +309,7 @@
     "scheme": {
       "description": "Pilih workflow yang diikuti setiap jenis item kerja di proyek ini.",
       "free": "Proyek ini tidak menggunakan workflow: setiap perubahan status diizinkan.",
-      "default_workflow": "Workflow default",
-      "per_type": "Workflow untuk {type}",
-      "same_as_default": "Sama dengan workflow default",
       "choose": "Pilih workflow",
-      "next": "Lanjutkan",
-      "back": "Kembali",
       "apply": "Terapkan",
       "detach": "Berhenti menggunakan workflow",
       "detach_confirm": "Status tetap ada, dapat diedit kembali, dan setiap perubahan status diizinkan lagi.",
@@ -338,15 +329,12 @@
         "default": "Perubahan tidak dapat diterapkan."
       },
       "link": "Tautkan ke workflow",
-      "change": "Ubah workflow",
-      "edit_workflow": "Edit workflow",
       "other_types": "Semua jenis lainnya",
       "table": {
         "workflow": "Workflow",
         "types": "Jenis item kerja",
         "actions": "Tindakan",
-        "unknown_workflow": "Workflow tidak dikenal",
-        "edit_named": "Edit workflow {name}"
+        "unknown_workflow": "Workflow tidak dikenal"
       },
       "add": "Tambah workflow",
       "add_submit": "Tambah",

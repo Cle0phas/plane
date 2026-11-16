@@ -195,11 +195,9 @@
         "duplicate": "Bu geçiş zaten var."
       },
       "panel": {
-        "state": "Durum",
         "transition": "Geçiş",
         "set_initial": "Başlangıç durumu olarak ayarla",
         "initial": "İş akışının başlangıç durumu",
-        "shared": "{count, plural, one {Başka # iş akışıyla paylaşılıyor: değişiklikler orada da geçerli olur.} other {Başka # iş akışıyla paylaşılıyor: değişiklikler orada da geçerli olur.}}",
         "remove_state": "İş akışından kaldır",
         "remove_transition": "Geçişi sil",
         "remove_source": "{name} kaynak durumunu kaldır",
@@ -207,8 +205,6 @@
         "empty_body": "İş akışları ekibinizin çalışma biçimine uyar. Proje panonuzun sütunlarına dönüşen durumlar ekleyin, bunları geçişlerle bağlayın ve kimlerin kullanabileceğini kurallarla sınırlayın.",
         "empty_hint": "Ayrıntılarını görmek için bir durum seçin.",
         "color": "Sütun rengi",
-        "incoming": "Gelen",
-        "outgoing": "Giden",
         "add_incoming": "Gelen geçiş ekle",
         "add_outgoing": "Giden geçiş ekle",
         "collapse": "Paneli daralt",
@@ -313,12 +309,7 @@
     "scheme": {
       "description": "Bu projede her iş öğesi türünün izleyeceği iş akışını seçin.",
       "free": "Bu proje iş akışı kullanmıyor: her durum değişikliğine izin verilir.",
-      "default_workflow": "Varsayılan iş akışı",
-      "per_type": "{type} için iş akışı",
-      "same_as_default": "Varsayılan iş akışıyla aynı",
       "choose": "İş akışı seçin",
-      "next": "Devam",
-      "back": "Geri",
       "apply": "Uygula",
       "detach": "İş akışı kullanmayı bırak",
       "detach_confirm": "Durumlar kalır, yeniden düzenlenebilir olur ve her durum değişikliğine yeniden izin verilir.",
@@ -338,15 +329,12 @@
         "default": "Değişiklik uygulanamadı."
       },
       "link": "Bir iş akışına bağla",
-      "change": "İş akışlarını değiştir",
-      "edit_workflow": "İş akışını düzenle",
       "other_types": "Diğer tüm türler",
       "table": {
         "workflow": "İş akışı",
         "types": "İş öğesi türleri",
         "actions": "İşlemler",
-        "unknown_workflow": "Bilinmeyen iş akışı",
-        "edit_named": "İş akışını düzenle: {name}"
+        "unknown_workflow": "Bilinmeyen iş akışı"
       },
       "add": "İş akışı ekle",
       "add_submit": "Ekle",

@@ -195,11 +195,9 @@
         "duplicate": "Esta transição já existe."
       },
       "panel": {
-        "state": "Estado",
         "transition": "Transição",
         "set_initial": "Definir como estado inicial",
         "initial": "Estado inicial do fluxo de trabalho",
-        "shared": "{count, plural, one {Compartilhado com # outro fluxo de trabalho: as alterações valem lá também.} many {Compartilhado com # outros fluxos de trabalho: as alterações valem lá também.} other {Compartilhado com # outros fluxos de trabalho: as alterações valem lá também.}}",
         "remove_state": "Remover do fluxo de trabalho",
         "remove_transition": "Excluir a transição",
         "remove_source": "Remover o estado de origem {name}",
@@ -207,8 +205,6 @@
         "empty_body": "Os fluxos de trabalho refletem a forma como sua equipe trabalha. Adicione estados, que se tornam as colunas do quadro do projeto, conecte-os com transições e limite com regras quem pode usá-las.",
         "empty_hint": "Selecione um estado para ver os detalhes.",
         "color": "Cor da coluna",
-        "incoming": "Entrada",
-        "outgoing": "Saída",
         "add_incoming": "Adicionar uma transição de entrada",
         "add_outgoing": "Adicionar uma transição de saída",
         "collapse": "Recolher painel",
@@ -313,12 +309,7 @@
     "scheme": {
       "description": "Escolha o fluxo de trabalho que cada tipo de item de trabalho segue neste projeto.",
       "free": "Este projeto não usa fluxos de trabalho: qualquer mudança de estado é permitida.",
-      "default_workflow": "Fluxo de trabalho padrão",
-      "per_type": "Fluxo de trabalho para {type}",
-      "same_as_default": "Igual ao fluxo de trabalho padrão",
       "choose": "Escolher um fluxo de trabalho",
-      "next": "Continuar",
-      "back": "Voltar",
       "apply": "Aplicar",
       "detach": "Parar de usar fluxos de trabalho",
       "detach_confirm": "Os estados permanecem, voltam a ser editáveis e qualquer mudança de estado volta a ser permitida.",
@@ -338,15 +329,12 @@
         "default": "Não foi possível aplicar a alteração."
       },
       "link": "Vincular a um fluxo de trabalho",
-      "change": "Alterar fluxos de trabalho",
-      "edit_workflow": "Editar fluxo de trabalho",
       "other_types": "Todos os outros tipos",
       "table": {
         "workflow": "Fluxo de trabalho",
         "types": "Tipos de item de trabalho",
         "actions": "Ações",
-        "unknown_workflow": "Fluxo de trabalho desconhecido",
-        "edit_named": "Editar fluxo de trabalho {name}"
+        "unknown_workflow": "Fluxo de trabalho desconhecido"
       },
       "add": "Adicionar um fluxo de trabalho",
       "add_submit": "Adicionar",

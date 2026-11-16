@@ -195,11 +195,9 @@
         "duplicate": "Cette transition existe déjà."
       },
       "panel": {
-        "state": "État",
         "transition": "Transition",
         "set_initial": "Définir comme état de départ",
         "initial": "État de départ du workflow",
-        "shared": "{count, plural, one {Partagé avec # autre workflow : les changements s’y appliquent aussi.} many {Partagé avec # autres workflows : les changements s’y appliquent aussi.} other {Partagé avec # autres workflows : les changements s’y appliquent aussi.}}",
         "remove_state": "Retirer du workflow",
         "remove_transition": "Supprimer la transition",
         "remove_source": "Retirer l’état d’origine {name}",
@@ -207,8 +205,6 @@
         "empty_body": "Les workflows correspondent à la façon de travailler de votre équipe. Ajoutez des états, qui deviennent les colonnes du tableau de votre projet, reliez-les par des transitions et limitez par des règles qui peut les emprunter.",
         "empty_hint": "Sélectionnez un état pour consulter ses informations.",
         "color": "Couleur de colonne",
-        "incoming": "Entrant",
-        "outgoing": "Sortant",
         "add_incoming": "Ajouter une transition entrante",
         "add_outgoing": "Ajouter une transition sortante",
         "collapse": "Réduire le panneau",
@@ -313,12 +309,7 @@
     "scheme": {
       "description": "Choisissez le workflow que suit chaque type de ticket dans ce projet.",
       "free": "Ce projet n’utilise pas de workflow : tout changement d’état est permis.",
-      "default_workflow": "Workflow par défaut",
-      "per_type": "Workflow pour {type}",
-      "same_as_default": "Comme le workflow par défaut",
       "choose": "Choisir un workflow",
-      "next": "Continuer",
-      "back": "Retour",
       "apply": "Appliquer",
       "detach": "Ne plus utiliser de workflow",
       "detach_confirm": "Les états restent, redeviennent modifiables, et tout changement d’état est de nouveau permis.",
@@ -338,15 +329,12 @@
         "default": "Impossible d’appliquer le changement."
       },
       "link": "Relier à un workflow",
-      "change": "Changer les workflows",
-      "edit_workflow": "Modifier le workflow",
       "other_types": "Tous les autres types",
       "table": {
         "workflow": "Workflow",
         "types": "Types de ticket",
         "actions": "Actions",
-        "unknown_workflow": "Workflow inconnu",
-        "edit_named": "Modifier le workflow {name}"
+        "unknown_workflow": "Workflow inconnu"
       },
       "add": "Ajouter un workflow",
       "add_submit": "Ajouter",

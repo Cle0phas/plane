@@ -195,11 +195,9 @@
         "duplicate": "To przejście już istnieje."
       },
       "panel": {
-        "state": "Stan",
         "transition": "Przejście",
         "set_initial": "Ustaw jako stan początkowy",
         "initial": "Stan początkowy workflow",
-        "shared": "{count, plural, one {Współdzielony z # innym workflow: zmiany obowiązują tam także.} few {Współdzielony z # innymi workflowami: zmiany obowiązują tam także.} many {Współdzielony z # innymi workflowami: zmiany obowiązują tam także.} other {Współdzielony z # innego workflow: zmiany obowiązują tam także.}}",
         "remove_state": "Usuń z workflow",
         "remove_transition": "Usuń przejście",
         "remove_source": "Usuń stan źródłowy {name}",
@@ -207,8 +205,6 @@
         "empty_body": "Workflowy odzwierciedlają sposób pracy zespołu. Dodaj stany, które stają się kolumnami tablicy projektu, połącz je przejściami i za pomocą reguł ogranicz, kto może z nich korzystać.",
         "empty_hint": "Wybierz stan, aby zobaczyć jego szczegóły.",
         "color": "Kolor kolumny",
-        "incoming": "Przychodzące",
-        "outgoing": "Wychodzące",
         "add_incoming": "Dodaj przejście przychodzące",
         "add_outgoing": "Dodaj przejście wychodzące",
         "collapse": "Zwiń panel",
@@ -313,12 +309,7 @@
     "scheme": {
       "description": "Wybierz workflow, według którego działa każdy typ elementu pracy w tym projekcie.",
       "free": "Ten projekt nie używa workflowów: dozwolona jest każda zmiana stanu.",
-      "default_workflow": "Domyślny workflow",
-      "per_type": "Workflow dla {type}",
-      "same_as_default": "Taki sam jak domyślny workflow",
       "choose": "Wybierz workflow",
-      "next": "Dalej",
-      "back": "Wstecz",
       "apply": "Zastosuj",
       "detach": "Przestań używać workflowów",
       "detach_confirm": "Stany zostają, znów można je edytować, a każda zmiana stanu jest ponownie dozwolona.",
@@ -338,15 +329,12 @@
         "default": "Nie udało się zastosować zmiany."
       },
       "link": "Powiąż z workflow",
-      "change": "Zmień workflowy",
-      "edit_workflow": "Edytuj workflow",
       "other_types": "Wszystkie pozostałe typy",
       "table": {
         "workflow": "Workflow",
         "types": "Typy elementów pracy",
         "actions": "Akcje",
-        "unknown_workflow": "Nieznany workflow",
-        "edit_named": "Edytuj workflow {name}"
+        "unknown_workflow": "Nieznany workflow"
       },
       "add": "Dodaj workflow",
       "add_submit": "Dodaj",
