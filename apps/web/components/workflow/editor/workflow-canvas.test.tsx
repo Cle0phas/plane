@@ -504,3 +504,25 @@ describe("start link", () => {
     expect(screen.getByText("workflows.editor.start")).toBeTruthy();
   });
 });
+
+describe("keyboard instructions", () => {
+  it("are translated for who can edit", () => {
+    renderCanvas();
+    const config = flowProps.current?.ariaLabelConfig;
+    expect(config?.["node.a11yDescription.default"]).toBe("workflows.editor.a11y.node");
+    expect(config?.["node.a11yDescription.keyboardDisabled"]).toBe("workflows.editor.a11y.node_read_only");
+    expect(config?.["edge.a11yDescription.default"]).toBe("workflows.editor.a11y.edge");
+    expect(config?.["minimap.ariaLabel"]).toBe("workflows.editor.minimap");
+    expect(config?.["handle.ariaLabel"]).toBe("workflows.editor.a11y.handle");
+    expect(config?.["node.a11yDescription.ariaLiveMessage"]?.({ direction: "up", x: 12, y: 34 })).toBe(
+      'workflows.editor.a11y.moved {"x":12,"y":34}'
+    );
+  });
+
+  it("promise no move and no removal to a reader", () => {
+    renderCanvas({ canEdit: false });
+    expect(flowProps.current?.ariaLabelConfig?.["node.a11yDescription.default"]).toBe(
+      "workflows.editor.a11y.node_read_only"
+    );
+  });
+});

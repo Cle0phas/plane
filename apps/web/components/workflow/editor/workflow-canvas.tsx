@@ -276,6 +276,24 @@ export function WorkflowCanvas({
     // oxlint-disable-next-line react-hooks/exhaustive-deps -- t, transitionLabel and start (from draft) change identity on every render
   }, [draft, initial, selection, showLabels, canEdit, currentLocale]);
 
+  // React Flow's built-in screen reader instructions, in the interface language. Memoised: a new object on
+  // every render would be written to its store each time.
+  const ariaLabelConfig = useMemo(
+    () => ({
+      "node.a11yDescription.default": t(
+        canEdit ? "workflows.editor.a11y.node" : "workflows.editor.a11y.node_read_only"
+      ),
+      "node.a11yDescription.keyboardDisabled": t("workflows.editor.a11y.node_read_only"),
+      "node.a11yDescription.ariaLiveMessage": ({ x, y }: { x: number; y: number }) =>
+        t("workflows.editor.a11y.moved", { x, y }),
+      "edge.a11yDescription.default": t("workflows.editor.a11y.edge"),
+      "minimap.ariaLabel": t("workflows.editor.minimap"),
+      "handle.ariaLabel": t("workflows.editor.a11y.handle"),
+    }),
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- t is a new function on every render, the locale stands for it
+    [canEdit, currentLocale]
+  );
+
   const handleConnect = ({ source, target, sourceHandle, targetHandle }: Connection) => {
     if (!source || !target || source === target || target === START_NODE_ID) return;
     // An arrow drawn from the start node moves the start (R18).
@@ -299,6 +317,7 @@ export function WorkflowCanvas({
         nodes={nodes}
         edges={edges}
         nodeTypes={NODE_TYPES}
+        ariaLabelConfig={ariaLabelConfig}
         connectionMode={ConnectionMode.Loose}
         // Plane's tokens follow every theme (light, dark, high contrast, custom); colorMode only knows two.
         className="[--xy-attribution-background-color:var(--background-color-surface-2)] [&_.react-flow\_\_attribution_a]:text-tertiary"
@@ -382,7 +401,6 @@ export function WorkflowCanvas({
           bgColor="var(--background-color-surface-2)"
           maskColor="color-mix(in srgb, var(--text-color-tertiary) 15%, transparent)"
           nodeColor="var(--border-color-strong)"
-          ariaLabel={t("workflows.editor.minimap")}
         />
         <ReadableFit
           stateCount={draft.states.length}
