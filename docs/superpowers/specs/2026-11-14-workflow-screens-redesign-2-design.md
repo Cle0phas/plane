@@ -273,7 +273,7 @@ Une contrainte de vérification sur `WorkflowTransitionSource` limite `source_si
 
 ### 6.6 Lecture des workflows par les invités (O7, si accepté)
 
-Les routes de lecture `GET workflows/`, `GET workflows/<id>/` et `GET workflow-statuses/` passent de « admin, membre, invité » à « admin, membre ». La lecture du système d'un projet ne change pas (les écrans de tickets en ont besoin). L'éditeur affiche « non autorisé » à un invité.
+Les routes de lecture `GET workflows/`, `GET workflows/<id>/` et `GET workflow-statuses/` passent de « admin, membre, invité » à « admin, membre ». La lecture du système d'un projet, d'abord laissée à tout membre du workspace, est réservée depuis le 2026-11-16 aux membres actifs du projet (tout rôle, invité compris) et aux admins du workspace : les projets sont destinés à être secrets par défaut, il faut y être ajouté pour voir, et les écrans de tickets ne servent qu'aux membres du projet. Tout autre appelant reçoit le même refus 403, que le projet existe ou non (règle A3 de la spec du 2026-11-12). L'éditeur affiche « non autorisé » à un invité.
 
 ## 7. Points ouverts : recommandations
 

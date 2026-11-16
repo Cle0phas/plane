@@ -145,9 +145,11 @@ Pour un projet doté d'un système : lecture seule, bandeau « géré par le wor
 | ---- | ---------------------------------------------------------------------------------------------------------------------- |
 | A1   | Lire les workflows du workspace : tout membre du workspace (le diagramme sert à comprendre les passages).              |
 | A2   | Créer, modifier, supprimer un statut ou un workflow, ses états, transitions et règles : admin du workspace.            |
-| A3   | Lire le système d'un projet : tout membre du workspace.                                                                |
+| A3   | Lire le système d'un projet : membre actif du projet (tout rôle) ou admin du workspace (révisé le 2026-11-16).         |
 | A4   | Définir, modifier ou retirer le système d'un projet, lancer le rattachement : admin du projet ou admin du workspace.   |
 | A5   | Tout objet est résolu dans le workspace de l'URL ; un objet absent ou d'un autre workspace reçoit la même réponse 404. |
+
+A3, révisée le 2026-11-16 (avant : tout membre du workspace). Les projets sont destinés à être secrets par défaut : il faut y être ajouté pour voir son système, qui porte des noms d'états et les utilisateurs cités par les règles. Tout autre appelant du workspace, invité compris, reçoit le même refus 403, que le projet existe ou non dans le workspace ; le contrôle est fait par le serveur avant de chercher le projet. Les routes d'écriture, de retrait et d'aperçu (A4) ne changent pas.
 
 ## 7. Interface
 
