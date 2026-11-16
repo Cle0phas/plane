@@ -67,3 +67,37 @@ export const schemeRows = (scheme: Pick<TProjectWorkflowScheme, "default_workflo
   }
   return rows;
 };
+
+/** The scheme as the tab edits it: the default workflow, and the workflow of each type that has its own. */
+export type TSchemeChoice = { defaultWorkflowId: string; items: Record<string, string> };
+
+export const schemeChoice = (scheme: Pick<TProjectWorkflowScheme, "default_workflow_id" | "items">): TSchemeChoice => ({
+  defaultWorkflowId: scheme.default_workflow_id ?? "",
+  items: Object.fromEntries(scheme.items.map((item) => [item.issue_type_id, item.workflow_id])),
+});
+
+/** The workflow follows exactly these types; a type it had and lost goes back to the default workflow. */
+export const withWorkflowTypes = (choice: TSchemeChoice, workflowId: string, typeIds: string[]): TSchemeChoice => ({
+  ...choice,
+  items: {
+    ...Object.fromEntries(Object.entries(choice.items).filter(([, id]) => id !== workflowId)),
+    ...Object.fromEntries(typeIds.map((typeId) => [typeId, workflowId])),
+  },
+});
+
+export const withoutWorkflow = (choice: TSchemeChoice, workflowId: string) => withWorkflowTypes(choice, workflowId, []);
+
+/** Types that followed the new default workflow on their own line now follow it as the default. */
+export const withDefault = (choice: TSchemeChoice, workflowId: string): TSchemeChoice => ({
+  defaultWorkflowId: workflowId,
+  items: Object.fromEntries(Object.entries(choice.items).filter(([, id]) => id !== workflowId)),
+});
+
+/** Types a workflow may take: those on the default workflow, plus its own. */
+export const freeTypeIds = (choice: TSchemeChoice, typeIds: string[], ownWorkflowId?: string) =>
+  typeIds.filter((typeId) => choice.items[typeId] === undefined || choice.items[typeId] === ownWorkflowId);
+
+export const unusedWorkflowIds = (choice: TSchemeChoice, workflowIds: string[]) => {
+  const used = new Set([choice.defaultWorkflowId, ...Object.values(choice.items)]);
+  return workflowIds.filter((id) => !used.has(id));
+};

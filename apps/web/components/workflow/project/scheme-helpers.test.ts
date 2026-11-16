@@ -6,6 +6,12 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  freeTypeIds,
+  schemeChoice,
+  unusedWorkflowIds,
+  withDefault,
+  withWorkflowTypes,
+  withoutWorkflow,
   buildSchemePayload,
   getSchemeErrorKey,
   getSchemeNeeds,
@@ -87,5 +93,52 @@ describe("schemeRows", () => {
       { workflowId: "default", isDefault: true, typeIds: ["task"] },
       { workflowId: "strict", isDefault: false, typeIds: ["bug", "story"] },
     ]);
+  });
+});
+
+describe("scheme choice", () => {
+  const choice = schemeChoice({
+    default_workflow_id: "w-default",
+    items: [
+      { issue_type_id: "bug", workflow_id: "w-strict" },
+      { issue_type_id: "story", workflow_id: "w-strict" },
+    ],
+  });
+  const allTypes = ["bug", "story", "task", "epic"];
+
+  it("reads a scheme as a default workflow and a workflow per type", () => {
+    expect(choice).toEqual({ defaultWorkflowId: "w-default", items: { bug: "w-strict", story: "w-strict" } });
+    expect(schemeChoice({ default_workflow_id: null, items: [] })).toEqual({ defaultWorkflowId: "", items: {} });
+  });
+
+  it("gives a workflow exactly the chosen types", () => {
+    expect(withWorkflowTypes(choice, "w-free", ["task"]).items).toEqual({
+      bug: "w-strict",
+      story: "w-strict",
+      task: "w-free",
+    });
+    expect(withWorkflowTypes(choice, "w-strict", ["bug", "task"]).items).toEqual({ bug: "w-strict", task: "w-strict" });
+  });
+
+  it("sends the types of a removed workflow back to the default one", () => {
+    expect(withoutWorkflow(choice, "w-strict")).toEqual({ defaultWorkflowId: "w-default", items: {} });
+  });
+
+  it("replaces the default workflow and keeps the other lines", () => {
+    expect(withDefault(choice, "w-free")).toEqual({
+      defaultWorkflowId: "w-free",
+      items: { bug: "w-strict", story: "w-strict" },
+    });
+    // A workflow that becomes the default one no longer needs its own lines.
+    expect(withDefault(choice, "w-strict")).toEqual({ defaultWorkflowId: "w-strict", items: {} });
+  });
+
+  it("lists the types a workflow may take: the free ones and its own", () => {
+    expect(freeTypeIds(choice, allTypes)).toEqual(["task", "epic"]);
+    expect(freeTypeIds(choice, allTypes, "w-strict")).toEqual(allTypes);
+  });
+
+  it("lists the workflows that are not in the table yet", () => {
+    expect(unusedWorkflowIds(choice, ["w-default", "w-strict", "w-free"])).toEqual(["w-free"]);
   });
 });

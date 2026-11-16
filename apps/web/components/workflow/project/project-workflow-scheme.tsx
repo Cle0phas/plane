@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { observer } from "mobx-react";
 import Link from "next/link";
 import { Button } from "@makeplane/propel/components/button";
@@ -19,29 +19,48 @@ import { useWorkItemType } from "@/hooks/store/use-work-item-type";
 import { useWorkflow } from "@/hooks/store/use-workflow";
 import { useUserPermissions } from "@/hooks/store/user";
 // local imports
+import { SchemeFormDialog, SchemeMappingDialog, type TSchemeFormProps } from "./scheme-dialog";
 import {
   buildSchemePayload,
+  freeTypeIds,
   getSchemeErrorKey,
   getSchemeNeeds,
   mergeArrivals,
-  needKey,
   pendingNeeds,
+  schemeChoice,
   schemeRows,
+  unusedWorkflowIds,
+  withDefault,
+  withWorkflowTypes,
+  withoutWorkflow,
+  type TSchemeChoice,
 } from "./scheme-helpers";
 
 type Props = { workspaceSlug: string; projectId: string };
 
-// Shown when a workflow or a type is unknown to the stores (deleted meanwhile, or not loaded yet).
-const UNKNOWN = "-";
+type TAction =
+  | { kind: "link" }
+  | { kind: "add" }
+  | { kind: "replace" }
+  | { kind: "types"; workflowId: string }
+  | { kind: "remove"; workflowId: string };
+type TForm = Pick<
+  TSchemeFormProps,
+  "title" | "submitLabel" | "workflows" | "isWorkflowFixed" | "types" | "checkedTypeIds" | "notes" | "onSubmit"
+>;
 
-const SELECT_CLASS = "rounded-md border border-subtle bg-layer-1 px-2 py-1.5 text-body-sm-regular";
+// Shown for a type unknown to the store (deleted meanwhile, or not loaded yet).
+const UNKNOWN = "-";
+const ACTION_CLASS = "rounded-sm text-body-xs-medium text-accent-primary hover:underline max-md:min-h-11";
+const CELL_CLASS = "border-b border-subtle p-2";
 
 export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ workspaceSlug, projectId }: Props) {
-  const { t } = useTranslation();
+  const { t, currentLocale } = useTranslation();
   const {
     fetchWorkflows,
     getWorkspaceWorkflows,
     getProjectScheme,
+    fetchProjectScheme,
     fetchWorkflowDetail,
     getWorkflowDetail,
     previewProjectScheme,
@@ -50,78 +69,109 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
   } = useWorkflow();
   const { getProjectAssignableTypes } = useWorkItemType();
   const { fetchProjectStates } = useProjectState();
+  const { allowPermissions } = useUserPermissions();
+  // Display only (A4): the server refuses every write from anyone else.
+  const canManage = allowPermissions([EUserPermissions.ADMIN], EUserPermissionsLevel.PROJECT, workspaceSlug, projectId);
   const scheme = getProjectScheme(projectId);
   const workflows = getWorkspaceWorkflows(workspaceSlug);
-  const types = getProjectAssignableTypes(workspaceSlug, projectId);
+  const types = getProjectAssignableTypes(workspaceSlug, projectId).map((type) => ({
+    id: type.id as string,
+    name: type.name as string,
+  }));
 
-  const [defaultWorkflowId, setDefaultWorkflowId] = useState("");
-  const [typeChoices, setTypeChoices] = useState<Record<string, string>>({});
-  const [needs, setNeeds] = useState<TWorkflowMappingNeed[] | null>(null);
+  const [action, setAction] = useState<TAction | null>(null);
+  const [mapping, setMapping] = useState<{ choice: TSchemeChoice; needs: TWorkflowMappingNeed[] } | null>(null);
   const [arrivals, setArrivals] = useState<Record<string, string>>({});
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [isDetachOpen, setIsDetachOpen] = useState(false);
-  // The wizard only shows while linking or changing; a linked project shows its table.
-  const [isEditing, setIsEditing] = useState(false);
-  const { allowPermissions } = useUserPermissions();
-  // Display only (A2, A4): the server refuses every write from anyone else.
-  const isWorkspaceAdmin = allowPermissions([EUserPermissions.ADMIN], EUserPermissionsLevel.WORKSPACE, workspaceSlug);
-  const canManage = allowPermissions([EUserPermissions.ADMIN], EUserPermissionsLevel.PROJECT, workspaceSlug, projectId);
+
   const rows = scheme ? schemeRows(scheme) : [];
-  const isLinked = rows.length > 0;
+  const choice = schemeChoice(scheme ?? { default_workflow_id: null, items: [] });
+  const typeIds = types.map((type) => type.id);
+  const names = new Intl.ListFormat(currentLocale, { style: "short", type: "unit" });
+  const workflowName = (id: string) =>
+    workflows.find((workflow) => workflow.id === id)?.name ?? t("workflows.scheme.table.unknown_workflow");
+  const typeNames = (ids: string[]) =>
+    names.format(ids.map((id) => types.find((type) => type.id === id)?.name ?? UNKNOWN));
+  const toNamed = (id: string) => ({ id, name: workflowName(id) });
+  const unused = unusedWorkflowIds(
+    choice,
+    workflows.map((workflow) => workflow.id)
+  ).map(toNamed);
+  const typesFor = (ownWorkflowId?: string) => {
+    const free = freeTypeIds(choice, typeIds, ownWorkflowId);
+    return types.filter((type) => free.includes(type.id));
+  };
+  // Why a type is missing from the list: it already follows another workflow of the table.
+  const takenNotes = (exceptWorkflowId?: string) =>
+    rows
+      .filter((row) => !row.isDefault && row.typeIds.length > 0 && row.workflowId !== exceptWorkflowId)
+      .map((row) =>
+        t("workflows.scheme.taken_note", {
+          count: row.typeIds.length,
+          types: typeNames(row.typeIds),
+          workflow: workflowName(row.workflowId),
+        })
+      );
+  const addBlocker =
+    unused.length === 0 ? "workflows.scheme.no_workflow" : typesFor().length === 0 ? "workflows.scheme.no_type" : null;
 
-  // A revalidated scheme must not overwrite what the user is editing.
-  const isPristine = useRef(true);
-  // Bumped after a successful apply or detach so the form re-reads the scheme whatever the render order.
-  const [syncTick, setSyncTick] = useState(0);
-  useEffect(() => {
-    if (!isPristine.current || needs !== null) return;
-    setDefaultWorkflowId(scheme?.default_workflow_id ?? "");
-    setTypeChoices(Object.fromEntries((scheme?.items ?? []).map((item) => [item.issue_type_id, item.workflow_id])));
-  }, [scheme, needs, syncTick]);
+  const start = (next: TAction) => {
+    setErrorKey(null);
+    setAction(next);
+  };
+  const close = () => {
+    setAction(null);
+    setMapping(null);
+    setArrivals({});
+    setErrorKey(null);
+  };
 
-  const payload = (arrivalsOverride = arrivals) =>
-    buildSchemePayload(
-      defaultWorkflowId,
-      typeChoices,
-      arrivalsOverride,
-      types.map((type) => type.id as string)
+  const applyChoice = async (next: TSchemeChoice, chosen: Record<string, string>) => {
+    await applyProjectScheme(
+      workspaceSlug,
+      projectId,
+      buildSchemePayload(next.defaultWorkflowId, next.items, chosen, typeIds)
     );
+    await Promise.allSettled([fetchProjectStates(workspaceSlug, projectId), fetchWorkflows(workspaceSlug)]);
+    close();
+    setToast({ type: "success", title: t("workflows.scheme.applied"), message: "" });
+  };
 
-  const refresh = () =>
-    Promise.allSettled([fetchProjectStates(workspaceSlug, projectId), fetchWorkflows(workspaceSlug)]);
-
-  const goToMapping = async () => {
+  // Every change starts from the scheme the server holds now, not from the copy on screen (Y12), and
+  // is applied at once unless work items must change state (W10).
+  const run = async (change: (current: TSchemeChoice) => TSchemeChoice) => {
     setErrorKey(null);
     setIsBusy(true);
     try {
-      const chosen = new Set([defaultWorkflowId, ...Object.values(typeChoices).filter(Boolean)]);
-      await Promise.all([...chosen].map((workflowId) => fetchWorkflowDetail(workspaceSlug, workflowId)));
-      const pending = pendingNeeds(await previewProjectScheme(workspaceSlug, projectId, payload()));
-      setArrivals((current) => mergeArrivals(current, pending));
-      setNeeds(pending);
+      const next = change(schemeChoice(await fetchProjectScheme(workspaceSlug, projectId)));
+      const payload = buildSchemePayload(next.defaultWorkflowId, next.items, {}, typeIds);
+      const needs = pendingNeeds(await previewProjectScheme(workspaceSlug, projectId, payload));
+      if (needs.length === 0) return await applyChoice(next, {});
+      const involved = [...new Set(needs.map((need) => need.workflow_id))];
+      await Promise.all(involved.map((workflowId) => fetchWorkflowDetail(workspaceSlug, workflowId)));
+      setArrivals({});
+      setMapping({ choice: next, needs });
     } catch (error) {
+      // A confirmation has no room for a message: it closes and the page shows the refusal.
+      if (action?.kind === "remove") setAction(null);
       setErrorKey(getSchemeErrorKey(error));
     } finally {
       setIsBusy(false);
     }
   };
 
-  const apply = async () => {
+  const applyMapping = async () => {
+    if (!mapping) return;
     setErrorKey(null);
     setIsBusy(true);
     try {
-      await applyProjectScheme(workspaceSlug, projectId, payload());
-      await refresh();
-      isPristine.current = true;
-      setSyncTick((tick) => tick + 1);
-      setNeeds(null);
-      setIsEditing(false);
-      setToast({ type: "success", title: t("workflows.scheme.applied"), message: "" });
+      await applyChoice(mapping.choice, arrivals);
     } catch (error) {
       const refreshed = getSchemeNeeds(error);
       if (refreshed) {
-        setNeeds(refreshed);
+        setMapping({ choice: mapping.choice, needs: refreshed });
         setArrivals((current) => mergeArrivals(current, refreshed));
       }
       setErrorKey(getSchemeErrorKey(error));
@@ -134,38 +184,62 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
     setIsBusy(true);
     try {
       await detachProjectScheme(workspaceSlug, projectId);
-      await refresh();
-      isPristine.current = true;
-      setSyncTick((tick) => tick + 1);
-      setIsDetachOpen(false);
-      setIsEditing(false);
+      await Promise.allSettled([fetchProjectStates(workspaceSlug, projectId), fetchWorkflows(workspaceSlug)]);
       setToast({ type: "success", title: t("workflows.scheme.detached"), message: "" });
     } catch (error) {
-      setIsDetachOpen(false);
       setErrorKey(getSchemeErrorKey(error));
     } finally {
+      setIsDetachOpen(false);
       setIsBusy(false);
     }
   };
 
-  const workflowName = (workflowId: string) => workflows.find((workflow) => workflow.id === workflowId)?.name ?? "";
-
-  const startEditing = () => {
-    setErrorKey(null);
-    setIsEditing(true);
+  const formOf = (current: TAction | null): TForm | null => {
+    if (current?.kind === "link")
+      return {
+        title: t("workflows.scheme.link"),
+        submitLabel: t("workflows.scheme.link_submit"),
+        workflows: workflows.map((workflow) => toNamed(workflow.id)),
+        notes: [t("workflows.scheme.link_note")],
+        onSubmit: (workflowId) => void run(() => ({ defaultWorkflowId: workflowId, items: {} })),
+      };
+    if (current?.kind === "add")
+      return {
+        title: t("workflows.scheme.add"),
+        submitLabel: t("workflows.scheme.add_submit"),
+        workflows: unused,
+        types: typesFor(),
+        notes: [...takenNotes(), t("workflows.scheme.unchecked_note")],
+        onSubmit: (workflowId, ids) => void run((latest) => withWorkflowTypes(latest, workflowId, ids)),
+      };
+    if (current?.kind === "types")
+      return {
+        title: t("workflows.scheme.edit_types_named", { name: workflowName(current.workflowId) }),
+        submitLabel: t("workflows.scheme.apply"),
+        workflows: [toNamed(current.workflowId)],
+        isWorkflowFixed: true,
+        types: typesFor(current.workflowId),
+        checkedTypeIds: rows.find((row) => row.workflowId === current.workflowId)?.typeIds ?? [],
+        notes: [...takenNotes(current.workflowId), t("workflows.scheme.unchecked_note")],
+        onSubmit: (workflowId, ids) => void run((latest) => withWorkflowTypes(latest, workflowId, ids)),
+      };
+    if (current?.kind === "replace")
+      return {
+        title: t("workflows.scheme.replace_title"),
+        submitLabel: t("workflows.scheme.replace"),
+        workflows: unused,
+        notes: [t("workflows.scheme.link_note")],
+        onSubmit: (workflowId) => void run((latest) => withDefault(latest, workflowId)),
+      };
+    return null;
   };
-
-  const cancelEditing = () => {
-    isPristine.current = true;
-    setSyncTick((tick) => tick + 1);
-    setNeeds(null);
-    setErrorKey(null);
-    setIsEditing(false);
-  };
+  const form = formOf(action);
+  const removed = action?.kind === "remove" ? rows.find((row) => row.workflowId === action.workflowId) : undefined;
+  const isDialogOpen = action !== null || mapping !== null;
 
   return (
     <div className="space-y-6">
-      {!isLinked && !isEditing && (
+      {rows.length === 0 ? (
         <div className="space-y-3">
           <p className="text-body-sm-regular text-secondary">{t("workflows.scheme.free")}</p>
           {canManage && (
@@ -174,21 +248,22 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
               size="md"
               stretch="auto"
               label={t("workflows.scheme.link")}
-              onClick={startEditing}
+              onClick={() => start({ kind: "link" })}
             />
           )}
         </div>
-      )}
-      {isLinked && !isEditing && (
+      ) : (
         <div className="space-y-3">
           {canManage && (
-            <div className="flex flex-wrap justify-end gap-2">
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              {addBlocker && <p className="text-caption-sm-regular text-tertiary">{t(addBlocker)}</p>}
               <Button
                 variant="secondary"
                 size="md"
                 stretch="auto"
-                label={t("workflows.scheme.change")}
-                onClick={startEditing}
+                disabled={addBlocker !== null}
+                label={t("workflows.scheme.add")}
+                onClick={() => start({ kind: "add" })}
               />
               <Button
                 variant="danger-outline"
@@ -203,47 +278,67 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
             <table className="w-full min-w-[560px] border-separate border-spacing-0" aria-label={t("workflows.label")}>
               <thead>
                 <tr className="text-left text-body-xs-medium text-secondary">
-                  {(isWorkspaceAdmin
-                    ? (["workflow", "types", "actions"] as const)
-                    : (["workflow", "types"] as const)
-                  ).map((column) => (
-                    <th key={column} scope="col" className="border-b border-subtle p-2">
-                      {t(`workflows.scheme.table.${column}`)}
-                    </th>
-                  ))}
+                  {(canManage ? (["workflow", "types", "actions"] as const) : (["workflow", "types"] as const)).map(
+                    (column) => (
+                      <th key={column} scope="col" className={CELL_CLASS}>
+                        {t(`workflows.scheme.table.${column}`)}
+                      </th>
+                    )
+                  )}
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row) => {
-                  const href = `/${workspaceSlug}/settings/workflows/${row.workflowId}`;
                   const name = workflowName(row.workflowId);
-                  const unknownName = t("workflows.scheme.table.unknown_workflow");
-                  const typeNames = row.typeIds.map(
-                    (typeId) => types.find((type) => type.id === typeId)?.name ?? UNKNOWN
-                  );
                   return (
                     <tr key={row.workflowId} className="align-top text-body-sm-regular text-primary">
-                      <td className="border-b border-subtle p-2">
+                      <td className={CELL_CLASS}>
                         <Link
-                          href={href}
+                          href={`/${workspaceSlug}/settings/workflows/${row.workflowId}`}
                           className="text-body-sm-medium hover:underline"
-                          aria-label={name ? undefined : unknownName}
                         >
-                          {name || UNKNOWN}
+                          {name}
                         </Link>
+                        {row.isDefault && (
+                          <span className="ml-2 rounded-sm border border-subtle px-1.5 py-0.5 text-caption-sm-medium text-secondary">
+                            {t("workflows.scheme.default_badge")}
+                          </span>
+                        )}
                       </td>
-                      <td className="border-b border-subtle p-2 text-secondary">
-                        {[...typeNames, ...(row.isDefault ? [t("workflows.scheme.other_types")] : [])].join(", ")}
+                      <td className={`${CELL_CLASS} text-secondary`}>
+                        {row.isDefault ? t("workflows.scheme.other_types") : typeNames(row.typeIds)}
                       </td>
-                      {isWorkspaceAdmin && (
-                        <td className="border-b border-subtle p-2">
-                          <Link
-                            href={href}
-                            className="text-body-xs-medium text-accent-primary hover:underline"
-                            aria-label={t("workflows.scheme.table.edit_named", { name: name || unknownName })}
-                          >
-                            {t("workflows.scheme.edit_workflow")}
-                          </Link>
+                      {canManage && (
+                        <td className={CELL_CLASS}>
+                          {row.isDefault ? (
+                            <button
+                              type="button"
+                              className={ACTION_CLASS}
+                              disabled={unused.length === 0}
+                              onClick={() => start({ kind: "replace" })}
+                            >
+                              {t("workflows.scheme.replace")}
+                            </button>
+                          ) : (
+                            <span className="flex flex-wrap gap-3">
+                              <button
+                                type="button"
+                                className={ACTION_CLASS}
+                                aria-label={t("workflows.scheme.edit_types_named", { name })}
+                                onClick={() => start({ kind: "types", workflowId: row.workflowId })}
+                              >
+                                {t("workflows.scheme.edit_types")}
+                              </button>
+                              <button
+                                type="button"
+                                className={ACTION_CLASS}
+                                aria-label={t("workflows.scheme.remove_named", { name })}
+                                onClick={() => start({ kind: "remove", workflowId: row.workflowId })}
+                              >
+                                {t("workflows.scheme.remove")}
+                              </button>
+                            </span>
+                          )}
                         </td>
                       )}
                     </tr>
@@ -254,130 +349,44 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
           </div>
         </div>
       )}
-      {errorKey && (
+      {errorKey && !isDialogOpen && (
         <p role="alert" className="text-body-sm-regular text-danger-primary">
           {t(errorKey)}
         </p>
       )}
-      {isEditing &&
-        canManage &&
-        (needs === null ? (
-          <div className="space-y-4">
-            <label className="flex flex-col gap-1 text-body-xs-medium text-secondary">
-              {t("workflows.scheme.default_workflow")}
-              <select
-                className={SELECT_CLASS}
-                value={defaultWorkflowId}
-                onChange={(event) => {
-                  isPristine.current = false;
-                  setDefaultWorkflowId(event.target.value);
-                }}
-              >
-                <option value="" disabled>
-                  {t("workflows.scheme.choose")}
-                </option>
-                {workflows.map((workflow) => (
-                  <option key={workflow.id} value={workflow.id}>
-                    {workflow.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {types.map((type) => (
-              <label key={type.id} className="flex flex-col gap-1 text-body-xs-medium text-secondary">
-                {t("workflows.scheme.per_type", { type: type.name })}
-                <select
-                  className={SELECT_CLASS}
-                  value={typeChoices[type.id] ?? ""}
-                  onChange={(event) => {
-                    isPristine.current = false;
-                    setTypeChoices((current) => ({ ...current, [type.id]: event.target.value }));
-                  }}
-                >
-                  <option value="">{t("workflows.scheme.same_as_default")}</option>
-                  {workflows.map((workflow) => (
-                    <option key={workflow.id} value={workflow.id}>
-                      {workflow.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ))}
-            <div className="flex gap-2">
-              <Button
-                variant="primary"
-                size="md"
-                stretch="auto"
-                disabled={!defaultWorkflowId}
-                loading={isBusy}
-                label={t("workflows.scheme.next")}
-                onClick={goToMapping}
-              />
-              <Button
-                variant="secondary"
-                size="md"
-                stretch="auto"
-                disabled={isBusy}
-                label={t("workflows.settings.form.cancel")}
-                onClick={cancelEditing}
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <h3 className="text-body-md-medium text-primary">{t("workflows.scheme.mapping.title")}</h3>
-            {needs.length === 0 ? (
-              <p className="text-body-sm-regular text-secondary">{t("workflows.scheme.mapping.none")}</p>
-            ) : (
-              <>
-                <p className="text-body-sm-regular text-secondary">{t("workflows.scheme.mapping.description")}</p>
-                {needs.map((need) => (
-                  <label key={needKey(need)} className="flex flex-col gap-1 text-body-xs-medium text-secondary">
-                    {t("workflows.scheme.mapping.row", {
-                      state: need.state_name,
-                      workflow: workflowName(need.workflow_id),
-                      count: need.issue_count,
-                    })}
-                    <select
-                      className={SELECT_CLASS}
-                      value={arrivals[needKey(need)] ?? ""}
-                      onChange={(event) =>
-                        setArrivals((current) => ({ ...current, [needKey(need)]: event.target.value }))
-                      }
-                    >
-                      <option value="" disabled>
-                        {t("workflows.scheme.mapping.pick")}
-                      </option>
-                      {(getWorkflowDetail(need.workflow_id)?.states ?? []).map((state) => (
-                        <option key={state.status.id} value={state.status.id}>
-                          {state.status.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                ))}
-              </>
-            )}
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                size="md"
-                stretch="auto"
-                label={t("workflows.scheme.back")}
-                onClick={() => setNeeds(null)}
-              />
-              <Button
-                variant="primary"
-                size="md"
-                stretch="auto"
-                loading={isBusy}
-                disabled={needs.some((need) => !arrivals[needKey(need)])}
-                label={t("workflows.scheme.apply")}
-                onClick={apply}
-              />
-            </div>
-          </div>
-        ))}
+      {form && (
+        <SchemeFormDialog {...form} isOpen={mapping === null} isBusy={isBusy} errorKey={errorKey} onClose={close} />
+      )}
+      <SchemeMappingDialog
+        isOpen={mapping !== null}
+        needs={mapping?.needs ?? []}
+        arrivals={arrivals}
+        statesOf={(workflowId) =>
+          (getWorkflowDetail(workflowId)?.states ?? []).map((state) => ({
+            id: state.status.id,
+            name: state.status.name,
+          }))
+        }
+        workflowName={workflowName}
+        isBusy={isBusy}
+        errorKey={errorKey}
+        onArrival={(key, statusId) => setArrivals((current) => ({ ...current, [key]: statusId }))}
+        onApply={() => void applyMapping()}
+        onClose={close}
+      />
+      <ConfirmDialog
+        isOpen={removed !== undefined && mapping === null}
+        handleClose={close}
+        handleSubmit={() => (removed ? run((latest) => withoutWorkflow(latest, removed.workflowId)) : undefined)}
+        isSubmitting={isBusy}
+        title={t("workflows.scheme.remove_title", { name: removed ? workflowName(removed.workflowId) : "" })}
+        content={t("workflows.scheme.remove_confirm", {
+          count: removed?.typeIds.length ?? 0,
+          types: typeNames(removed?.typeIds ?? []),
+          default: workflowName(choice.defaultWorkflowId),
+        })}
+        primaryButtonText={{ loading: t("workflows.scheme.remove"), default: t("workflows.scheme.remove") }}
+      />
       <ConfirmDialog
         handleClose={() => setIsDetachOpen(false)}
         handleSubmit={detach}
