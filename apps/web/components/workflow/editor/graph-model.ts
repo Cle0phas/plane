@@ -20,7 +20,6 @@ import type {
 /**
  * group null: the server deduces it (W5). known_group: category already known, display only (X5).
  * group_locked: chosen by hand on the server, which then ignores a return to automatic (W5); display only.
- * shared_count: other workflows using the status (W17).
  * server_name, shared_names: name known to the server and the other workflows using the status (W17).
  */
 export type TDraftStatus = {
@@ -30,7 +29,6 @@ export type TDraftStatus = {
   group: TStateGroups | null;
   known_group?: TStateGroups;
   group_locked?: boolean;
-  shared_count: number;
   server_name?: string;
   shared_names?: string[];
 };
@@ -76,7 +74,6 @@ const GRAPH_ERROR_CODES = new Set([
 export const fromDetail = (detail: TWorkflowDetail, statuses: TWorkflowStatus[]): TDraftGraph => ({
   states: detail.states.map((state) => {
     const known = statuses.find((status) => status.id === state.status.id);
-    const usage = known?.workflow_count ?? 1;
     return {
       key: state.id,
       status: {
@@ -86,7 +83,6 @@ export const fromDetail = (detail: TWorkflowDetail, statuses: TWorkflowStatus[])
         group: state.status.group_is_auto ? null : state.status.group,
         known_group: state.status.group,
         group_locked: !state.status.group_is_auto,
-        shared_count: Math.max(usage - 1, 0),
         server_name: state.status.name,
         shared_names: (known?.workflows ?? []).filter((item) => item.id !== detail.id).map((item) => item.name),
       },
@@ -550,7 +546,6 @@ export type TStatusOption = {
   color: string;
   group: TStateGroups;
   group_is_auto: boolean;
-  workflow_count: number;
   workflow_names: string[];
 };
 
@@ -571,12 +566,11 @@ export const statusOptions = (
       color: item.color,
       group: item.group,
       group_is_auto: item.group_is_auto,
-      workflow_count: item.workflow_count ?? 0,
       workflow_names: (item.workflows ?? [])
         .filter((workflow) => workflow.id !== workflowId)
         .map((workflow) => workflow.name),
     })),
-    ...candidates.map((item) => ({ ...item, group_is_auto: false, workflow_count: 0, workflow_names: [] })),
+    ...candidates.map((item) => ({ ...item, group_is_auto: false, workflow_names: [] })),
   ];
   return all.filter((option) => {
     const key = option.name.trim().toLowerCase();
@@ -594,7 +588,6 @@ export const optionToStatus = (option: TStatusOption): TDraftStatus => ({
   group: option.group_is_auto ? null : option.group,
   known_group: option.group,
   group_locked: Boolean(option.id) && !option.group_is_auto,
-  shared_count: option.workflow_count,
   shared_names: option.workflow_names,
 });
 
@@ -602,7 +595,6 @@ export const createdStatus = (name: string, group: TStateGroups | null): TDraftS
   name: name.trim(),
   color: GROUP_COLORS[group ?? "unstarted"],
   group,
-  shared_count: 0,
 });
 
 export const statusNameError = (

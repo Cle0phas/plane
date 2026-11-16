@@ -24,7 +24,7 @@ const removeLabel = (name: string) => `workflows.editor.panel.remove_source {"na
 
 const state = (key: string, status: Partial<TDraftStatus> = {}) => ({
   key,
-  status: { name: key.toUpperCase(), color: "#3A3A3A", group: null, shared_count: 0, ...status },
+  status: { name: key.toUpperCase(), color: "#3A3A3A", group: null, ...status },
   position_x: 0,
   position_y: 0,
   is_initial: false,
@@ -166,7 +166,7 @@ describe("state panel", () => {
 
   it("names the other workflows that use the state", () => {
     const draft: TDraftGraph = {
-      states: [state("a", { shared_count: 2, shared_names: ["Bug", "Delivery"] })],
+      states: [state("a", { shared_names: ["Bug", "Delivery"] })],
       transitions: [],
     };
     renderPanel({ draft, selection: { kind: "state", key: "a" } });

@@ -14,7 +14,7 @@ vi.mock("@plane/i18n", () => ({ useTranslation: () => ({ t: (key: string) => key
 
 const state = (key: string, name: string, isInitial = false) => ({
   key,
-  status: { name, color: "#3A3A3A", group: null, shared_count: 0 },
+  status: { name, color: "#3A3A3A", group: null },
   position_x: 0,
   position_y: 0,
   is_initial: isInitial,

@@ -16,14 +16,14 @@ const draft: TDraftGraph = {
   states: [
     {
       key: "a",
-      status: { name: "Todo", color: "#3A3A3A", group: null, shared_count: 0 },
+      status: { name: "Todo", color: "#3A3A3A", group: null },
       position_x: 0,
       position_y: 0,
       is_initial: true,
     },
     {
       key: "b",
-      status: { name: "Done", color: "#3A3A3A", group: null, shared_count: 0 },
+      status: { name: "Done", color: "#3A3A3A", group: null },
       position_x: 240,
       position_y: 0,
       is_initial: false,
@@ -109,7 +109,7 @@ describe("WorkflowTextView", () => {
         ...draft.states,
         {
           key: "c",
-          status: { name: "Review", color: "#3A3A3A", group: "started", shared_count: 0 },
+          status: { name: "Review", color: "#3A3A3A", group: "started" },
           position_x: 480,
           position_y: 0,
           is_initial: false,

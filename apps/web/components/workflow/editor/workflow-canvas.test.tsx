@@ -52,7 +52,7 @@ vi.mock("@xyflow/react", async (importOriginal) => {
 
 const state = (key: string, name: string, x: number, isInitial = false) => ({
   key,
-  status: { name, color: "#3A3A3A", group: null, shared_count: 0 },
+  status: { name, color: "#3A3A3A", group: null },
   position_x: x,
   position_y: 0,
   is_initial: isInitial,

@@ -32,7 +32,6 @@ const status = (name: string, extra: Partial<TDraftStatus> = {}): TDraftStatus =
   name,
   color: "#3A3A3A",
   group: null,
-  shared_count: 0,
   ...extra,
 });
 const state = (key: string, name: string, x = 0, isInitial = false, extra: Partial<TDraftStatus> = {}) => ({

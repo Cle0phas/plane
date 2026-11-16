@@ -20,17 +20,16 @@ const options: TStatusOption[] = [
     color: "#111111",
     group: "unstarted",
     group_is_auto: false,
-    workflow_count: 2,
     workflow_names: [],
   },
-  { name: "Review", color: "#333333", group: "started", group_is_auto: false, workflow_count: 0, workflow_names: [] },
-  { name: "Done", color: "#444444", group: "completed", group_is_auto: false, workflow_count: 0, workflow_names: [] },
+  { name: "Review", color: "#333333", group: "started", group_is_auto: false, workflow_names: [] },
+  { name: "Done", color: "#444444", group: "completed", group_is_auto: false, workflow_names: [] },
 ];
 const draft: TDraftGraph = {
   states: [
     {
       key: "u",
-      status: { name: "Used", color: "#3A3A3A", group: null, shared_count: 0 },
+      status: { name: "Used", color: "#3A3A3A", group: null },
       position_x: 0,
       position_y: 0,
       is_initial: true,
@@ -72,7 +71,6 @@ describe("AddStatusDialog", () => {
           group: "unstarted",
           known_group: "unstarted",
           group_locked: true,
-          shared_count: 2,
           server_name: "Todo",
           shared_names: [],
         },
@@ -82,7 +80,6 @@ describe("AddStatusDialog", () => {
           group: "started",
           known_group: "started",
           group_locked: false,
-          shared_count: 0,
           shared_names: [],
         },
       ],
@@ -104,7 +101,7 @@ describe("AddStatusDialog", () => {
     await user.click(screen.getByRole("button", { name: CREATE }));
     await user.click(screen.getByRole("checkbox", { name: ANY }));
     await user.click(screen.getByRole("button", { name: ADD }));
-    expect(onAdd).toHaveBeenCalledWith([{ name: "Fresh", color: "#3A3A3A", group: null, shared_count: 0 }], true);
+    expect(onAdd).toHaveBeenCalledWith([{ name: "Fresh", color: "#3A3A3A", group: null }], true);
   });
 
   it("refuses a name the workflow already has", async () => {

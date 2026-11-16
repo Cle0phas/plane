@@ -34,7 +34,6 @@ const status = (name: string, extra: Partial<TDraftStatus> = {}): TDraftStatus =
   name,
   color: "#3A3A3A",
   group: null,
-  shared_count: 0,
   ...extra,
 });
 const state = (key: string, extra: Partial<TDraftState> = {}): TDraftState => ({
@@ -321,7 +320,6 @@ describe("status options", () => {
       group: "unstarted",
       known_group: "unstarted",
       group_locked: true,
-      shared_count: 2,
       server_name: "Todo",
       shared_names: [],
     });
@@ -331,7 +329,6 @@ describe("status options", () => {
       group: "started",
       known_group: "started",
       group_locked: false,
-      shared_count: 0,
       shared_names: [],
     });
     const automatic = optionToStatus({ ...existing, group_is_auto: true });
@@ -344,9 +341,8 @@ describe("status options", () => {
       name: "New",
       color: "#16A34A",
       group: "completed",
-      shared_count: 0,
     });
-    expect(createdStatus("Auto", null)).toEqual({ name: "Auto", color: "#3A3A3A", group: null, shared_count: 0 });
+    expect(createdStatus("Auto", null)).toEqual({ name: "Auto", color: "#3A3A3A", group: null });
   });
 
   it("explains why a name cannot be added", () => {

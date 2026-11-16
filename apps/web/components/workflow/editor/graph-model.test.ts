@@ -67,7 +67,6 @@ describe("graph model", () => {
       group: null,
       known_group: "unstarted",
       group_locked: false,
-      shared_count: 1,
       server_name: "Open",
       shared_names: [],
     });
