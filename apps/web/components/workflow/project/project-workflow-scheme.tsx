@@ -145,6 +145,17 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
     setErrorKey(null);
   };
 
+  // The server already applied the change: a failed reload keeps the success and says the page is outdated.
+  const reloadAfterChange = async (successTitle: string) => {
+    const results = await Promise.allSettled([
+      fetchProjectStates(workspaceSlug, projectId),
+      fetchWorkflows(workspaceSlug),
+    ]);
+    setToast({ type: "success", title: successTitle, message: "" });
+    if (results.some((result) => result.status === "rejected"))
+      setToast({ type: "error", title: t("workflows.settings.load_error"), message: "" });
+  };
+
   const applyChoice = async (next: TSchemeChoice, chosen: Record<string, string>) => {
     const isFocusLost = action?.kind === "link" || action?.kind === "add" || action?.kind === "remove";
     await applyProjectScheme(
@@ -152,10 +163,9 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
       projectId,
       buildSchemePayload(next.defaultWorkflowId, next.items, chosen, typeIds)
     );
-    await Promise.allSettled([fetchProjectStates(workspaceSlug, projectId), fetchWorkflows(workspaceSlug)]);
+    await reloadAfterChange(t("workflows.scheme.applied"));
     close();
     if (isFocusLost) setFocusRequest((value) => value + 1);
-    setToast({ type: "success", title: t("workflows.scheme.applied"), message: "" });
   };
 
   // Every change starts from the scheme the server holds now, not from the copy on screen (Y12), and
@@ -204,8 +214,7 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
     setIsBusy(true);
     try {
       await detachProjectScheme(workspaceSlug, projectId);
-      await Promise.allSettled([fetchProjectStates(workspaceSlug, projectId), fetchWorkflows(workspaceSlug)]);
-      setToast({ type: "success", title: t("workflows.scheme.detached"), message: "" });
+      await reloadAfterChange(t("workflows.scheme.detached"));
     } catch (error) {
       setErrorKey(getSchemeErrorKey(error));
     } finally {

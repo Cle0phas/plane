@@ -130,7 +130,7 @@ export class BaseWorkspaceRootStore implements IWorkspaceRootStore {
     this.webhook = new WebhookStore(_rootStore);
     this.apiToken = new ApiTokenStore(_rootStore);
     this.workItemType = new WorkItemTypeStore();
-    this.workflow = new WorkflowStore();
+    this.workflow = new WorkflowStore(undefined, _rootStore);
   }
 
   /**

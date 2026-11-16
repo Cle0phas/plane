@@ -20,6 +20,10 @@ import type {
   TWorkflowSummary,
 } from "@plane/types";
 import { WorkflowService } from "@/services/workflow.service";
+import type { IStateStore } from "@/store/state.store";
+
+// Read at call time: the root store builds its state store after the workspace stores.
+type TStateRoot = { state: Pick<IStateStore, "fetchedMap" | "fetchProjectStates"> };
 
 export interface IWorkflowStore {
   workflowsMap: Record<string, Record<string, TWorkflowSummary>>;
@@ -85,8 +89,9 @@ export class WorkflowStore implements IWorkflowStore {
   schemesMap: Record<string, TProjectWorkflowScheme> = {};
   candidatesMap: Record<string, TWorkflowStatusCandidate[]> = {};
   private service: WorkflowService;
+  private rootStore?: TStateRoot;
 
-  constructor(service: WorkflowService = new WorkflowService()) {
+  constructor(service: WorkflowService = new WorkflowService(), rootStore?: TStateRoot) {
     makeObservable(this, {
       workflowsMap: observable,
       detailsMap: observable,
@@ -108,6 +113,7 @@ export class WorkflowStore implements IWorkflowStore {
       detachProjectScheme: action,
     });
     this.service = service;
+    this.rootStore = rootStore;
   }
 
   getWorkspaceWorkflows = computedFn((workspaceSlug: string) =>
@@ -198,11 +204,17 @@ export class WorkflowStore implements IWorkflowStore {
         scheme.workflows = scheme.workflows.map((graph) => (graph.id === workflowId ? toGraph(workflow) : graph));
       }
     });
-    // Counts and shared statuses changed too; a saved candidate is now a status.
+    // Counts and shared statuses changed too; a saved candidate is now a status. The server also renamed,
+    // created or dropped the mirrored states of every linked project: refetch the ones already loaded.
+    const stateStore = this.rootStore?.state;
+    const loadedProjectIds = (workflow.projects ?? [])
+      .map((project) => project.id)
+      .filter((projectId) => stateStore?.fetchedMap[projectId]);
     await Promise.allSettled([
       this.fetchWorkflows(workspaceSlug),
       this.fetchStatuses(workspaceSlug),
       this.fetchCandidates(workspaceSlug),
+      ...loadedProjectIds.map((projectId) => stateStore?.fetchProjectStates(workspaceSlug, projectId)),
     ]);
     return workflow;
   };

@@ -17,7 +17,7 @@ vi.mock("@/hooks/store/use-work-item-type", () => ({
   useWorkItemType: () => ({ getProjectAssignableTypes: () => state.types }),
 }));
 vi.mock("@/hooks/store/use-project-state", () => ({
-  useProjectState: () => ({ fetchProjectStates: vi.fn().mockResolvedValue([]) }),
+  useProjectState: () => ({ fetchProjectStates: (...args: unknown[]) => state.fetchProjectStates(...args) }),
 }));
 
 // The compat Link adds a trailing slash; the address is what matters.
@@ -49,6 +49,7 @@ const state = vi.hoisted(() => ({
   applyProjectScheme: vi.fn(),
   detachProjectScheme: vi.fn(),
   fetchWorkflowDetail: vi.fn(),
+  fetchProjectStates: vi.fn(),
 }));
 vi.mock("@/hooks/store/use-workflow", () => ({
   useWorkflow: () => ({
@@ -113,6 +114,7 @@ beforeEach(() => {
   state.applyProjectScheme = vi.fn(async () => state.scheme);
   state.detachProjectScheme = vi.fn().mockResolvedValue(undefined);
   state.fetchWorkflowDetail = vi.fn().mockResolvedValue(undefined);
+  state.fetchProjectStates = vi.fn().mockResolvedValue([]);
   setToast.mockClear();
 });
 
@@ -237,6 +239,34 @@ describe("linked project", () => {
     await user.click(within(dialog).getByRole("button", { name: `${S}.replace` }));
     await waitFor(() => expect(state.applyProjectScheme).toHaveBeenCalledTimes(1));
     expect(lastApplied()).toEqual({ default_workflow_id: "w-free", items: strictItems, mappings: [] });
+  });
+
+  it("keeps an applied change but says the page is outdated when the states cannot be reloaded", async () => {
+    state.fetchProjectStates = vi.fn().mockRejectedValue(new Error("offline"));
+    const user = open();
+    await user.click(button(`${S}.replace`));
+    const dialog = screen.getByRole("dialog");
+    await user.selectOptions(within(dialog).getByRole("combobox", { name: `${S}.table.workflow` }), "Kanban");
+    await user.click(within(dialog).getByRole("button", { name: `${S}.replace` }));
+    await waitFor(() =>
+      expect(setToast.mock.calls.map(([toast]) => [toast.type, toast.title])).toEqual([
+        ["success", `${S}.applied`],
+        ["error", "workflows.settings.load_error"],
+      ])
+    );
+  });
+
+  it("keeps a detach but says the page is outdated when the states cannot be reloaded", async () => {
+    state.fetchProjectStates = vi.fn().mockRejectedValue(new Error("offline"));
+    const user = open();
+    await user.click(button(`${S}.detach`));
+    await user.click(screen.getAllByRole("button", { name: `${S}.detach` }).at(-1) as HTMLElement);
+    await waitFor(() =>
+      expect(setToast.mock.calls.map(([toast]) => [toast.type, toast.title])).toEqual([
+        ["success", `${S}.detached`],
+        ["error", "workflows.settings.load_error"],
+      ])
+    );
   });
 
   it("says why no workflow can be added when every one is in the table", () => {

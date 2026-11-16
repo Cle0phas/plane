@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { TProjectWorkflowScheme, TWorkflowDetail, TWorkflowSummary } from "@plane/types";
 import type { WorkflowService } from "@/services/workflow.service";
 import { WorkflowStore } from "./workflow.store";
@@ -30,19 +30,22 @@ const detail = (id: string, name: string): TWorkflowDetail => ({
   projects: [{ id: "p", name: "Secret" }],
 });
 
-const buildStore = (overrides: object = {}) =>
-  new WorkflowStore({
-    list: async () => [summary("b", "Beta"), summary("a", "Alpha")],
-    listStatuses: async () => [],
-    listCandidates: async () => [],
-    saveGraph: async (_slug: string, id: string) => detail(id, "Saved"),
-    getProjectScheme: async (): Promise<TProjectWorkflowScheme> => ({
-      default_workflow_id: "a",
-      items: [],
-      workflows: [{ id: "a", name: "Alpha", description: "", updated_at: null, states: [], transitions: [] }],
-    }),
-    ...overrides,
-  } as unknown as WorkflowService);
+const buildStore = (overrides: object = {}, rootStore?: ConstructorParameters<typeof WorkflowStore>[1]) =>
+  new WorkflowStore(
+    {
+      list: async () => [summary("b", "Beta"), summary("a", "Alpha")],
+      listStatuses: async () => [],
+      listCandidates: async () => [],
+      saveGraph: async (_slug: string, id: string) => detail(id, "Saved"),
+      getProjectScheme: async (): Promise<TProjectWorkflowScheme> => ({
+        default_workflow_id: "a",
+        items: [],
+        workflows: [{ id: "a", name: "Alpha", description: "", updated_at: null, states: [], transitions: [] }],
+      }),
+      ...overrides,
+    } as unknown as WorkflowService,
+    rootStore
+  );
 
 describe("WorkflowStore", () => {
   it("keeps workflows per workspace, sorted by name", async () => {
@@ -109,6 +112,35 @@ describe("WorkflowStore", () => {
     });
     await store.saveGraph("acme", "a", { states: [], transitions: [], expected_version: "v1" });
     expect(reads).toBe(1);
+  });
+
+  it("refetches the loaded states of the projects using a saved workflow", async () => {
+    const fetchProjectStates = vi.fn(async () => []);
+    const store = buildStore(
+      {
+        saveGraph: async (_slug: string, id: string) => ({
+          ...detail(id, "Saved"),
+          projects: [
+            { id: "loaded", name: "Loaded" },
+            { id: "unread", name: "Unread" },
+          ],
+        }),
+      },
+      { state: { fetchedMap: { loaded: true }, fetchProjectStates } }
+    );
+    await store.saveGraph("acme", "a", { states: [], transitions: [], expected_version: "v1" });
+    expect(fetchProjectStates.mock.calls).toEqual([["acme", "loaded"]]);
+  });
+
+  it("keeps a graph save successful when the refetch of project states fails", async () => {
+    const fetchProjectStates = vi.fn(async () => {
+      throw new Error("offline");
+    });
+    const store = buildStore({}, { state: { fetchedMap: { p: true }, fetchProjectStates } });
+    await expect(
+      store.saveGraph("acme", "a", { states: [], transitions: [], expected_version: "v1" })
+    ).resolves.toMatchObject({ name: "Saved" });
+    expect(fetchProjectStates).toHaveBeenCalledTimes(1);
   });
 
   it("sends the expected version with a graph save", async () => {
