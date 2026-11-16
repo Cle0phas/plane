@@ -77,6 +77,24 @@ def _drop_obsolete_states(project, kept_by_status):
     obsolete.delete()
 
 
+def _adoptable_states(project):
+    """Per lower-case name, the one unmanaged state adopted by name; its case twins are mapped like any state."""
+    # Statuses are unique per workspace ignoring case. A state already spelled like its status is adopted first:
+    # renaming another twin to that spelling would collide with it.
+    spelling = {
+        name.lower(): name
+        for name in WorkflowStatus.objects.filter(workspace_id=project.workspace_id).values_list("name", flat=True)
+    }
+    adoptable = {}
+    # State.objects already hides the intake triage state.
+    states = State.objects.filter(project_id=project.id, workflow_status__isnull=True).order_by(
+        "sequence", "created_at", "id"
+    )
+    for state in sorted(states, key=lambda state: state.name != spelling.get(state.name.lower())):
+        adoptable.setdefault(state.name.lower(), state)
+    return adoptable
+
+
 def sync_project_states(project, *, drop_obsolete=True):
     """W4, W17: exactly one managed project state per status of the scheme workflows; returns {status_id: State}."""
     scheme = ProjectWorkflowScheme.objects.get(project_id=project.id)
@@ -86,10 +104,7 @@ def sync_project_states(project, *, drop_obsolete=True):
         state.workflow_status_id: state
         for state in State.objects.filter(project_id=project.id, workflow_status__isnull=False)
     }
-    # State.objects already hides the intake triage state.
-    unmanaged = {
-        state.name.lower(): state for state in State.objects.filter(project_id=project.id, workflow_status__isnull=True)
-    }
+    unmanaged = _adoptable_states(project)
     result = {}
     for status in statuses.order_by("sequence", "name"):
         state = linked.get(status.id) or unmanaged.pop(status.name.lower(), None)
@@ -126,6 +141,7 @@ def mapping_needs(project, default_workflow_id, items):
         .values("state_id", "type_id")
         .annotate(count=Count("id"))
     )
+    adoptable = _adoptable_states(project)
     needs = {}
     for row in rows:
         workflow_id = items.get(str(row["type_id"]), default_workflow_id)
@@ -136,7 +152,7 @@ def mapping_needs(project, default_workflow_id, items):
         if key not in needs:
             # Only an unmanaged state is adopted by name; a managed one carries another status.
             auto = None
-            if state.workflow_status_id is None:
+            if adoptable.get(state.name.lower()) == state:
                 auto = next(
                     (status_id for status_id, name in statuses[workflow_id].items() if name == state.name.lower()), None
                 )

@@ -234,6 +234,38 @@ class TestMappingAndApply:
         assert detach_scheme(project=project, actor_id=project.workspace.owner_id) is False
 
 
+class TestCaseTwins:
+    """Plane allows "Done" and "done" in one project: one is adopted by name, the other is mapped like any state."""
+
+    @pytest.mark.parametrize(
+        "names, adopted",
+        [
+            (("Done", "done"), "Done"),
+            (("DONE", "done"), "DONE"),
+            # Adopting "done" would rename it to "Done" while its twin still holds that name.
+            (("done", "Done"), "Done"),
+        ],
+    )
+    def test_one_state_per_name_is_adopted_and_its_twin_is_mapped(self, project, software, names, adopted, mock_celery):
+        created = {name: State.objects.create(name=name, project=project) for name in names}
+        items = {name: Issue.objects.create(name=name, project=project, state=state) for name, state in created.items()}
+        kept = created[adopted]
+        (twin,) = [state for name, state in created.items() if name != adopted]
+
+        needs = mapping_needs(project, software.id, {})
+
+        done = str(software.states_by_name["Done"].status_id)
+        assert {need["state_id"]: need["auto_status_id"] for need in needs} == {str(kept.id): done, str(twin.id): None}
+        doing = software.states_by_name["Doing"].status_id
+        states = _apply(project, software, mappings={(twin.id, software.id): doing})
+        for item in items.values():
+            item.refresh_from_db()
+        assert items[adopted].state_id == kept.id
+        assert State.objects.get(pk=kept.pk).workflow_status_id == software.states_by_name["Done"].status_id
+        assert items[twin.name].state_id == states[doing].id
+        assert not State.objects.filter(pk=twin.pk).exists()
+
+
 class TestResync:
     def test_resync_works_outside_a_transaction_block(self, project, software):
         link_project(project, software)
