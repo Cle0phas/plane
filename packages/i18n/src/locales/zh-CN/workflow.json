@@ -302,6 +302,7 @@
         "node": "按 Enter 或 Space 键选择状态。使用方向键移动它，按 Delete 键移除它。按 Esc 键取消。",
         "node_read_only": "按 Enter 或 Space 键选择状态。",
         "edge": "按 Enter 或 Space 键选择转换。按 Delete 键删除它，或按 Esc 键取消。",
+        "edge_read_only": "按 Enter 或 Space 键选择转换。",
         "moved": "状态已移动。新位置：x {x}，y {y}。",
         "handle": "连接点"
       }

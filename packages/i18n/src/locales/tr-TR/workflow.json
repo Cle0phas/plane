@@ -302,6 +302,7 @@
         "node": "Bir durumu seçmek için Enter veya Space tuşuna basın. Taşımak için ok tuşlarını, kaldırmak için Delete tuşunu kullanın. İptal etmek için Esc tuşuna basın.",
         "node_read_only": "Bir durumu seçmek için Enter veya Space tuşuna basın.",
         "edge": "Bir geçişi seçmek için Enter veya Space tuşuna basın. Silmek için Delete, iptal etmek için Esc tuşuna basın.",
+        "edge_read_only": "Bir geçişi seçmek için Enter veya Space tuşuna basın.",
         "moved": "Durum taşındı. Yeni konum: x {x}, y {y}.",
         "handle": "Bağlantı noktası"
       }

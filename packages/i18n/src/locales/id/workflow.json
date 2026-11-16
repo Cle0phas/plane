@@ -302,6 +302,7 @@
         "node": "Tekan Enter atau Space untuk memilih status. Gunakan tombol panah untuk memindahkannya dan Delete untuk menghapusnya. Tekan Esc untuk membatalkan.",
         "node_read_only": "Tekan Enter atau Space untuk memilih status.",
         "edge": "Tekan Enter atau Space untuk memilih transisi. Tekan Delete untuk menghapusnya atau Esc untuk membatalkan.",
+        "edge_read_only": "Tekan Enter atau Space untuk memilih transisi.",
         "moved": "Status dipindahkan. Posisi baru: x {x}, y {y}.",
         "handle": "Titik koneksi"
       }

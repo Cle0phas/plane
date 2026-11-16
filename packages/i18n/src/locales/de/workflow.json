@@ -302,6 +302,7 @@
         "node": "Drücken Sie Enter oder Space, um einen Status auszuwählen. Verschieben Sie ihn mit den Pfeiltasten und entfernen Sie ihn mit Delete. Drücken Sie Esc, um abzubrechen.",
         "node_read_only": "Drücken Sie Enter oder Space, um einen Status auszuwählen.",
         "edge": "Drücken Sie Enter oder Space, um einen Übergang auszuwählen. Drücken Sie Delete, um ihn zu entfernen, oder Esc, um abzubrechen.",
+        "edge_read_only": "Drücken Sie Enter oder Space, um einen Übergang auszuwählen.",
         "moved": "Status verschoben. Neue Position: x {x}, y {y}.",
         "handle": "Verbindungspunkt"
       }

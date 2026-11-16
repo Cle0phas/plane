@@ -302,6 +302,7 @@
         "node": "Prema Enter o Space per selezionare uno stato. Usi i tasti freccia per spostarlo e Delete per rimuoverlo. Prema Esc per annullare.",
         "node_read_only": "Prema Enter o Space per selezionare uno stato.",
         "edge": "Prema Enter o Space per selezionare una transizione. Prema Delete per eliminarla o Esc per annullare.",
+        "edge_read_only": "Prema Enter o Space per selezionare una transizione.",
         "moved": "Stato spostato. Nuova posizione: x {x}, y {y}.",
         "handle": "Punto di connessione"
       }

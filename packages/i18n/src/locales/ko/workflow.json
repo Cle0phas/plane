@@ -302,6 +302,7 @@
         "node": "Enter 또는 Space 키를 눌러 스테이트를 선택합니다. 화살표 키로 이동하고 Delete 키로 제거합니다. 취소하려면 Esc 키를 누릅니다.",
         "node_read_only": "Enter 또는 Space 키를 눌러 스테이트를 선택합니다.",
         "edge": "Enter 또는 Space 키를 눌러 전환을 선택합니다. 삭제하려면 Delete 키를, 취소하려면 Esc 키를 누릅니다.",
+        "edge_read_only": "Enter 또는 Space 키를 눌러 전환을 선택합니다.",
         "moved": "스테이트를 이동했습니다. 새 위치: x {x}, y {y}.",
         "handle": "연결 지점"
       }

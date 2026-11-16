@@ -302,6 +302,7 @@
         "node": "Stisknutím Enter nebo Space vyberete stav. Šipkami ho přesunete a klávesou Delete odeberete. Stisknutím Esc akci zrušíte.",
         "node_read_only": "Stisknutím Enter nebo Space vyberete stav.",
         "edge": "Stisknutím Enter nebo Space vyberete přechod. Klávesou Delete ho odstraníte, klávesou Esc akci zrušíte.",
+        "edge_read_only": "Stisknutím Enter nebo Space vyberete přechod.",
         "moved": "Stav přesunut. Nová pozice: x {x}, y {y}.",
         "handle": "Bod připojení"
       }

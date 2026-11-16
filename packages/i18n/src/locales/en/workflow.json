@@ -302,6 +302,7 @@
         "node": "Press Enter or Space to select a state. Use the arrow keys to move it and Delete to remove it. Press Escape to cancel.",
         "node_read_only": "Press Enter or Space to select a state.",
         "edge": "Press Enter or Space to select a transition. Press Delete to remove it or Escape to cancel.",
+        "edge_read_only": "Press Enter or Space to select a transition.",
         "moved": "State moved. New position: x {x}, y {y}.",
         "handle": "Connection point"
       }

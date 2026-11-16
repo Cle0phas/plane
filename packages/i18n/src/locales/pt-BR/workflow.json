@@ -302,6 +302,7 @@
         "node": "Pressione Enter ou Space para selecionar um estado. Use as teclas de seta para movê-lo e Delete para removê-lo. Pressione Esc para cancelar.",
         "node_read_only": "Pressione Enter ou Space para selecionar um estado.",
         "edge": "Pressione Enter ou Space para selecionar uma transição. Pressione Delete para excluí-la ou Esc para cancelar.",
+        "edge_read_only": "Pressione Enter ou Space para selecionar uma transição.",
         "moved": "Estado movido. Nova posição: x {x}, y {y}.",
         "handle": "Ponto de conexão"
       }

@@ -302,6 +302,7 @@
         "node": "Druk op Enter of Space om een status te selecteren. Gebruik de pijltoetsen om hem te verplaatsen en Delete om hem te verwijderen. Druk op Esc om te annuleren.",
         "node_read_only": "Druk op Enter of Space om een status te selecteren.",
         "edge": "Druk op Enter of Space om een overgang te selecteren. Druk op Delete om hem te verwijderen of op Esc om te annuleren.",
+        "edge_read_only": "Druk op Enter of Space om een overgang te selecteren.",
         "moved": "Status verplaatst. Nieuwe positie: x {x}, y {y}.",
         "handle": "Verbindingspunt"
       }

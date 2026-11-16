@@ -302,6 +302,7 @@
         "node": "Appuyez sur Entrée ou Espace pour sélectionner un état. Utilisez les flèches pour le déplacer et Suppr pour le retirer. Appuyez sur Échap pour annuler.",
         "node_read_only": "Appuyez sur Entrée ou Espace pour sélectionner un état.",
         "edge": "Appuyez sur Entrée ou Espace pour sélectionner une transition. Appuyez sur Suppr pour la supprimer ou sur Échap pour annuler.",
+        "edge_read_only": "Appuyez sur Entrée ou Espace pour sélectionner une transition.",
         "moved": "État déplacé. Nouvelle position : x {x}, y {y}.",
         "handle": "Point de connexion"
       }

@@ -302,6 +302,7 @@
         "node": "Apăsați Enter sau Space pentru a selecta o stare. Folosiți tastele săgeți pentru a o muta și Delete pentru a o elimina. Apăsați Esc pentru a anula.",
         "node_read_only": "Apăsați Enter sau Space pentru a selecta o stare.",
         "edge": "Apăsați Enter sau Space pentru a selecta o tranziție. Apăsați Delete pentru a o șterge sau Esc pentru a anula.",
+        "edge_read_only": "Apăsați Enter sau Space pentru a selecta o tranziție.",
         "moved": "Stare mutată. Poziție nouă: x {x}, y {y}.",
         "handle": "Punct de conexiune"
       }

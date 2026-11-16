@@ -302,6 +302,7 @@
         "node": "Naciśnij Enter lub Space, aby wybrać stan. Użyj klawiszy strzałek, aby go przesunąć, i Delete, aby go usunąć. Naciśnij Esc, aby anulować.",
         "node_read_only": "Naciśnij Enter lub Space, aby wybrać stan.",
         "edge": "Naciśnij Enter lub Space, aby wybrać przejście. Naciśnij Delete, aby je usunąć, lub Esc, aby anulować.",
+        "edge_read_only": "Naciśnij Enter lub Space, aby wybrać przejście.",
         "moved": "Stan przeniesiony. Nowa pozycja: x {x}, y {y}.",
         "handle": "Punkt połączenia"
       }

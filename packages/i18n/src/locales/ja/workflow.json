@@ -302,6 +302,7 @@
         "node": "Enter キーまたは Space キーを押して状態を選択します。矢印キーで移動し、Delete キーで削除します。Esc キーを押すとキャンセルします。",
         "node_read_only": "Enter キーまたは Space キーを押して状態を選択します。",
         "edge": "Enter キーまたは Space キーを押して遷移を選択します。Delete キーで削除し、Esc キーでキャンセルします。",
+        "edge_read_only": "Enter キーまたは Space キーを押して遷移を選択します。",
         "moved": "状態を移動しました。新しい位置：x {x}、y {y}。",
         "handle": "接続ポイント"
       }

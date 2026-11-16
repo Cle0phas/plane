@@ -302,6 +302,7 @@
         "node": "Nhấn Enter hoặc Space để chọn một trạng thái. Dùng các phím mũi tên để di chuyển và Delete để gỡ nó. Nhấn Esc để hủy.",
         "node_read_only": "Nhấn Enter hoặc Space để chọn một trạng thái.",
         "edge": "Nhấn Enter hoặc Space để chọn một chuyển tiếp. Nhấn Delete để xóa hoặc Esc để hủy.",
+        "edge_read_only": "Nhấn Enter hoặc Space để chọn một chuyển tiếp.",
         "moved": "Đã di chuyển trạng thái. Vị trí mới: x {x}, y {y}.",
         "handle": "Điểm kết nối"
       }
