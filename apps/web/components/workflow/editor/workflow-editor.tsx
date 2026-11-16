@@ -11,7 +11,7 @@ import { useTranslation } from "@plane/i18n";
 import { v4 as uuidv4 } from "uuid";
 import type {
   TWorkflowDetail,
-  TWorkflowGraphPayload,
+  TWorkflowGraphSavePayload,
   TWorkflowStatus,
   TWorkflowStatusCandidate,
   TWorkflowStatusUsage,
@@ -55,7 +55,7 @@ type Props = {
   candidates: TWorkflowStatusCandidate[];
   readOnly: boolean;
   // Injected by the page (X10): the editor knows neither the store nor the router.
-  onSave: (payload: TWorkflowGraphPayload) => Promise<TWorkflowDetail>;
+  onSave: (payload: TWorkflowGraphSavePayload) => Promise<TWorkflowDetail>;
   onClose: () => void;
 };
 
@@ -125,7 +125,7 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
     setServerError(null);
     setIsSaving(true);
     try {
-      const result = await onSave(toPayload(draft));
+      const result = await onSave({ ...toPayload(draft), expected_version: workflow.version });
       setDraft(fromDetail(result, statusesRef.current));
       setToast({ type: "success", title: t("workflows.editor.saved"), message: "" });
     } catch (error) {

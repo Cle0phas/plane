@@ -10,9 +10,10 @@ import type {
   TProjectWorkflowScheme,
   TProjectWorkflowSchemePayload,
   TWorkflowDetail,
+  TWorkflowEditor,
   TWorkflowFormData,
   TWorkflowGraph,
-  TWorkflowGraphPayload,
+  TWorkflowGraphSavePayload,
   TWorkflowMappingNeed,
   TWorkflowStatus,
   TWorkflowStatusCandidate,
@@ -43,7 +44,12 @@ export interface IWorkflowStore {
   ) => Promise<TWorkflowDetail>;
   removeWorkflow: (workspaceSlug: string, workflowId: string) => Promise<void>;
   duplicateWorkflow: (workspaceSlug: string, workflowId: string, name: string) => Promise<TWorkflowDetail>;
-  saveGraph: (workspaceSlug: string, workflowId: string, payload: TWorkflowGraphPayload) => Promise<TWorkflowDetail>;
+  saveGraph: (
+    workspaceSlug: string,
+    workflowId: string,
+    payload: TWorkflowGraphSavePayload
+  ) => Promise<TWorkflowDetail>;
+  sendPresence: (workspaceSlug: string, workflowId: string, editing: boolean) => Promise<TWorkflowEditor[]>;
   removeStatus: (workspaceSlug: string, statusId: string) => Promise<void>;
   fetchProjectScheme: (workspaceSlug: string, projectId: string) => Promise<TProjectWorkflowScheme>;
   previewProjectScheme: (
@@ -183,7 +189,7 @@ export class WorkflowStore implements IWorkflowStore {
     return workflow;
   };
 
-  saveGraph = async (workspaceSlug: string, workflowId: string, payload: TWorkflowGraphPayload) => {
+  saveGraph = async (workspaceSlug: string, workflowId: string, payload: TWorkflowGraphSavePayload) => {
     const workflow = await this.service.saveGraph(workspaceSlug, workflowId, payload);
     runInAction(() => {
       this.detailsMap[workflowId] = workflow;
@@ -200,6 +206,10 @@ export class WorkflowStore implements IWorkflowStore {
     ]);
     return workflow;
   };
+
+  // Nothing is kept: the editors of a workflow only matter to the editor showing them.
+  sendPresence = async (workspaceSlug: string, workflowId: string, editing: boolean) =>
+    (await this.service.sendPresence(workspaceSlug, workflowId, editing)).editors;
 
   removeStatus = async (workspaceSlug: string, statusId: string) => {
     await this.service.removeStatus(workspaceSlug, statusId);

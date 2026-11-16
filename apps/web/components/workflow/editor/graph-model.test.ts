@@ -32,6 +32,7 @@ const detail: TWorkflowDetail = {
   name: "Flow",
   description: "",
   updated_at: null,
+  version: "v1",
   project_count: 0,
   states: [
     {

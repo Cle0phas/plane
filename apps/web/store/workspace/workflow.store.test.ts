@@ -23,6 +23,7 @@ const detail = (id: string, name: string): TWorkflowDetail => ({
   name,
   description: "",
   updated_at: null,
+  version: "v1",
   states: [],
   transitions: [],
   project_count: 1,
@@ -54,7 +55,7 @@ describe("WorkflowStore", () => {
   it("refreshes cached project schemes after a graph save", async () => {
     const store = buildStore();
     await store.fetchProjectScheme("acme", "project");
-    await store.saveGraph("acme", "a", { states: [], transitions: [] });
+    await store.saveGraph("acme", "a", { states: [], transitions: [], expected_version: "v1" });
     const cached = store.getProjectScheme("project");
     expect(cached?.workflows[0].name).toBe("Saved");
     expect(cached?.workflows[0]).not.toHaveProperty("projects");
@@ -67,9 +68,11 @@ describe("WorkflowStore", () => {
         throw { graph: ["status_in_use"] };
       },
     });
-    await expect(store.saveGraph("acme", "a", { states: [], transitions: [] })).rejects.toEqual({
-      graph: ["status_in_use"],
-    });
+    await expect(store.saveGraph("acme", "a", { states: [], transitions: [], expected_version: "v1" })).rejects.toEqual(
+      {
+        graph: ["status_in_use"],
+      }
+    );
   });
 
   it("keeps status candidates per workspace", async () => {
@@ -104,7 +107,31 @@ describe("WorkflowStore", () => {
         return [];
       },
     });
-    await store.saveGraph("acme", "a", { states: [], transitions: [] });
+    await store.saveGraph("acme", "a", { states: [], transitions: [], expected_version: "v1" });
     expect(reads).toBe(1);
+  });
+
+  it("sends the expected version with a graph save", async () => {
+    const calls: unknown[] = [];
+    const store = buildStore({
+      saveGraph: async (_slug: string, id: string, payload: unknown) => {
+        calls.push(payload);
+        return detail(id, "Saved");
+      },
+    });
+    await store.saveGraph("acme", "a", { states: [], transitions: [], expected_version: "v1" });
+    expect(calls).toEqual([{ states: [], transitions: [], expected_version: "v1" }]);
+  });
+
+  it("returns the other editors of a workflow", async () => {
+    const calls: unknown[][] = [];
+    const store = buildStore({
+      sendPresence: async (...args: unknown[]) => {
+        calls.push(args);
+        return { editors: [{ id: "u", display_name: "Awa" }] };
+      },
+    });
+    expect(await store.sendPresence("acme", "a", true)).toEqual([{ id: "u", display_name: "Awa" }]);
+    expect(calls).toEqual([["acme", "a", true]]);
   });
 });

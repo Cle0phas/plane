@@ -63,7 +63,12 @@ export type TWorkflowGraph = {
   transitions: TWorkflowTransition[];
 };
 
-export type TWorkflowDetail = TWorkflowGraph & { project_count: number; projects?: TWorkflowProjectRef[] };
+export type TWorkflowDetail = TWorkflowGraph & {
+  /** Fingerprint of the graph, sent back with a save (stale save refused). */
+  version: string;
+  project_count: number;
+  projects?: TWorkflowProjectRef[];
+};
 
 export type TWorkflowSummary = {
   id: string;
@@ -99,6 +104,11 @@ export type TWorkflowGraphPayload = {
   states: TWorkflowGraphPayloadState[];
   transitions: TWorkflowGraphPayloadTransition[];
 };
+
+export type TWorkflowGraphSavePayload = TWorkflowGraphPayload & { expected_version: string };
+
+/** Another workspace admin with unsaved changes on the same workflow. */
+export type TWorkflowEditor = { id: string; display_name: string };
 
 export type TProjectWorkflowSchemeItem = { issue_type_id: string; workflow_id: string };
 

@@ -148,6 +148,7 @@ describe("sides", () => {
       id: "w",
       name: "W",
       description: "",
+      version: "v1",
       updated_at: null,
       project_count: 0,
       states: [

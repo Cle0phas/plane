@@ -7,7 +7,12 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { TWorkflowDetail, TWorkflowGraphPayload, TWorkflowStatus, TWorkflowStatusCandidate } from "@plane/types";
+import type {
+  TWorkflowDetail,
+  TWorkflowGraphSavePayload,
+  TWorkflowStatus,
+  TWorkflowStatusCandidate,
+} from "@plane/types";
 import { WorkflowEditor } from "./workflow-editor";
 
 // The panel formats lists of names for the language.
@@ -29,6 +34,7 @@ const workflow: TWorkflowDetail = {
   name: "Software",
   description: "",
   updated_at: null,
+  version: "v1",
   project_count: 2,
   projects: [
     { id: "p1", name: "Alpha" },
@@ -77,7 +83,7 @@ afterEach(() => vi.restoreAllMocks());
 
 describe("WorkflowEditor", () => {
   it("adds a transition towards a state taken from the other existing states", async () => {
-    const onSave = vi.fn(async (_payload: TWorkflowGraphPayload) => workflow);
+    const onSave = vi.fn(async (_payload: TWorkflowGraphSavePayload) => workflow);
     renderEditor({ onSave });
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "workflows.editor.add_transition.title" }));
@@ -159,8 +165,17 @@ describe("WorkflowEditor", () => {
     expect(screen.queryByRole("button", { name: /workflows\.editor\.panel\.remove_source/ })).toBeNull();
   });
 
+  it("sends back the version of the workflow it was opened on", async () => {
+    const onSave = vi.fn(async (_payload: TWorkflowGraphSavePayload) => workflow);
+    renderEditor({ onSave });
+    const user = userEvent.setup();
+    await addReview(user);
+    await user.click(screen.getByRole("button", { name: "workflows.editor.save" }));
+    expect(onSave.mock.calls[0][0].expected_version).toBe("v1");
+  });
+
   it("adds a ticked state and saves the graph", async () => {
-    const onSave = vi.fn(async (_payload: TWorkflowGraphPayload) => workflow);
+    const onSave = vi.fn(async (_payload: TWorkflowGraphSavePayload) => workflow);
     renderEditor({ onSave });
     const user = userEvent.setup();
     await addReview(user);

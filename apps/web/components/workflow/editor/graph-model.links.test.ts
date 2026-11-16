@@ -196,6 +196,7 @@ describe("shared statuses", () => {
     name: "Software",
     description: "",
     updated_at: null,
+    version: "v1",
     project_count: 0,
     states: [{ id: "a", status: shared, position_x: 0, position_y: 0, is_initial: true }],
     transitions: [],

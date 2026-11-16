@@ -9,8 +9,9 @@ import type {
   TProjectWorkflowScheme,
   TProjectWorkflowSchemePayload,
   TWorkflowDetail,
+  TWorkflowEditor,
   TWorkflowFormData,
-  TWorkflowGraphPayload,
+  TWorkflowGraphSavePayload,
   TWorkflowMappingNeed,
   TWorkflowStatus,
   TWorkflowStatusCandidate,
@@ -52,8 +53,12 @@ export class WorkflowService extends APIService {
     return this.unwrap(this.delete(`/api/workspaces/${workspaceSlug}/workflows/${workflowId}/`));
   }
 
-  saveGraph(workspaceSlug: string, workflowId: string, payload: TWorkflowGraphPayload): Promise<TWorkflowDetail> {
+  saveGraph(workspaceSlug: string, workflowId: string, payload: TWorkflowGraphSavePayload): Promise<TWorkflowDetail> {
     return this.unwrap(this.put(`/api/workspaces/${workspaceSlug}/workflows/${workflowId}/graph/`, payload));
+  }
+
+  sendPresence(workspaceSlug: string, workflowId: string, editing: boolean): Promise<{ editors: TWorkflowEditor[] }> {
+    return this.unwrap(this.post(`/api/workspaces/${workspaceSlug}/workflows/${workflowId}/presence/`, { editing }));
   }
 
   listStatuses(workspaceSlug: string): Promise<TWorkflowStatus[]> {
