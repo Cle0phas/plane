@@ -50,18 +50,24 @@ export function WorkflowTextView({ draft, selection, onSelect }: Props) {
             const isOpen = !collapsed.includes(row.key);
             const isSelected = selection?.kind === "state" && selection.key === row.key;
             return (
-              <tr key={row.key} className="align-top">
+              // Mouse shortcut (D11); the state button of the row is the keyboard path.
+              <tr
+                key={row.key}
+                className="cursor-pointer align-top"
+                onClick={() => onSelect({ kind: "state", key: row.key })}
+              >
                 <td className="border-b border-subtle p-2">
                   <button
                     type="button"
                     className="flex size-8 items-center justify-center rounded-md hover:bg-layer-1 max-md:size-11"
                     aria-expanded={isOpen}
                     aria-label={t("workflows.editor.text.toggle", { name: row.name })}
-                    onClick={() =>
+                    onClick={(event) => {
+                      event.stopPropagation();
                       setCollapsed((current) =>
                         isOpen ? [...current, row.key] : current.filter((key) => key !== row.key)
-                      )
-                    }
+                      );
+                    }}
                   >
                     {isOpen ? (
                       <ChevronDownOutline className="size-4" aria-hidden />
@@ -77,7 +83,10 @@ export function WorkflowTextView({ draft, selection, onSelect }: Props) {
                     aria-current={isSelected ? "true" : undefined}
                     // The editor focuses this row after adding the state (spec 3.3).
                     data-state-key={row.key}
-                    onClick={() => onSelect({ kind: "state", key: row.key })}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onSelect({ kind: "state", key: row.key });
+                    }}
                   >
                     {row.name}
                   </button>
@@ -97,7 +106,17 @@ export function WorkflowTextView({ draft, selection, onSelect }: Props) {
                             className="text-body-sm-regular text-primary"
                           >
                             {key === null ? (
-                              <span>{route}</span>
+                              <button
+                                type="button"
+                                className="rounded-sm text-left hover:underline max-md:min-h-11"
+                                aria-current={selection?.kind === "start" ? "true" : undefined}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  onSelect({ kind: "start" });
+                                }}
+                              >
+                                {route}
+                              </button>
                             ) : (
                               <button
                                 type="button"
@@ -105,7 +124,10 @@ export function WorkflowTextView({ draft, selection, onSelect }: Props) {
                                 aria-current={
                                   selection?.kind === "transition" && selection.key === key ? "true" : undefined
                                 }
-                                onClick={() => onSelect({ kind: "transition", key })}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  onSelect({ kind: "transition", key });
+                                }}
                               >
                                 {label}
                               </button>

@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { TDraftGraph } from "./graph-model";
@@ -55,6 +55,29 @@ describe("WorkflowTextView", () => {
     expect(onSelect).toHaveBeenLastCalledWith({ kind: "state", key: "b" });
     await user.click(screen.getByRole("button", { name: /Finish/ }));
     expect(onSelect).toHaveBeenLastCalledWith({ kind: "transition", key: "t" });
+  });
+
+  it("selects the state when its row is clicked outside a transition", async () => {
+    const onSelect = vi.fn();
+    render(<WorkflowTextView draft={draft} selection={null} onSelect={onSelect} />);
+    const row = screen.getByRole("button", { name: "Done" }).closest("tr") as HTMLElement;
+    const cells = within(row).getAllByRole("cell");
+    await userEvent.setup().click(cells[cells.length - 1]);
+    expect(onSelect.mock.calls).toEqual([[{ kind: "state", key: "b" }]]);
+  });
+
+  it("selects only the transition when its name is clicked", async () => {
+    const onSelect = vi.fn();
+    render(<WorkflowTextView draft={draft} selection={null} onSelect={onSelect} />);
+    await userEvent.setup().click(screen.getByRole("button", { name: /Finish/ }));
+    expect(onSelect.mock.calls).toEqual([[{ kind: "transition", key: "t" }]]);
+  });
+
+  it("opens the start panel from the start line", async () => {
+    const onSelect = vi.fn();
+    render(<WorkflowTextView draft={draft} selection={null} onSelect={onSelect} />);
+    await userEvent.setup().click(screen.getByRole("button", { name: /workflows\.editor\.text\.origin_start → Todo/ }));
+    expect(onSelect.mock.calls).toEqual([[{ kind: "start" }]]);
   });
 
   it("hides the transitions of a collapsed state", async () => {
