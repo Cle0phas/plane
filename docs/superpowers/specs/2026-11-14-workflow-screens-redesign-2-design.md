@@ -2,7 +2,7 @@
 
 - Date : 2026-11-14
 - Branche : `feat/workflows` (fork `Cle0phas/plane`), avant l'ouverture de la PR 2
-- Statut : en relecture
+- Statut : validée le 2026-11-14 (points O1 à O8 acceptés tels que recommandés)
 - Complète : `docs/superpowers/specs/2026-11-14-workflow-screens-redesign-design.md` (« spec de la refonte 1 »), dont elle remplace les sections 3.4, 3.6 et 6.2 et modifie les sections 3.1, 3.2, 3.7 et 3.8. Le modèle, le contrôle des transitions et les règles d'accès A1 à A5 restent ceux de `docs/superpowers/specs/2026-11-12-workflows-design.md` (« spec des workflows »), sauf le point O7 s'il est accepté.
 
 ## 1. Contexte et objectif
