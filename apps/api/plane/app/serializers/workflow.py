@@ -35,7 +35,7 @@ class WorkflowStatusSerializer(BaseSerializer):
 
     class Meta:
         model = WorkflowStatus
-        fields = ["id", "name", "color", "group", "group_is_auto", "sequence", "workflow_count", "workflows"]
+        fields = ["id", "name", "color", "group", "group_is_auto", "workflow_count", "workflows"]
         read_only_fields = fields
 
     def get_workflows(self, obj):

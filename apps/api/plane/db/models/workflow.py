@@ -41,11 +41,10 @@ class WorkflowStatus(BaseModel):
     color = models.CharField(max_length=7)
     group = models.CharField(max_length=20, choices=StateGroup.choices, default=StateGroup.STARTED)
     group_is_auto = models.BooleanField(default=True)
-    sequence = models.FloatField(default=65535)
 
     class Meta:
         db_table = "workflow_statuses"
-        ordering = ("sequence", "name")
+        ordering = ("name",)
         constraints = [
             models.UniqueConstraint(
                 Lower("name"),

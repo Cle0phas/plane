@@ -141,6 +141,11 @@ class TestRead:
         assert by_name["Unused"]["workflows"] == []
         assert by_name["To do"]["workflow_count"] == 2
 
+    def test_statuses_carry_no_order_of_their_own(self, workspace, users, software):
+        # The column order of a project comes from its workflows, never from the shared statuses.
+        response = _client(users["member"]).get(STATUSES_URL.format(slug=workspace.slug))
+        assert response.data and all("sequence" not in item for item in response.data)
+
     def test_project_names_only_reach_workspace_admins(self, workspace, users, project, software):
         link_project(project, software)
         as_admin = _client(users["admin"]).get(WORKFLOWS_URL.format(slug=workspace.slug)).data[0]

@@ -12,7 +12,6 @@ export type TWorkflowStatus = {
   color: string;
   group: TStateGroups;
   group_is_auto: boolean;
-  sequence?: number;
   workflow_count?: number;
   /** Workflows using the status, sorted by name. */
   workflows?: { id: string; name: string }[];
