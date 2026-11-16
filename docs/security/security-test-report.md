@@ -1,42 +1,43 @@
 # Rapport de test de sécurité
 
-| Champ     | Valeur                                                       |
-| --------- | ------------------------------------------------------------ |
-| Projet    | Fork de Plane (Cle0phas/plane), types de ticket, livraison 1 |
-| Version   | 0.1                                                          |
-| Date      | 2026-11-12                                                   |
-| Auteur    | Équipe sécurité (asin-harness /security)                     |
-| Phase ADM | Mise en œuvre et opérationnalisation                         |
+| Champ     | Valeur                                                 |
+| --------- | ------------------------------------------------------ |
+| Projet    | Fork de Plane (Cle0phas/plane), workflows, livraison 2 |
+| Version   | 0.2                                                    |
+| Date      | 2026-11-16                                             |
+| Auteur    | Équipe sécurité (asin-harness /security)               |
+| Phase ADM | Mise en œuvre et opérationnalisation                   |
+
+Ce rapport remplace celui de la livraison 1 (types de ticket, 2026-11-12), qui reste dans l'historique git (commit `9438110fa2`).
 
 ## 1. Périmètre
 
-- Branche testée : `feat/work-item-types`, commit `1122679eb9`, comparée à sa base `cd44cc1320` sur `upstream/preview` (diff de la branche uniquement, 143 fichiers).
-- Composants couverts : les 9 routes des types (workspace et projet), le contrôle du type sur chaque chemin d'écriture des tickets (application, API publique v1, brouillons et leur conversion, intake, app publique `space`), la validation des champs stockés (`StrictUUIDField`, `clean_logo_props`, nom et description), les filtres et le regroupement par type, l'historique des changements de type, le journal d'audit en ajout seul, les migrations 0126 à 0128, et le store frontend des types.
-- Composants exclus : l'authentification existante de Plane (session, clés API, CSRF, cookies), non modifiée par la branche ; le reste du dépôt hors diff.
-- Entrées de référence : le fork n'a pas de `docs/architecture/dat.md` (pas de matrice d'autorisation section 5 ni de dépendances externes déclarées), pas de `docs/architecture/api.md` ni de `docs/specs/sfd.md`. La spécification utilisée à la place est `docs/superpowers/specs/2026-11-12-work-item-types-design.md` (règles R1 à R14, section 7 STRIDE, section 10 limites connues).
-- Exceptions acceptées (spec section 10, non comptées comme constats) : la concurrence entre la suppression d'un type et son affectation ; les compteurs par type des projets privés visibles de tout membre du workspace (R2) ; le caractère « ajout seul » du journal d'audit garanti par l'application mais pas par la base.
+- Branche testée : `feat/workflows`, commit `bf60153709`, comparée à sa base `525e4c9732` sur `feat/work-item-types` (diff de la branche uniquement : 147 fichiers de code, 145 commits).
+- Composants couverts : les routes des statuts et des workflows du workspace (lecture, création, modification, suppression, graphe, copie), la route de présence, les routes du système de workflows d'un projet (lecture, écriture, retrait, aperçu), le contrôle des transitions sur chaque chemin d'écriture de l'état d'un ticket (application web, API publique v1, intake, conversion de brouillon, garde du modèle), le refus de modifier les états d'un projet géré par un workflow, les écritures système sans acteur (application d'un système, synchronisation, clôture automatique), le rendu des données dans le client web, les migrations 0129 à 0131.
+- Composants exclus : l'authentification existante de Plane (session, clés d'API, CSRF, cookies), non modifiée par la branche ; le reste du dépôt hors diff.
+- Entrées de référence : le fork n'a pas de `docs/architecture/dat.md` (pas de matrice d'autorisation section 5 ni de dépendances externes déclarées), pas de `docs/architecture/api.md` ni de `docs/specs/sfd.md`. Les règles d'accès servant de contrat sont celles des specs : `docs/superpowers/specs/2026-11-12-workflows-design.md` (A1 à A5, section 8 STRIDE) et `docs/superpowers/specs/2026-11-14-workflow-screens-redesign-2-design.md` (O7, sections 6 et 8). Le `CLAUDE.md` du projet ne déclare pas de registre Harbor.
+- Exceptions acceptées par les specs, non comptées comme constats : l'écriture concurrente du système d'un projet (la dernière l'emporte) ; un admin de projet peut contourner « limiter qui » en retirant puis en remettant le système (règles A4 et T6, tracé par l'audit) ; la route de présence sans limite de débit propre.
 
 ## 2. Méthode
 
-- Méthode security-audit de Cloudflare (vendorisée dans le harnais ASIN), profil `quick` limité au diff : une vague de recherche (5 agents), un passage du critique de couverture, un vérificateur indépendant par candidat.
-- Classes retenues : `ATTACK-CLASSES.md` (Access control, Business logic, Injection, Feature abuse and data leakage), `DATA-ISOLATION-AND-LIFECYCLE.md`, et les compagnons ASIN `ASIN-IAM-XROAD.md#Missing or inconsistent authorisation` et `ASIN-SOVEREIGNTY.md#Personal data in logs or telemetry`. Non retenus : `WEB-PROTOCOL-AND-AUTH.md` (aucune modification de session, cookie ou en-tête) et `CLIENT-SIDE.md` (aucun nouveau rendu HTML brut).
-- Conteneur : `sandbox-run.sh` (réseau coupé, environnement vide, cible en lecture seule, écriture limitée au dossier scratch, limites CPU, mémoire, processus, taille et durée), image locale `feat-work-item-types-api-tests:latest`, empreinte `sha256:ef16751689b897bc889d45f9da54c7b375eb312117e3cc400b9dfb8b293ea929`. Registre Harbor non configuré pour ce fork : image construite localement depuis `apps/api/Dockerfile.dev`, jamais tirée d'un registre public. La preuve locale a été promue par `promote.py`.
-- Limite d'exécution : le bac à sable ne fournit pas PostgreSQL, Redis ni RabbitMQ. Les contrôles dépendant de la base sont donc fondés sur la lecture du code ; seul le contrôle du candidat, qui n'en avait pas besoin, a été exécuté.
+- Méthode security-audit de Cloudflare (vendorisée dans le harnais ASIN), profil `quick` limité au diff : reconnaissance (4 agents), une vague de recherche (6 agents), un passage du critique de couverture, un vérificateur indépendant par candidat (4).
+- Classes retenues : `ATTACK-CLASSES.md` (Access control, Business logic, Injection, Feature abuse and data leakage, Chained vulnerabilities and trust boundaries), `DATA-ISOLATION-AND-LIFECYCLE.md`, `RESOURCE-EXHAUSTION-AND-AVAILABILITY.md`, `WEB-PROTOCOL-AND-AUTH.md` (Ordinary CSRF, API-key scope and resource binding), et les compagnons ASIN `ASIN-IAM-XROAD.md#Missing or inconsistent authorisation` et `ASIN-SOVEREIGNTY.md#Personal data in logs or telemetry` et `#Data leaving the perimeter`. L'application n'utilise ni Keycloak ni X-Road : aucun constat n'est tiré de ces classes.
+- Conteneur : aucun code de la cible n'a été exécuté. Le bac à sable (`sandbox-run.sh` : réseau coupé, environnement vide, cible en lecture seule) ne fournit pas PostgreSQL, et tous les tests de la fonctionnalité en dépendent. L'image du projet disponible localement était `wfr2-fix-api-tests:latest` (`sha256:3785e7309ba1665e66c8dffc0a79fc97b52c2b5f25a4e35b27b38c4c03da38ac`) ; elle n'a pas servi. Toutes les preuves sont donc des lectures du code source, ce qui interdit le statut « confirmé » : un candidat fondé reste « à valider ».
 - Écart à la méthode : les blocs de classes d'attaque et de règles ont été désignés aux agents par fichier et par nom, avec obligation de les lire tels quels, au lieu d'être recopiés dans chaque consigne.
-- Dossier d'exécution (non versionné) : `docs/security/runs/2026-11-12-diff-1/`.
-- Validateurs : `validate-findings.cjs` : `PASS: 1 findings valid` ; `validate-coverage-ledger.cjs` : `PASS: 12 coverage units valid`.
+- Dossier d'exécution (non versionné) : `docs/security/runs/2026-11-16-diff-1/`.
+- Validateurs : `validate-findings.cjs` : `PASS: 4 findings valid` ; `validate-coverage-ledger.cjs` : `PASS: 21 coverage units valid`.
 
 ## 3. Verdict
 
-- Verdict global : **conforme**. Aucun constat confirmé, de quelque sévérité que ce soit.
-- Verdict souveraineté : **conforme**. Le journal d'audit et l'historique ne contiennent que des identifiants et des données saisies par les admins (nom, description, icône d'un type) ; aucune donnée personnelle au-delà de l'identifiant de l'auteur, aucun secret, aucun appel sortant.
-- Verdict IAM : **conforme**. Chaque route vérifie le rôle côté serveur ; les écritures au niveau du projet passent par le contrôle explicite admin du workspace ou admin du projet ; toutes les requêtes sont limitées au workspace de l'URL ; un objet d'un autre workspace reçoit la même réponse qu'un objet inexistant.
-- Constats par sévérité : critical 0, high 0, medium 0, low 0, informational 0. Un candidat rejeté.
-- Couverture : **partielle**. Audit `quick` limité au diff : 7 unités couvertes, 1 unité avec candidat (rejeté), 1 unité hors périmètre, et 3 unités proposées par le critique de couverture **reportées** faute de seconde vague dans ce profil :
-  1. la persistance des filtres des vues sauvegardées et des vues d'analyse ;
-  2. les autres consommateurs du filtre par type (modules, cycles, archives, intake, workspace, brouillons, analyses, vues publiques `space`) ;
-  3. les écritures de tickets qui contournent `Issue.save()` (créations en masse, mises à jour par requête, imports, copies).
-     Aucun audit précédent n'existait pour ce dépôt.
+- Verdict global : **conforme** au sens de la méthode (aucun constat confirmé), **avec un candidat à valider de priorité haute** (section 5) : s'il se confirme, une règle « limiter qui » peut être contournée par un membre du projet. La décision de fusion doit en tenir compte.
+- Verdict souveraineté : **conforme**. La livraison n'ajoute aucun appel sortant, aucune télémétrie, aucun secret, aucune image ; le journal d'audit et l'historique ne contiennent que des identifiants techniques et des noms saisis par les admins. Hors périmètre, à traiter avant toute mise en service : la télémétrie d'origine de Plane (section 7, HORS-001).
+- Verdict IAM : **conforme**. Chaque route vérifie le rôle côté serveur, le rôle est relu en base à chaque requête, aucune écriture n'est décidée par la seule interface, tout objet est résolu dans le workspace de l'URL.
+- Constats par sévérité : critical 0, high 0, medium 0, low 0, informational 0. Un candidat à valider, trois rejetés.
+- Couverture : **partielle**. Audit `quick` limité au diff : 13 unités couvertes, 3 unités avec candidats, 3 unités reportées (aucune seconde vague dans ce profil) et 2 unités hors périmètre. Unités reportées :
+  1. le retrait d'un type de ticket d'un projet, ou sa suppression, qui change le workflow effectif des tickets sans passer par la garde ;
+  2. la logique de l'enregistrement du graphe, de la copie et de la suppression d'un workflow sous concurrence (lecture sans verrou de l'état par la garde pendant un enregistrement) ;
+  3. le cycle de vie des projets et des membres face au système (projet archivé ou supprimé dans les comptes d'usage et la lecture du système).
+     Aucun registre précédent compatible n'existait pour ce code.
 
 ## 4. Constats
 
@@ -44,33 +45,59 @@ Aucun constat confirmé.
 
 ## 5. À valider
 
-- Aucun constat `needs_validation`.
-- Candidats rejetés : 1. La cause est réelle et reproduite localement, mais l'échec reste limité à la requête de celui qui l'envoie, sans autre principal ni ressource partagée touchés : ce n'est pas une faille de sécurité. Il s'agit d'un **défaut fonctionnel** de la livraison : enregistrer une vue sauvegardée, ou une vue d'analyse, filtrée par type échoue (erreur 500), parce que le filtre par type stocke des identifiants dans un format que le champ JSON ne sait pas enregistrer. Il est à corriger avant la fusion (voir section 7, hors constats de sécurité).
+**VAL-001. Un aller-retour de type par un workflow plus souple place un ticket dans un statut que son propre workflow restreint.** Fichiers : `apps/api/plane/utils/workflows.py` (résolution de l'état lors d'un changement de type), `apps/api/plane/db/models/issue.py` (garde du modèle).
+
+- Ce qui est établi par la lecture du code : quand un changement de type fait passer un ticket à un autre workflow, l'état actuel est gardé s'il existe dans le nouveau workflow, sans contrôle de flèche ni de règle (c'est la règle W9 de la spec). Quand deux workflows d'un même projet partagent des statuts, un membre qui peut modifier le ticket peut le passer au type qui suit le workflow le plus souple, y faire avancer le ticket par une flèche sans règle, puis revenir au type d'origine : l'état est gardé, et le ticket se retrouve dans un statut que le workflow d'origine réserve à d'autres. La spec dit que le changement de type ne doit contourner ni les flèches ni « limiter qui » (W9) ; cette combinaison n'y est pas couverte.
+- Ce qui manque pour confirmer : l'observation du résultat. Le bac à sable de l'audit n'a pas de base de données.
+- Ce qui le déciderait : un test de contrat, sur la pile de test isolée du projet et des données factices, avec deux workflows partageant deux statuts dont l'un restreint le passage de l'un à l'autre. Comportement sûr : le ticket ne finit jamais dans le statut restreint sous son type d'origine sans que l'acteur y ait droit. À rejouer par l'API publique v1.
+- Variante écartée : le simple retour à l'état initial par aller-retour de type est le comportement que W9 spécifie.
+
+Candidats rejetés : 3.
+
+- La lecture du système d'un projet par tout membre ou invité du workspace, sans appartenance au projet : le code applique la règle A3 et la section 6.6 des specs validées ; c'est une décision de conception et non une faille. Elle contredit toutefois la raison de la décision O7 : voir DEC-001 en section 7.
+- La liste des workflows sans plafond avec des requêtes par ligne, et l'envoi d'une tâche par ticket déplacé lors d'un changement de système : seuls des administrateurs peuvent les déclencher, dans leur propre périmètre ; ce sont des améliorations de performance (section 7).
 
 ## 6. Points vérifiés sans anomalie
 
-- Autorisation des 5 routes des types du workspace : lecture pour tout membre actif, écriture pour les admins seulement, décorateur sur chaque méthode.
-- Autorisation des 4 routes des types d'un projet : `_require_project_manager` en première instruction de chaque écriture, même réponse 403 que l'objet existe ou non.
-- Isolation par workspace : toutes les requêtes filtrées par le workspace de l'URL, réponse 404 identique pour un objet absent ou étranger.
-- Affectation massive : seuls nom, description, icône et statut actif sont modifiables ; le type par défaut n'est posé que côté serveur, après contrôle d'identité strict.
-- Type d'un ticket sur tous les chemins d'écriture (application, API v1, brouillons et conversion, intake, `space`) : contrôle unique, même workspace, activé dans le projet, actif, non supprimé ; champ du modèle en lecture seule ; ancienne faille d'injection inter-workspace de l'API v1 fermée.
-- Valeurs stockées et rendu : liste blanche stricte des icônes, rendu React en texte, aucun chargement de ressource tierce.
-- Filtres et regroupement : identifiants invalides rejetés ou ignorés sans erreur 500 en lecture, valeurs de regroupement limitées au workspace, pas d'oracle d'existence.
-- Concurrence : verrous pris dans un ordre fixe, contraintes uniques partielles en base comme garde-fou.
-- Cycle de vie et audit : écriture de l'audit avant la suppression, dans la même transaction ; migration 0127 ne touchant ni types supprimés ni autres workspaces, idempotente ; migration 0128 qui échoue proprement en cas de doublon.
-- Store frontend : données rangées par workspace, réponses tardives isolées, état réinitialisé à la déconnexion.
+- Autorisation des routes du workspace : toutes les écritures (suppression d'un statut, création, modification et suppression d'un workflow, graphe, copie, présence) sont réservées aux admins par le décorateur de chaque méthode ; les lectures des workflows et des statuts sont ouvertes aux admins et aux membres, fermées aux invités ; la liste des noms d'états candidats est réservée aux admins.
+- Autorisation des routes du système d'un projet : écriture, retrait et aperçu passent d'abord par le contrôle « admin du workspace ou admin du projet » ; un invité ne peut pas être admin de projet.
+- Isolation par workspace : tout objet est lu dans le workspace de l'URL ; les workflows d'un système, les statuts d'un graphe et les utilisateurs nommés dans une règle sont revérifiés dans ce workspace ; réponse 404 identique pour un objet absent ou étranger.
+- Session et CSRF : les nouvelles routes héritent de l'authentification par session et du contrôle d'origine sur les méthodes d'écriture.
+- Garde des transitions : appelée sur chaque chemin d'écriture de l'état (application web, API v1, intake, conversion de brouillon), doublée par une garde du modèle ; l'acteur vient de la requête ; les règles s'évaluent avec le rôle de projet ; type de règle inconnu ou acteur absent : refus.
+- États d'un projet géré : création, modification, suppression et choix de l'état par défaut refusés sur les routes de l'application et de l'API v1.
+- Écritures système : les déplacements d'un changement de système sont validés contre le nouveau workflow et tracés ; la clôture automatique ne suit qu'une transition globale sans règle.
+- Entrées : graphe validé et borné (200 états, 1 000 transitions, 1 000 statuts par workspace, une règle par transition, 200 utilisateurs par règle), identifiants stricts, couleur par expression régulière ; aucune requête SQL brute.
+- Rendu : aucune insertion de HTML, liens construits à partir d'identifiants, textes du serveur rendus comme du texte.
+- Migrations 0129 à 0131 : schéma seulement, contraintes uniques conditionnées à la suppression logique, pas de migration de données.
+- Présence : clé de cache construite à partir d'identifiants du serveur, 75 secondes ; seuls les admins actifs sont listés.
+- Journaux et audit : écriture de l'audit dans la transaction de chaque changement ; ni nom ni courriel dans les entrées ; aucune route ne relit le journal d'audit.
 
 ## 7. Plan de remédiation
 
-Aucune tâche de sécurité : aucun constat critical, high ou medium.
+Aucune tâche de sécurité bloquante au sens de la méthode : aucun constat critical, high ou medium confirmé.
 
-Correctifs et durcissements recommandés, non bloquants au titre de la sécurité :
+À traiter avant fusion ou à décider par le propriétaire :
 
-| Réf.                          | Test de non-régression                                                                                                                                                               | Correctif minimal                                                                                                                            | Bloquant                                        | Responsable     | Échéance                               |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------- | -------------------------------------- |
-| FONC-001 (défaut fonctionnel) | Enregistrer une vue sauvegardée filtrée par type réussit ; la sortie du filtre par type en écriture est sérialisable en JSON ; une valeur non textuelle est refusée proprement (400) | Dans `filter_issue_type`, garder les UUID pour GET, normaliser l'entrée et stocker des chaînes pour POST et PATCH, comme les filtres voisins | Non (sécurité), oui (fonctionnel, avant fusion) | Équipe build    | Avant fusion de `feat/work-item-types` |
-| DUR-001                       | Restaurer un ticket supprimé dont le type a été supprimé lui redonne le type par défaut                                                                                              | Compter `Issue.all_objects` dans les gardes de suppression, ou revalider le type à la restauration                                           | Non                                             | Équipe build    | Livraison 2                            |
-| DUR-002                       | Le garde-fou du modèle refuse un type inactif                                                                                                                                        | Ajouter `is_active` au filtre de `Issue._ensure_default_type`                                                                                | Non                                             | Équipe build    | Livraison 2                            |
-| DUR-003                       | Les routes du projet refusent un projet supprimé ou archivé                                                                                                                          | Charger le projet (workspace de l'URL) avant le PATCH et le DELETE des liaisons                                                              | Non                                             | Équipe build    | Livraison 2                            |
-| DUR-004                       | La file de suppression n'est envoyée qu'après le commit                                                                                                                              | Mettre la cascade dans `transaction.on_commit`                                                                                               | Non                                             | Équipe build    | Livraison 2                            |
-| COUV-001                      | Seconde passe sur les 3 unités reportées                                                                                                                                             | Audit `standard` limité à ces unités                                                                                                         | Non                                             | Équipe sécurité | Avant la livraison 2                   |
+| Réf.     | Test de non-régression                                                                                                                                                           | Correctif minimal                                                                                                                                                                                                                 | Bloquant                    |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| VAL-001  | Deux workflows partageant deux statuts, l'un restreignant le passage ; un membre non autorisé ne peut pas amener le ticket dans le statut restreint par deux changements de type | Lors d'un changement de type vers un autre workflow, ne garder l'état que si l'acteur a le droit d'y entrer selon le nouveau workflow (état initial, ou flèche entrante dont les règles l'admettent) ; sinon poser l'état initial | Oui, si le test confirme    |
+| DEC-001  | Un membre et un invité du workspace qui ne sont pas membres d'un projet privé reçoivent 403 à la lecture de son système                                                          | Exiger l'appartenance au projet ou le rôle d'admin du workspace pour lire le système d'un projet (change la règle A3)                                                                                                             | Décision du propriétaire    |
+| HORS-001 | Vérifier dans le déploiement que l'export de télémétrie est coupé                                                                                                                | Code d'origine de Plane, hors diff : l'export de métriques d'instance est actif par défaut vers un hôte externe ; le couper par la configuration avant toute mise en service                                                      | Oui pour la mise en service |
+
+Durcissements recommandés, non bloquants :
+
+| Réf.     | Sujet                                                                                                                                                             |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DUR-001  | Vérifier l'appartenance active au projet au début de l'évaluation des règles (défense en profondeur ; aujourd'hui garantie par les routes appelantes)             |
+| DUR-002  | Nettoyer les utilisateurs nommés dans une règle quand un membre quitte le workspace (sinon l'enregistrement suivant du graphe est refusé)                         |
+| DUR-003  | Ne renvoyer les identifiants d'utilisateurs des règles qu'aux admins dans les lectures des workflows et du système                                                |
+| DUR-004  | Filtrer aussi par workspace la lecture des workflows d'un système (défense en profondeur)                                                                         |
+| DUR-005  | Compter et précharger les projets dans la liste des workflows ; plafonner ou paginer                                                                              |
+| DUR-006  | Envoyer l'historique des tickets déplacés par lot, et ne journaliser qu'une erreur avec le nombre d'échecs                                                        |
+| DUR-007  | Limite de débit par utilisateur sur la route de présence et sur les écritures lourdes (graphe, système)                                                           |
+| DUR-008  | Borner la taille des entrées d'audit (graphe complet avant et après à chaque enregistrement)                                                                      |
+| DUR-009  | Dire dans l'aide de la règle « personne assignée » qu'un membre pouvant s'assigner peut ensuite passer la règle                                                   |
+| DUR-010  | Compter aussi les rôles « membre hors projet » et « invité hors projet » dans les matrices de tests du système                                                    |
+| DUR-011  | Réunir les règles d'accès (A1 à A5, O7, présence, aperçu) dans une seule matrice, une ligne par route                                                             |
+| DUR-012  | Pointer `.npmrc` vers un miroir npm interne quand l'ASIN en fournit un ; prendre une décision explicite sur le lien d'attribution de la bibliothèque de diagramme |
+| COUV-001 | Seconde passe d'audit, profil `standard`, sur les 3 unités reportées                                                                                              |
