@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import WorkflowEditorPage from "./page";
 
 type TSwrResult = { data?: unknown; error?: unknown };
-type TEditorProps = { workflow: { version: string }; onReload: () => Promise<void> };
+type TEditorProps = { workflow: { version: string }; onReload: () => Promise<void>; focusOnMount?: boolean };
 
 const state = vi.hoisted(() => ({
   canRead: true,
@@ -139,11 +139,14 @@ describe("WorkflowEditorPage", () => {
   it("reads everything again and remounts the editor on a reload", async () => {
     openPage();
     expect(state.mounts).toBe(1);
+    expect(state.editor!.focusOnMount).toBe(false);
     await act(() => state.editor!.onReload());
     expect(state.fetchWorkflowDetail).toHaveBeenCalledWith("ws", "w");
     expect(state.fetchStatuses).toHaveBeenCalledWith("ws");
     expect(state.fetchCandidates).toHaveBeenCalledWith("ws");
     expect(state.mounts).toBe(2);
+    // The reload button left with the old editor: the new one takes the focus.
+    expect(state.editor!.focusOnMount).toBe(true);
   });
 
   // The proposed states only shorten a list: their failure must not keep the admin on a stale editor.

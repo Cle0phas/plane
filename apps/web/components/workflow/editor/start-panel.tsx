@@ -9,10 +9,16 @@ import { useTranslation } from "@plane/i18n";
 // local imports
 import { clearInitial, setInitial, type TDraftGraph } from "./graph-model";
 
-type Props = { draft: TDraftGraph; canEdit: boolean; onChange: (draft: TDraftGraph) => void };
+type Props = {
+  draft: TDraftGraph;
+  canEdit: boolean;
+  onChange: (draft: TDraftGraph) => void;
+  /** The remove button is gone after an unlink: the caller places the focus. */
+  onUnlinked?: () => void;
+};
 
 /** Panel of the start link (spec 4.3): the state every new work item starts in. */
-export function StartPanel({ draft, canEdit, onChange }: Props) {
+export function StartPanel({ draft, canEdit, onChange, onUnlinked }: Props) {
   const { t } = useTranslation();
   const initial = draft.states.find((state) => state.is_initial);
 
@@ -49,7 +55,10 @@ export function StartPanel({ draft, canEdit, onChange }: Props) {
             size="sm"
             stretch="auto"
             label={t("workflows.editor.start_panel.unlink")}
-            onClick={() => onChange(clearInitial(draft))}
+            onClick={() => {
+              onChange(clearInitial(draft));
+              onUnlinked?.();
+            }}
           />
         </div>
       )}

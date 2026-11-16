@@ -244,6 +244,37 @@ describe("linked project", () => {
     open();
     expect((button(`${S}.add`) as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByText(`${S}.no_workflow`)).toBeTruthy();
+    // The reason is read with the button, not only seen next to it.
+    const reason = document.getElementById(button(`${S}.add`).getAttribute("aria-describedby") ?? "");
+    expect(reason?.textContent).toBe(`${S}.no_workflow`);
+  });
+
+  // I5: the row and its "Remove" are gone once applied; the table keeps the keyboard user in place.
+  it("gives the focus to the table once a workflow is removed", async () => {
+    const user = open();
+    await user.click(button(named("remove_named", "Strict")));
+    state.applyProjectScheme = vi.fn(async () => {
+      state.scheme = { ...linked(), items: [] };
+      return state.scheme;
+    });
+    await user.click(button(`${S}.remove`));
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("table")));
+  });
+
+  // The last free workflow added, "Add a workflow" is disabled and can no longer take the focus back.
+  it("gives the focus to the table once the last free workflow is added", async () => {
+    state.applyProjectScheme = vi.fn(async () => {
+      state.scheme = { ...linked(), items: [...strictItems, { issue_type_id: "task", workflow_id: "w-free" }] };
+      return state.scheme;
+    });
+    const user = open();
+    await user.click(button(`${S}.add`));
+    const dialog = screen.getByRole("dialog");
+    await user.selectOptions(within(dialog).getByRole("combobox", { name: `${S}.table.workflow` }), "Kanban");
+    await user.click(within(dialog).getByRole("checkbox", { name: "Task" }));
+    await user.click(within(dialog).getByRole("button", { name: `${S}.add_submit` }));
+    await waitFor(() => expect((button(`${S}.add`) as HTMLButtonElement).disabled).toBe(true));
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("table")));
   });
 
   it("shows a refusal of the server in the dialog", async () => {
@@ -378,5 +409,18 @@ describe("project without a workflow", () => {
     await user.click(within(dialog).getByRole("button", { name: `${S}.link_submit` }));
     await waitFor(() => expect(state.applyProjectScheme).toHaveBeenCalledTimes(1));
     expect(lastApplied()).toEqual({ default_workflow_id: "w-default", items: [], mappings: [] });
+  });
+
+  it("gives the focus to the new table once a workflow is linked", async () => {
+    state.applyProjectScheme = vi.fn(async () => {
+      state.scheme = linked();
+      return state.scheme;
+    });
+    const user = open();
+    await user.click(button(`${S}.link`));
+    const dialog = screen.getByRole("dialog");
+    await user.selectOptions(within(dialog).getByRole("combobox", { name: `${S}.table.workflow` }), "Software");
+    await user.click(within(dialog).getByRole("button", { name: `${S}.link_submit` }));
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("table")));
   });
 });

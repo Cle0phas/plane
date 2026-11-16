@@ -115,6 +115,8 @@ describe("WorkflowSidePanel", () => {
       await userEvent.setup().click(screen.getByRole("button", { name: removeLabel("A") }));
       const next = onChange.mock.calls[0][0] as TDraftGraph;
       expect(next.transitions[0]).toMatchObject({ key: "t", name: "Finish", source_keys: ["b"], sides: {} });
+      // The removed chip took its button away: the heading keeps the keyboard user in the panel.
+      expect(document.activeElement).toBe(screen.getByRole("heading", { level: 2, name: "Finish" }));
     });
 
     it("offers no removal of the only source, nor in read-only mode", () => {
@@ -193,6 +195,7 @@ describe("transition panel", () => {
     ).toEqual(["workflows.editor.add_transition.choose_state", "A"]);
     await user.selectOptions(picker, "A");
     expect(onChange.mock.calls[0][0].transitions[2].source_keys).toEqual(["b", "a"]);
+    expect(document.activeElement).toBe(screen.getByRole("heading", { level: 2 }));
   });
 
   it("offers no source to add to a transition from any state", () => {

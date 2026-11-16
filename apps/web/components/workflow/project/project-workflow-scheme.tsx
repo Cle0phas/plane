@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import Link from "next/link";
 import { Button } from "@makeplane/propel/components/button";
@@ -19,6 +19,7 @@ import { useWorkItemType } from "@/hooks/store/use-work-item-type";
 import { useWorkflow } from "@/hooks/store/use-workflow";
 import { useUserPermissions } from "@/hooks/store/user";
 // local imports
+import { focusWhenReady } from "../editor/focus-when-ready";
 import { SchemeFormDialog, SchemeMappingDialog, type TSchemeFormProps } from "./scheme-dialog";
 import {
   buildSchemePayload,
@@ -85,6 +86,22 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [isDetachOpen, setIsDetachOpen] = useState(false);
+  const [focusRequest, setFocusRequest] = useState(0);
+  const tableRef = useRef<HTMLTableElement>(null);
+
+  // A link, an add or a remove can take away the control that started it: the table keeps the focus in place.
+  // The closing dialog first hands the focus back to its trigger, in a microtask: take over on the next frame.
+  useEffect(() => {
+    if (focusRequest === 0) return;
+    let stop = () => {};
+    const frame = requestAnimationFrame(() => {
+      stop = focusWhenReady(() => tableRef.current);
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      stop();
+    };
+  }, [focusRequest]);
 
   const rows = scheme ? schemeRows(scheme) : [];
   const choice = schemeChoice(scheme ?? { default_workflow_id: null, items: [] });
@@ -129,6 +146,7 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
   };
 
   const applyChoice = async (next: TSchemeChoice, chosen: Record<string, string>) => {
+    const isFocusLost = action?.kind === "link" || action?.kind === "add" || action?.kind === "remove";
     await applyProjectScheme(
       workspaceSlug,
       projectId,
@@ -136,6 +154,7 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
     );
     await Promise.allSettled([fetchProjectStates(workspaceSlug, projectId), fetchWorkflows(workspaceSlug)]);
     close();
+    if (isFocusLost) setFocusRequest((value) => value + 1);
     setToast({ type: "success", title: t("workflows.scheme.applied"), message: "" });
   };
 
@@ -257,12 +276,17 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
         <div className="space-y-3">
           {canManage && (
             <div className="flex flex-wrap items-center justify-end gap-2">
-              {addBlocker && <p className="text-caption-sm-regular text-tertiary">{t(addBlocker)}</p>}
+              {addBlocker && (
+                <p id="workflow-scheme-add-blocker" className="text-caption-sm-regular text-tertiary">
+                  {t(addBlocker)}
+                </p>
+              )}
               <Button
                 variant="secondary"
                 size="md"
                 stretch="auto"
                 disabled={addBlocker !== null}
+                aria-describedby={addBlocker ? "workflow-scheme-add-blocker" : undefined}
                 label={t("workflows.scheme.add")}
                 onClick={() => start({ kind: "add" })}
               />
@@ -276,7 +300,12 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
             </div>
           )}
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[560px] border-separate border-spacing-0" aria-label={t("workflows.label")}>
+            <table
+              ref={tableRef}
+              tabIndex={-1}
+              className="w-full min-w-[560px] border-separate border-spacing-0"
+              aria-label={t("workflows.label")}
+            >
               <thead>
                 <tr className="text-left text-body-xs-medium text-secondary">
                   {(canManage ? (["workflow", "types", "actions"] as const) : (["workflow", "types"] as const)).map(

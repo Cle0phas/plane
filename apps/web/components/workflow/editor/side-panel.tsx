@@ -29,6 +29,7 @@ import {
   type TDraftGraph,
   type TDraftTransition,
 } from "./graph-model";
+import { focusWhenReady } from "./focus-when-ready";
 import { StartPanel } from "./start-panel";
 import { TONE_CLASS } from "./tones";
 import type { TEditorSelection } from "./workflow-canvas";
@@ -56,7 +57,8 @@ type Props = {
   onAddTransition: (lock: TTransitionLock) => void;
   /** Opens the rule dialog on the selected transition. */
   onEditRule: () => void;
-  // Bumped when the selection comes from the text view, so keyboard users land in the panel.
+  // Bumped when the selection comes from outside the diagram (text view, panel cards, banner, dialog), so
+  // keyboard users land in the panel.
   focusSignal: number;
 };
 
@@ -68,6 +70,7 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel(props: Prop
   const headingRef = useRef<HTMLHeadingElement>(null);
   const sourcePickerRef = useRef<HTMLSelectElement>(null);
   const handledSignal = useRef(0);
+  const [focusRequest, setFocusRequest] = useState(0);
 
   // Any selection opens the panel (spec 3.7), a click on the element already selected too: each click
   // stores a new selection object, while a re-render keeps the same one.
@@ -76,7 +79,8 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel(props: Prop
     setIsAddingSource(false);
   }, [selection]);
 
-  // A collapsed panel renders its heading only on the next pass, so the hand-off waits for it.
+  // A collapsed panel renders its heading only on the next pass, so the hand-off waits for it; a closing
+  // dialog keeps the page inert a few frames, so the focus is retried until it holds.
   useEffect(() => {
     if (focusSignal === handledSignal.current) return;
     if (isCollapsed) {
@@ -84,8 +88,18 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel(props: Prop
       return;
     }
     handledSignal.current = focusSignal;
-    headingRef.current?.focus();
+    return focusWhenReady(() => headingRef.current);
   }, [focusSignal, isCollapsed]);
+
+  // The control that acted is gone once the change renders: the heading takes the focus back.
+  useEffect(() => {
+    if (focusRequest > 0) headingRef.current?.focus();
+  }, [focusRequest]);
+  const requestFocus = () => setFocusRequest((value) => value + 1);
+  const changeAndFocus = (next: TDraftGraph) => {
+    onChange(next);
+    requestFocus();
+  };
 
   // The link that opened the picker is gone: the picker takes the focus.
   useEffect(() => {
@@ -221,13 +235,15 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel(props: Prop
       {!hasSelection && (
         <div className="space-y-3 pt-8 text-center">
           <WorkflowsOutline className="mx-auto size-12 text-tertiary" aria-hidden />
-          <h2 className="text-h5-semibold text-primary">{t("workflows.editor.panel.empty_title")}</h2>
+          <h2 ref={headingRef} tabIndex={-1} className="text-h5-semibold text-primary">
+            {t("workflows.editor.panel.empty_title")}
+          </h2>
           <p className="text-body-sm-regular text-secondary">{t("workflows.editor.panel.empty_body")}</p>
           <p className="text-body-sm-regular text-secondary">{t("workflows.editor.panel.empty_hint")}</p>
         </div>
       )}
 
-      {isStart && <StartPanel draft={draft} canEdit={canEdit} onChange={onChange} />}
+      {isStart && <StartPanel draft={draft} canEdit={canEdit} onChange={onChange} onUnlinked={requestFocus} />}
 
       {state && (
         <>
@@ -315,7 +331,7 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel(props: Prop
                   size="sm"
                   stretch="auto"
                   label={t("workflows.editor.panel.remove_state")}
-                  onClick={() => onChange(removeState(draft, state.key))}
+                  onClick={() => changeAndFocus(removeState(draft, state.key))}
                 />
               )}
             </div>
@@ -355,7 +371,7 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel(props: Prop
                         type="button"
                         className="flex size-5 items-center justify-center rounded-full hover:bg-layer-1-hover max-md:size-11"
                         aria-label={t("workflows.editor.panel.remove_source", { name: stateName(draft, key) })}
-                        onClick={() => onChange(removeSource(draft, transition.key, key))}
+                        onClick={() => changeAndFocus(removeSource(draft, transition.key, key))}
                       >
                         <CloseOutline className="size-3" aria-hidden />
                       </button>
@@ -377,7 +393,7 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel(props: Prop
                   aria-label={t("workflows.editor.panel.add_source")}
                   value=""
                   onChange={(event) => {
-                    onChange(
+                    changeAndFocus(
                       updateTransition(draft, transition.key, {
                         source_keys: [...transition.source_keys, event.target.value],
                       })
@@ -445,7 +461,7 @@ export const WorkflowSidePanel = observer(function WorkflowSidePanel(props: Prop
                 size="sm"
                 stretch="auto"
                 label={t("workflows.editor.panel.remove_transition")}
-                onClick={() => onChange(removeTransition(draft, transition.key))}
+                onClick={() => changeAndFocus(removeTransition(draft, transition.key))}
               />
             </div>
           )}

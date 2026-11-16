@@ -430,6 +430,60 @@ it("opens the start panel from the banner line", async () => {
   fireEvent.click(within(screen.getByRole("group", { name: "workflows.editor.diagram_label" })).getByText("Todo"));
   await user.click(screen.getByRole("button", { name: "workflows.editor.errors.initial_state_required" }));
   expect(screen.getByRole("combobox", { name: "workflows.editor.start_panel.field" })).toBeTruthy();
+  await waitFor(() =>
+    expect(document.activeElement).toBe(
+      screen.getByRole("heading", { level: 2, name: "workflows.editor.start_panel.title" })
+    )
+  );
+});
+
+// I5: the control that acted leaves the page, the panel heading keeps the keyboard user in place.
+describe("focus after a panel action", () => {
+  const expectHeadingFocused = (name: string) =>
+    waitFor(() => expect(document.activeElement).toBe(screen.getByRole("heading", { level: 2, name })));
+
+  it("lands on the empty panel once the state is removed", async () => {
+    renderEditor();
+    fireEvent.click(screen.getByText("Done"));
+    await userEvent.setup().click(screen.getByRole("button", { name: "workflows.editor.panel.remove_state" }));
+    await expectHeadingFocused("workflows.editor.panel.empty_title");
+  });
+
+  it("lands on the empty panel once the transition is deleted", async () => {
+    renderEditor();
+    const user = userEvent.setup();
+    fireEvent.click(screen.getByText("Done"));
+    await user.click(screen.getByRole("button", { name: /Finish/ }));
+    await user.click(screen.getByRole("button", { name: "workflows.editor.panel.remove_transition" }));
+    await expectHeadingFocused("workflows.editor.panel.empty_title");
+  });
+
+  it("stays on the start panel once its link is removed", async () => {
+    renderEditor();
+    fireEvent.click(screen.getByText("workflows.editor.start"));
+    await userEvent.setup().click(screen.getByRole("button", { name: "workflows.editor.start_panel.unlink" }));
+    await expectHeadingFocused("workflows.editor.start_panel.title");
+  });
+
+  it("lands on the new transition added from the panel of a state", async () => {
+    renderEditor();
+    const user = userEvent.setup();
+    fireEvent.click(screen.getByText("Done"));
+    await user.click(screen.getByRole("button", { name: "workflows.editor.panel.add_incoming" }));
+    await user.click(screen.getByRole("checkbox", { name: "Review" }));
+    await user.click(screen.getByRole("button", { name: "workflows.editor.add_transition.submit" }));
+    await expectHeadingFocused("workflows.editor.text.unnamed");
+    // The closing dialog must not take it back afterwards.
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    expect(document.activeElement).toBe(
+      screen.getByRole("heading", { level: 2, name: "workflows.editor.text.unnamed" })
+    );
+  });
+});
+
+it("focuses its main region when the page mounts it after a reload", () => {
+  renderEditor({ focusOnMount: true });
+  expect(document.activeElement?.id).toBe("workflow-editor-main");
 });
 
 describe("stale save", () => {

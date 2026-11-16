@@ -67,6 +67,8 @@ type Props = {
   /** Signals unsaved changes and returns the other admins who have some (spec 4.6). */
   onPresence?: (editing: boolean) => Promise<TWorkflowEditor[]>;
   onDirtyChange?: (dirty: boolean) => void;
+  /** Set by the page when it remounts the editor after a reload: the reload button is gone. */
+  focusOnMount?: boolean;
 };
 
 type TDialog = { kind: "state" } | { kind: "transition"; lock: TTransitionLock | null } | { kind: "rule" } | null;
@@ -78,7 +80,18 @@ const PRESENCE_INTERVAL = 30_000;
 const VIEW_CLASS = "rounded-sm px-3 py-1 text-body-xs-medium max-md:min-h-11";
 
 export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
-  const { workflow, statuses, candidates, readOnly, onSave, onClose, onReload, onPresence, onDirtyChange } = props;
+  const {
+    workflow,
+    statuses,
+    candidates,
+    readOnly,
+    onSave,
+    onClose,
+    onReload,
+    onPresence,
+    onDirtyChange,
+    focusOnMount,
+  } = props;
   const { t, currentLocale } = useTranslation();
   // Read once (X13): below 768px the editor opens on the text view and does not edit.
   const [isSmall] = useState(() => window.matchMedia("(max-width: 767px)").matches);
@@ -120,6 +133,14 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
     baseVersionRef.current = workflow.version;
     if (shouldResetDraft(previous, saved, draftRef.current)) setDraft(saved);
   }, [saved, workflow.version]);
+
+  useEffect(
+    () => {
+      if (focusOnMount) mainRef.current?.focus();
+    },
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- on mount only
+    []
+  );
 
   useEffect(() => {
     if (addedKey === null) return;
@@ -277,7 +298,14 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
                 return (
                   <li key={code}>
                     {target ? (
-                      <button type="button" className="text-left underline" onClick={() => setSelection(target)}>
+                      <button
+                        type="button"
+                        className="text-left underline"
+                        onClick={() => {
+                          setSelection(target);
+                          setFocusSignal((value) => value + 1);
+                        }}
+                      >
                         {t(getDraftErrorKey(code))}
                       </button>
                     ) : (
@@ -421,6 +449,8 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
           };
           setDraft((current) => addTransitionWithStates(current, input));
           setSelection({ kind: "transition", key: input.key });
+          // Opened from the panel, its trigger left with the state's panel: the new transition's heading takes over.
+          if (dialog?.kind === "transition" && dialog.lock) setFocusSignal((value) => value + 1);
           setDialog(null);
         }}
       />

@@ -111,6 +111,7 @@ function WorkflowEditorPage({ params }: Route.ComponentProps) {
             isWorkspaceAdmin ? (editing: boolean) => sendPresence(workspaceSlug, workflowId, editing) : undefined
           }
           onDirtyChange={setDirty}
+          focusOnMount={reloads > 0}
           onClose={() => {
             const target = closeTarget(workspaceSlug, isWorkspaceAdmin, window.history.state?.idx);
             if (target.kind === "back") router.back();
