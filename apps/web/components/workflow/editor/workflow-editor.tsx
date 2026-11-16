@@ -264,7 +264,9 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
           selection={selection}
           canEdit={canEdit}
           onChange={setDraft}
+          onSelect={setSelection}
           onAddTransition={(lock) => setDialog({ kind: "transition", lock })}
+          onEditRule={() => setDialog({ kind: "rule" })}
           focusSignal={focusSignal}
         />
       </div>

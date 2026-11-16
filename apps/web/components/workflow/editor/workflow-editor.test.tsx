@@ -10,7 +10,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { TWorkflowDetail, TWorkflowGraphPayload, TWorkflowStatus, TWorkflowStatusCandidate } from "@plane/types";
 import { WorkflowEditor } from "./workflow-editor";
 
-vi.mock("@plane/i18n", () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
+// The panel formats lists of names for the language.
+vi.mock("@plane/i18n", () => ({ useTranslation: () => ({ t: (key: string) => key, currentLocale: "en" }) }));
 vi.mock("@plane/blocks/toast", () => ({ setToast: vi.fn() }));
 // The rule form reads the member store; it is out of scope here.
 vi.mock("./restrict-actors-form", () => ({ RestrictActorsForm: () => null }));
@@ -148,8 +149,9 @@ describe("WorkflowEditor", () => {
       "workflows.editor.panel.add_outgoing",
     ])
       expect(screen.queryByRole("button", { name })).toBeNull();
-    await user.click(screen.getByRole("button", { name: /^Finish/ }));
-    expect(screen.getByRole("heading", { name: "workflows.editor.panel.transition" })).toBeTruthy();
+    // The cards of the state's transitions still select them: reading is allowed.
+    await user.click(within(screen.getByRole("complementary")).getByRole("button", { name: /^Finish/ }));
+    expect(screen.getByRole("heading", { level: 2, name: "Finish" })).toBeTruthy();
     expect(screen.getByRole("textbox", { name: "workflows.editor.add_transition.name" }).matches(":disabled")).toBe(
       true
     );
@@ -176,7 +178,7 @@ describe("WorkflowEditor", () => {
     await user.click(screen.getByRole("button", { name: "workflows.editor.view.text" }));
     expect(screen.getByRole("table")).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Done" }));
-    expect(screen.getByRole("heading", { name: "workflows.editor.panel.state" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "Done" })).toBeTruthy();
   });
 
   it("discards unsaved changes", async () => {
@@ -229,11 +231,11 @@ describe("WorkflowEditor", () => {
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "workflows.editor.view.text" }));
     await user.click(screen.getByRole("button", { name: /^Finish/ }));
-    expect(screen.getByRole("heading", { name: "workflows.editor.panel.transition" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "Finish" })).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "workflows.editor.panel.remove_transition" }));
     await user.click(screen.getByRole("button", { name: "workflows.editor.discard" }));
     expect(screen.getByRole("button", { name: /^Finish/ })).toBeTruthy();
-    expect(screen.queryByRole("heading", { name: "workflows.editor.panel.transition" })).toBeNull();
+    expect(screen.queryByRole("heading", { level: 2, name: "Finish" })).toBeNull();
     expect(screen.getByRole("heading", { name: "workflows.editor.panel.empty_title" })).toBeTruthy();
   });
 
@@ -256,7 +258,17 @@ describe("WorkflowEditor", () => {
       ],
     };
     // The store refreshes the statuses before saveGraph resolves; the page re-renders with them.
-    const fresh = [...statuses, { ...statusOf("sr", "Review"), workflow_count: 2 }];
+    const fresh = [
+      ...statuses,
+      {
+        ...statusOf("sr", "Review"),
+        workflow_count: 2,
+        workflows: [
+          { id: "w2", name: "Bug" },
+          { id: workflow.id, name: workflow.name },
+        ],
+      },
+    ];
     const view = renderEditor({
       onSave: async () => {
         view.rerender(editorOf({ statuses: fresh, onSave: async () => reviewed }));
@@ -268,7 +280,7 @@ describe("WorkflowEditor", () => {
     await user.click(screen.getByRole("button", { name: "workflows.editor.save" }));
     await user.click(screen.getByRole("button", { name: "workflows.editor.view.text" }));
     await user.click(screen.getByRole("button", { name: "Review" }));
-    expect(screen.getByRole("note").textContent).toBe("workflows.editor.panel.shared");
+    expect(screen.getByRole("note").textContent).toBe("workflows.editor.panel.shared_named");
   });
 
   it("expands the collapsed panel on a new selection and focuses its heading", async () => {
@@ -277,7 +289,7 @@ describe("WorkflowEditor", () => {
     await user.click(screen.getByRole("button", { name: "workflows.editor.panel.collapse" }));
     await user.click(screen.getByRole("button", { name: "workflows.editor.view.text" }));
     await user.click(screen.getByRole("button", { name: "Done" }));
-    const heading = screen.getByRole("heading", { name: "workflows.editor.panel.state" });
+    const heading = screen.getByRole("heading", { level: 2, name: "Done" });
     await waitFor(() => expect(document.activeElement).toBe(heading));
   });
 
@@ -287,7 +299,7 @@ describe("WorkflowEditor", () => {
     await user.click(screen.getByRole("button", { name: "workflows.editor.panel.collapse" }));
     // A click without the mousedown that React Flow's drag handler cannot run under jsdom.
     fireEvent.click(screen.getByText("Done"));
-    expect(screen.getByRole("heading", { name: "workflows.editor.panel.state" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "Done" })).toBeTruthy();
   });
 
   it("expands the collapsed panel on a click on the state already selected in the diagram", async () => {
@@ -295,9 +307,9 @@ describe("WorkflowEditor", () => {
     const user = userEvent.setup();
     fireEvent.click(screen.getByText("Done"));
     await user.click(screen.getByRole("button", { name: "workflows.editor.panel.collapse" }));
-    expect(screen.queryByRole("heading", { name: "workflows.editor.panel.state" })).toBeNull();
+    expect(screen.queryByRole("heading", { level: 2, name: "Done" })).toBeNull();
     fireEvent.click(screen.getByText("Done"));
-    expect(screen.getByRole("heading", { name: "workflows.editor.panel.state" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "Done" })).toBeTruthy();
   });
 
   it("points the skip link at the view shown", async () => {
@@ -314,7 +326,7 @@ describe("WorkflowEditor", () => {
     await user.click(screen.getByRole("button", { name: "workflows.editor.view.text" }));
     await user.click(screen.getByRole("button", { name: "Done" }));
     await user.click(screen.getByRole("button", { name: "workflows.editor.panel.remove_state" }));
-    expect(screen.queryByRole("heading", { name: "workflows.editor.panel.state" })).toBeNull();
+    expect(screen.queryByRole("heading", { level: 2, name: "Done" })).toBeNull();
     expect(screen.getByRole("heading", { name: "workflows.editor.panel.empty_title" })).toBeTruthy();
   });
 
