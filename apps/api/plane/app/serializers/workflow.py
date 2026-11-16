@@ -202,6 +202,18 @@ class WorkflowGraphInputSerializer(serializers.Serializer):
                     raise graph_error("invalid_transition")
                 sides[key] = {"source": value["source"], "target": value["target"]}
             transition["sides"] = sides
+        # Two transitions over the same route make the actor check ambiguous (spec 6.4).
+        routes = set()
+        for transition in attrs["transitions"]:
+            target = transition["target_key"]
+            pairs = (
+                [("*", target)]
+                if transition["from_any"]
+                else [(source, target) for source in transition["source_keys"]]
+            )
+            if any(pair in routes for pair in pairs):
+                raise graph_error("duplicate_transition")
+            routes.update(pairs)
         return attrs
 
 

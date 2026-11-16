@@ -789,3 +789,42 @@ class TestPresence:
         missing = _client(users["admin"]).post(url, {"editing": True}, format="json")
         assert hidden.status_code == missing.status_code == status.HTTP_404_NOT_FOUND
         assert cache.get(_editing_key(foreign, users["admin"])) is None
+
+
+@pytest.mark.contract
+@pytest.mark.django_db
+class TestDuplicateTransitions:
+    def _arrow(self, software, sources, target):
+        key = lambda name: str(software.states_by_name[name].id)  # noqa: E731
+        return {
+            "name": "",
+            "from_any": sources == "*",
+            "source_keys": [] if sources == "*" else [key(name) for name in sources],
+            "target_key": key(target),
+            "rules": [],
+        }
+
+    def _put(self, workspace, users, software, transitions):
+        payload = _graph_payload(software)
+        payload["transitions"] = transitions
+        return _client(users["admin"]).put(
+            GRAPH_URL.format(slug=workspace.slug, pk=software.id), payload, format="json"
+        )
+
+    def test_two_transitions_sharing_a_source_and_a_target_are_refused(self, workspace, users, software):
+        arrows = [self._arrow(software, ["To do"], "Done"), self._arrow(software, ["To do"], "Done")]
+        response = self._put(workspace, users, software, arrows)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data == {"graph": ["duplicate_transition"]}
+
+    def test_two_transitions_from_any_state_to_the_same_state_are_refused(self, workspace, users, software):
+        arrows = [self._arrow(software, "*", "Done"), self._arrow(software, "*", "Done")]
+        response = self._put(workspace, users, software, arrows)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data == {"graph": ["duplicate_transition"]}
+
+    def test_a_global_and_a_named_transition_to_the_same_state_are_accepted(self, workspace, users, software):
+        arrows = [self._arrow(software, "*", "Done"), self._arrow(software, ["To do"], "Done")]
+        response = self._put(workspace, users, software, arrows)
+        assert response.status_code == status.HTTP_200_OK, response.data
+        assert len(response.data["transitions"]) == 2
