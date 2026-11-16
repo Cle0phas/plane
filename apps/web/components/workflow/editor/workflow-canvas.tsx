@@ -278,21 +278,22 @@ export function WorkflowCanvas({
 
   // React Flow's built-in screen reader instructions, in the interface language. Memoised: a new object on
   // every render would be written to its store each time.
-  const ariaLabelConfig = useMemo(
-    () => ({
-      "node.a11yDescription.default": t(
-        canEdit ? "workflows.editor.a11y.node" : "workflows.editor.a11y.node_read_only"
-      ),
-      "node.a11yDescription.keyboardDisabled": t("workflows.editor.a11y.node_read_only"),
+  const ariaLabelConfig = useMemo(() => {
+    const nodeHint = t(canEdit ? "workflows.editor.a11y.node" : "workflows.editor.a11y.node_read_only");
+    return {
+      // React Flow renders "keyboardDisabled" while its keyboard is enabled (always here): both carry the same text.
+      "node.a11yDescription.default": nodeHint,
+      "node.a11yDescription.keyboardDisabled": nodeHint,
       "node.a11yDescription.ariaLiveMessage": ({ x, y }: { x: number; y: number }) =>
         t("workflows.editor.a11y.moved", { x, y }),
-      "edge.a11yDescription.default": t("workflows.editor.a11y.edge"),
+      "edge.a11yDescription.default": t(
+        canEdit ? "workflows.editor.a11y.edge" : "workflows.editor.a11y.edge_read_only"
+      ),
       "minimap.ariaLabel": t("workflows.editor.minimap"),
       "handle.ariaLabel": t("workflows.editor.a11y.handle"),
-    }),
+    };
     // oxlint-disable-next-line react-hooks/exhaustive-deps -- t is a new function on every render, the locale stands for it
-    [canEdit, currentLocale]
-  );
+  }, [canEdit, currentLocale]);
 
   const handleConnect = ({ source, target, sourceHandle, targetHandle }: Connection) => {
     if (!source || !target || source === target || target === START_NODE_ID) return;
