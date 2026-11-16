@@ -181,6 +181,7 @@ export const ProjectWorkflowScheme = observer(function ProjectWorkflowScheme({ w
   };
 
   const detach = async () => {
+    setErrorKey(null);
     setIsBusy(true);
     try {
       await detachProjectScheme(workspaceSlug, projectId);

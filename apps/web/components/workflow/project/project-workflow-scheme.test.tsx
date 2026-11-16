@@ -271,9 +271,98 @@ describe("linked project", () => {
     await user.click(confirm);
     await waitFor(() => expect(state.detachProjectScheme).toHaveBeenCalledWith("ws", "p1"));
   });
+
+  it("starts every change from the scheme the server holds, not the copy on screen", async () => {
+    state.fetchProjectScheme = vi.fn(async () => ({
+      ...linked(),
+      items: [...strictItems, { issue_type_id: "task", workflow_id: "w-free" }],
+    }));
+    const user = open();
+    await user.click(button(named("edit_types_named", "Strict")));
+    await user.click(within(screen.getByRole("dialog")).getByRole("checkbox", { name: "Story" }));
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: `${S}.apply` }));
+    await waitFor(() => expect(state.applyProjectScheme).toHaveBeenCalledTimes(1));
+    expect(lastApplied().items).toEqual([
+      { issue_type_id: "task", workflow_id: "w-free" },
+      { issue_type_id: "bug", workflow_id: "w-strict" },
+    ]);
+  });
+
+  it("keeps the dialog usable after a failed preview, and applies on the next try", async () => {
+    state.previewProjectScheme = vi
+      .fn()
+      .mockRejectedValueOnce({ scheme: ["invalid_scheme"] })
+      .mockResolvedValue([]);
+    const user = open();
+    await user.click(button(`${S}.replace`));
+    const dialog = screen.getByRole("dialog");
+    await user.selectOptions(within(dialog).getByRole("combobox", { name: `${S}.table.workflow` }), "Kanban");
+    const submit = within(dialog).getByRole("button", { name: `${S}.replace` });
+    await user.click(submit);
+    expect((await screen.findByRole("alert")).textContent).toBe(`${S}.errors.invalid_scheme`);
+    expect(submit.matches(":disabled")).toBe(false);
+    await user.click(submit);
+    await waitFor(() => expect(state.applyProjectScheme).toHaveBeenCalledTimes(1));
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("keeps the dialog usable after a failed apply, and applies on the next try", async () => {
+    state.applyProjectScheme = vi
+      .fn()
+      .mockRejectedValueOnce({ scheme: ["invalid_scheme"] })
+      .mockResolvedValue(undefined);
+    const user = open();
+    await user.click(button(`${S}.replace`));
+    const dialog = screen.getByRole("dialog");
+    await user.selectOptions(within(dialog).getByRole("combobox", { name: `${S}.table.workflow` }), "Kanban");
+    const submit = within(dialog).getByRole("button", { name: `${S}.replace` });
+    await user.click(submit);
+    expect((await screen.findByRole("alert")).textContent).toBe(`${S}.errors.invalid_scheme`);
+    expect(submit.matches(":disabled")).toBe(false);
+    await user.click(submit);
+    await waitFor(() => expect(state.applyProjectScheme).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
+  it("shows a failed detach, and clears the error on the next detach", async () => {
+    state.detachProjectScheme = vi
+      .fn()
+      .mockRejectedValueOnce({ scheme: ["invalid_scheme"] })
+      .mockResolvedValue(undefined);
+    const user = open();
+    const detachAndConfirm = async () => {
+      await user.click(button(`${S}.detach`));
+      await user.click(screen.getAllByRole("button", { name: `${S}.detach` }).at(-1) as HTMLElement);
+    };
+    await detachAndConfirm();
+    expect((await screen.findByRole("alert")).textContent).toBe(`${S}.errors.invalid_scheme`);
+    await detachAndConfirm();
+    await waitFor(() => expect(state.detachProjectScheme).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+  });
+
+  it("shows a fallback label for a workflow or a type the lists do not know", () => {
+    state.scheme = {
+      default_workflow_id: "w-default",
+      items: [{ issue_type_id: "ghost", workflow_id: "w-gone" }],
+      workflows: [],
+    };
+    open();
+    const row = screen.getAllByRole("row")[2];
+    expect(within(row).getByRole("link", { name: `${S}.table.unknown_workflow` })).toBeTruthy();
+    expect(within(row).getByText("-")).toBeTruthy();
+  });
 });
 
 describe("project without a workflow", () => {
+  it("offers no action to who cannot manage the project", () => {
+    state.scheme = { default_workflow_id: null, items: [], workflows: [] };
+    state.canManage = false;
+    open();
+    expect(screen.getByText(`${S}.free`)).toBeTruthy();
+    expect(screen.queryAllByRole("button")).toEqual([]);
+  });
+
   beforeEach(() => {
     state.scheme = { default_workflow_id: null, items: [], workflows: [] };
   });
