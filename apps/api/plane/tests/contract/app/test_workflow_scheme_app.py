@@ -41,7 +41,9 @@ def _client(user):
 @pytest.fixture
 def users(db, workspace, create_user):
     people = {"admin": create_user}
-    for name, role in (("member", 15), ("guest", 5), ("project_admin", 15), ("outside_admin", 20)):
+    roles = {"member": 15, "guest": 5, "project_admin": 15, "outside_admin": 20}
+    roles.update(outside_member=15, outside_guest=5, former_member=15)
+    for name, role in roles.items():
         people[name] = UserFactory()
         WorkspaceMember.objects.create(workspace=workspace, member=people[name], role=role)
     return people
@@ -52,6 +54,7 @@ def project(workspace, users):
     project = Project.objects.create(name="Home", identifier="HOME", workspace=workspace, created_by=users["admin"])
     for name, role in (("admin", 20), ("member", 15), ("guest", 5), ("project_admin", 20)):
         ProjectMember.objects.create(project=project, member=users[name], role=role)
+    ProjectMember.objects.create(project=project, member=users["former_member"], role=15, is_active=False)
     return project
 
 
@@ -79,14 +82,42 @@ def _url(template, workspace, project):
 @pytest.mark.contract
 @pytest.mark.django_db
 class TestRead:
-    @pytest.mark.parametrize("role", ["admin", "member", "guest", "outside_admin"])
-    def test_every_workspace_member_reads_the_scheme(self, workspace, users, project, software, bug, support, role):
+    @pytest.mark.parametrize("network", [0, 2])
+    @pytest.mark.parametrize("role", ["admin", "member", "guest", "project_admin", "outside_admin"])
+    def test_project_members_and_workspace_admins_read_the_scheme(
+        self, workspace, users, project, software, bug, support, role, network
+    ):
+        Project.objects.filter(pk=project.pk).update(network=network)
         link_project(project, software, {bug: support})
         response = _client(users[role]).get(_url(SCHEME_URL, workspace, project))
         assert response.status_code == status.HTTP_200_OK
         assert response.data["default_workflow_id"] == str(software.id)
         assert response.data["items"] == [{"issue_type_id": str(bug.id), "workflow_id": str(support.id)}]
         assert sorted(workflow["name"] for workflow in response.data["workflows"]) == ["Software", "Support"]
+
+    @pytest.mark.parametrize("network", [0, 2])
+    @pytest.mark.parametrize("role", ["outside_member", "outside_guest", "former_member"])
+    def test_outside_the_project_the_refusal_does_not_tell_whether_it_exists(
+        self, workspace, users, project, software, role, network
+    ):
+        Project.objects.filter(pk=project.pk).update(network=network)
+        link_project(project, software)
+        foreign = ProjectFactory(workspace=WorkspaceFactory())
+        client = _client(users[role])
+        refused = client.get(_url(SCHEME_URL, workspace, project))
+        hidden = client.get(SCHEME_URL.format(slug=workspace.slug, project_id=foreign.id))
+        missing = client.get(SCHEME_URL.format(slug=workspace.slug, project_id=uuid4()))
+        assert refused.status_code == hidden.status_code == missing.status_code == status.HTTP_403_FORBIDDEN
+        assert refused.data == hidden.data == missing.data
+        assert "workflows" not in refused.data
+
+    def test_other_workspaces_and_anonymous_callers_are_refused(self, workspace, project, software):
+        link_project(project, software)
+        stranger = UserFactory()
+        WorkspaceMember.objects.create(workspace=WorkspaceFactory(), member=stranger, role=20)
+        url = _url(SCHEME_URL, workspace, project)
+        assert _client(stranger).get(url).status_code == status.HTTP_403_FORBIDDEN
+        assert APIClient().get(url).status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_a_free_project_has_an_empty_scheme(self, workspace, users, project):
         response = _client(users["member"]).get(_url(SCHEME_URL, workspace, project))

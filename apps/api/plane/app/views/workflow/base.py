@@ -20,9 +20,10 @@ from plane.app.serializers import (
     WorkflowStatusSerializer,
 )
 from plane.app.serializers.workflow import DUPLICATE_WORKFLOW_NAME_MESSAGE
-from plane.app.views.issue_type.base import _require_project_manager
+from plane.app.views.issue_type.base import FORBIDDEN, _require_project_manager
 from plane.db.models import (
     Project,
+    ProjectMember,
     ProjectWorkflowScheme,
     Workflow,
     WorkflowState,
@@ -372,6 +373,18 @@ def scheme_body(project):
     }
 
 
+def _require_project_reader(request, slug, project_id):
+    """A3: workspace admins and active project members read; the same 403 whether or not the project exists."""
+    if (
+        is_workspace_admin(request.user, slug)
+        or ProjectMember.objects.filter(
+            member=request.user, workspace__slug=slug, project_id=project_id, is_active=True
+        ).exists()
+    ):
+        return None
+    return Response(FORBIDDEN, status=status.HTTP_403_FORBIDDEN)
+
+
 def _editing_key(workflow_id, user_id):
     return f"workflow_editing:{workflow_id}:{user_id}"
 
@@ -412,6 +425,9 @@ class WorkflowPresenceEndpoint(BaseAPIView):
 class ProjectWorkflowSchemeEndpoint(BaseAPIView):
     @allow_permission(allowed_roles=[ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST], level="WORKSPACE")
     def get(self, request, slug, project_id):
+        refusal = _require_project_reader(request, slug, project_id)
+        if refusal:
+            return refusal
         project = Project.objects.get(workspace__slug=slug, pk=project_id)
         return Response(scheme_body(project), status=status.HTTP_200_OK)
 
