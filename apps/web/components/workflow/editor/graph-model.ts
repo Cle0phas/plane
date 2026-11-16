@@ -446,6 +446,16 @@ export const startPlacement = (draft: TDraftGraph): TStartPlacement | null => {
   return { ...bottom, sides: { source: "top", target: "bottom" } };
 };
 
+// State names are 11px at zoom 1 (text-caption-sm): an automatic refit never goes below it (D9).
+export const READABLE_ZOOM = 1;
+
+/** What an automatic refit shows (D9): everything when it stays readable, else a part at the readable zoom. */
+export const refitTarget = (zoomToFitAll: number, isOpening: boolean, hasGrown: boolean) => {
+  if (zoomToFitAll >= READABLE_ZOOM) return "all" as const;
+  if (isOpening) return "start" as const;
+  return hasGrown ? ("last" as const) : ("keep" as const);
+};
+
 export const connectStates = (
   draft: TDraftGraph,
   key: string,

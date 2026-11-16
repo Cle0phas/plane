@@ -16,6 +16,8 @@ import {
   getGraphErrorKey,
   isDuplicateRoute,
   optionToStatus,
+  READABLE_ZOOM,
+  refitTarget,
   removeState,
   renamedSharedStatuses,
   sourceCandidates,
@@ -242,5 +244,21 @@ describe("shared statuses", () => {
       transitions: [],
     };
     expect(renamedSharedStatuses(draft)).toEqual([{ key: "a", from: "Todo", to: "To do", workflows: ["Bug"] }]);
+  });
+});
+
+describe("refitTarget", () => {
+  it("shows the whole diagram when it fits at a readable size", () => {
+    expect(refitTarget(READABLE_ZOOM, true, false)).toBe("all");
+    expect(refitTarget(READABLE_ZOOM, false, true)).toBe("all");
+  });
+
+  it("opens on the start when the diagram is too large", () => {
+    expect(refitTarget(0.4, true, false)).toBe("start");
+  });
+
+  it("then follows the state just added, and stays put after a removal", () => {
+    expect(refitTarget(0.4, false, true)).toBe("last");
+    expect(refitTarget(0.4, false, false)).toBe("keep");
   });
 });

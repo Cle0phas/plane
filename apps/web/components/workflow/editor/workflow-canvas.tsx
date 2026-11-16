@@ -8,10 +8,12 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react"
 import {
   applyNodeChanges,
   ConnectionMode,
+  getViewportForBounds,
   MarkerType,
   MiniMap,
   Panel,
   ReactFlow,
+  useNodesInitialized,
   useReactFlow,
   useStore,
   type Connection,
@@ -27,6 +29,8 @@ import type { TWorkflowSide } from "@plane/types";
 import {
   closestSides,
   displayGroup,
+  READABLE_ZOOM,
+  refitTarget,
   startPlacement,
   stateName,
   toneOf,
@@ -67,7 +71,9 @@ const MINIMAP_HEIGHT = 150;
 // Margin of every React Flow panel (.react-flow__panel): keeps the slider clear of the minimap.
 const PANEL_MARGIN = 15;
 // One or two nodes keep their natural size instead of filling the canvas.
-const FIT_VIEW_OPTIONS = { padding: 0.2, maxZoom: 1 };
+const FIT_PADDING = 0.2;
+const MIN_ZOOM = 0.25;
+const FIT_VIEW_OPTIONS = { padding: FIT_PADDING, maxZoom: 1 };
 
 const toSide = (value: string | null | undefined, fallback: TWorkflowSide): TWorkflowSide =>
   SIDES.includes(value as TWorkflowSide) ? (value as TWorkflowSide) : fallback;
@@ -84,13 +90,42 @@ function ZoomSlider({ label }: { label: string }) {
       type="range"
       className="w-40"
       aria-label={label}
-      min={0.25}
+      min={MIN_ZOOM}
       max={2}
       step={0.05}
       value={zoom}
       onChange={(event) => void zoomTo(Number(event.target.value))}
     />
   );
+}
+
+type TReadableFitProps = { stateCount: number; startKeys: string[]; lastKey?: string };
+
+// Refits when a state is added or removed, never on a pan or a drag (R12), and never below the
+// readable zoom (D9): a diagram too large opens on its start, then follows the state just added.
+function ReadableFit({ stateCount, startKeys, lastKey }: TReadableFitProps) {
+  const isMeasured = useNodesInitialized();
+  const { fitView, getNodes, getNodesBounds } = useReactFlow();
+  const width = useStore((state) => state.width);
+  const height = useStore((state) => state.height);
+  const previousCount = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!isMeasured) return;
+    const isOpening = previousCount.current === null;
+    const hasGrown = previousCount.current !== null && stateCount > previousCount.current;
+    previousCount.current = stateCount;
+    const zoom = getViewportForBounds(getNodesBounds(getNodes()), width, height, MIN_ZOOM, 1, FIT_PADDING).zoom;
+    const target = refitTarget(zoom, isOpening, hasGrown);
+    if (target === "keep") return;
+    const focus = target === "start" ? startKeys : target === "last" && lastKey ? [lastKey] : null;
+    void fitView(
+      focus ? { ...FIT_VIEW_OPTIONS, minZoom: READABLE_ZOOM, nodes: focus.map((id) => ({ id })) } : FIT_VIEW_OPTIONS
+    );
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- a resize or a new callback identity must not move the view
+  }, [isMeasured, stateCount]);
+
+  return null;
 }
 
 export function WorkflowCanvas({
@@ -175,13 +210,6 @@ export function WorkflowCanvas({
       })
     );
   }, [signature]);
-
-  // Refit only when a state is added or removed, never on a pan or a drag (R12).
-  const stateCount = draft.states.length;
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => void flowRef.current?.fitView(FIT_VIEW_OPTIONS));
-    return () => cancelAnimationFrame(frame);
-  }, [stateCount]);
 
   // A new array re-renders every edge, once per drag frame; t is new on each render, the locale stands for it.
   const edges = useMemo((): Edge[] => {
@@ -268,11 +296,9 @@ export function WorkflowCanvas({
         edges={edges}
         nodeTypes={NODE_TYPES}
         connectionMode={ConnectionMode.Loose}
-        fitView
-        fitViewOptions={FIT_VIEW_OPTIONS}
         // Plane's tokens follow every theme (light, dark, high contrast, custom); colorMode only knows two.
         className="[--xy-attribution-background-color:var(--background-color-surface-2)] [&_.react-flow\_\_attribution_a]:text-tertiary"
-        minZoom={0.25}
+        minZoom={MIN_ZOOM}
         maxZoom={2}
         nodesDraggable={canEdit}
         nodesConnectable={canEdit}
@@ -353,6 +379,11 @@ export function WorkflowCanvas({
           maskColor="color-mix(in srgb, var(--text-color-tertiary) 15%, transparent)"
           nodeColor="var(--border-color-strong)"
           ariaLabel={t("workflows.editor.minimap")}
+        />
+        <ReadableFit
+          stateCount={draft.states.length}
+          startKeys={initial ? [START_NODE_ID, initial.key] : [START_NODE_ID]}
+          lastKey={draft.states[draft.states.length - 1]?.key}
         />
         <Panel position="bottom-right" style={{ bottom: MINIMAP_HEIGHT + PANEL_MARGIN }}>
           <ZoomSlider label={t("workflows.editor.zoom")} />

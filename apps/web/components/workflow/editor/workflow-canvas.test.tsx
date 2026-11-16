@@ -339,9 +339,11 @@ describe("WorkflowCanvas", () => {
     });
   });
 
-  it("never zooms past 1 when it fits the view, so a lone node keeps its size", () => {
-    renderCanvas({ draft: { states: [], transitions: [] } });
-    expect(flow().fitViewOptions?.maxZoom).toBe(1);
+  it("never refits below the readable zoom", async () => {
+    renderCanvas();
+    await waitFor(() => expect(flowInstance.current).toBeDefined());
+    expect(flowProps.current?.fitView).toBeUndefined();
+    expect(flowProps.current?.minZoom).toBe(0.25);
   });
 
   it("leaves + to a contenteditable field, whatever its value", async () => {
