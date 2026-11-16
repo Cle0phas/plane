@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type {
@@ -58,6 +58,7 @@ const editorOf = (props: Partial<React.ComponentProps<typeof WorkflowEditor>> = 
       readOnly={false}
       onSave={async () => workflow}
       onClose={() => {}}
+      onReload={async () => {}}
       {...props}
     />
   </div>
@@ -412,4 +413,131 @@ it("opens the start panel from the banner line", async () => {
   fireEvent.click(within(screen.getByRole("group", { name: "workflows.editor.diagram_label" })).getByText("Todo"));
   await user.click(screen.getByRole("button", { name: "workflows.editor.errors.initial_state_required" }));
   expect(screen.getByRole("combobox", { name: "workflows.editor.start_panel.field" })).toBeTruthy();
+});
+
+describe("stale save", () => {
+  it("asks to reload and blocks the save", async () => {
+    const onReload = vi.fn(async () => {});
+    renderEditor({ onSave: vi.fn().mockRejectedValue({ graph: ["stale_graph"] }), onReload });
+    const user = userEvent.setup();
+    await addReview(user);
+    await user.click(screen.getByRole("button", { name: "workflows.editor.save" }));
+    const banner = await screen.findByRole("alert");
+    expect(within(banner).getByText("workflows.editor.errors.stale_graph")).toBeTruthy();
+    expect((screen.getByRole("button", { name: "workflows.editor.save" }) as HTMLButtonElement).disabled).toBe(true);
+    await user.click(within(banner).getByRole("button", { name: "workflows.editor.reload" }));
+    expect(onReload).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("presence", () => {
+  it("shows the other admins who are editing", async () => {
+    const onPresence = vi.fn(async () => [{ id: "u", display_name: "Awa" }]);
+    renderEditor({ onPresence });
+    expect((await screen.findByRole("status")).textContent).toBe("workflows.editor.presence");
+    expect(onPresence).toHaveBeenCalledWith(false);
+  });
+
+  it("signals its own unsaved changes, then their end when it closes", async () => {
+    const onPresence = vi.fn(async () => []);
+    const { unmount } = renderEditor({ onPresence });
+    await addReview(userEvent.setup());
+    await waitFor(() => expect(onPresence).toHaveBeenLastCalledWith(true));
+    unmount();
+    expect(onPresence).toHaveBeenLastCalledWith(false);
+  });
+
+  it("asks again every thirty seconds", async () => {
+    vi.useFakeTimers();
+    try {
+      const onPresence = vi.fn(async () => []);
+      renderEditor({ onPresence });
+      expect(onPresence).toHaveBeenCalledTimes(1);
+      await act(() => vi.advanceTimersByTimeAsync(30_000));
+      expect(onPresence).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("hides the banner when the call fails", async () => {
+    const onPresence = vi.fn().mockRejectedValue(new Error("down"));
+    renderEditor({ onPresence });
+    await waitFor(() => expect(onPresence).toHaveBeenCalled());
+    expect(screen.queryByRole("status")).toBeNull();
+  });
+
+  it("is silent for a reader", () => {
+    const onPresence = vi.fn(async () => []);
+    renderEditor({ readOnly: true, onPresence });
+    expect(onPresence).not.toHaveBeenCalled();
+  });
+});
+
+describe("renaming a shared state", () => {
+  const shared = [
+    {
+      ...statusOf("sa", "Todo"),
+      workflow_count: 2,
+      workflows: [
+        { id: "w", name: "Software" },
+        { id: "w2", name: "Bug" },
+      ],
+    },
+    statusOf("sb", "Done"),
+  ];
+  const rename = async (user: ReturnType<typeof userEvent.setup>) => {
+    fireEvent.click(screen.getByText("Todo"));
+    const field = screen.getByRole("textbox", { name: "workflows.editor.add_state.name" });
+    await user.clear(field);
+    await user.type(field, "To do");
+    await user.click(screen.getByRole("button", { name: "workflows.editor.save" }));
+  };
+
+  it("asks before saving and sends nothing when cancelled", async () => {
+    const onSave = vi.fn(async () => workflow);
+    renderEditor({ statuses: shared, onSave });
+    const user = userEvent.setup();
+    await rename(user);
+    expect(await screen.findByText("workflows.editor.rename.line")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "workflows.settings.form.cancel" }));
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it("saves once the rename is confirmed", async () => {
+    const onSave = vi.fn(async (_payload: TWorkflowGraphSavePayload) => workflow);
+    renderEditor({ statuses: shared, onSave });
+    const user = userEvent.setup();
+    await rename(user);
+    await user.click(await screen.findByRole("button", { name: "workflows.editor.rename.confirm" }));
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave.mock.calls[0][0].states[0].status.name).toBe("To do");
+  });
+
+  it("does not ask for a state this workflow is alone to use", async () => {
+    const onSave = vi.fn(async () => workflow);
+    renderEditor({ onSave });
+    await rename(userEvent.setup());
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+  });
+});
+
+it("tells the page when unsaved changes appear and go", async () => {
+  const onDirtyChange = vi.fn();
+  renderEditor({ onDirtyChange });
+  const user = userEvent.setup();
+  await addReview(user);
+  await waitFor(() => expect(onDirtyChange).toHaveBeenLastCalledWith(true));
+  await user.click(screen.getByRole("button", { name: "workflows.editor.discard" }));
+  await waitFor(() => expect(onDirtyChange).toHaveBeenLastCalledWith(false));
+});
+
+it("gives the focus back to the panel heading when the selection comes from the panel", async () => {
+  renderEditor();
+  const user = userEvent.setup();
+  fireEvent.click(screen.getByText("Done"));
+  // The card of the transition "Finish" arriving in "Done" is a button of the panel.
+  await user.click(screen.getByRole("button", { name: /Finish/ }));
+  const heading = screen.getByRole("heading", { level: 2 });
+  await waitFor(() => expect(document.activeElement).toBe(heading));
 });

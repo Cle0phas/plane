@@ -6,11 +6,14 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { observer } from "mobx-react";
+import { Button } from "@makeplane/propel/components/button";
+import { ConfirmDialog } from "@plane/blocks/dialog";
 import { setToast } from "@plane/blocks/toast";
 import { useTranslation } from "@plane/i18n";
 import { v4 as uuidv4 } from "uuid";
 import type {
   TWorkflowDetail,
+  TWorkflowEditor,
   TWorkflowGraphSavePayload,
   TWorkflowStatus,
   TWorkflowStatusCandidate,
@@ -36,6 +39,7 @@ import {
   optionToStatus,
   removeState,
   removeTransition,
+  renamedSharedStatuses,
   setInitial,
   setRestriction,
   shouldResetDraft,
@@ -43,6 +47,7 @@ import {
   toPayload,
   validateDraft,
   type TDraftGraph,
+  type TSharedRename,
   type TStateRef,
 } from "./graph-model";
 import { WorkflowSidePanel } from "./side-panel";
@@ -57,15 +62,24 @@ type Props = {
   // Injected by the page (X10): the editor knows neither the store nor the router.
   onSave: (payload: TWorkflowGraphSavePayload) => Promise<TWorkflowDetail>;
   onClose: () => void;
+  /** Reloads the workflow after a stale save; the page then remounts the editor (Y5). */
+  onReload: () => Promise<void>;
+  /** Signals unsaved changes and returns the other admins who have some (spec 4.6). */
+  onPresence?: (editing: boolean) => Promise<TWorkflowEditor[]>;
+  onDirtyChange?: (dirty: boolean) => void;
 };
 
 type TDialog = { kind: "state" } | { kind: "transition"; lock: TTransitionLock | null } | { kind: "rule" } | null;
 
+const STALE_KEY = "workflows.editor.errors.stale_graph";
+// The server keeps an editing signal 75 seconds (spec 6.2).
+const PRESENCE_INTERVAL = 30_000;
+
 const VIEW_CLASS = "rounded-sm px-3 py-1 text-body-xs-medium max-md:min-h-11";
 
 export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
-  const { workflow, statuses, candidates, readOnly, onSave, onClose } = props;
-  const { t } = useTranslation();
+  const { workflow, statuses, candidates, readOnly, onSave, onClose, onReload, onPresence, onDirtyChange } = props;
+  const { t, currentLocale } = useTranslation();
   // Read once (X13): below 768px the editor opens on the text view and does not edit.
   const [isSmall] = useState(() => window.matchMedia("(max-width: 767px)").matches);
   const canEdit = !readOnly && !isSmall;
@@ -77,6 +91,9 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
   const [dialog, setDialog] = useState<TDialog>(null);
   const [serverError, setServerError] = useState<{ key: string; projects: TWorkflowStatusUsage[] } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [editors, setEditors] = useState<TWorkflowEditor[]>([]);
+  const [renames, setRenames] = useState<TSharedRename[] | null>(null);
+  const [isReloading, setIsReloading] = useState(false);
   const [focusSignal, setFocusSignal] = useState(0);
   // Last state added through the dialog: its node or row takes the focus (spec 3.3).
   const [addedKey, setAddedKey] = useState<string | null>(null);
@@ -120,8 +137,53 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
     [statuses, candidates, draft, workflow.id]
   );
   const selectedTransitionKey = selection?.kind === "transition" ? selection.key : null;
+  const isStale = serverError?.key === STALE_KEY;
 
-  const save = async () => {
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- the page callback may change identity, only dirty matters
+  }, [dirty]);
+  // A closed editor holds no unsaved change.
+  useEffect(
+    () => () => onDirtyChange?.(false),
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- on unmount only
+    []
+  );
+
+  // One call both signals this admin's unsaved changes and reads the others' (Y4): at once when the
+  // draft becomes dirty or clean, then every 30 seconds. A failure only hides the banner.
+  useEffect(() => {
+    if (!canEdit || !onPresence) return;
+    let isCurrent = true;
+    const beat = async () => {
+      let next: TWorkflowEditor[] = [];
+      try {
+        next = await onPresence(dirty);
+      } catch {
+        // Presence is a courtesy: a failure only hides the banner.
+      }
+      if (isCurrent) setEditors(next);
+    };
+    void beat();
+    const timer = window.setInterval(() => void beat(), PRESENCE_INTERVAL);
+    return () => {
+      isCurrent = false;
+      window.clearInterval(timer);
+    };
+  }, [canEdit, dirty, onPresence]);
+  useEffect(
+    () => () => {
+      if (canEdit) void onPresence?.(false).catch(() => undefined);
+    },
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- on unmount only
+    []
+  );
+
+  const save = async (isRenameConfirmed = false) => {
+    // Renaming a status other workflows use renames it there too: ask once, here, where it takes effect (E3).
+    const renamed = renamedSharedStatuses(draft);
+    if (renamed.length > 0 && !isRenameConfirmed) return setRenames(renamed);
+    setRenames(null);
     setServerError(null);
     setIsSaving(true);
     try {
@@ -132,6 +194,18 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
       setServerError(getGraphErrorKey(error));
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const reload = async () => {
+    setIsReloading(true);
+    try {
+      await onReload();
+    } catch {
+      // The stale banner stays, so the reload can be tried again.
+      setToast({ type: "error", title: t("workflows.settings.load_error"), message: "" });
+    } finally {
+      setIsReloading(false);
     }
   };
 
@@ -148,12 +222,12 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
         projects={workflow.projects}
         canEdit={canEdit}
         dirty={dirty}
-        canSave={dirty && errors.length === 0}
+        canSave={dirty && errors.length === 0 && !isStale}
         isSaving={isSaving}
         onAddState={() => setDialog({ kind: "state" })}
         onAddTransition={() => setDialog({ kind: "transition", lock: null })}
         onAddRule={() => setDialog({ kind: "rule" })}
-        onSave={save}
+        onSave={() => void save()}
         onDiscard={() => {
           setDraft(saved);
           setServerError(null);
@@ -163,6 +237,16 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
       {notice && (
         <p role="status" className="border-b border-subtle bg-layer-1 px-6 py-2 text-body-sm-regular text-secondary">
           {t(notice)}
+        </p>
+      )}
+      {editors.length > 0 && (
+        <p role="status" className="border-b border-subtle bg-layer-1 px-6 py-2 text-body-sm-regular text-secondary">
+          {t("workflows.editor.presence", {
+            count: editors.length,
+            names: new Intl.ListFormat(currentLocale, { style: "long", type: "conjunction" }).format(
+              editors.map((editor) => editor.display_name)
+            ),
+          })}
         </p>
       )}
       {(errors.length > 0 || serverError) && (
@@ -191,6 +275,16 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
           {serverError && (
             <>
               <p>{t(serverError.key)}</p>
+              {isStale && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  stretch="auto"
+                  loading={isReloading}
+                  label={t("workflows.editor.reload")}
+                  onClick={() => void reload()}
+                />
+              )}
               {serverError.projects.map((project) => (
                 <p key={project.project_id}>
                   {t("workflows.editor.errors.status_in_use_project", {
@@ -264,7 +358,11 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
           selection={selection}
           canEdit={canEdit}
           onChange={setDraft}
-          onSelect={setSelection}
+          onSelect={(next) => {
+            setSelection(next);
+            // The activated card leaves the panel: the heading takes the focus back.
+            setFocusSignal((value) => value + 1);
+          }}
           onAddTransition={(lock) => setDialog({ kind: "transition", lock })}
           onEditRule={() => setDialog({ kind: "rule" })}
           focusSignal={focusSignal}
@@ -319,6 +417,28 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
           setDraft((current) => setRestriction(current, transitionKey, params));
           setDialog(null);
         }}
+      />
+      <ConfirmDialog
+        isOpen={renames !== null}
+        handleClose={() => setRenames(null)}
+        handleSubmit={() => save(true)}
+        isSubmitting={isSaving}
+        variant="warning"
+        title={t("workflows.editor.rename.title")}
+        content={(renames ?? []).map((item) => (
+          <span key={item.key} className="block">
+            {t("workflows.editor.rename.line", {
+              from: item.from,
+              to: item.to,
+              names: new Intl.ListFormat(currentLocale, { style: "short", type: "unit" }).format(item.workflows),
+            })}
+          </span>
+        ))}
+        primaryButtonText={{
+          loading: t("workflows.editor.rename.confirm"),
+          default: t("workflows.editor.rename.confirm"),
+        }}
+        secondaryButtonText={t("workflows.settings.form.cancel")}
       />
     </div>
   );

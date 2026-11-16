@@ -73,6 +73,7 @@ function WorkflowEditorPage({ params }: Route.ComponentProps) {
           candidates={getWorkspaceCandidates(workspaceSlug)}
           readOnly={!isWorkspaceAdmin}
           onSave={(payload) => saveGraph(workspaceSlug, workflow.id, payload)}
+          onReload={async () => void (await fetchWorkflowDetail(workspaceSlug, workflow.id))}
           onClose={() => {
             const target = closeTarget(workspaceSlug, isWorkspaceAdmin, window.history.state?.idx);
             if (target.kind === "back") router.back();
