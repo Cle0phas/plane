@@ -139,6 +139,12 @@ Suppression du système : les états restent mais perdent leur lien (`workflow_s
 
 Pour un projet doté d'un système : lecture seule, bandeau « géré par le workflow ». Le serveur refuse aussi la création, la modification, la suppression et le changement d'état par défaut d'un état géré.
 
+### 5.5 Ordre des colonnes (ajouté le 2026-11-16)
+
+Quand un projet est relié, ses états, donc les colonnes du tableau et les listes d'états, suivent l'ordre des états du workflow par défaut tel que l'éditeur le montre dans la vue texte et l'enregistre (ordre de création des états du graphe), puis viennent les états apportés seulement par les autres workflows du système, workflow par workflow dans l'ordre de leurs noms. Les états repris par leur nom sont replacés comme les autres. Pour un projet déjà relié, l'ordre existant n'est jamais refait : un état ajouté par la suite (workflow modifié, système changé) se place à la fin. Un projet détaché puis relié est traité comme un projet nouvellement relié.
+
+Un statut est partagé par plusieurs workflows (W17) : il ne peut pas porter un ordre unique. L'ordre est donc lu dans les graphes au moment de la synchronisation et écrit dans la séquence des états du projet ; le champ `sequence` des statuts, jamais écrit, est supprimé. Limite connue : la position d'un état sur le diagramme ne change pas cet ordre, et l'éditeur ne permet pas de réordonner les états d'un workflow.
+
 ## 6. Règles d'accès
 
 | Réf. | Règle                                                                                                                  |
