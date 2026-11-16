@@ -110,3 +110,13 @@ def test_deleting_a_workflow_row_removes_its_graph(workspace):
     assert not WorkflowState.objects.exists()
     assert not WorkflowTransition.objects.exists()
     assert not WorkflowTransitionRule.objects.exists()
+
+
+class TestTransitionSideConstraint:
+    def test_the_database_refuses_a_side_outside_the_four(self, workspace):
+        workflow = build_workflow(workspace, "Sides", ["A", "B"], [(["A"], "B", None)])
+        source = WorkflowTransitionSource.objects.get(transition__workflow=workflow)
+        for field in ("source_side", "target_side"):
+            with pytest.raises(IntegrityError), transaction.atomic():
+                WorkflowTransitionSource.objects.filter(pk=source.pk).update(**{field: "middle"})
+        WorkflowTransitionSource.objects.filter(pk=source.pk).update(source_side="top", target_side="")

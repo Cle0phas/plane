@@ -125,6 +125,11 @@ class WorkflowTransitionSource(WorkflowGraphRow):
         db_table = "workflow_transition_sources"
         constraints = [
             models.UniqueConstraint(fields=["transition", "source"], name="workflow_transition_source_unique"),
+            # The copy of a workflow writes rows without the serializer: the database keeps the rule too.
+            models.CheckConstraint(
+                condition=Q(source_side__in=["", *TRANSITION_SIDES]) & Q(target_side__in=["", *TRANSITION_SIDES]),
+                name="workflow_transition_source_sides_valid",
+            ),
         ]
 
 
