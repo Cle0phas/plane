@@ -99,6 +99,8 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
   const [addedKey, setAddedKey] = useState<string | null>(null);
   const mainRef = useRef<HTMLElement>(null);
   const savedRef = useRef(saved);
+  // The version of the graph the draft was built from: a refresh under a dirty draft must not replace it (CA-17).
+  const baseVersionRef = useRef(workflow.version);
   const draftRef = useRef(draft);
   draftRef.current = draft;
   // The store refreshes the statuses before a save resolves: the save reads them here, not from its closure.
@@ -114,8 +116,10 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
   useEffect(() => {
     const previous = savedRef.current;
     savedRef.current = saved;
+    if (isDraftDirty(draftRef.current, previous)) return;
+    baseVersionRef.current = workflow.version;
     if (shouldResetDraft(previous, saved, draftRef.current)) setDraft(saved);
-  }, [saved]);
+  }, [saved, workflow.version]);
 
   useEffect(() => {
     if (addedKey === null) return;
@@ -196,7 +200,8 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
     setServerError(null);
     setIsSaving(true);
     try {
-      const result = await onSave({ ...toPayload(draft), expected_version: workflow.version });
+      const result = await onSave({ ...toPayload(draft), expected_version: baseVersionRef.current });
+      baseVersionRef.current = result.version;
       setDraft(fromDetail(result, statusesRef.current));
       setToast({ type: "success", title: t("workflows.editor.saved"), message: "" });
     } catch (error) {
@@ -239,7 +244,9 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
         onSave={() => void save()}
         onDiscard={() => {
           setDraft(saved);
-          setServerError(null);
+          baseVersionRef.current = workflow.version;
+          // A stale draft stays stale until the workflow is reloaded (spec 4.6).
+          setServerError((current) => (current?.key === STALE_KEY ? current : null));
         }}
         onClose={onClose}
       />

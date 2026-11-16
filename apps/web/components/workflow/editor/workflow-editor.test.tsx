@@ -166,13 +166,28 @@ describe("WorkflowEditor", () => {
     expect(screen.queryByRole("button", { name: /workflows\.editor\.panel\.remove_source/ })).toBeNull();
   });
 
+  // CA-17: a refresh under a dirty draft must not hand the server the version of a graph the draft ignores.
   it("sends back the version of the workflow it was opened on", async () => {
     const onSave = vi.fn(async (_payload: TWorkflowGraphSavePayload) => workflow);
+    const view = renderEditor({ onSave });
+    const user = userEvent.setup();
+    await addReview(user);
+    const [todo, done] = workflow.states;
+    const refreshed = { ...workflow, version: "v2", states: [todo, { ...done, position_x: 600 }] };
+    view.rerender(editorOf({ workflow: refreshed, onSave }));
+    await user.click(screen.getByRole("button", { name: "workflows.editor.save" }));
+    expect(onSave.mock.calls[0][0].expected_version).toBe("v1");
+  });
+
+  it("sends the version of its last save on the next one", async () => {
+    const onSave = vi.fn(async (_payload: TWorkflowGraphSavePayload) => ({ ...workflow, version: "v2" }));
     renderEditor({ onSave });
     const user = userEvent.setup();
     await addReview(user);
     await user.click(screen.getByRole("button", { name: "workflows.editor.save" }));
-    expect(onSave.mock.calls[0][0].expected_version).toBe("v1");
+    await addReview(user);
+    await user.click(screen.getByRole("button", { name: "workflows.editor.save" }));
+    expect(onSave.mock.calls.map(([payload]) => payload.expected_version)).toEqual(["v1", "v2"]);
   });
 
   it("adds a ticked state and saves the graph", async () => {
@@ -427,6 +442,19 @@ describe("stale save", () => {
     expect((screen.getByRole("button", { name: "workflows.editor.save" }) as HTMLButtonElement).disabled).toBe(true);
     await user.click(within(banner).getByRole("button", { name: "workflows.editor.reload" }));
     expect(onReload).toHaveBeenCalledTimes(1);
+  });
+
+  // Spec 4.6: the save stays blocked until the workflow is reloaded, a discard does not reload it.
+  it("keeps the save blocked after a discard", async () => {
+    renderEditor({ onSave: vi.fn().mockRejectedValue({ graph: ["stale_graph"] }) });
+    const user = userEvent.setup();
+    await addReview(user);
+    await user.click(screen.getByRole("button", { name: "workflows.editor.save" }));
+    await screen.findByRole("alert");
+    await user.click(screen.getByRole("button", { name: "workflows.editor.discard" }));
+    await addReview(user);
+    expect(within(screen.getByRole("alert")).getByText("workflows.editor.errors.stale_graph")).toBeTruthy();
+    expect((screen.getByRole("button", { name: "workflows.editor.save" }) as HTMLButtonElement).disabled).toBe(true);
   });
 });
 

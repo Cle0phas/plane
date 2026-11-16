@@ -30,7 +30,8 @@ import { useUserPermissions } from "@/hooks/store/user";
 import type { Route } from "./+types/page";
 import { closeTarget } from "./close-target";
 
-const SWR_OPTIONS = { revalidateOnFocus: false, revalidateIfStale: false };
+// A refresh under a dirty draft would only be ignored by the editor: none happens on its own.
+const SWR_OPTIONS = { revalidateOnFocus: false, revalidateIfStale: false, revalidateOnReconnect: false };
 
 function WorkflowEditorPage({ params }: Route.ComponentProps) {
   const { workspaceSlug, workflowId } = params;
@@ -76,7 +77,8 @@ function WorkflowEditorPage({ params }: Route.ComponentProps) {
     await Promise.all([
       fetchWorkflowDetail(workspaceSlug, workflowId),
       fetchStatuses(workspaceSlug),
-      isWorkspaceAdmin ? fetchCandidates(workspaceSlug) : undefined,
+      // The proposed states only shorten a list: their failure must not fail the reload.
+      isWorkspaceAdmin ? fetchCandidates(workspaceSlug).catch(() => undefined) : undefined,
     ]);
     setReloads((count) => count + 1);
   };
@@ -88,7 +90,7 @@ function WorkflowEditorPage({ params }: Route.ComponentProps) {
       <LeaveGuard when={dirty} />
       {isRoleKnown && !canRead ? (
         <NotAuthorizedView section="settings" className="h-auto" />
-      ) : detail.error || statuses.error ? (
+      ) : (detail.error && !workflow) || (statuses.error && !statuses.data) ? (
         <p role="alert" className="p-6 text-body-sm-regular text-danger-primary">
           {t("workflows.settings.load_error")}
         </p>
