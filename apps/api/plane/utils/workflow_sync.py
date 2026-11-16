@@ -325,6 +325,31 @@ def projects_using(workflow_id):
     ).distinct()
 
 
+def drop_type_lines(issue_type_id, project_id=None):
+    """A type leaving a project (or the workspace) leaves its scheme too; the projects that lost a line re-sync."""
+    lines = ProjectWorkflowSchemeItem.objects.filter(issue_type_id=issue_type_id)
+    if project_id is not None:
+        lines = lines.filter(scheme__project_id=project_id)
+    project_ids = set(lines.values_list("scheme__project_id", flat=True))
+    if not project_ids:
+        return
+    workflow_ids = {
+        *ProjectWorkflowScheme.objects.filter(project_id__in=project_ids).values_list("default_workflow_id", flat=True),
+        *ProjectWorkflowSchemeItem.objects.filter(scheme__project_id__in=project_ids).values_list(
+            "workflow_id", flat=True
+        ),
+    }
+    with transaction.atomic():
+        # Same lock order as apply_scheme: workflows by id, then projects by id.
+        list(Workflow.objects.select_for_update(of=("self",)).filter(pk__in=workflow_ids).order_by("id"))
+        projects = list(Project.objects.select_for_update(of=("self",)).filter(pk__in=project_ids).order_by("id"))
+        lines.filter(scheme__project_id__in=project_ids).delete()
+        for project in projects:
+            # A detach may have raced the removal.
+            if ProjectWorkflowScheme.objects.filter(project_id=project.id).exists():
+                sync_project_states(project)
+
+
 def status_usage(workflow_id, status_ids):
     """W11: per linked project, the work items following this workflow that sit in these statuses."""
     usage = []

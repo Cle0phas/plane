@@ -30,6 +30,7 @@ from plane.db.models import (
 )
 from plane.db.models.issue_type import DEFAULT_ISSUE_TYPE_LOGO_PROPS
 from plane.utils.audit import record_audit
+from plane.utils.workflow_sync import SchemeError, drop_type_lines
 from ..base import BaseAPIView
 
 
@@ -92,6 +93,7 @@ def _issue_type_delete_error(issue_type):
 UNIQUE_NAME_CONSTRAINT = "issue_type_unique_lower_name_workspace_when_deleted_at_null"
 METHOD_NOT_ALLOWED = {"error": "Method not allowed on this route."}
 NOT_AN_OBJECT = {"error": "The payload must be an object."}
+STATES_IN_USE = {"error": "Work items sit in states that removing this work item type would drop."}
 
 
 def _duplicate_name_response(error):
@@ -199,21 +201,25 @@ class WorkspaceIssueTypeEndpoint(BaseAPIView):
     def delete(self, request, slug, pk=None):
         if pk is None:
             return Response(METHOD_NOT_ALLOWED, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        with transaction.atomic():
-            issue_type = IssueType.objects.select_for_update(of=("self",)).get(workspace__slug=slug, pk=pk)
-            error = _issue_type_delete_error(issue_type)
-            if error:
-                return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
-            # Audit first: delete() queues the soft-delete cascade at once, outside this transaction's rollback.
-            record_audit(
-                workspace_id=issue_type.workspace_id,
-                actor_id=request.user.id,
-                action="issue_type.deleted",
-                target_type="issue_type",
-                target_id=issue_type.id,
-                before=issue_type_snapshot(issue_type),
-            )
-            issue_type.delete()
+        try:
+            with transaction.atomic():
+                issue_type = IssueType.objects.select_for_update(of=("self",)).get(workspace__slug=slug, pk=pk)
+                error = _issue_type_delete_error(issue_type)
+                if error:
+                    return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
+                drop_type_lines(issue_type.id)
+                # Audit first: delete() queues the soft-delete cascade at once, outside this transaction's rollback.
+                record_audit(
+                    workspace_id=issue_type.workspace_id,
+                    actor_id=request.user.id,
+                    action="issue_type.deleted",
+                    target_type="issue_type",
+                    target_id=issue_type.id,
+                    before=issue_type_snapshot(issue_type),
+                )
+                issue_type.delete()
+        except SchemeError:
+            return Response(STATES_IN_USE, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -358,28 +364,33 @@ class ProjectIssueTypeDetailEndpoint(BaseAPIView):
         refusal = _require_project_manager(request, slug, project_id)
         if refusal:
             return refusal
-        with transaction.atomic():
-            link = ProjectIssueType.objects.select_for_update(of=("self",)).get(
-                project_id=project_id, project__workspace__slug=slug, issue_type_id=issue_type_id
-            )
-            if link.is_default:
-                return Response(
-                    {"error": "The project default work item type cannot be removed."},
-                    status=status.HTTP_400_BAD_REQUEST,
+        try:
+            with transaction.atomic():
+                link = ProjectIssueType.objects.select_for_update(of=("self",)).get(
+                    project_id=project_id, project__workspace__slug=slug, issue_type_id=issue_type_id
                 )
-            if Issue.objects.filter(project_id=project_id, type_id=issue_type_id).exists():
-                return Response(
-                    {"error": "Work items of this project use this work item type."},
-                    status=status.HTTP_400_BAD_REQUEST,
+                if link.is_default:
+                    return Response(
+                        {"error": "The project default work item type cannot be removed."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                if Issue.objects.filter(project_id=project_id, type_id=issue_type_id).exists():
+                    return Response(
+                        {"error": "Work items of this project use this work item type."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                drop_type_lines(issue_type_id, project_id=link.project_id)
+                # Audit first, for the same reason as the workspace type deletion.
+                record_audit(
+                    workspace_id=link.workspace_id,
+                    actor_id=request.user.id,
+                    action="project_issue_type.disabled",
+                    target_type="project_issue_type",
+                    target_id=link.id,
+                    before=project_issue_type_snapshot(link),
                 )
-            # Audit first, for the same reason as the workspace type deletion.
-            record_audit(
-                workspace_id=link.workspace_id,
-                actor_id=request.user.id,
-                action="project_issue_type.disabled",
-                target_type="project_issue_type",
-                target_id=link.id,
-                before=project_issue_type_snapshot(link),
-            )
-            link.delete()
+                link.delete()
+        except SchemeError:
+            # Raised inside the block so the dropped lines roll back with it.
+            return Response(STATES_IN_USE, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)

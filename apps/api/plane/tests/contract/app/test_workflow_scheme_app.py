@@ -13,6 +13,7 @@ from plane.db.models import (
     AuditLog,
     Issue,
     Project,
+    ProjectIssueType,
     ProjectMember,
     ProjectWorkflowScheme,
     State,
@@ -229,3 +230,110 @@ class TestWrite:
             _url(SCHEME_URL, workspace, project), {"default_workflow_id": str(software.id), "items": []}, format="json"
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+PROJECT_TYPE_URL = "/api/workspaces/{slug}/projects/{project_id}/issue-types/{type_id}/"
+WORKSPACE_TYPE_URL = "/api/workspaces/{slug}/issue-types/{type_id}/"
+WORKFLOW_URL = "/api/workspaces/{slug}/workflows/{pk}/"
+
+
+@pytest.mark.contract
+@pytest.mark.django_db
+class TestTypeRemoval:
+    """A type leaving a project leaves its scheme too, so its workflow is no longer used there."""
+
+    @pytest.fixture
+    def other(self, workspace, users, bug):
+        other = Project.objects.create(name="Other", identifier="OTH", workspace=workspace, created_by=users["admin"])
+        ProjectMember.objects.create(project=other, member=users["admin"], role=20)
+        ProjectIssueTypeFactory(project=other, issue_type=bug)
+        return other
+
+    def _workflow(self, client, workspace, workflow):
+        return client.get(WORKFLOW_URL.format(slug=workspace.slug, pk=workflow.id))
+
+    def test_removing_a_mapped_type_from_a_project_drops_its_line(
+        self, workspace, users, project, software, support, bug, mock_celery
+    ):
+        link_project(project, software, {bug: support})
+        client = _client(users["admin"])
+
+        response = client.delete(PROJECT_TYPE_URL.format(slug=workspace.slug, project_id=project.id, type_id=bug.id))
+
+        assert response.status_code == status.HTTP_204_NO_CONTENT, response.data
+        scheme = client.get(_url(SCHEME_URL, workspace, project)).data
+        assert scheme["default_workflow_id"] == str(software.id) and scheme["items"] == []
+        assert set(State.objects.filter(project=project).values_list("name", flat=True)) == {"To do", "Done"}
+        assert self._workflow(client, workspace, support).data["project_count"] == 0
+        deleted = client.delete(WORKFLOW_URL.format(slug=workspace.slug, pk=support.id))
+        assert deleted.status_code == status.HTTP_204_NO_CONTENT
+
+    def test_deleting_a_mapped_workspace_type_drops_its_line_in_every_project(
+        self, workspace, users, project, other, software, support, bug, mock_celery
+    ):
+        link_project(project, software, {bug: support})
+        link_project(other, software, {bug: support})
+        client = _client(users["admin"])
+
+        response = client.delete(WORKSPACE_TYPE_URL.format(slug=workspace.slug, type_id=bug.id))
+
+        assert response.status_code == status.HTTP_204_NO_CONTENT, response.data
+        for linked in (project, other):
+            assert client.get(_url(SCHEME_URL, workspace, linked)).data["items"] == []
+            assert set(State.objects.filter(project=linked).values_list("name", flat=True)) == {"To do", "Done"}
+        assert self._workflow(client, workspace, support).data["project_count"] == 0
+        deleted = client.delete(WORKFLOW_URL.format(slug=workspace.slug, pk=support.id))
+        assert deleted.status_code == status.HTTP_204_NO_CONTENT
+
+    def test_a_project_without_a_scheme_is_unaffected(
+        self, workspace, users, project, other, software, support, bug, mock_celery
+    ):
+        link_project(other, software, {bug: support})
+        free = State.objects.create(name="Backlog", project=project)
+        client = _client(users["admin"])
+
+        removed = client.delete(PROJECT_TYPE_URL.format(slug=workspace.slug, project_id=project.id, type_id=bug.id))
+        deleted = client.delete(WORKSPACE_TYPE_URL.format(slug=workspace.slug, type_id=bug.id))
+
+        assert removed.status_code == deleted.status_code == status.HTTP_204_NO_CONTENT
+        assert not ProjectWorkflowScheme.objects.filter(project=project).exists()
+        assert list(State.objects.filter(project=project)) == [free]
+        assert State.objects.get(pk=free.pk).workflow_status_id is None
+
+    def test_the_audit_entries_of_the_removal_are_unchanged(
+        self, workspace, users, project, software, support, bug, mock_celery
+    ):
+        link_project(project, software, {bug: support})
+        seen = list(AuditLog.objects.values_list("id", flat=True))
+
+        _client(users["admin"]).delete(
+            PROJECT_TYPE_URL.format(slug=workspace.slug, project_id=project.id, type_id=bug.id)
+        )
+
+        added = AuditLog.objects.exclude(id__in=seen).values_list("action", flat=True)
+        assert list(added) == ["project_issue_type.disabled"]
+
+    @pytest.mark.parametrize("route", ["project", "workspace"])
+    def test_a_removal_that_would_drop_a_state_holding_work_items_is_refused(
+        self, workspace, users, project, software, support, bug, route, mock_celery
+    ):
+        states = link_project(project, software, {bug: support})
+        # A work item of another type left in a state only the type's workflow brings (the model guard refuses it).
+        stray = Issue.objects.create(name="Stray", project=project, state=states["To do"])
+        Issue.objects.filter(pk=stray.pk).update(state=states["New"])
+        seen = list(AuditLog.objects.values_list("id", flat=True))
+        url = (
+            PROJECT_TYPE_URL.format(slug=workspace.slug, project_id=project.id, type_id=bug.id)
+            if route == "project"
+            else WORKSPACE_TYPE_URL.format(slug=workspace.slug, type_id=bug.id)
+        )
+
+        response = _client(users["admin"]).delete(url)
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert isinstance(response.data["error"], str) and response.data["error"]
+        assert ProjectWorkflowScheme.objects.get(project=project).items.filter(issue_type=bug).exists()
+        assert ProjectIssueType.objects.filter(project=project, issue_type=bug).exists()
+        assert State.objects.filter(pk=states["New"].pk).exists()
+        assert not AuditLog.objects.exclude(id__in=seen).exists()
+        mock_celery.assert_not_called()
