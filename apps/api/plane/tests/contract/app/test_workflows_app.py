@@ -788,7 +788,23 @@ class TestPresence:
         url = PRESENCE_URL.format(slug=workspace.slug, pk=uuid4())
         missing = _client(users["admin"]).post(url, {"editing": True}, format="json")
         assert hidden.status_code == missing.status_code == status.HTTP_404_NOT_FOUND
+        # Same body too: nothing tells a workflow of another workspace from an unknown id (spec 8).
+        assert hidden.data == missing.data
         assert cache.get(_editing_key(foreign, users["admin"])) is None
+
+    def test_an_anonymous_caller_is_refused_like_on_the_other_workflow_routes(self, workspace, software):
+        response = APIClient().post(
+            PRESENCE_URL.format(slug=workspace.slug, pk=software.id), {"editing": True}, format="json"
+        )
+        detail = APIClient().get(WORKFLOW_URL.format(slug=workspace.slug, pk=software.id))
+        assert response.status_code == detail.status_code == status.HTTP_401_UNAUTHORIZED
+        assert "editors" not in response.data
+
+    def test_an_admin_demoted_after_signalling_is_no_longer_listed(self, workspace, users, software):
+        awa = _admin(workspace, "Awa")
+        self._post(awa, workspace, software)
+        WorkspaceMember.objects.filter(workspace=workspace, member=awa).update(role=15)
+        assert self._post(users["admin"], workspace, software, {"editing": False}).data == {"editors": []}
 
 
 @pytest.mark.contract
