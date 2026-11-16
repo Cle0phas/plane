@@ -168,6 +168,8 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
   );
   const selectedTransitionKey = selection?.kind === "transition" ? selection.key : null;
   const isStale = serverError?.key === STALE_KEY;
+  // The save's response replaces the draft: an edit made while it is in flight would be lost.
+  const canChange = canEdit && !isSaving;
 
   useEffect(() => {
     onDirtyChange?.(dirty);
@@ -372,7 +374,7 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
           {view === "diagram" ? (
             <WorkflowCanvas
               draft={draft}
-              canEdit={canEdit}
+              canEdit={canChange}
               showLabels={showLabels}
               selection={selection}
               onSelect={setSelection}
@@ -401,7 +403,7 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
         <WorkflowSidePanel
           draft={draft}
           selection={selection}
-          canEdit={canEdit}
+          canEdit={canChange}
           onChange={setDraft}
           onSelect={(next) => {
             setSelection(next);

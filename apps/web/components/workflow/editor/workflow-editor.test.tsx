@@ -397,6 +397,36 @@ describe("WorkflowEditor", () => {
     expect(screen.getByRole("button", { name: "workflows.editor.save" })).toHaveProperty("disabled", false);
   });
 
+  it.each([
+    ["resolves", () => Promise.resolve(workflow)],
+    ["rejects", () => Promise.reject({ graph: ["status_in_use"], projects: [] })],
+  ])("locks every edit while a save is in flight, until it %s", async (_label, settle) => {
+    let finish: (() => void) | undefined;
+    const onSave = vi.fn(
+      () =>
+        new Promise<TWorkflowDetail>((resolve, reject) => {
+          finish = () => settle().then(resolve, reject);
+        })
+    );
+    renderEditor({ onSave });
+    const user = userEvent.setup();
+    await addReview(user);
+    await user.click(screen.getByRole("button", { name: "workflows.editor.save" }));
+    const addState = screen.getByRole("button", { name: "workflows.editor.add_state.title" });
+    expect(addState).toHaveProperty("disabled", true);
+    // Disabled through its fieldset, which the property of the input does not reflect.
+    const nameField = () => screen.getByRole("textbox", { name: "workflows.editor.add_state.name" });
+    expect(nameField().matches(":disabled")).toBe(true);
+
+    await act(async () => finish?.());
+
+    await waitFor(() => expect(addState).toHaveProperty("disabled", false));
+    // A successful save replaces the draft and drops the selection: select a state again.
+    await user.click(screen.getByRole("button", { name: "workflows.editor.view.text" }));
+    await user.click(screen.getByRole("button", { name: "Todo" }));
+    expect(nameField().matches(":disabled")).toBe(false);
+  });
+
   it("opens on the text view without editing tools below 768px (X13)", () => {
     vi.spyOn(window, "matchMedia").mockImplementation(
       (query: string) => ({ matches: query === "(max-width: 767px)", media: query }) as MediaQueryList

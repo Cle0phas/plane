@@ -67,7 +67,7 @@ export function EditorHeader(props: Props) {
       {canEdit && (
         <div className="flex items-center gap-1">
           {tools.map(({ label, Icon, onClick }) => (
-            <button key={label} type="button" className={TOOL_CLASS} onClick={onClick}>
+            <button key={label} type="button" className={TOOL_CLASS} disabled={isSaving} onClick={onClick}>
               <Icon className="size-4" aria-hidden />
               {label}
             </button>
