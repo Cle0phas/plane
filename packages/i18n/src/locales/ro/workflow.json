@@ -318,8 +318,7 @@
         "title": "Mută elementele de lucru",
         "description": "Aceste stări conțin elemente de lucru, dar nu fac parte din fluxul de lucru ales. Alege unde merg elementele de lucru.",
         "row": "{state} în {workflow}: {count, plural, one {# element de lucru} few {# elemente de lucru} other {# de elemente de lucru}}",
-        "pick": "Stare de destinație",
-        "none": "Nimic de mutat."
+        "pick": "Stare de destinație"
       },
       "applied": "Proiectul urmează acum fluxurile sale de lucru.",
       "detached": "Proiectul nu mai folosește fluxuri de lucru.",

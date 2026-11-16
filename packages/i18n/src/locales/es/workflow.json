@@ -318,8 +318,7 @@
         "title": "Mover elementos de trabajo",
         "description": "Estos estados contienen elementos de trabajo pero no forman parte del workflow elegido. Elige adónde van los elementos de trabajo.",
         "row": "{state} en {workflow}: {count, plural, one {# elemento de trabajo} other {# elementos de trabajo}}",
-        "pick": "Estado de destino",
-        "none": "Nada que mover."
+        "pick": "Estado de destino"
       },
       "applied": "El proyecto ahora sigue sus workflows.",
       "detached": "El proyecto ya no usa workflows.",

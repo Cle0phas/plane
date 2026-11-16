@@ -318,8 +318,7 @@
         "title": "Arbeitsaufgaben verschieben",
         "description": "Diese Status enthalten Arbeitsaufgaben, gehören aber nicht zum gewählten Workflow. Wählen Sie, wohin die Arbeitsaufgaben verschoben werden.",
         "row": "{state} in {workflow}: {count, plural, one {# Arbeitsaufgabe} other {# Arbeitsaufgaben}}",
-        "pick": "Zielstatus",
-        "none": "Nichts zu verschieben."
+        "pick": "Zielstatus"
       },
       "applied": "Das Projekt folgt jetzt seinen Workflows.",
       "detached": "Das Projekt verwendet keine Workflows mehr.",

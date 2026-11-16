@@ -318,8 +318,7 @@
         "title": "Werkitems verplaatsen",
         "description": "Deze statussen bevatten werkitems maar maken geen deel uit van de gekozen workflow. Kies waar de werkitems naartoe gaan.",
         "row": "{state} in {workflow}: {count, plural, one {# werkitem} other {# werkitems}}",
-        "pick": "Doelstatus",
-        "none": "Niets te verplaatsen."
+        "pick": "Doelstatus"
       },
       "applied": "Het project volgt nu zijn workflows.",
       "detached": "Het project gebruikt geen workflows meer.",

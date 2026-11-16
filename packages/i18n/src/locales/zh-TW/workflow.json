@@ -318,8 +318,7 @@
         "title": "移動工作項目",
         "description": "這些狀態中有工作項目，但不屬於所選的工作流程。請選擇工作項目的去向。",
         "row": "{workflow}中的{state}：{count, plural, one {# 個工作項目} other {# 個工作項目}}",
-        "pick": "目標狀態",
-        "none": "沒有需要移動的內容。"
+        "pick": "目標狀態"
       },
       "applied": "專案現在遵循其工作流程。",
       "detached": "專案不再使用工作流程。",

@@ -318,8 +318,7 @@
         "title": "İş öğelerini taşı",
         "description": "Bu durumlar iş öğeleri içeriyor ancak seçilen iş akışının parçası değil. İş öğelerinin nereye gideceğini seçin.",
         "row": "{workflow} içinde {state}: {count, plural, one {# iş öğesi} other {# iş öğesi}}",
-        "pick": "Hedef durum",
-        "none": "Taşınacak bir şey yok."
+        "pick": "Hedef durum"
       },
       "applied": "Proje artık iş akışlarını izliyor.",
       "detached": "Proje artık iş akışı kullanmıyor.",

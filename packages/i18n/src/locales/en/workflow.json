@@ -318,8 +318,7 @@
         "title": "Move work items",
         "description": "These states hold work items but are not part of the chosen workflow. Choose where the work items go.",
         "row": "{state} in {workflow}: {count, plural, one {# work item} other {# work items}}",
-        "pick": "Arrival state",
-        "none": "Nothing to move."
+        "pick": "Arrival state"
       },
       "applied": "The project now follows its workflows.",
       "detached": "The project no longer uses workflows.",

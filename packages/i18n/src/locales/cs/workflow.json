@@ -318,8 +318,7 @@
         "title": "Přesunout pracovní položky",
         "description": "Tyto stavy obsahují pracovní položky, ale nejsou součástí vybraného pracovního toku. Vyberte, kam se pracovní položky přesunou.",
         "row": "{state} v {workflow}: {count, plural, one {# pracovní položka} few {# pracovní položky} many {# pracovní položky} other {# pracovních položek}}",
-        "pick": "Cílový stav",
-        "none": "Není co přesouvat."
+        "pick": "Cílový stav"
       },
       "applied": "Projekt se nyní řídí svými pracovními toky.",
       "detached": "Projekt již pracovní toky nepoužívá.",

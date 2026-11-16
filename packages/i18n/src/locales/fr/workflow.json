@@ -318,8 +318,7 @@
         "title": "Déplacer les tickets",
         "description": "Ces états contiennent des tickets mais ne font pas partie du workflow choisi. Choisissez où vont les tickets.",
         "row": "{state} dans {workflow} : {count, plural, one {# ticket} many {# tickets} other {# tickets}}",
-        "pick": "État d’arrivée",
-        "none": "Rien à déplacer."
+        "pick": "État d’arrivée"
       },
       "applied": "Le projet suit maintenant ses workflows.",
       "detached": "Le projet n’utilise plus de workflow.",

@@ -318,8 +318,7 @@
         "title": "Mover itens de trabalho",
         "description": "Estes estados contêm itens de trabalho, mas não fazem parte do fluxo de trabalho escolhido. Escolha para onde os itens de trabalho vão.",
         "row": "{state} em {workflow}: {count, plural, one {# item de trabalho} many {# itens de trabalho} other {# itens de trabalho}}",
-        "pick": "Estado de destino",
-        "none": "Nada a mover."
+        "pick": "Estado de destino"
       },
       "applied": "O projeto agora segue seus fluxos de trabalho.",
       "detached": "O projeto não usa mais fluxos de trabalho.",

@@ -318,8 +318,7 @@
         "title": "Chuyển mục công việc",
         "description": "Các trạng thái này chứa mục công việc nhưng không thuộc quy trình làm việc đã chọn. Hãy chọn nơi chuyển các mục công việc đến.",
         "row": "{state} trong {workflow}: {count, plural, one {# mục công việc} other {# mục công việc}}",
-        "pick": "Trạng thái đích",
-        "none": "Không có gì để chuyển."
+        "pick": "Trạng thái đích"
       },
       "applied": "Dự án hiện tuân theo các quy trình làm việc của nó.",
       "detached": "Dự án không còn dùng quy trình làm việc.",

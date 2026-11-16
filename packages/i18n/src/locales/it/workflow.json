@@ -318,8 +318,7 @@
         "title": "Sposta gli elementi di lavoro",
         "description": "Questi stati contengono elementi di lavoro ma non fanno parte del flusso di lavoro scelto. Scegli dove spostare gli elementi di lavoro.",
         "row": "{state} in {workflow}: {count, plural, one {# elemento di lavoro} many {# elementi di lavoro} other {# elementi di lavoro}}",
-        "pick": "Stato di arrivo",
-        "none": "Niente da spostare."
+        "pick": "Stato di arrivo"
       },
       "applied": "Il progetto ora segue i suoi flussi di lavoro.",
       "detached": "Il progetto non usa più flussi di lavoro.",

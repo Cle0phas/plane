@@ -318,8 +318,7 @@
         "title": "移动工作项",
         "description": "这些状态中有工作项，但不属于所选工作流。请选择工作项的去向。",
         "row": "{workflow}中的{state}：{count, plural, one {# 个工作项} other {# 个工作项}}",
-        "pick": "目标状态",
-        "none": "没有需要移动的内容。"
+        "pick": "目标状态"
       },
       "applied": "项目现在遵循其工作流。",
       "detached": "项目不再使用工作流。",

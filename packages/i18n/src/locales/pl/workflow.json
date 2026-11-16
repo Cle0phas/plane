@@ -318,8 +318,7 @@
         "title": "Przenieś elementy pracy",
         "description": "Te stany zawierają elementy pracy, ale nie należą do wybranego workflow. Wybierz, dokąd trafią elementy pracy.",
         "row": "{state} w {workflow}: {count, plural, one {# element pracy} few {# elementy pracy} many {# elementów pracy} other {# elementu pracy}}",
-        "pick": "Stan docelowy",
-        "none": "Nie ma nic do przeniesienia."
+        "pick": "Stan docelowy"
       },
       "applied": "Projekt działa teraz według swoich workflowów.",
       "detached": "Projekt nie używa już workflowów.",

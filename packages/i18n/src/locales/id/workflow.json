@@ -318,8 +318,7 @@
         "title": "Pindahkan item kerja",
         "description": "Status ini berisi item kerja tetapi bukan bagian dari workflow yang dipilih. Pilih ke mana item kerja dipindahkan.",
         "row": "{state} di {workflow}: {count, plural, one {# item kerja} other {# item kerja}}",
-        "pick": "Status tujuan",
-        "none": "Tidak ada yang perlu dipindahkan."
+        "pick": "Status tujuan"
       },
       "applied": "Proyek kini mengikuti workflow-nya.",
       "detached": "Proyek tidak lagi menggunakan workflow.",
