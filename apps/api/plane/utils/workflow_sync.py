@@ -99,14 +99,21 @@ def sync_project_states(project, *, drop_obsolete=True):
     """W4, W17: exactly one managed project state per status of the scheme workflows; returns {status_id: State}."""
     scheme = ProjectWorkflowScheme.objects.get(project_id=project.id)
     workflow_ids = {scheme.default_workflow_id, *scheme.items.values_list("workflow_id", flat=True)}
-    statuses = WorkflowStatus.objects.filter(workflow_states__workflow_id__in=workflow_ids).distinct()
+    # Graph order (created_at, id) of the default workflow, then the other workflows by name. A status is
+    # shared by several workflows, so the order is read from the graphs and cannot be a field of the status.
+    graph_states = WorkflowState.objects.filter(workflow_id__in=workflow_ids, status__deleted_at__isnull=True)
+    graph_states = graph_states.select_related("status").order_by("workflow__name", "workflow_id", "created_at", "id")
+    statuses = {}
+    for graph_state in sorted(graph_states, key=lambda row: row.workflow_id != scheme.default_workflow_id):
+        statuses.setdefault(graph_state.status_id, graph_state.status)
     linked = {
         state.workflow_status_id: state
         for state in State.objects.filter(project_id=project.id, workflow_status__isnull=False)
     }
     unmanaged = _adoptable_states(project)
     result = {}
-    for status in statuses.order_by("sequence", "name"):
+    first_link = not linked
+    for status in statuses.values():
         state = linked.get(status.id) or unmanaged.pop(status.name.lower(), None)
         if state is None:
             state = State(project_id=project.id, workspace_id=project.workspace_id)
@@ -116,6 +123,11 @@ def sync_project_states(project, *, drop_obsolete=True):
                 setattr(state, field, value)
             state.save()
         result[status.id] = state
+    if first_link:
+        # The columns of a newly linked project follow the workflow; later syncs append and keep the board order.
+        for index, state in enumerate(result.values(), start=1):
+            state.sequence = index * 15000
+        State.objects.bulk_update(result.values(), ["sequence"])
     # apply_scheme moves the items out of obsolete states first, then drops them itself.
     if drop_obsolete:
         _drop_obsolete_states(project, result)

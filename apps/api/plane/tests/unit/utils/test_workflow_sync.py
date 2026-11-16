@@ -100,6 +100,45 @@ class TestSync:
         assert not State.objects.filter(pk=states["Done"].pk).exists()
 
 
+def _columns(project):
+    return list(State.objects.filter(project=project).order_by("sequence").values_list("name", flat=True))
+
+
+class TestColumnOrder:
+    """A newly linked project shows its columns in workflow order; later syncs only append."""
+
+    def test_a_new_link_follows_the_default_workflow_then_the_other_workflows(
+        self, workspace, project, software, support, bug
+    ):
+        archive = build_workflow(workspace, "Archive", ["Zed", "Doing"])
+        story = IssueTypeFactory(workspace=workspace, name="Story")
+        ProjectIssueTypeFactory(project=project, issue_type=story)
+        link_project(project, software, {bug: support, story: archive})
+        assert _columns(project) == ["To do", "Doing", "Done", "Zed", "New", "Closed"]
+
+    def test_a_new_link_reorders_the_states_it_adopts(self, project, software):
+        for name in ("Done", "Doing", "To do"):
+            State.objects.create(name=name, project=project)
+        link_project(project, software)
+        assert _columns(project) == ["To do", "Doing", "Done"]
+
+    def test_a_linked_project_keeps_its_order_and_appends_new_states(self, project, software):
+        states = link_project(project, software)
+        State.objects.filter(pk=states["Done"].pk).update(sequence=1)
+        for name in ("Zeta", "Alpha"):
+            status = WorkflowStatus.objects.create(workspace=software.workspace, name=name, color="#3A3A3A")
+            WorkflowState.objects.create(workflow=software, status=status)
+        resync_workflow(software.id)
+        assert _columns(project) == ["Done", "To do", "Doing", "Zeta", "Alpha"]
+
+    def test_a_project_linked_again_after_a_detach_follows_the_workflow_order(self, project, software):
+        states = link_project(project, software)
+        State.objects.filter(pk=states["Done"].pk).update(sequence=1)
+        detach_scheme(project=project, actor_id=project.workspace.owner_id)
+        link_project(project, software)
+        assert _columns(project) == ["To do", "Doing", "Done"]
+
+
 class TestMappingAndApply:
     def test_needs_list_states_absent_from_the_target_workflow(self, project, software, support, bug):
         legacy = State.objects.create(name="Backlog", project=project)
