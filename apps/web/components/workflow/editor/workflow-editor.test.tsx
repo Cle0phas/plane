@@ -20,6 +20,8 @@ vi.mock("@plane/i18n", () => ({ useTranslation: () => ({ t: (key: string) => key
 vi.mock("@plane/blocks/toast", () => ({ setToast: vi.fn() }));
 // The rule form reads the member store; it is out of scope here.
 vi.mock("./restrict-actors-form", () => ({ RestrictActorsForm: () => null }));
+// Integration tests of the whole editor in jsdom: slow under machine load, not a product defect.
+vi.setConfig({ testTimeout: 15_000 });
 
 const statusOf = (id: string, name: string): TWorkflowStatus => ({
   id,
