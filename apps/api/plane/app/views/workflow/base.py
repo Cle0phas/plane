@@ -31,7 +31,7 @@ from plane.db.models import (
 )
 from plane.utils.audit import record_audit
 from plane.utils.issue_types import StrictUUIDField
-from plane.utils.workflow_graph import GraphError, save_workflow_graph, workflow_graph
+from plane.utils.workflow_graph import GraphError, graph_version, save_workflow_graph, workflow_graph
 from plane.utils.workflow_seed import candidate_statuses, graph_copy, graph_from_project
 from plane.utils.workflow_sync import (
     SchemeError,
@@ -69,7 +69,9 @@ def _projects(workflow, is_admin):
 
 
 def workflow_detail(workflow, is_admin):
-    return {**workflow_graph(workflow), **_projects(workflow, is_admin)}
+    graph = workflow_graph(workflow)
+    # The fingerprint the editor sends back with its save (spec 6.1); the audit snapshot does not carry it.
+    return {**graph, "version": graph_version(graph), **_projects(workflow, is_admin)}
 
 
 def _workflow_snapshot(workflow):
@@ -260,10 +262,23 @@ class WorkflowGraphEndpoint(BaseAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         try:
+            expected_version = serializers.RegexField(r"^[0-9a-f]{64}$").run_validation(
+                request.data.get("expected_version")
+            )
+        except serializers.ValidationError as error:
+            return Response({"expected_version": error.detail}, status=status.HTTP_400_BAD_REQUEST)
+        try:
             with transaction.atomic():
                 workflow = Workflow.objects.select_for_update(of=("self",)).get(workspace_id=workspace.id, pk=pk)
-                save_workflow_graph(workflow=workflow, graph=serializer.validated_data, actor_id=request.user.id)
+                save_workflow_graph(
+                    workflow=workflow,
+                    graph=serializer.validated_data,
+                    actor_id=request.user.id,
+                    expected_version=expected_version,
+                )
         except GraphError as error:
+            if error.code == "stale_graph":
+                return Response({"graph": [error.code]}, status=status.HTTP_409_CONFLICT)
             body = {"graph": [error.code]}
             if error.details:
                 body["projects"] = error.details

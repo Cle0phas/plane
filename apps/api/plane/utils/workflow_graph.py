@@ -2,6 +2,10 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # See the LICENSE file for details.
 
+# Python imports
+import hashlib
+import json
+
 # Module imports
 from plane.db.models import (
     WorkflowState,
@@ -81,15 +85,28 @@ def workflow_graph(workflow):
     }
 
 
-def _resolve_statuses(workflow, graph, existing):
-    """Lock the referenced statuses and check the request may use them; returns {status id: WorkflowStatus}."""
-    ids = [state["status"]["id"] for state in graph["states"] if "id" in state["status"]]
-    statuses = {
+def graph_version(graph):
+    """Fingerprint of the states and transitions of a workflow_graph() result (spec 6.1)."""
+    content = {"states": graph["states"], "transitions": graph["transitions"]}
+    return hashlib.sha256(json.dumps(content, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def _lock_statuses(workflow, graph, existing):
+    """Lock in one query, ordered by id, the statuses the request cites and those the workflow uses now."""
+    ids = {str(state["status"]["id"]) for state in graph["states"] if "id" in state["status"]}
+    ids.update(str(state.status_id) for state in existing.values())
+    return {
         str(status.id): status
         for status in WorkflowStatus.objects.select_for_update(of=("self",))
         .filter(workspace_id=workflow.workspace_id, pk__in=ids)
         .order_by("id")
     }
+
+
+def _resolve_statuses(workflow, graph, existing, locked):
+    """Check the request may use the statuses it cites; returns {status id: WorkflowStatus}."""
+    ids = [str(state["status"]["id"]) for state in graph["states"] if "id" in state["status"]]
+    statuses = {status_id: locked[status_id] for status_id in ids if status_id in locked}
     if len(statuses) != len(ids):
         raise GraphError("invalid_status")
     for state in graph["states"]:
@@ -129,14 +146,18 @@ def _write_status(workflow, data, statuses):
     return status, True
 
 
-def save_workflow_graph(*, workflow, graph, actor_id):
+def save_workflow_graph(*, workflow, graph, actor_id, expected_version=None):
     """P1: replace the graph of a locked workflow, then propagate to every linked project (5.2)."""
+    existing = {str(state.id): state for state in WorkflowState.objects.filter(workflow_id=workflow.id)}
+    locked = _lock_statuses(workflow, graph, existing)
+    # Read under the locks: a shared status renamed from another workflow counts as a change (spec 6.1).
+    before = workflow_graph(workflow)
+    if expected_version is not None and graph_version(before) != expected_version:
+        raise GraphError("stale_graph")
     # An empty graph would leave linked projects without an initial state.
     if not graph["states"] and projects_using(workflow.id).exists():
         raise GraphError("initial_state_required")
-    before = workflow_graph(workflow)
-    existing = {str(state.id): state for state in WorkflowState.objects.filter(workflow_id=workflow.id)}
-    statuses = _resolve_statuses(workflow, graph, existing)
+    statuses = _resolve_statuses(workflow, graph, existing, locked)
     keys = {state["key"] for state in graph["states"]}
     removed = [state for key, state in existing.items() if key not in keys]
     if removed:

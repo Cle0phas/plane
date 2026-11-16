@@ -23,6 +23,7 @@ from plane.db.models import (
 )
 from plane.tests.factories import UserFactory, WorkspaceFactory
 from plane.tests.workflow_builders import build_workflow, link_project
+from plane.utils.workflow_graph import graph_version, workflow_graph
 
 STATUSES_URL = "/api/workspaces/{slug}/workflow-statuses/"
 STATUS_URL = "/api/workspaces/{slug}/workflow-statuses/{pk}/"
@@ -37,6 +38,36 @@ def _client(user):
     client = APIClient()
     client.force_authenticate(user=user)
     return client
+
+
+def _version(workflow):
+    return graph_version(workflow_graph(workflow))
+
+
+def _new_state(name):
+    return {
+        "key": f"new-{name}",
+        "status": {"name": name, "color": "#00AA00"},
+        "position_x": 10,
+        "position_y": 20,
+        "is_initial": False,
+    }
+
+
+def _refused_actors(workspace, users, project):
+    """Everyone spec 9 plays against an admin-only route: none of them is an admin of this workspace."""
+    project_admin = UserFactory()
+    WorkspaceMember.objects.create(workspace=workspace, member=project_admin, role=15)
+    ProjectMember.objects.create(project=project, member=project_admin, role=20)
+    foreign_admin = UserFactory()
+    WorkspaceMember.objects.create(workspace=WorkspaceFactory(), member=foreign_admin, role=20)
+    return {
+        "project_admin": project_admin,
+        "member": users["member"],
+        "guest": users["guest"],
+        "stranger": UserFactory(),
+        "foreign_admin": foreign_admin,
+    }
 
 
 @pytest.fixture
@@ -72,7 +103,7 @@ def _graph_payload(workflow, extra_states=(), drop=()):
         for name, state in workflow.states_by_name.items()
         if name not in drop
     ]
-    return {"states": states + list(extra_states), "transitions": []}
+    return {"states": states + list(extra_states), "transitions": [], "expected_version": _version(workflow)}
 
 
 @pytest.mark.contract
@@ -536,7 +567,9 @@ class TestDuplicate:
         before = _shape(client.get(WORKFLOW_URL.format(slug=workspace.slug, pk=rich.id)).data)
         copy = self._post(users["admin"], workspace, rich.id, name="Copy of Rich").data
         emptied = client.put(
-            GRAPH_URL.format(slug=workspace.slug, pk=copy["id"]), {"states": [], "transitions": []}, format="json"
+            GRAPH_URL.format(slug=workspace.slug, pk=copy["id"]),
+            {"states": [], "transitions": [], "expected_version": copy["version"]},
+            format="json",
         )
         assert emptied.status_code == status.HTTP_200_OK
         assert _shape(client.get(WORKFLOW_URL.format(slug=workspace.slug, pk=rich.id)).data) == before
@@ -597,3 +630,74 @@ class TestDuplicate:
         missing = self._post(users["admin"], workspace, uuid4(), name="Copy")
         assert hidden.status_code == missing.status_code == status.HTTP_404_NOT_FOUND
         assert hidden.data == missing.data
+
+
+@pytest.mark.contract
+@pytest.mark.django_db
+class TestStaleGraph:
+    def _put(self, user, workspace, workflow, payload):
+        return _client(user).put(GRAPH_URL.format(slug=workspace.slug, pk=workflow.id), payload, format="json")
+
+    def test_the_detail_carries_the_version(self, workspace, users, software):
+        detail = _client(users["member"]).get(WORKFLOW_URL.format(slug=workspace.slug, pk=software.id))
+        assert detail.data["version"] == _version(software)
+
+    @pytest.mark.parametrize(
+        "value",
+        [None, "", "abc", "g" * 64, "A" * 64, 12, ["a" * 64]],
+        ids=["missing", "empty", "short", "not-hex", "upper-case", "number", "list"],
+    )
+    def test_a_missing_or_malformed_version_is_refused(self, workspace, users, software, value):
+        payload = _graph_payload(software, [_new_state("Review")])
+        if value is None:
+            del payload["expected_version"]
+        else:
+            payload["expected_version"] = value
+        response = self._put(users["admin"], workspace, software, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "expected_version" in response.data
+        assert WorkflowState.objects.filter(workflow=software).count() == 2
+
+    def test_a_stale_save_is_refused_and_writes_nothing(self, workspace, users, software):
+        stale = _graph_payload(software, drop=["Done"])
+        first = self._put(users["admin"], workspace, software, _graph_payload(software, [_new_state("Review")]))
+        assert first.status_code == status.HTTP_200_OK, first.data
+        audits = AuditLog.objects.filter(action="workflow.graph_updated").count()
+        response = self._put(users["admin"], workspace, software, stale)
+        assert response.status_code == status.HTTP_409_CONFLICT
+        assert response.data == {"graph": ["stale_graph"]}
+        assert WorkflowState.objects.filter(workflow=software).count() == 3
+        assert AuditLog.objects.filter(action="workflow.graph_updated").count() == audits
+
+    def test_the_version_returned_by_a_save_allows_the_next_one(self, workspace, users, software):
+        first = self._put(users["admin"], workspace, software, _graph_payload(software, [_new_state("Review")]))
+        payload = _graph_payload(software, [_new_state("Shipped")])
+        payload["expected_version"] = first.data["version"]
+        second = self._put(users["admin"], workspace, software, payload)
+        assert second.status_code == status.HTTP_200_OK, second.data
+        assert second.data["version"] != first.data["version"]
+
+    def test_a_shared_status_renamed_from_another_workflow_makes_the_draft_stale(self, workspace, users, software):
+        other = build_workflow(workspace, "Bug", ["To do", "Fixed"])
+        stale = _graph_payload(software)
+        renaming = _graph_payload(other)
+        renaming["states"][0]["status"]["name"] = "Todo"
+        assert self._put(users["admin"], workspace, other, renaming).status_code == status.HTTP_200_OK
+        response = self._put(users["admin"], workspace, software, stale)
+        assert response.status_code == status.HTTP_409_CONFLICT
+        assert WorkflowStatus.objects.get(pk=software.states_by_name["To do"].status_id).name == "Todo"
+
+    def test_renaming_the_workflow_does_not_make_a_draft_stale(self, workspace, users, software):
+        payload = _graph_payload(software, [_new_state("Review")])
+        renamed = _client(users["admin"]).patch(
+            WORKFLOW_URL.format(slug=workspace.slug, pk=software.id), {"name": "Renamed"}, format="json"
+        )
+        assert renamed.status_code == status.HTTP_200_OK
+        assert self._put(users["admin"], workspace, software, payload).status_code == status.HTTP_200_OK
+
+    @pytest.mark.parametrize("actor", ["project_admin", "member", "guest", "stranger", "foreign_admin"])
+    def test_only_workspace_admins_save_even_with_a_valid_version(self, workspace, users, project, software, actor):
+        user = _refused_actors(workspace, users, project)[actor]
+        response = self._put(user, workspace, software, _graph_payload(software, [_new_state("Review")]))
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert WorkflowState.objects.filter(workflow=software).count() == 2
