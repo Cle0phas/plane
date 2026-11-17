@@ -5,12 +5,13 @@
  */
 
 import { Button } from "@makeplane/propel/components/button";
-import { AutomationsOutline, CopyOutline, StateOutline, WorkflowsOutline } from "@makeplane/propel/icons";
+import { AutomationsOutline, StateOutline, WorkflowsOutline } from "@makeplane/propel/icons";
 import { useTranslation } from "@plane/i18n";
 import type { TWorkflowProjectRef } from "@plane/types";
 
 type Props = {
   name: string;
+  description: string;
   projectCount: number;
   projects?: TWorkflowProjectRef[];
   canEdit: boolean;
@@ -25,13 +26,12 @@ type Props = {
   onClose: () => void;
 };
 
-const USED_IN_CLASS =
-  "inline-flex items-center gap-1 rounded-sm border border-subtle px-2 py-0.5 text-caption-sm-medium text-secondary max-md:min-h-11";
+const USED_IN_CLASS = "text-caption-md-regular text-tertiary max-md:min-h-11";
 const TOOL_CLASS =
   "flex flex-col items-center gap-1 rounded-md px-3 py-1 text-caption-sm-regular text-secondary hover:bg-layer-1 max-md:min-h-11";
 
 export function EditorHeader(props: Props) {
-  const { name, projectCount, projects, canEdit, dirty, canSave, isSaving } = props;
+  const { name, description, projectCount, projects, canEdit, dirty, canSave, isSaving } = props;
   const { t } = useTranslation();
   const usedIn = t("workflows.editor.used_in", { count: projectCount });
   const tools = [
@@ -43,24 +43,35 @@ export function EditorHeader(props: Props) {
   return (
     <header className="flex flex-wrap items-center gap-4 border-b border-subtle px-6 py-3">
       <div className="min-w-0 flex-1 space-y-1">
-        <h1 className="truncate text-body-sm-semibold text-primary">{name}</h1>
-        {/* Names only reach workspace admins (P6 of the workflows plan): without them the count is plain text. */}
-        {projects && projects.length > 0 ? (
-          <details className="relative">
-            <summary className={`cursor-pointer ${USED_IN_CLASS}`}>
-              <CopyOutline className="size-3" aria-hidden />
-              {usedIn}
-            </summary>
-            <ul className="shadow-md absolute z-10 mt-1 min-w-48 rounded-md border border-subtle bg-layer-1 p-2 text-body-xs-regular text-primary">
-              {projects.map((project) => (
-                <li key={project.id}>{project.name}</li>
-              ))}
-            </ul>
-          </details>
-        ) : (
-          <p className={USED_IN_CLASS}>
-            <CopyOutline className="size-3" aria-hidden />
-            {usedIn}
+        <nav aria-label={t("workflows.editor.breadcrumb")} className="text-caption-md-regular text-tertiary">
+          {/* Back to the list through Close, so unsaved changes get the same guard. */}
+          <button type="button" className="hover:underline" onClick={props.onClose}>
+            {t("workflows.label")}
+          </button>
+          <span aria-hidden className="px-1">
+            /
+          </span>
+          <span aria-current="page">{name}</span>
+        </nav>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <h1 className="truncate text-h5-semibold text-primary">{name}</h1>
+          {/* Names only reach workspace admins (P6 of the workflows plan): without them the count is plain text. */}
+          {projects && projects.length > 0 ? (
+            <details className="relative">
+              <summary className={`cursor-pointer ${USED_IN_CLASS}`}>{usedIn}</summary>
+              <ul className="shadow-md absolute z-10 mt-1 min-w-48 rounded-md border border-subtle bg-layer-1 p-2 text-body-xs-regular text-primary">
+                {projects.map((project) => (
+                  <li key={project.id}>{project.name}</li>
+                ))}
+              </ul>
+            </details>
+          ) : (
+            <p className={USED_IN_CLASS}>{usedIn}</p>
+          )}
+        </div>
+        {description && (
+          <p title={description} className="line-clamp-2 max-w-3xl text-body-xs-regular text-tertiary">
+            {description}
           </p>
         )}
       </div>

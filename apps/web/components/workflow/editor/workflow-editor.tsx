@@ -255,6 +255,7 @@ export const WorkflowEditor = observer(function WorkflowEditor(props: Props) {
       </a>
       <EditorHeader
         name={workflow.name}
+        description={workflow.description}
         projectCount={workflow.project_count}
         projects={workflow.projects}
         canEdit={canEdit}
