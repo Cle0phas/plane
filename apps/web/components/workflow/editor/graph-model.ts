@@ -522,9 +522,10 @@ export const displayGroup = (draft: TDraftGraph, state: TDraftState): TStateGrou
   return leaves ? "started" : "completed";
 };
 
-export type TStateTone = "todo" | "progress" | "done" | "cancelled";
+export type TStateTone = "backlog" | "todo" | "progress" | "done" | "cancelled";
 
 export const toneOf = (group: TStateGroups): TStateTone => {
+  if (group === "backlog") return "backlog";
   if (group === "started") return "progress";
   if (group === "completed") return "done";
   if (group === "cancelled") return "cancelled";

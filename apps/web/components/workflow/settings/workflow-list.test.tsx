@@ -43,6 +43,8 @@ const summary = (id: string, name: string, extra: Partial<TWorkflowSummary> = {}
   created_at: "2026-11-01T10:00:00Z",
   updated_at: "2026-11-02T10:00:00Z",
   state_count: 3,
+  states: [],
+  transition_count: 0,
   project_count: 0,
   ...extra,
 });

@@ -280,9 +280,9 @@ describe("categories", () => {
     expect(displayGroup(fresh, fresh.states[0])).toBe("unstarted");
   });
 
-  it("maps the five categories to four tones", () => {
+  it("gives each of the five categories its own tone", () => {
     expect((["backlog", "unstarted", "started", "completed", "cancelled"] as const).map(toneOf)).toEqual([
-      "todo",
+      "backlog",
       "todo",
       "progress",
       "done",

@@ -76,6 +76,9 @@ export type TWorkflowSummary = {
   created_at: string;
   updated_at: string;
   state_count: number;
+  /** States in graph order, for the list preview (spec 4.1). */
+  states: { name: string; group: TStateGroups }[];
+  transition_count: number;
   project_count: number;
   projects?: TWorkflowProjectRef[];
 };
