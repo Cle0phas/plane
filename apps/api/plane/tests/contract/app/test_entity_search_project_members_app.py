@@ -63,7 +63,7 @@ class TestEntitySearchProjectMembers:
 
     def test_member_of_other_project_gets_nothing(self, workspace, secret_project):
         user = _user(workspace)
-        other = Project.objects.create(name="Other", identifier="OTH", workspace=workspace, created_by=user, network=2)
+        other = Project.objects.create(name="Other", identifier="OTH", workspace=workspace, created_by=user)
         ProjectMember.objects.create(project=other, member=user, workspace=workspace, role=15, is_active=True)
         response = _search(user, workspace, secret_project, "user_mention,project")
         assert response.status_code == status.HTTP_200_OK

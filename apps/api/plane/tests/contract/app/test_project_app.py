@@ -207,7 +207,7 @@ class TestProjectAPIPost(TestProjectBase):
             "name": "Full Project",
             "identifier": "FP",
             "description": "A comprehensive test project",
-            "network": 2,
+            "network": 0,
             "cycle_view": True,
             "issue_views_view": False,
             "module_view": True,

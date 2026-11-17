@@ -82,12 +82,10 @@ def _url(template, workspace, project):
 @pytest.mark.contract
 @pytest.mark.django_db
 class TestRead:
-    @pytest.mark.parametrize("network", [0, 2])
     @pytest.mark.parametrize("role", ["admin", "member", "guest", "project_admin", "outside_admin"])
     def test_project_members_and_workspace_admins_read_the_scheme(
-        self, workspace, users, project, software, bug, support, role, network
+        self, workspace, users, project, software, bug, support, role
     ):
-        Project.objects.filter(pk=project.pk).update(network=network)
         link_project(project, software, {bug: support})
         response = _client(users[role]).get(_url(SCHEME_URL, workspace, project))
         assert response.status_code == status.HTTP_200_OK
@@ -95,12 +93,10 @@ class TestRead:
         assert response.data["items"] == [{"issue_type_id": str(bug.id), "workflow_id": str(support.id)}]
         assert sorted(workflow["name"] for workflow in response.data["workflows"]) == ["Software", "Support"]
 
-    @pytest.mark.parametrize("network", [0, 2])
     @pytest.mark.parametrize("role", ["outside_member", "outside_guest", "former_member"])
     def test_outside_the_project_the_refusal_does_not_tell_whether_it_exists(
-        self, workspace, users, project, software, role, network
+        self, workspace, users, project, software, role
     ):
-        Project.objects.filter(pk=project.pk).update(network=network)
         link_project(project, software)
         foreign = ProjectFactory(workspace=WorkspaceFactory())
         client = _client(users[role])

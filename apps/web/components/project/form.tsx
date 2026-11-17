@@ -7,10 +7,8 @@
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { InfoOutline, LockOutline } from "@makeplane/propel/icons";
-import { FieldLabel } from "@makeplane/propel/elements/field";
 import { InputField } from "@makeplane/propel/components/input-field";
 import { TextAreaField } from "@makeplane/propel/components/text-area-field";
-import type { TNetworkChoice } from "@plane/constants";
 import { NETWORK_CHOICES } from "@plane/constants";
 import { useTranslation } from "@plane/i18n";
 // plane imports
@@ -20,7 +18,6 @@ import { setToast } from "@plane/blocks/toast";
 import { Tooltip } from "@makeplane/propel/components/tooltip";
 import { EFileAssetType } from "@plane/types";
 import type { IProject, IWorkspace } from "@plane/types";
-import { Select } from "@plane/blocks/select";
 import { renderFormattedDate } from "@plane/utils";
 import { CoverImage } from "@/components/common/cover-image";
 import { ImagePickerPopover } from "@/components/core/image-picker-popover";
@@ -33,7 +30,6 @@ import { usePlatformOS } from "@/hooks/use-platform-os";
 // services
 import { ProjectService } from "@/services/project";
 // local imports
-import { ProjectNetworkIcon } from "./project-network-icon";
 
 export interface IProjectDetailsForm {
   project: IProject;
@@ -100,6 +96,7 @@ export function ProjectDetailsForm(props: IProjectDetailsForm) {
           title: t("toast.success"),
           message: t("project_settings.general.toast.success"),
         });
+        return undefined;
       })
       .catch((err) => {
         try {
@@ -189,14 +186,11 @@ export function ProjectDetailsForm(props: IProjectDetailsForm) {
       return;
     }
 
-    if (project.identifier !== formData.identifier)
-      await projectService
-        .checkProjectIdentifierAvailability(workspaceSlug, payload.identifier ?? "")
-        .then(async (res) => {
-          if (res.exists) setError("identifier", { message: t("common.identifier_already_exists") });
-          else await handleUpdateChange(payload);
-        });
-    else await handleUpdateChange(payload);
+    if (project.identifier !== formData.identifier) {
+      const res = await projectService.checkProjectIdentifierAvailability(workspaceSlug, payload.identifier ?? "");
+      if (res.exists) setError("identifier", { message: t("common.identifier_already_exists") });
+      else await handleUpdateChange(payload);
+    } else await handleUpdateChange(payload);
     setTimeout(() => {
       setIsLoading(false);
     }, 300);
@@ -370,55 +364,6 @@ export function ProjectDetailsForm(props: IProjectDetailsForm) {
               )}
             />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <FieldLabel size="lg" inset={false} htmlFor="project-network">
-              {t("workspace_projects.network.label")}
-            </FieldLabel>
-            <Controller
-              name="network"
-              control={control}
-              render={({ field: { value, onChange } }) => {
-                const selectedNetwork = NETWORK_CHOICES.find((n) => n.key === value);
-                return (
-                  <Select<TNetworkChoice>
-                    getValues={() => NETWORK_CHOICES}
-                    value={selectedNetwork ?? null}
-                    onChange={(key) => onChange(Number(key))}
-                    getOptionValue={(network) => String(network.key)}
-                    getOptionLabel={(network) => t(network.i18n_label)}
-                    getOptionIcon={(network) => (
-                      <ProjectNetworkIcon iconKey={network.iconKey} className="mt-0.5 size-4 shrink-0" />
-                    )}
-                    getOptionDescription={(network) => t(network.description)}
-                    placeholder={t("select_network")}
-                    showSearch={false}
-                    pinSelected={false}
-                    contentSizing="anchor"
-                    disabled={!isAdmin}
-                    estimateItemSize={64}
-                  >
-                    <Select.Trigger<TNetworkChoice>
-                      id="project-network"
-                      variant="select-lg"
-                      className="font-medium"
-                      disabled={!isAdmin}
-                      prependIcon={(networks) =>
-                        networks[0] ? (
-                          <ProjectNetworkIcon iconKey={networks[0].iconKey} className="h-3.5 w-3.5" />
-                        ) : undefined
-                      }
-                    >
-                      {(networks) => (
-                        <span className="min-w-0 grow truncate text-left">
-                          {networks[0] ? t(networks[0].i18n_label) : t("select_network")}
-                        </span>
-                      )}
-                    </Select.Trigger>
-                  </Select>
-                );
-              }}
-            />
-          </div>
           <div className="col-span-1 flex flex-col gap-1.5 sm:col-span-2 xl:col-span-1">
             <Controller
               name="timezone"
@@ -430,8 +375,8 @@ export function ProjectDetailsForm(props: IProjectDetailsForm) {
                     fieldLabel={t("common.project_timezone")}
                     errorMessage={errors.timezone?.message}
                     value={value}
-                    onChange={(value: string) => {
-                      onChange(value);
+                    onChange={(timezone: string) => {
+                      onChange(timezone);
                     }}
                     label={t("common.project_timezone")}
                     error={Boolean(errors.timezone)}

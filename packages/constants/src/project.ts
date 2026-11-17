@@ -18,6 +18,7 @@ export type TNetworkChoice = {
   iconKey: TNetworkChoiceIconKey;
 };
 
+// Projects are secret only: the server refuses any other value.
 export const NETWORK_CHOICES: TNetworkChoice[] = [
   {
     key: 0,
@@ -25,13 +26,6 @@ export const NETWORK_CHOICES: TNetworkChoice[] = [
     i18n_label: "workspace_projects.network.private.title",
     description: "workspace_projects.network.private.description", //"Accessible only by invite",
     iconKey: "Lock",
-  },
-  {
-    key: 2,
-    labelKey: "Public",
-    i18n_label: "workspace_projects.network.public.title",
-    description: "workspace_projects.network.public.description", //"Anyone in the workspace except Guests can join",
-    iconKey: "Globe2",
   },
 ];
 
