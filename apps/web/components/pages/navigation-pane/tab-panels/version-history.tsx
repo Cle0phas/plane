@@ -127,10 +127,8 @@ export const PageNavigationPaneVersionHistoryPanel = observer(function PageNavig
   // versions grouped by the day they were saved, newest first. Today's group always exists since it
   // holds the current version; today and yesterday read as relative days.
   const versionGroups = useMemo<TVersionGroup[]>(() => {
-    // Intl knows Ukrainian as "uk"; the app stores it as "ua"
-    const intlLocale = currentLocale === "ua" ? "uk" : currentLocale;
-    const relativeDayFormatter = new Intl.RelativeTimeFormat(intlLocale, { numeric: "auto" });
-    const dayFormatter = new Intl.DateTimeFormat(intlLocale, { weekday: "short", day: "numeric", month: "short" });
+    const relativeDayFormatter = new Intl.RelativeTimeFormat(currentLocale, { numeric: "auto" });
+    const dayFormatter = new Intl.DateTimeFormat(currentLocale, { weekday: "short", day: "numeric", month: "short" });
     const today = getStartOfDay(new Date());
 
     const getGroupLabel = (day: Date) => {

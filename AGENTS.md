@@ -52,7 +52,7 @@ See `apps/api/tests/RUNNING_TESTS.md` for the full walkthrough and troubleshooti
 
 ## Translations
 
-Strings live in `packages/i18n/src/locales/<lang>/<namespace>.json`; `en` is the source of truth and every locale must have the same keys. Use the `translate` skill when changing locale files, and run `pnpm --filter=@plane/i18n sync:check` (CI runs it with `--ci`).
+Strings live in `packages/i18n/src/locales/<lang>/<namespace>.json`; Only `en` (source of truth) and `fr` (default) are shipped; both must have the same keys. Use the `translate` skill when changing locale files, and run `pnpm --filter=@plane/i18n sync:check` (CI runs it with `--ci`).
 
 ## Pull requests
 
