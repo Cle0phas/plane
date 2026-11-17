@@ -13,7 +13,6 @@ import type { TProjectDisplayFilters, TProjectFilters } from "@plane/types";
 import { DateFilterSubmenu, isCustomDateFilterValue } from "@/components/common/filters/date-filter-submenu";
 import { MemberFilterSubmenu } from "@/components/common/filters/member-filter-submenu";
 // local imports
-import { FilterAccess } from "./access";
 
 type Props = {
   displayFilters: TProjectDisplayFilters;
@@ -35,12 +34,6 @@ export const ProjectFiltersSelection = observer(function ProjectFiltersSelection
       />
 
       <MenuSeparator />
-
-      {/* access */}
-      <FilterAccess
-        appliedFilters={filters.access ?? null}
-        handleUpdate={(val) => handleFiltersUpdate("access", val)}
-      />
 
       {/* lead */}
       <MemberFilterSubmenu
