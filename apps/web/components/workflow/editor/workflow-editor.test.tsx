@@ -264,11 +264,12 @@ describe("WorkflowEditor", () => {
     renderEditor();
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "workflows.editor.view.text" }));
-    await user.click(screen.getByRole("button", { name: /^Finish/ }));
+    // The text view lists a transition under its source and under its target.
+    await user.click(screen.getAllByRole("button", { name: /^Finish/ })[0]);
     expect(screen.getByRole("heading", { level: 2, name: "Finish" })).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "workflows.editor.panel.remove_transition" }));
     await user.click(screen.getByRole("button", { name: "workflows.editor.discard" }));
-    expect(screen.getByRole("button", { name: /^Finish/ })).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: /^Finish/ }).length).toBeGreaterThan(0);
     expect(screen.queryByRole("heading", { level: 2, name: "Finish" })).toBeNull();
     expect(screen.getByRole("heading", { name: "workflows.editor.panel.empty_title" })).toBeTruthy();
   });

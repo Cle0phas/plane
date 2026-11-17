@@ -363,24 +363,52 @@ describe("text view and counts", () => {
     ],
   };
 
-  it("lists the incoming transitions of each state, the start first", () => {
+  it("lists in each state every transition touching it: start, global, incoming, outgoing", () => {
     expect(textRows(draft)).toEqual([
       {
         key: "a",
         name: "A",
         group: "unstarted",
-        transitions: [
-          { key: null, name: "", origin: "start" },
-          { key: "g", name: "", origin: "any" },
+        isInitial: true,
+        lines: [
+          { key: null, name: "", kind: "start", targetKey: "a" },
+          { key: "g", name: "", kind: "any", targetKey: "a" },
+          { key: "t", name: "Go", kind: "out", sourceKey: "a", targetKey: "b" },
         ],
       },
       {
         key: "b",
         name: "B",
         group: "completed",
-        transitions: [{ key: "t", name: "Go", origin: "state", sourceKey: "a", sourceName: "A" }],
+        isInitial: false,
+        lines: [{ key: "t", name: "Go", kind: "in", sourceKey: "a", targetKey: "b" }],
       },
     ]);
+  });
+
+  it("gives one line per source and shows a loop once", () => {
+    const several: TDraftGraph = {
+      states: [
+        state("a", { is_initial: true, status: status("A") }),
+        state("b", { status: status("B") }),
+        state("c", { status: status("C") }),
+      ],
+      transitions: [
+        { key: "m", name: "Merge", from_any: false, source_keys: ["a", "b"], target_key: "c", rules: [] },
+        { key: "l", name: "Again", from_any: false, source_keys: ["c"], target_key: "c", rules: [] },
+      ],
+    };
+    const lines = Object.fromEntries(textRows(several).map((row) => [row.key, row.lines]));
+    expect(lines.c).toEqual([
+      { key: "m", name: "Merge", kind: "in", sourceKey: "a", targetKey: "c" },
+      { key: "m", name: "Merge", kind: "in", sourceKey: "b", targetKey: "c" },
+      { key: "l", name: "Again", kind: "in", sourceKey: "c", targetKey: "c" },
+    ]);
+    expect(lines.a).toEqual([
+      { key: null, name: "", kind: "start", targetKey: "a" },
+      { key: "m", name: "Merge", kind: "out", sourceKey: "a", targetKey: "c" },
+    ]);
+    expect(lines.b).toEqual([{ key: "m", name: "Merge", kind: "out", sourceKey: "b", targetKey: "c" }]);
   });
 
   it("counts incoming and outgoing transitions", () => {

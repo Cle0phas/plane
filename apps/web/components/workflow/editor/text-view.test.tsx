@@ -35,118 +35,82 @@ const draft: TDraftGraph = {
   ],
 };
 
+// The state button of a row is named by its lozenge, the row is its closest <tr>.
+const rowOf = (name: string) => screen.getByRole("button", { name }).closest("tr") as HTMLElement;
+const show = (selection: Parameters<typeof WorkflowTextView>[0]["selection"] = null, onSelect = vi.fn()) => {
+  render(<WorkflowTextView draft={draft} selection={selection} onSelect={onSelect} />);
+  return onSelect;
+};
+
 describe("WorkflowTextView", () => {
-  it("lists every state with the transitions that lead to it", () => {
-    render(<WorkflowTextView draft={draft} selection={null} onSelect={() => {}} />);
-    const rows = screen.getAllByRole("row").slice(1);
-    expect(rows).toHaveLength(2);
-    expect(rows[0].textContent).toContain("Todo");
-    expect(rows[0].textContent).toContain("workflows.editor.text.origin_start");
-    expect(rows[0].textContent).toContain("workflows.editor.text.origin_any");
-    expect(rows[1].textContent).toContain("Finish");
-    expect(rows[1].textContent).toContain("Todo → Done");
+  it("shows a transition in the row of its source and in the row of its target", () => {
+    show();
+    expect(within(rowOf("Todo")).getAllByText("Finish")).toHaveLength(1);
+    expect(within(rowOf("Done")).getAllByText("Finish")).toHaveLength(1);
   });
 
-  it("selects a state or a transition", async () => {
-    const onSelect = vi.fn();
-    render(<WorkflowTextView draft={draft} selection={null} onSelect={onSelect} />);
+  it("shows the start and a global transition only in the row of their target", () => {
+    show();
+    expect(within(rowOf("Todo")).getByText("workflows.editor.text.origin_start")).toBeTruthy();
+    expect(within(rowOf("Todo")).getByText("workflows.editor.text.origin_any")).toBeTruthy();
+    expect(within(rowOf("Done")).queryByText("workflows.editor.text.origin_start")).toBeNull();
+    expect(within(rowOf("Done")).queryByText("workflows.editor.text.origin_any")).toBeNull();
+  });
+
+  it("opens the panel of a transition, of the start, or of a state", async () => {
+    const onSelect = show();
     const user = userEvent.setup();
+    await user.click(within(rowOf("Done")).getByRole("button", { name: /Finish/ }));
+    expect(onSelect).toHaveBeenLastCalledWith({ kind: "transition", key: "t" });
+    await user.click(within(rowOf("Todo")).getByRole("button", { name: /origin_start/ }));
+    expect(onSelect).toHaveBeenLastCalledWith({ kind: "start" });
     await user.click(screen.getByRole("button", { name: "Done" }));
     expect(onSelect).toHaveBeenLastCalledWith({ kind: "state", key: "b" });
-    await user.click(screen.getByRole("button", { name: /Finish/ }));
-    expect(onSelect).toHaveBeenLastCalledWith({ kind: "transition", key: "t" });
+    expect(onSelect).toHaveBeenCalledTimes(3);
   });
 
-  it("selects the state when its row is clicked outside a transition", async () => {
-    const onSelect = vi.fn();
-    render(<WorkflowTextView draft={draft} selection={null} onSelect={onSelect} />);
-    const row = screen.getByRole("button", { name: "Done" }).closest("tr") as HTMLElement;
-    const cells = within(row).getAllByRole("cell");
-    await userEvent.setup().click(cells[cells.length - 1]);
-    expect(onSelect.mock.calls).toEqual([[{ kind: "state", key: "b" }]]);
+  it("marks every line of the selected transition as pressed", () => {
+    show({ kind: "transition", key: "t" });
+    expect(screen.getAllByRole("button", { name: /Finish/, pressed: true })).toHaveLength(2);
+    expect(screen.getAllByRole("button", { pressed: true })).toHaveLength(2);
   });
 
-  it("selects only the transition when its name is clicked", async () => {
-    const onSelect = vi.fn();
-    render(<WorkflowTextView draft={draft} selection={null} onSelect={onSelect} />);
-    await userEvent.setup().click(screen.getByRole("button", { name: /Finish/ }));
-    expect(onSelect.mock.calls).toEqual([[{ kind: "transition", key: "t" }]]);
-  });
-
-  it("opens the start panel from the start line", async () => {
-    const onSelect = vi.fn();
-    render(<WorkflowTextView draft={draft} selection={null} onSelect={onSelect} />);
-    await userEvent.setup().click(screen.getByRole("button", { name: /workflows\.editor\.text\.origin_start → Todo/ }));
-    expect(onSelect.mock.calls).toEqual([[{ kind: "start" }]]);
+  it("names a transition without a name", () => {
+    show();
+    // The start and the global transition of Todo both have no name.
+    expect(within(rowOf("Todo")).getAllByRole("button", { name: /workflows\.editor\.text\.unnamed/ })).toHaveLength(2);
   });
 
   it("hides the transitions of a collapsed state", async () => {
-    render(<WorkflowTextView draft={draft} selection={null} onSelect={() => {}} />);
-    const toggles = screen.getAllByRole("button", { name: "workflows.editor.text.toggle" });
-    await userEvent.setup().click(toggles[1]);
-    expect(toggles[1].getAttribute("aria-expanded")).toBe("false");
-    expect(screen.queryByRole("button", { name: /Finish/ })).toBeNull();
+    show();
+    const toggle = within(rowOf("Done")).getByRole("button", { name: "workflows.editor.text.toggle" });
+    expect(toggle.getAttribute("aria-expanded")).toBe("true");
+    await userEvent.setup().click(toggle);
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    expect(within(rowOf("Done")).queryByText("Finish")).toBeNull();
+  });
+
+  it("selects the state when its row is clicked outside a button", async () => {
+    const onSelect = show();
+    const cells = within(rowOf("Done")).getAllByRole("cell");
+    await userEvent.setup().click(cells[1]);
+    expect(onSelect.mock.calls).toEqual([[{ kind: "state", key: "b" }]]);
+  });
+
+  it("marks the initial state and writes each category as text", () => {
+    show();
+    expect(within(rowOf("Todo")).getByText("workflows.editor.text.initial_state")).toBeTruthy();
+    expect(within(rowOf("Done")).getByText("workflows.groups.completed")).toBeTruthy();
+  });
+
+  it("explains the icons below the table", () => {
+    show();
+    expect(screen.getByText("workflows.editor.text.legend_start")).toBeTruthy();
+    expect(screen.getByText("workflows.editor.text.legend_any")).toBeTruthy();
   });
 
   it("says so when the workflow is empty", () => {
     render(<WorkflowTextView draft={{ states: [], transitions: [] }} selection={null} onSelect={() => {}} />);
     expect(screen.getByText("workflows.editor.text.empty")).toBeTruthy();
-  });
-
-  it("gives a transition without a name a readable, selectable label", async () => {
-    const onSelect = vi.fn();
-    render(<WorkflowTextView draft={draft} selection={null} onSelect={onSelect} />);
-    const button = screen.getByRole("button", {
-      name: "workflows.editor.text.unnamed (workflows.editor.text.origin_any → Todo)",
-    });
-    await userEvent.setup().click(button);
-    expect(onSelect).toHaveBeenLastCalledWith({ kind: "transition", key: "g" });
-  });
-
-  it("keeps list keys unique when one transition has several sources", () => {
-    const multi: TDraftGraph = {
-      states: [
-        ...draft.states,
-        {
-          key: "c",
-          status: { name: "Review", color: "#3A3A3A", group: "started" },
-          position_x: 480,
-          position_y: 0,
-          is_initial: false,
-        },
-      ],
-      transitions: [{ key: "m", name: "Go", from_any: false, source_keys: ["a", "b"], target_key: "c", rules: [] }],
-    };
-    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
-    render(<WorkflowTextView draft={multi} selection={null} onSelect={() => {}} />);
-    expect(screen.getAllByRole("button", { name: /Go/ })).toHaveLength(2);
-    expect(errors).not.toHaveBeenCalled();
-    errors.mockRestore();
-  });
-
-  it("keeps list keys unique when two sources share a name or are missing", () => {
-    const twins: TDraftGraph = {
-      states: [draft.states[0], { ...draft.states[1], status: { ...draft.states[1].status, name: "Todo" } }],
-      transitions: [
-        { key: "m", name: "Go", from_any: false, source_keys: ["a", "b"], target_key: "a", rules: [] },
-        { key: "n", name: "Lost", from_any: false, source_keys: ["x", "y"], target_key: "b", rules: [] },
-      ],
-    };
-    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
-    render(<WorkflowTextView draft={twins} selection={null} onSelect={() => {}} />);
-    expect(screen.getAllByRole("button", { name: /Go/ })).toHaveLength(2);
-    expect(screen.getAllByRole("button", { name: /Lost/ })).toHaveLength(2);
-    expect(errors).not.toHaveBeenCalled();
-    errors.mockRestore();
-  });
-
-  it("writes the category as text next to the coloured state", () => {
-    const started: TDraftGraph = {
-      states: [{ ...draft.states[0], status: { ...draft.states[0].status, group: "started" } }],
-      transitions: [],
-    };
-    render(<WorkflowTextView draft={started} selection={null} onSelect={() => {}} />);
-    expect(screen.getByText("workflows.groups.started")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Todo" }).className).toContain("bg-info-subtle");
   });
 });

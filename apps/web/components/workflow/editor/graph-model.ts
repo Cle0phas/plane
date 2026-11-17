@@ -616,36 +616,45 @@ export const transitionCounts = (draft: TDraftGraph, key: string) => ({
     .length,
 });
 
-export type TTextTransition = {
+export type TTextLine = {
+  /** Transition key; null for the arrival from the start. */
   key: string | null;
   name: string;
-  origin: "start" | "any" | "state";
+  kind: "start" | "any" | "in" | "out";
+  /** Source state of an "in" or "out" route. */
   sourceKey?: string;
-  sourceName?: string;
+  targetKey: string;
 };
-type TTextRow = { key: string; name: string; group: TStateGroups; transitions: TTextTransition[] };
+export type TTextRow = { key: string; name: string; group: TStateGroups; isInitial: boolean; lines: TTextLine[] };
 
-/** Text view (spec 3.7): each state with the transitions that lead to it, the start first. */
+const textLine = (kind: TTextLine["kind"], transition: TDraftTransition, sourceKey?: string): TTextLine => ({
+  key: transition.key,
+  name: transition.name,
+  kind,
+  ...(sourceKey === undefined ? {} : { sourceKey }),
+  targetKey: transition.target_key,
+});
+
+/** Text view (spec 5.2): each state with every transition touching it, start and globals first. */
 export const textRows = (draft: TDraftGraph): TTextRow[] => {
+  const routes = draft.transitions.filter((transition) => !transition.from_any);
   return draft.states.map((state) => ({
     key: state.key,
     name: state.status.name,
     group: displayGroup(draft, state),
-    transitions: [
-      ...(state.is_initial ? [{ key: null, name: "", origin: "start" as const }] : []),
+    isInitial: state.is_initial,
+    lines: [
+      ...(state.is_initial ? [{ key: null, name: "", kind: "start" as const, targetKey: state.key }] : []),
       ...draft.transitions
+        .filter((transition) => transition.from_any && transition.target_key === state.key)
+        .map((transition) => textLine("any", transition)),
+      ...routes
         .filter((transition) => transition.target_key === state.key)
-        .flatMap((transition): TTextTransition[] =>
-          transition.from_any
-            ? [{ key: transition.key, name: transition.name, origin: "any" }]
-            : transition.source_keys.map((source) => ({
-                key: transition.key,
-                name: transition.name,
-                origin: "state",
-                sourceKey: source,
-                sourceName: stateName(draft, source),
-              }))
-        ),
+        .flatMap((transition) => transition.source_keys.map((source) => textLine("in", transition, source))),
+      // A loop is already listed as incoming.
+      ...routes
+        .filter((transition) => transition.target_key !== state.key && transition.source_keys.includes(state.key))
+        .map((transition) => textLine("out", transition, state.key)),
     ],
   }));
 };
