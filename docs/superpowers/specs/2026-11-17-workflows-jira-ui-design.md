@@ -26,7 +26,7 @@ Rapprocher de Jira la page Paramètres du workspace > Workflows et la vue Texte 
 
 Un composant de `apps/web/components/workflow/` utilisé par la liste, la vue Texte, et par le panneau latéral et le diagramme pour leurs couleurs.
 
-- Props : `name`, `group` (backlog, unstarted, started, completed, cancelled), `variant` facultatif (`initial`, `any`).
+- Props : `name`, `group` (backlog, unstarted, started, completed, cancelled). La catégorie est aussi écrite dans le `title` du badge.
 - Style : texte en majuscules, petite taille en gras, `whitespace-nowrap`, coins légèrement arrondis, `padding` 2px 6px.
 - Couleurs (J2), déclarées une seule fois dans `tones.ts` :
 
@@ -38,7 +38,7 @@ Un composant de `apps/web/components/workflow/` utilisé par la liste, la vue Te
 | Terminé      | teinte « succès »                                    |
 | Annulé       | teinte « danger »                                    |
 
-- `variant="initial"` : libellé « Création », forme sombre au texte clair (la classe inverse existante). `variant="any"` : libellé « Tous les états », bord plein neutre.
+- Pas de variantes « Création » ni « Tous les états » (révisé le 2026-11-17) : la vue Texte écrit « Début » et « Tous les états » en texte simple, et aucun autre écran n'en a besoin.
 - La teinte Backlog distincte s'applique aussi aux noeuds du diagramme : aujourd'hui Backlog et Non commencé partagent une teinte.
 
 ## 4. Liste des workflows
@@ -50,7 +50,7 @@ Un composant de `apps/web/components/workflow/` utilisé par la liste, la vue Te
 - `states` : liste de `{ "name", "group" }` dans l'ordre du graphe (`created_at`, `id`), le même que l'éditeur et que les colonnes d'un projet nouvellement relié ;
 - `transition_count` : nombre de transitions.
 
-Droits inchangés : admins et membres du workspace (A1). Les noms d'états sont déjà lisibles par ces rôles via le détail d'un workflow. La lecture reste bornée (200 états par workflow). Le nombre de requêtes de la liste ne dépend pas du nombre de workflows.
+Droits inchangés : admins et membres du workspace (A1). Les noms d'états sont déjà lisibles par ces rôles via le détail d'un workflow. La lecture reste bornée (200 états par workflow). Les états et le nombre de transitions n'ajoutent aucune requête par workflow ; le compte des projets d'une ligne (`_projects`) en coûtait déjà une ou deux, hors périmètre.
 
 ### 4.2 Écran
 
@@ -60,7 +60,7 @@ Droits inchangés : admins et membres du workspace (A1). Les noms d'états sont 
 - Aperçu : les cinq premiers badges dans l'ordre du flux séparés par « → », puis une puce « +N ». Sans état : « Aucun état » et un lien « ajouter un premier état » vers l'éditeur (admins ; texte seul pour un membre).
 - Utilisé dans : puce « N projets » ; les noms des projets s'affichent en infobulle pour les admins (P6). « Non utilisé » si aucun projet.
 - Modifié le : date courte du format existant (`renderFormattedDate`).
-- Actions : lien « Modifier » et bouton « ⋯ » (`aria-label` « Plus d'actions pour {nom} ») ouvrant un menu Dupliquer, Supprimer. Supprimer est désactivé pour un workflow utilisé, avec la raison « Utilisé par N projets » en infobulle ; le texte d'aide sous la ligne disparaît. La confirmation de suppression et la duplication restent celles d'aujourd'hui.
+- Actions : lien « Modifier » et bouton « ⋯ » (`aria-label` « Plus d'actions pour {nom} ») ouvrant un menu Dupliquer, Supprimer. Supprimer est désactivé pour un workflow utilisé, avec la raison « Utilisé par N projets » en ligne grise de l'entrée du menu (révisé le 2026-11-17 : une entrée désactivée ne reçoit ni survol ni focus de façon fiable) ; le texte d'aide sous la ligne disparaît. La confirmation de suppression et la duplication restent celles d'aujourd'hui.
 - Aucun workflow : le message vide actuel. Aucun résultat après filtre : « Aucun workflow ne correspond ».
 
 ## 5. Éditeur
@@ -78,7 +78,7 @@ Seule la structure du tableau change ; le panneau latéral reste celui d'aujourd
 
 - Tableau `table-fixed`, bordures verticales entre colonnes, dans un conteneur à défilement horizontal. Colonnes : chevron (48px), État (environ 32 %), Transitions (le reste).
 - Une ligne par état, dans l'ordre du graphe. Le chevron replie ou déplie les transitions de l'état (`aria-expanded`). Toutes les lignes sont dépliées à l'ouverture.
-- Cellule État : badge (bouton, J3), et « État initial » en petit texte gris pour l'état initial. Elle reste alignée en haut sur toute la hauteur de la ligne.
+- Cellule État : badge (bouton, J3), et « État initial » en petit texte gris pour l'état initial. Sous le badge, la catégorie en petit texte gris, pour que la couleur ne soit pas le seul signal (WCAG 1.4.1, ajouté le 2026-11-17). Elle reste alignée en haut sur toute la hauteur de la ligne.
 - Cellule Transitions : une sous-ligne par transition qui touche l'état, séparées par une bordure, dans cet ordre :
   1. l'arrivée depuis le début, si l'état est initial ;
   2. les transitions globales vers cet état ;
@@ -106,13 +106,13 @@ Seule la réponse de lecture de la liste change (4.1) : mêmes rôles, mêmes do
 1. Une transition globale et l'arrivée depuis le début n'apparaissent que dans la ligne de leur cible.
 2. Chaque transition A vers B apparaît exactement dans la ligne de A et dans celle de B ; un état affiche toutes ses transitions, quel qu'en soit le nombre.
 3. Cliquer une sous-ligne sélectionne la transition et ouvre le panneau latéral existant ; cliquer le badge d'un état ouvre le panneau de l'état.
-4. La suppression d'un workflow utilisé reste impossible, avec la raison en infobulle.
+4. La suppression d'un workflow utilisé reste impossible, avec la raison affichée dans le menu.
 5. La liste montre, sans requête par ligne, l'aperçu des états et le nombre de transitions de chaque workflow.
 6. La description reste lisible depuis la liste et depuis l'éditeur.
 7. Aucun changement de schéma, de droits ni de comportement métier.
 
 ## 9. Tests
 
-- Serveur : tests de contrat de la liste (`states` dans l'ordre du graphe, `transition_count`, droits inchangés pour admin, membre, invité, non-membre ; nombre de requêtes constant quand le nombre de workflows augmente).
+- Serveur : tests de contrat de la liste (`states` dans l'ordre du graphe, `transition_count`, droits inchangés pour admin, membre, invité, non-membre ; aucune requête de plus par workflow pour les états et les transitions).
 - Web : tests unitaires de la construction des lignes de la vue Texte (ordre, doublons, boucles, sources multiples) ; tests de composants de la liste (recherche, filtre, compteur, aperçu limité à cinq, badge Vide, menu et suppression désactivée), de la vue Texte (sélection, repli, badge d'état) et de l'en-tête (fil d'Ariane, description).
 - Vérification à l'écran sur le serveur de développement, thème clair et sombre, largeur bureau et mobile.
