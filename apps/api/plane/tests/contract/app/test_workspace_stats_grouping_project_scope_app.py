@@ -5,8 +5,7 @@
 """Contract tests for project scoping of workspace-level stats and issue grouping.
 
 - ``project-stats`` returns the projects the caller can list: admins see every
-  project, members see projects they belong to plus public ones, guests only
-  projects they belong to.
+  project, members and guests only projects they belong to (projects are secret).
 - The advance analytics overview counts members only of ``project_ids`` in the
   URL workspace that the caller is an active member of.
 - Workspace-level issue grouping only uses project, state and cycle ids from
@@ -76,14 +75,6 @@ def own_project(db, workspace, member, guest):
 
 
 @pytest.fixture
-def public_project(db, workspace, create_user):
-    """A public project neither ``member`` nor ``guest`` belongs to."""
-    project = Project.objects.create(name="Public", identifier="PUB", workspace=workspace, network=2)
-    ProjectMember.objects.create(project=project, member=create_user, workspace=workspace, role=20)
-    return project
-
-
-@pytest.fixture
 def secret_project(db, workspace, create_user):
     """A secret project neither ``member`` nor ``guest`` belongs to."""
     project = Project.objects.create(name="Secret", identifier="SEC", workspace=workspace, network=0)
@@ -109,18 +100,17 @@ def _stats_ids(client, workspace):
 @pytest.mark.contract
 class TestProjectStatsVisibility:
     @pytest.mark.django_db
-    def test_member_sees_own_and_public_projects(self, workspace, member, own_project, public_project, secret_project):
-        assert _stats_ids(_client(member), workspace) == {str(own_project.id), str(public_project.id)}
+    def test_member_sees_only_own_projects(self, workspace, member, own_project, secret_project):
+        assert _stats_ids(_client(member), workspace) == {str(own_project.id)}
 
     @pytest.mark.django_db
-    def test_guest_sees_only_own_projects(self, workspace, guest, own_project, public_project, secret_project):
+    def test_guest_sees_only_own_projects(self, workspace, guest, own_project, secret_project):
         assert _stats_ids(_client(guest), workspace) == {str(own_project.id)}
 
     @pytest.mark.django_db
-    def test_admin_sees_every_project(self, session_client, workspace, own_project, public_project, secret_project):
+    def test_admin_sees_every_project(self, session_client, workspace, own_project, secret_project):
         assert _stats_ids(session_client, workspace) == {
             str(own_project.id),
-            str(public_project.id),
             str(secret_project.id),
         }
 

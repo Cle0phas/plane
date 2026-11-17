@@ -68,12 +68,13 @@ def get_default_preferences():
 class Project(ChangeTrackerMixin, BaseModel):
     TRACKED_FIELDS = ["timezone"]
 
-    NETWORK_CHOICES = ((0, "Secret"), (2, "Public"))
+    # A project belongs to one team: there is no public project (decision 2026-11-16).
+    NETWORK_CHOICES = ((0, "Secret"),)
     name = models.CharField(max_length=255, verbose_name="Project Name")
     description = models.TextField(verbose_name="Project Description", blank=True)
     description_text = models.JSONField(verbose_name="Project Description RT", blank=True, null=True)
     description_html = models.JSONField(verbose_name="Project Description HTML", blank=True, null=True)
-    network = models.PositiveSmallIntegerField(default=2, choices=NETWORK_CHOICES)
+    network = models.PositiveSmallIntegerField(default=0, choices=NETWORK_CHOICES)
     workspace = models.ForeignKey("db.WorkSpace", on_delete=models.CASCADE, related_name="workspace_project")
     identifier = models.CharField(max_length=12, verbose_name="Project Identifier", db_index=True)
     default_assignee = models.ForeignKey(
@@ -160,6 +161,8 @@ class Project(ChangeTrackerMixin, BaseModel):
                 condition=Q(deleted_at__isnull=True),
                 name="project_unique_name_workspace_when_deleted_at_null",
             ),
+            # Keeps every "member or public" visibility filter equal to "member" even if a write path is missed.
+            models.CheckConstraint(condition=Q(network=0), name="project_network_secret_only"),
         ]
         verbose_name = "Project"
         verbose_name_plural = "Projects"
