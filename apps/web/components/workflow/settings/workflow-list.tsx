@@ -302,7 +302,7 @@ export const WorkspaceWorkflowList = observer(function WorkspaceWorkflowList({
                 size="md"
                 stretch="auto"
                 aria-label={t("workflows.settings.usage.label")}
-                label={`${t("workflows.settings.usage.label")} : ${t(`workflows.settings.usage.${usage}`)}`}
+                label={t("workflows.settings.usage.trigger", { value: t(`workflows.settings.usage.${usage}`) })}
               />
             }
           />
