@@ -6,6 +6,8 @@ from uuid import uuid4
 
 import pytest
 from django.core.cache import cache
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -121,6 +123,31 @@ class TestRead:
         assert listed.data[0]["state_count"] == 2
         assert [state["status"]["name"] for state in detail.data["states"]] == ["To do", "Done"]
         assert {item["name"] for item in statuses.data} == {"To do", "Done"}
+
+    @pytest.mark.parametrize("role", ["admin", "member"])
+    def test_the_list_gives_each_workflow_its_states_in_graph_order_and_its_transition_count(
+        self, workspace, users, software, role
+    ):
+        Workflow.objects.create(workspace=workspace, name="Empty")
+        listed = _client(users[role]).get(WORKFLOWS_URL.format(slug=workspace.slug))
+        by_name = {item["name"]: item for item in listed.data}
+        assert by_name["Software"]["states"] == [
+            {"name": "To do", "group": software.states_by_name["To do"].status.group},
+            {"name": "Done", "group": software.states_by_name["Done"].status.group},
+        ]
+        assert by_name["Software"]["transition_count"] == 1
+        assert by_name["Empty"]["states"] == [] and by_name["Empty"]["transition_count"] == 0
+
+    def test_states_and_transitions_add_no_query_per_workflow(self, workspace, users, software):
+        client = _client(users["member"])
+        url = WORKFLOWS_URL.format(slug=workspace.slug)
+        with CaptureQueriesContext(connection) as one:
+            client.get(url)
+        build_workflow(workspace, "Second", ["A", "B", "C"], [(["A"], "B", None), (["B"], "C", None)])
+        with CaptureQueriesContext(connection) as two:
+            client.get(url)
+        # The project count of a row (_projects) already costs one query per workflow for a member.
+        assert len(two.captured_queries) - len(one.captured_queries) <= 1
 
     def test_guests_read_neither_workflows_nor_statuses(self, workspace, users, software):
         client = _client(users["guest"])

@@ -151,9 +151,22 @@ class WorkflowEndpoint(BaseAPIView):
         if pk is not None:
             workflow = Workflow.objects.get(workspace__slug=slug, pk=pk)
             return Response(workflow_detail(workflow, is_admin), status=status.HTTP_200_OK)
-        workflows = Workflow.objects.filter(workspace__slug=slug).annotate(state_count=Count("states"))
+        graph_states = WorkflowState.objects.select_related("status").order_by("created_at", "id")
+        workflows = (
+            Workflow.objects.filter(workspace__slug=slug)
+            # distinct: two counts over two joins would multiply each other.
+            .annotate(state_count=Count("states", distinct=True), transition_count=Count("transitions", distinct=True))
+            .prefetch_related(Prefetch("states", queryset=graph_states))
+        )
         data = [
-            {**WorkflowSerializer(workflow).data, "state_count": workflow.state_count, **_projects(workflow, is_admin)}
+            {
+                **WorkflowSerializer(workflow).data,
+                "state_count": workflow.state_count,
+                "transition_count": workflow.transition_count,
+                # Graph order: the order of the editor and of a newly linked project (spec 4.1).
+                "states": [{"name": state.status.name, "group": state.status.group} for state in workflow.states.all()],
+                **_projects(workflow, is_admin),
+            }
             for workflow in workflows
         ]
         return Response(data, status=status.HTTP_200_OK)
