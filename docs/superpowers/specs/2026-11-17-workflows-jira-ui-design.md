@@ -94,7 +94,7 @@ Seule la structure du tableau change ; le panneau latéral reste celui d'aujourd
 
 ## 6. Textes et accessibilité
 
-- Toutes les chaînes passent par `packages/i18n`, dans les 22 langues (anglais de référence, français fourni par le brief, autres langues traduites selon le skill `translate`).
+- Toutes les chaînes passent par `packages/i18n`, en anglais (référence) et en français (fourni par le brief), les deux seules langues livrées depuis le 2026-11-17 ; le français est la langue par défaut.
 - Vrais boutons partout ; `aria-label` sur les boutons icône ; contraste du texte d'au moins 4,5:1 dans les deux thèmes ; tableaux dans un conteneur à défilement horizontal ; boutons de l'en-tête qui passent à la ligne sur petit écran. Cibles tactiles de 44px sous 768px, comme le reste de l'éditeur.
 
 ## 7. Sécurité

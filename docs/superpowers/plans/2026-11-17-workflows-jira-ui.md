@@ -6,7 +6,7 @@
 
 **Architecture:** Le serveur ajoute à la liste des workflows, en lecture seule, les états (nom, catégorie) dans l'ordre du graphe et le nombre de transitions. Côté web, un badge d'état partagé (`StateLozenge`) et cinq teintes de catégorie servent la liste, la vue Texte, le panneau latéral et le diagramme. La vue Texte est reconstruite à partir d'une fonction pure (`textRows`) qui liste, pour chaque état, toutes les transitions qui le touchent.
 
-**Tech Stack:** Django REST Framework, pytest ; React 19, TypeScript, MobX, Tailwind 4, `@makeplane/propel` (Menu, Tooltip, IconButton, icônes), `@plane/blocks` (Select, ConfirmDialog, toast), Vitest et Testing Library, `packages/i18n` (22 langues).
+**Tech Stack:** Django REST Framework, pytest ; React 19, TypeScript, MobX, Tailwind 4, `@makeplane/propel` (Menu, Tooltip, IconButton, icônes), `@plane/blocks` (Select, ConfirmDialog, toast), Vitest et Testing Library, `packages/i18n` (français et anglais seulement depuis le commit `027dddbff1`).
 
 **Spec:** `docs/superpowers/specs/2026-11-17-workflows-jira-ui-design.md`
 
@@ -15,7 +15,7 @@
 - Branche `feat/workflows-jira-ui`, worktree `.worktrees/feat-workflows` ; ne pas changer de branche.
 - Aucune nouvelle dépendance ; composants de `@makeplane/propel` et `@plane/blocks` d'abord.
 - Couleurs depuis les jetons du thème uniquement (J2) : aucune couleur hexadécimale dans les composants.
-- Toute chaîne visible passe par `t()` ; chaque clé existe dans les 22 langues de `packages/i18n/src/locales/` (`pnpm --filter=@plane/i18n sync:check`).
+- Toute chaîne visible passe par `t()` ; chaque clé existe en anglais et en français, les deux seules langues livrées (`packages/i18n/src/locales/en` et `fr`) (`pnpm --filter=@plane/i18n sync:check`).
 - Droits inchangés : la liste reste lisible par les admins et les membres du workspace, pas par les invités ; les noms de projets restent réservés aux admins (P6).
 - Identifiants techniques en anglais ; commentaires d'une ligne qui disent pourquoi ; pas de tiret cadratin.
 - Commits Conventional Commits en anglais, sujet de 72 caractères au plus, sans aucune attribution ; jamais `--no-verify`.
@@ -1131,7 +1131,7 @@ git commit -m "feat(web): show the workflow list with state previews and a menu"
 
 **Files:**
 
-- Modify: `packages/i18n/src/locales/*/workflow.json` (22 fichiers)
+- Modify: `packages/i18n/src/locales/*/workflow.json` (`en` et `fr`)
 
 **Interfaces:**
 
@@ -1173,7 +1173,7 @@ git commit -m "feat(web): show the workflow list with state previews and a menu"
 
 Français (`fr`), d'après le brief : « Rechercher un workflow », « Utilisation », « Tous », « Utilisés », « Non utilisés », « {count, plural, one {# workflow} other {# workflows}} », « {count, plural, one {# transition} other {# transitions}} », « Vide », « Aucun état », « ajouter un premier état », « Non utilisé », « Plus d'actions pour {name} », « Description de {name} », « Aucun workflow ne correspond », « Aperçu des états », « {count, plural, one {Utilisé par # projet} other {Utilisé par # projets}} », « Fil d'Ariane », « Déplier ou replier », « État initial », « Transition initiale », « Transition globale (depuis tous les états) », « Clic sur une transition : édition dans le panneau latéral. ».
 
-- [ ] **Step 3: Translate the other 20 locales** selon le skill.
+- [ ] **Step 3: No other locale** : depuis le 2026-11-17, seuls l'anglais et le français sont livrés ; ne rien traduire d'autre.
 
 - [ ] **Step 4: Check**
 
