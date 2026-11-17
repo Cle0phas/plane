@@ -2,16 +2,16 @@
   "templates": {
     "settings": {
       "title": "Modèles",
-      "description": "Économisez 80% du temps consacré à la création de projets, d'éléments de travail et de pages lorsque vous utilisez des modèles.",
+      "description": "Économisez 80% du temps consacré à la création de projets, de tickets et de pages lorsque vous utilisez des modèles.",
       "new_project_template": "Nouveau modèle de projet",
-      "new_work_item_template": "Nouveau modèle d’élément de travail",
+      "new_work_item_template": "Nouveau modèle de ticket",
       "new_page_template": "Nouveau modèle de page",
       "options": {
         "project": {
           "label": "Modèles de projet"
         },
         "work_item": {
-          "label": "Modèles d'éléments de travail"
+          "label": "Modèles de tickets"
         },
         "page": {
           "label": "Modèles de page"
@@ -70,7 +70,7 @@
         "work_item": {
           "template": {
             "name": {
-              "placeholder": "Nommez votre modèle d'élément de travail.",
+              "placeholder": "Nommez votre modèle de ticket.",
               "validation": {
                 "required": "Le nom du modèle est requis",
                 "maxLength": "Le nom du modèle doit comporter moins de 255 caractères"
@@ -81,18 +81,18 @@
             }
           },
           "name": {
-            "placeholder": "Donnez un titre à cet élément de travail.",
+            "placeholder": "Donnez un titre à ce ticket.",
             "validation": {
-              "required": "Le titre de l'élément de travail est requis",
-              "maxLength": "Le titre de l'élément de travail doit comporter moins de 255 caractères"
+              "required": "Le titre du ticket est requis",
+              "maxLength": "Le titre du ticket doit comporter moins de 255 caractères"
             }
           },
           "description": {
-            "placeholder": "Décrivez cet élément de travail afin qu'il soit clair ce que vous accomplirez lorsque vous le terminerez."
+            "placeholder": "Décrivez ce ticket afin qu'il soit clair ce que vous accomplirez lorsque vous le terminerez."
           },
           "button": {
-            "create": "Créer un modèle d'élément de travail",
-            "update": "Mettre à jour le modèle d'élément de travail"
+            "create": "Créer un modèle de ticket",
+            "update": "Mettre à jour le modèle de ticket"
           }
         },
         "page": {
@@ -227,23 +227,23 @@
     "empty_state": {
       "upgrade": {
         "title": "Modèles",
-        "description": "Avec les modèles de projet, d'élément de travail et de page dans Plane, vous n'avez pas à créer un projet à partir de zéro ou à définir manuellement les propriétés des éléments de travail.",
+        "description": "Avec les modèles de projet, de ticket et de page dans Plane, vous n'avez pas à créer un projet à partir de zéro ou à définir manuellement les propriétés des tickets.",
         "sub_description": "Récupérez 80% de votre temps d'administration lorsque vous utilisez des modèles."
       },
       "no_templates": {
         "button": "Créez votre premier modèle"
       },
       "no_labels": {
-        "description": " Aucune étiquette pour le moment. Créez des étiquettes pour aider à organiser et filtrer les éléments de travail dans votre projet."
+        "description": " Aucune étiquette pour le moment. Créez des étiquettes pour aider à organiser et filtrer les tickets dans votre projet."
       },
       "no_modules": {
         "description": "Aucun module pour le moment. Organisez le travail en sous-projets avec des responsables et des acteurs dédiés."
       },
       "no_work_items": {
-        "description": "Aucun élément de travail pour le moment. Ajoutez-en un pour structurer votre travail mieux."
+        "description": "Aucun ticket pour le moment. Ajoutez-en un pour structurer votre travail mieux."
       },
       "no_sub_work_items": {
-        "description": "Aucun sous-élément de travail pour le moment. Ajoutez-en un pour structurer votre travail mieux."
+        "description": "Aucun sous-ticket pour le moment. Ajoutez-en un pour structurer votre travail mieux."
       },
       "page": {
         "no_templates": {
@@ -322,7 +322,7 @@
         "page": "Choisir à partir du modèle"
       },
       "tooltip": {
-        "work_item": "Choisir un modèle d'élément de travail"
+        "work_item": "Choisir un modèle de ticket"
       },
       "no_results": {
         "work_item": "Aucun modèle trouvé.",

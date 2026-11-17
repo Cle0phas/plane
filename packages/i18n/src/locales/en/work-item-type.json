@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "Cannot delete default work item type",
           "cannot_delete_work_item_type_with_associated_work_items": "Cannot delete work item type with associated work items"
         }
+      },
+      "list": {
+        "description": "Create the work item types that projects in this workspace can use.",
+        "inactive_badge": "Inactive",
+        "work_item_count": "{count, plural, one {# work item} other {# work items}}",
+        "load_error": "Work item types could not be loaded.",
+        "more_actions": "Actions for {name}"
+      },
+      "actions": {
+        "deactivate": "Deactivate",
+        "reactivate": "Reactivate"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "The default type cannot be deactivated.",
+        "project_default_cannot_be_deactivated": "This type is the default type of at least one project.",
+        "project_default_cannot_be_deleted": "This type is the default type of a project and cannot be deleted."
+      },
+      "project": {
+        "description": "Choose the work item types this project uses and its default type.",
+        "used_in_project": "Used in this project",
+        "set_default": "Make default",
+        "toast_error": "The work item types of this project could not be updated.",
+        "disabled_reasons": {
+          "project_default": "The default type of the project cannot be removed.",
+          "in_use": "Work items of this project use this type.",
+          "not_enabled": "Use this type in the project first."
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "Give this work item type a unique name"
+          "placeholder": "Give this work item type a unique name",
+          "label": "Name",
+          "required": "Name is required.",
+          "max_length": "Name must be 255 characters or fewer."
         },
         "description": {
-          "placeholder": "Describe what this work item type is meant for and when it's to be used."
+          "placeholder": "Describe what this work item type is meant for and when it's to be used.",
+          "label": "Description",
+          "max_length": "Description must be 1000 characters or fewer."
+        },
+        "icon": {
+          "label": "Icon"
         }
       }
     },
@@ -388,6 +423,26 @@
           "text": "Upgrade"
         }
       }
+    },
+    "select": {
+      "label": "Type"
+    },
+    "switcher": {
+      "label": "Change work item type"
+    },
+    "activity": {
+      "changed_from": "changed the type from",
+      "to": "to"
+    },
+    "filter": {
+      "label": "Work item type"
+    },
+    "group_by": {
+      "label": "Work item type",
+      "unknown_type": "Unknown type"
+    },
+    "display_property": {
+      "label": "Work item type"
     }
   },
   "work_item_type_hierarchy": {

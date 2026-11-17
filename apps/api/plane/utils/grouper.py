@@ -21,6 +21,7 @@ from plane.db.models import (
     IssueAssignee,
     ModuleIssue,
     IssueLabel,
+    IssueType,
 )
 from typing import Optional, Dict, Tuple, Any, Union, List
 
@@ -127,6 +128,7 @@ def issue_on_results(
         "is_draft",
         "archived_at",
         "state__group",
+        "type_id",
     ]
 
     if group_by in FIELD_MAPPER:
@@ -188,6 +190,14 @@ def issue_group_values(
 
     if field == "project_id":
         return list(Project.objects.filter(workspace__slug=slug, id__in=project_ids).values_list("id", flat=True))
+
+    if field == "type_id":
+        # Soft-deleted types still referenced by work items stay visible so those items do not vanish.
+        referenced = Issue.objects.filter(type__workspace__slug=slug).values("type_id")
+        queryset = IssueType.all_objects.filter(workspace__slug=slug).filter(
+            Q(deleted_at__isnull=True) | Q(id__in=referenced)
+        )
+        return list(queryset.values_list("id", flat=True)) + ["None"]
 
     if field == "priority":
         return ["low", "medium", "high", "urgent", "none"]

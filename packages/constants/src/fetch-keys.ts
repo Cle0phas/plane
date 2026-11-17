@@ -86,6 +86,19 @@ export const WORKSPACE_FAVORITE = (workspaceSlug: string) => `WORKSPACE_FAVORITE
 
 export const WORKSPACE_STATES = (workspaceSlug: string) => `WORKSPACE_STATES_${workspaceSlug.toUpperCase()}`;
 
+export const WORKSPACE_WORK_ITEM_TYPES = (workspaceSlug: string) =>
+  `WORKSPACE_WORK_ITEM_TYPES_${workspaceSlug.toUpperCase()}`;
+
+export const PROJECT_WORK_ITEM_TYPES = (projectId: string) => `PROJECT_WORK_ITEM_TYPES_${projectId.toUpperCase()}`;
+
+export const WORKSPACE_WORKFLOWS = (workspaceSlug: string) => `WORKSPACE_WORKFLOWS_${workspaceSlug.toUpperCase()}`;
+export const WORKSPACE_WORKFLOW_STATUSES = (workspaceSlug: string) =>
+  `WORKSPACE_WORKFLOW_STATUSES_${workspaceSlug.toUpperCase()}`;
+export const WORKSPACE_WORKFLOW_CANDIDATES = (workspaceSlug: string) =>
+  `WORKSPACE_WORKFLOW_CANDIDATES_${workspaceSlug.toUpperCase()}`;
+export const WORKFLOW_DETAIL = (workflowId: string) => `WORKFLOW_DETAIL_${workflowId.toUpperCase()}`;
+export const PROJECT_WORKFLOW_SCHEME = (projectId: string) => `PROJECT_WORKFLOW_SCHEME_${projectId.toUpperCase()}`;
+
 export const WORKSPACE_SIDEBAR_PREFERENCES = (workspaceSlug: string) =>
   `WORKSPACE_SIDEBAR_PREFERENCES_${workspaceSlug.toUpperCase()}`;
 

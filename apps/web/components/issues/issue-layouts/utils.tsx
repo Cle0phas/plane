@@ -52,6 +52,8 @@ import { EIssuesStoreType } from "@plane/types";
 import { renderFormattedDate, getFileURL } from "@plane/utils";
 // store
 import { store } from "@/lib/store-context";
+import { getWorkItemTypeColumnEntries } from "@/components/work-item-types/helpers";
+import { WorkItemTypeIcon } from "@/components/work-item-types/work-item-type-icon";
 import { ISSUE_FILTER_DEFAULT_DATA } from "@/store/issue/helpers/base-issues.store";
 import { DEFAULT_DISPLAY_PROPERTIES } from "@/store/issue/issue-details/sub_issues_filter.store";
 // constants
@@ -111,6 +113,9 @@ type TGetGroupByColumns = {
   isWorkspaceLevel: boolean;
   isEpic?: boolean;
   projectId?: string;
+  t: (key: string) => string;
+  // Group ids present in the loaded data, so a group of a type missing from the store still gets a column.
+  groupIds?: string[];
 };
 
 // NOTE: Type of groupBy is different compared to what's being passed from the components.
@@ -122,6 +127,8 @@ export const getGroupByColumns = ({
   isWorkspaceLevel,
   isEpic = false,
   projectId,
+  t,
+  groupIds,
 }: TGetGroupByColumns): IGroupByColumn[] | undefined => {
   // If no groupBy is specified and includeNone is true, return "All Issues" group
   if (!groupBy && includeNone) {
@@ -149,6 +156,7 @@ export const getGroupByColumns = ({
     state: getStateColumns,
     "state_detail.group": getStateGroupColumns,
     priority: getPriorityColumns,
+    issue_type: () => getWorkItemTypeColumns(t, groupIds),
     labels: getLabelsColumns,
     assignees: getAssigneeColumns,
     created_by: getCreatedByColumns,
@@ -279,6 +287,26 @@ const getPriorityColumns = (): IGroupByColumn[] => {
     name: priority.title,
     icon: <PriorityIcon priority={priority?.key} />,
     payload: { priority: priority.key },
+  }));
+};
+
+// Inactive types stay listed: existing work items keep them (R7).
+const getWorkItemTypeColumns = (t: (key: string) => string, groupIds: string[] = []): IGroupByColumn[] => {
+  const workspaceSlug = store.router.workspaceSlug;
+  const workItemTypes = workspaceSlug ? store.workspaceRoot.workItemType.getWorkspaceTypes(workspaceSlug) : [];
+  return getWorkItemTypeColumnEntries(workItemTypes, groupIds, {
+    unknown: t("work_item_types.group_by.unknown_type"),
+    none: t("common.none"),
+  }).map((entry) => ({
+    id: entry.id,
+    name: entry.name,
+    icon: entry.workItemType ? (
+      <WorkItemTypeIcon workItemType={entry.workItemType} size={16} decorative />
+    ) : (
+      <WorkItemsOutline className="size-4" aria-hidden />
+    ),
+    payload: entry.payload,
+    isDropDisabled: entry.isDropDisabled,
   }));
 };
 

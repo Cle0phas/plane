@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "Không thể xóa loại mục công việc mặc định",
           "cannot_delete_work_item_type_with_associated_work_items": "Không thể xóa loại mục công việc có mục công việc liên quan"
         }
+      },
+      "list": {
+        "description": "Tạo các loại mục công việc mà các dự án trong không gian làm việc này có thể sử dụng.",
+        "inactive_badge": "Không hoạt động",
+        "work_item_count": "{count, plural, one {# mục công việc} other {# mục công việc}}",
+        "load_error": "Không thể tải các loại mục công việc.",
+        "more_actions": "Hành động cho {name}"
+      },
+      "actions": {
+        "deactivate": "Hủy kích hoạt",
+        "reactivate": "Kích hoạt lại"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "Không thể hủy kích hoạt loại mặc định.",
+        "project_default_cannot_be_deactivated": "Loại này là loại mặc định của ít nhất một dự án.",
+        "project_default_cannot_be_deleted": "Loại này là loại mặc định của một dự án và không thể xóa."
+      },
+      "project": {
+        "description": "Chọn các loại mục công việc mà dự án này sử dụng và loại mặc định của dự án.",
+        "used_in_project": "Được dùng trong dự án này",
+        "set_default": "Đặt làm mặc định",
+        "toast_error": "Không thể cập nhật các loại mục công việc của dự án này.",
+        "disabled_reasons": {
+          "project_default": "Không thể gỡ loại mặc định của dự án.",
+          "in_use": "Các mục công việc của dự án này đang dùng loại này.",
+          "not_enabled": "Hãy dùng loại này trong dự án trước."
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "Đặt cho loại mục công việc này một tên duy nhất"
+          "placeholder": "Đặt cho loại mục công việc này một tên duy nhất",
+          "label": "Tên",
+          "required": "Tên là bắt buộc.",
+          "max_length": "Tên không được dài quá 255 ký tự."
         },
         "description": {
-          "placeholder": "Mô tả loại mục công việc này dùng để làm gì và khi nào nên sử dụng nó."
+          "placeholder": "Mô tả loại mục công việc này dùng để làm gì và khi nào nên sử dụng nó.",
+          "label": "Mô tả",
+          "max_length": "Mô tả không được dài quá 1000 ký tự."
+        },
+        "icon": {
+          "label": "Biểu tượng"
         }
       }
     },
@@ -388,6 +423,26 @@
           "text": "Nâng cấp"
         }
       }
+    },
+    "select": {
+      "label": "Loại"
+    },
+    "switcher": {
+      "label": "Đổi loại mục công việc"
+    },
+    "activity": {
+      "changed_from": "đã thay đổi loại từ",
+      "to": "thành"
+    },
+    "filter": {
+      "label": "Loại mục công việc"
+    },
+    "group_by": {
+      "label": "Loại mục công việc",
+      "unknown_type": "Loại không xác định"
+    },
+    "display_property": {
+      "label": "Loại mục công việc"
     }
   },
   "work_item_type_hierarchy": {

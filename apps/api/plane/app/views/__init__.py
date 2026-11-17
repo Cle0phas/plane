@@ -233,6 +233,23 @@ from .webhook.base import (
     WebhookSecretRegenerateEndpoint,
 )
 
+from .issue_type.base import (
+    WorkspaceIssueTypeEndpoint,
+    ProjectIssueTypeListEndpoint,
+    ProjectIssueTypeDetailEndpoint,
+)
+
+from .workflow.base import (
+    ProjectWorkflowSchemeEndpoint,
+    ProjectWorkflowSchemePreviewEndpoint,
+    WorkflowDuplicateEndpoint,
+    WorkflowEndpoint,
+    WorkflowGraphEndpoint,
+    WorkflowPresenceEndpoint,
+    WorkflowStatusCandidatesEndpoint,
+    WorkflowStatusEndpoint,
+)
+
 from .error_404 import custom_404_view
 
 from .notification.base import MarkAllReadNotificationViewSet

@@ -79,7 +79,18 @@ from .workspace import (
 
 from .favorite import UserFavorite
 
-from .issue_type import IssueType
+from .issue_type import IssueType, ProjectIssueType
+from .workflow import (
+    ProjectWorkflowScheme,
+    ProjectWorkflowSchemeItem,
+    Workflow,
+    WorkflowState,
+    WorkflowStatus,
+    WorkflowTransition,
+    WorkflowTransitionRule,
+    WorkflowTransitionSource,
+)
+from .audit_log import AuditLog
 
 from .recent_visit import UserRecentVisit
 

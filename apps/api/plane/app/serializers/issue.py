@@ -47,6 +47,8 @@ from plane.utils.content_validator import (
     validate_html_content,
     validate_binary_data,
 )
+from plane.utils.issue_types import StrictUUIDField, validate_work_item_type_id
+from plane.utils.workflows import resolve_workflow_state
 
 
 class IssueFlatSerializer(BaseSerializer):
@@ -99,6 +101,7 @@ class IssueCreateSerializer(BaseSerializer):
     )
     project_id = serializers.UUIDField(source="project.id", read_only=True)
     workspace_id = serializers.UUIDField(source="workspace.id", read_only=True)
+    type_id = StrictUUIDField(required=False, allow_null=True)
 
     class Meta:
         model = Issue
@@ -114,6 +117,7 @@ class IssueCreateSerializer(BaseSerializer):
             "deleted_at",
             "archived_at",
             "sequence_id",
+            "type",
         ]
 
     def get_fields(self):
@@ -203,6 +207,27 @@ class IssueCreateSerializer(BaseSerializer):
             ).exists()
         ):
             raise serializers.ValidationError("Estimate point is not valid please pass a valid estimate_point_id")
+
+        if "type_id" in attrs:
+            attrs["type_id"] = validate_work_item_type_id(
+                attrs["type_id"],
+                project_id=self.context.get("project_id"),
+                current_type_id=self.instance.type_id if self.instance else None,
+                allow_null=self.instance is None,
+            )
+
+        # Workflow last: it needs the validated state and type (spec 4.2).
+        state = resolve_workflow_state(
+            project_id=self.context.get("project_id"),
+            instance=self.instance,
+            state=attrs.get("state"),
+            state_given="state" in attrs,
+            type_id=attrs.get("type_id"),
+        )
+        if state is not None:
+            attrs["state"] = state
+            # The server moved the state: the views report it with the other changes.
+            self.workflow_state_id = state.id
 
         return attrs
 
@@ -819,6 +844,7 @@ class IssueSerializer(DynamicBaseSerializer):
             "link_count",
             "is_draft",
             "archived_at",
+            "type_id",
         ]
         read_only_fields = fields
 
@@ -869,6 +895,7 @@ class IssueListDetailSerializer(serializers.Serializer):
             "updated_by": instance.updated_by_id,
             "is_draft": instance.is_draft,
             "archived_at": instance.archived_at,
+            "type_id": instance.type_id,
             # Computed fields
             "cycle_id": instance.cycle_id,
             "module_ids": self.get_module_ids(instance),

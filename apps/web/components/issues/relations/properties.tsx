@@ -14,6 +14,7 @@ import { EIssueServiceType } from "@plane/types";
 import { MemberSelect } from "@/components/dropdowns/member/member-select";
 import { PrioritySelect } from "@/components/dropdowns/priority/priority-select";
 import { StateSelect } from "@/components/dropdowns/state/state-select";
+import { useAllowedStateIds } from "@/components/workflow";
 // hooks
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 // types
@@ -37,6 +38,7 @@ export const RelationIssueProperty = observer(function RelationIssueProperty(pro
 
   // derived value
   const issue = getIssueById(issueId);
+  const allowedStateIds = useAllowedStateIds(workspaceSlug, issue?.project_id ?? undefined, issue);
 
   // if issue is not found, return empty
   if (!issue) return <></>;
@@ -69,6 +71,7 @@ export const RelationIssueProperty = observer(function RelationIssueProperty(pro
         disabled={disabled}
         variant="pill-sm"
         tooltip
+        allowedStateIds={allowedStateIds}
       />
 
       <PrioritySelect

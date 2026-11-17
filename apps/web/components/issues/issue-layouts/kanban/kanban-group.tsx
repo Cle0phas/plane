@@ -9,6 +9,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { autoScrollForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-scroll/element";
+import { useParams } from "next/navigation";
 import { observer } from "mobx-react";
 // plane constants
 import { DRAG_ALLOWED_GROUPS } from "@plane/constants";
@@ -39,6 +40,8 @@ import { KanbanIssueBlockLoader } from "@/components/ui/loader/layouts/kanban-la
 import { useWorkFlowFDragNDrop } from "@/components/workflow";
 // hooks
 import { useProjectState } from "@/hooks/store/use-project-state";
+import { useWorkItemType } from "@/hooks/store/use-work-item-type";
+import { getQuickAddTypeData } from "@/components/work-item-types/helpers";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { useIssuesStore } from "@/hooks/use-issue-layout-store";
 // local imports
@@ -99,6 +102,10 @@ export const KanbanGroup = observer(function KanbanGroup(props: IKanbanGroup) {
   const { t } = useTranslation();
   // hooks
   const projectState = useProjectState();
+  const { workspaceSlug, projectId } = useParams();
+  const { getProjectAssignableTypes } = useWorkItemType();
+  const assignableTypes =
+    workspaceSlug && projectId ? getProjectAssignableTypes(workspaceSlug.toString(), projectId.toString()) : [];
 
   const {
     issues: { getGroupIssueCount, getPaginationData, getIssueLoader },
@@ -123,8 +130,14 @@ export const KanbanGroup = observer(function KanbanGroup(props: IKanbanGroup) {
   );
   const [isDraggingOverColumn, setIsDraggingOverColumn] = useState(false);
 
-  const { workflowDisabledSource, isWorkflowDropDisabled, handleWorkFlowState, getIsWorkflowWorkItemCreationDisabled } =
-    useWorkFlowFDragNDrop(group_by, sub_group_by);
+  const {
+    workflowDisabledSource,
+    isWorkflowDropDisabled,
+    handleWorkFlowState,
+    resetWorkFlowState,
+    getIsWorkflowWorkItemCreationDisabled,
+    getWorkflowInitialStateId,
+  } = useWorkFlowFDragNDrop(group_by, sub_group_by);
 
   // Enable Kanban Columns as Drop Targets
   useEffect(() => {
@@ -141,33 +154,44 @@ export const KanbanGroup = observer(function KanbanGroup(props: IKanbanGroup) {
           setIsDraggingOverColumn(true);
           // handle if dragging a workflowState
           if (source) {
-            handleWorkFlowState(source?.groupId, groupId, source?.subGroupId, sub_group_id);
+            handleWorkFlowState(
+              source?.groupId,
+              groupId,
+              source?.subGroupId,
+              sub_group_id,
+              source?.id ? issuesMap[source.id] : undefined
+            );
           }
         },
         onDragLeave: () => {
           setIsDraggingOverColumn(false);
+          resetWorkFlowState();
         },
         onDragStart: (payload) => {
           const source = getSourceFromDropPayload(payload);
           setIsDraggingOverColumn(true);
           // handle if dragging a workflowState
           if (source) {
-            handleWorkFlowState(source?.groupId, groupId, source?.subGroupId, sub_group_id);
+            handleWorkFlowState(
+              source?.groupId,
+              groupId,
+              source?.subGroupId,
+              sub_group_id,
+              source?.id ? issuesMap[source.id] : undefined
+            );
           }
         },
         onDrop: (payload) => {
           setIsDraggingOverColumn(false);
+          resetWorkFlowState();
           const source = getSourceFromDropPayload(payload);
           const destination = getDestinationFromDropPayload(payload);
 
           if (!source || !destination) return;
 
-          if ((isWorkflowDropDisabled || isDropDisabled) && dropErrorMessage) {
-            setToast({
-              type: "warning",
-              title: t("common.warning"),
-              message: dropErrorMessage,
-            });
+          if (isWorkflowDropDisabled || isDropDisabled) {
+            const message = isWorkflowDropDisabled ? t("workflows.workflow_disabled.title") : dropErrorMessage;
+            if (message) setToast({ type: "warning", title: t("common.warning"), message });
             return;
           }
 
@@ -194,6 +218,9 @@ export const KanbanGroup = observer(function KanbanGroup(props: IKanbanGroup) {
     isWorkflowDropDisabled,
     dropErrorMessage,
     handleOnDrop,
+    handleWorkFlowState,
+    resetWorkFlowState,
+    issuesMap,
   ]);
 
   const prePopulateQuickAddData = (
@@ -218,6 +245,8 @@ export const KanbanGroup = observer(function KanbanGroup(props: IKanbanGroup) {
         preloadedData = { ...preloadedData, label_ids: [groupValue] };
       } else if (groupByKey === "assignees" && groupValue != "None") {
         preloadedData = { ...preloadedData, assignee_ids: [groupValue] };
+      } else if (groupByKey === "issue_type") {
+        preloadedData = { ...preloadedData, ...getQuickAddTypeData(groupValue, assignableTypes) };
       } else if (groupByKey === "created_by") {
         preloadedData = { ...preloadedData };
       } else {
@@ -238,6 +267,8 @@ export const KanbanGroup = observer(function KanbanGroup(props: IKanbanGroup) {
         preloadedData = { ...preloadedData, label_ids: [subGroupValue] };
       } else if (subGroupByKey === "assignees" && subGroupValue != "None") {
         preloadedData = { ...preloadedData, assignee_ids: [subGroupValue] };
+      } else if (subGroupByKey === "issue_type") {
+        preloadedData = { ...preloadedData, ...getQuickAddTypeData(subGroupValue, assignableTypes) };
       } else if (subGroupByKey === "created_by") {
         preloadedData = { ...preloadedData };
       } else {
@@ -245,7 +276,9 @@ export const KanbanGroup = observer(function KanbanGroup(props: IKanbanGroup) {
       }
     }
 
-    return preloadedData;
+    // A linked project refuses any other state than the initial one of the type's workflow (T1).
+    const initialStateId = getWorkflowInitialStateId((preloadedData as { type_id?: string }).type_id);
+    return initialStateId ? { ...preloadedData, state_id: initialStateId } : preloadedData;
   };
 
   const isSubGroup = !!sub_group_id && sub_group_id !== "null";

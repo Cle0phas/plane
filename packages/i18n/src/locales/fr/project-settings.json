@@ -21,7 +21,7 @@
       },
       "confirm_project_name_label": "Saisissez le nom du projet pour continuer.",
       "leave_project": {
-        "confirm_description": "Êtes-vous sûr de vouloir quitter le projet {projectName} ? Les éléments de travail qui vous sont associés deviendront inaccessibles."
+        "confirm_description": "Êtes-vous sûr de vouloir quitter le projet {projectName} ? Les tickets qui vous sont associés deviendront inaccessibles."
       }
     },
     "members": {
@@ -33,8 +33,8 @@
       "project_subscribers": "Abonnés du projet",
       "project_subscribers_description": "Sélectionnez les membres qui recevront des notifications pour ce projet.",
       "guest_super_permissions": {
-        "title": "Accorder l’accès en lecture à tous les éléments de travail pour les utilisateurs invités :",
-        "sub_heading": "Cela permettra aux invités d’avoir un accès en lecture à tous les éléments de travail du projet."
+        "title": "Accorder l’accès en lecture à tous les tickets pour les utilisateurs invités :",
+        "sub_heading": "Cela permettra aux invités d’avoir un accès en lecture à tous les tickets du projet."
       },
       "invite_members": {
         "title": "Inviter des membres",
@@ -44,7 +44,7 @@
     },
     "states": {
       "heading": "États",
-      "description": "Définissez et personnalisez les états du flux de travail pour suivre la progression de vos éléments de travail.",
+      "description": "Définissez et personnalisez les états du flux de travail pour suivre la progression de vos tickets.",
       "describe_this_state_for_your_members": "Décrivez cet état pour vos membres.",
       "empty_state": {
         "title": "Aucun état disponible pour le groupe {groupKey}",
@@ -53,7 +53,7 @@
     },
     "labels": {
       "heading": "Étiquettes",
-      "description": "Créez des étiquettes personnalisées pour catégoriser et organiser vos éléments de travail",
+      "description": "Créez des étiquettes personnalisées pour catégoriser et organiser vos tickets",
       "label_title": "Titre de l’étiquette",
       "label_title_is_required": "Le titre de l’étiquette est requis",
       "label_max_char": "Le nom de l’étiquette ne doit pas dépasser 255 caractères",
@@ -187,14 +187,14 @@
       "heading": "Automatisations",
       "description": "Configurez des actions automatisées pour fluidifier votre flux de gestion de projet et réduire les tâches manuelles.",
       "auto-archive": {
-        "title": "Archiver automatiquement les éléments de travail fermés",
-        "description": "Plane archivera automatiquement les éléments de travail qui ont été complétés ou annulés.",
-        "duration": "Archiver automatiquement les éléments de travail fermés depuis"
+        "title": "Archiver automatiquement les tickets fermés",
+        "description": "Plane archivera automatiquement les tickets qui ont été complétés ou annulés.",
+        "duration": "Archiver automatiquement les tickets fermés depuis"
       },
       "auto-close": {
-        "title": "Fermer automatiquement les éléments de travail",
-        "description": "Plane fermera automatiquement les éléments de travail qui n’ont pas été complétés ou annulés.",
-        "duration": "Fermer automatiquement les éléments de travail inactifs depuis",
+        "title": "Fermer automatiquement les tickets",
+        "description": "Plane fermera automatiquement les tickets qui n’ont pas été complétés ou annulés.",
+        "duration": "Fermer automatiquement les tickets inactifs depuis",
         "auto_close_status": "Statut de fermeture automatique"
       },
       "auto-remind": {
@@ -206,25 +206,25 @@
     "empty_state": {
       "labels": {
         "title": "Pas encore d’étiquettes",
-        "description": "Créez des étiquettes pour organiser et filtrer les éléments de travail dans votre projet."
+        "description": "Créez des étiquettes pour organiser et filtrer les tickets dans votre projet."
       },
       "estimates": {
         "title": "Pas encore de systèmes d’estimation",
-        "description": "Créez un ensemble d’estimations pour communiquer le volume de travail par élément de travail.",
+        "description": "Créez un ensemble d’estimations pour communiquer le volume de travail par ticket.",
         "primary_button": "Ajouter un système d’estimation"
       },
       "integrations": {
         "title": "Aucune intégration configurée",
-        "description": "Configurez GitHub et d'autres intégrations pour synchroniser vos éléments de travail du projet."
+        "description": "Configurez GitHub et d'autres intégrations pour synchroniser vos tickets du projet."
       }
     },
     "workflows": {
       "toggle": {
         "title": "Activer les flux de travail",
-        "description": "Définissez des flux de travail pour contrôler le déplacement des éléments de travail",
+        "description": "Définissez des flux de travail pour contrôler le déplacement des tickets",
         "no_states_tooltip": "Aucun état n’est ajouté au flux de travail.",
-        "no_work_item_types_tooltip": "Aucun type d’élément de travail n’est ajouté au flux de travail.",
-        "no_states_or_work_item_types_tooltip": "Aucun état ni type d’élément de travail n’est ajouté au flux de travail.",
+        "no_work_item_types_tooltip": "Aucun type de ticket n’est ajouté au flux de travail.",
+        "no_states_or_work_item_types_tooltip": "Aucun état ni type de ticket n’est ajouté au flux de travail.",
         "toast": {
           "loading": {
             "enabling": "Activation des flux de travail",
@@ -241,7 +241,7 @@
         }
       },
       "heading": "Flux de travail",
-      "description": "Automatisez les transitions d’éléments de travail et définissez des règles pour contrôler la progression des tâches dans le pipeline de votre projet.",
+      "description": "Automatisez les transitions de tickets et définissez des règles pour contrôler la progression des tâches dans le pipeline de votre projet.",
       "add_button": "Ajouter un nouveau flux de travail",
       "search": "Rechercher des flux de travail",
       "detail": {
@@ -249,10 +249,10 @@
         "add_states": "Ajouter des états",
         "unmapped_states": {
           "title": "États non mappés détectés",
-          "description": "Certains éléments de travail des types sélectionnés sont actuellement dans des états qui n’existent pas dans ce flux de travail.",
-          "note": "Si vous activez ce flux de travail, ces éléments passeront automatiquement à l’état initial de ce flux de travail.",
+          "description": "Certains tickets des types sélectionnés sont actuellement dans des états qui n’existent pas dans ce flux de travail.",
+          "note": "Si vous activez ce flux de travail, ces tickets passeront automatiquement à l’état initial de ce flux de travail.",
           "label": "États manquants",
-          "tooltip": "Certains éléments de travail sont dans des états qui ne sont pas mappés à ce flux de travail. Ouvrez le flux de travail pour le vérifier."
+          "tooltip": "Certains tickets sont dans des états qui ne sont pas mappés à ce flux de travail. Ouvrez le flux de travail pour le vérifier."
         }
       },
       "select_states": {
@@ -262,7 +262,7 @@
         }
       },
       "default_footer": {
-        "fallback_message": "Ce flux de travail s’applique à tout type d’élément de travail non assigné à un flux de travail."
+        "fallback_message": "Ce flux de travail s’applique à tout type de ticket non assigné à un flux de travail."
       },
       "create": {
         "heading": "Créer un nouveau flux de travail",
@@ -281,7 +281,7 @@
           }
         },
         "work_item_type": {
-          "label": "Type d’élément de travail"
+          "label": "Type de ticket"
         },
         "success": {
           "title": "Succès !",
@@ -325,8 +325,8 @@
       }
     },
     "work_item_types": {
-      "heading": "Types d’éléments de travail",
-      "description": "Créez et personnalisez différents types d’éléments de travail avec des propriétés uniques"
+      "heading": "Types de tickets",
+      "description": "Créez et personnalisez différents types de tickets avec des propriétés uniques"
     },
     "features": {
       "cycles": {
@@ -373,25 +373,25 @@
         },
         "in_app": {
           "title": "Dans l'application",
-          "description": "Recevez de nouveaux éléments de travail des membres et invités de votre espace de travail sans perturber les existants."
+          "description": "Recevez de nouveaux tickets des membres et invités de votre espace de travail sans perturber les existants."
         },
         "email": {
           "title": "E-mail",
-          "description": "Collectez de nouveaux éléments de travail de toute personne envoyant un e-mail à une adresse Plane.",
+          "description": "Collectez de nouveaux tickets de toute personne envoyant un e-mail à une adresse Plane.",
           "fieldName": "ID e-mail"
         },
         "form": {
           "title": "Formulaires",
-          "description": "Permettez aux personnes hors de votre espace de travail de créer des éléments de travail potentiels via un formulaire dédié et sécurisé.",
+          "description": "Permettez aux personnes hors de votre espace de travail de créer des tickets potentiels via un formulaire dédié et sécurisé.",
           "fieldName": "URL du formulaire par défaut",
-          "create_forms": "Créer des formulaires à l'aide des types d'éléments de travail",
+          "create_forms": "Créer des formulaires à l'aide des types de tickets",
           "manage_forms": "Gérer les formulaires",
           "manage_forms_tooltip": "Demandez à l'administrateur de l'espace de travail de gérer cela.",
           "create_form": "Créer un formulaire",
           "edit_form": "Modifier les détails du formulaire",
           "form_title": "Titre du formulaire",
           "form_title_required": "Le titre du formulaire est requis",
-          "work_item_type": "Type d'élément de travail",
+          "work_item_type": "Type de ticket",
           "remove_property": "Supprimer la propriété",
           "select_properties": "Sélectionner les propriétés",
           "search_placeholder": "Rechercher des propriétés",
@@ -419,16 +419,16 @@
       "time_tracking": {
         "title": "Suivi du temps",
         "short_title": "Suivi du temps",
-        "description": "Enregistrez le temps passé sur les éléments de travail et les projets.",
+        "description": "Enregistrez le temps passé sur les tickets et les projets.",
         "toggle_title": "Activer le suivi du temps",
         "toggle_description": "Les membres du projet pourront enregistrer le temps travaillé."
       },
       "milestones": {
         "title": "Jalons",
         "short_title": "Jalons",
-        "description": "Les jalons fournissent une couche pour aligner les éléments de travail vers des dates d'achèvement partagées.",
+        "description": "Les jalons fournissent une couche pour aligner les tickets vers des dates d'achèvement partagées.",
         "toggle_title": "Activer les jalons",
-        "toggle_description": "Organisez les éléments de travail par échéances de jalons."
+        "toggle_description": "Organisez les tickets par échéances de jalons."
       },
       "toasts": {
         "loading": "Mise à jour de la fonctionnalité du projet...",
@@ -442,7 +442,7 @@
     },
     "templates": {
       "heading": "Modèles",
-      "description": "Économisez 80% du temps consacré à la création de projets, d’éléments de travail et de pages en utilisant des modèles."
+      "description": "Économisez 80% du temps consacré à la création de projets, de tickets et de pages en utilisant des modèles."
     },
     "cycles": {
       "auto_schedule": {
@@ -495,8 +495,8 @@
             }
           },
           "auto_rollover": {
-            "label": "Report automatique des éléments de travail",
-            "tooltip": "Le jour où un cycle se termine, déplacer tous les éléments de travail non terminés vers le cycle suivant."
+            "label": "Report automatique des tickets",
+            "tooltip": "Le jour où un cycle se termine, déplacer tous les tickets non terminés vers le cycle suivant."
           }
         },
         "toast": {

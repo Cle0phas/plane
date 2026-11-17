@@ -8,6 +8,7 @@ import type { MutableRefObject } from "react";
 import { useEffect, useRef, useState } from "react";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { useParams } from "next/navigation";
 import { observer } from "mobx-react";
 // plane imports
 import { DRAG_ALLOWED_GROUPS } from "@plane/constants";
@@ -30,6 +31,8 @@ import { ListLoaderItemRow } from "@/components/ui/loader/layouts/list-layout-lo
 import { useWorkFlowFDragNDrop } from "@/components/workflow";
 // hooks
 import { useProjectState } from "@/hooks/store/use-project-state";
+import { useWorkItemType } from "@/hooks/store/use-work-item-type";
+import { getQuickAddTypeData } from "@/components/work-item-types/helpers";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { useIssuesStore } from "@/hooks/use-issue-layout-store";
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
@@ -106,6 +109,10 @@ export const ListGroup = observer(function ListGroup(props: Props) {
   const groupRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslation();
   const projectState = useProjectState();
+  const { workspaceSlug, projectId } = useParams();
+  const { getProjectAssignableTypes } = useWorkItemType();
+  const assignableTypes =
+    workspaceSlug && projectId ? getProjectAssignableTypes(workspaceSlug.toString(), projectId.toString()) : [];
 
   const {
     issues: { getGroupIssueCount, getPaginationData, getIssueLoader },
@@ -113,8 +120,14 @@ export const ListGroup = observer(function ListGroup(props: Props) {
 
   const [intersectionElement, setIntersectionElement] = useState<HTMLDivElement | null>(null);
 
-  const { workflowDisabledSource, isWorkflowDropDisabled, handleWorkFlowState, getIsWorkflowWorkItemCreationDisabled } =
-    useWorkFlowFDragNDrop(group_by);
+  const {
+    workflowDisabledSource,
+    isWorkflowDropDisabled,
+    handleWorkFlowState,
+    resetWorkFlowState,
+    getIsWorkflowWorkItemCreationDisabled,
+    getWorkflowInitialStateId,
+  } = useWorkFlowFDragNDrop(group_by);
   const isWorkflowIssueCreationDisabled = getIsWorkflowWorkItemCreationDisabled(group.id);
 
   const groupIssueCount = getGroupIssueCount(group.id, undefined, false) ?? 0;
@@ -166,6 +179,8 @@ export const ListGroup = observer(function ListGroup(props: Props) {
         preloadedData = { ...preloadedData, cycle_id: value };
       } else if (groupByKey === "module" && value != "None") {
         preloadedData = { ...preloadedData, module_ids: [value] };
+      } else if (groupByKey === "issue_type") {
+        preloadedData = { ...preloadedData, ...getQuickAddTypeData(value, assignableTypes) };
       } else if (groupByKey === "created_by") {
         preloadedData = { ...preloadedData };
       } else {
@@ -173,7 +188,9 @@ export const ListGroup = observer(function ListGroup(props: Props) {
       }
     }
 
-    return preloadedData;
+    // A linked project refuses any other state than the initial one of the type's workflow (T1).
+    const initialStateId = getWorkflowInitialStateId((preloadedData as { type_id?: string }).type_id);
+    return initialStateId ? { ...preloadedData, state_id: initialStateId } : preloadedData;
   };
 
   useEffect(() => {
@@ -190,16 +207,25 @@ export const ListGroup = observer(function ListGroup(props: Props) {
         },
         onDragLeave: () => {
           setIsDraggingOverColumn(false);
+          resetWorkFlowState();
         },
         onDragStart: () => {
           setIsDraggingOverColumn(true);
         },
         onDrag: ({ source }) => {
           const sourceGroupId = source?.data?.groupId as string | undefined;
+          const sourceId = source?.data?.id as string | undefined;
           const currentGroupId = group.id;
 
           // oxlint-disable-next-line no-unused-expressions
-          sourceGroupId && handleWorkFlowState(sourceGroupId, currentGroupId);
+          sourceGroupId &&
+            handleWorkFlowState(
+              sourceGroupId,
+              currentGroupId,
+              undefined,
+              undefined,
+              sourceId ? issuesMap[sourceId] : undefined
+            );
 
           const sourceIndex = getGroupIndex(sourceGroupId);
           const currentIndex = getGroupIndex(currentGroupId);
@@ -212,18 +238,15 @@ export const ListGroup = observer(function ListGroup(props: Props) {
         },
         onDrop: (payload) => {
           setIsDraggingOverColumn(false);
+          resetWorkFlowState();
           const source = getSourceFromDropPayload(payload);
           const destination = getDestinationFromDropPayload(payload);
 
           if (!source || !destination) return;
 
           if (isWorkflowDropDisabled || group.isDropDisabled) {
-            if (group.dropErrorMessage)
-              setToast({
-                type: "warning",
-                title: t("common.warning"),
-                message: group.dropErrorMessage,
-              });
+            const message = isWorkflowDropDisabled ? t("workflows.workflow_disabled.title") : group.dropErrorMessage;
+            if (message) setToast({ type: "warning", title: t("common.warning"), message });
             return;
           }
 
@@ -246,6 +269,9 @@ export const ListGroup = observer(function ListGroup(props: Props) {
     setDragColumnOrientation,
     setIsDraggingOverColumn,
     isWorkflowDropDisabled,
+    handleWorkFlowState,
+    resetWorkFlowState,
+    issuesMap,
   ]);
 
   const isDragAllowed = group_by ? DRAG_ALLOWED_GROUPS.includes(group_by) : true;

@@ -12,6 +12,7 @@ import type { TIssue, TIssueServiceType } from "@plane/types";
 import { EIssueServiceType } from "@plane/types";
 import { copyUrlToClipboard } from "@plane/utils";
 // hooks
+import { getWorkflowRefusalKey } from "@/components/workflow";
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 
 export type TRelationIssueOperations = {
@@ -46,11 +47,11 @@ export const useRelationOperations = (
             type: "success",
             message: t("entity.update.success", { entity: entityName }),
           });
-        } catch (_error) {
+        } catch (error) {
           setToast({
             title: t("toast.error"),
             type: "error",
-            message: t("entity.update.failed", { entity: entityName }),
+            message: t(getWorkflowRefusalKey(error) ?? "entity.update.failed", { entity: entityName }),
           });
         }
       },

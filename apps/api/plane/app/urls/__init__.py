@@ -10,6 +10,7 @@ from .estimate import urlpatterns as estimate_urls
 from .external import urlpatterns as external_urls
 from .intake import urlpatterns as intake_urls
 from .issue import urlpatterns as issue_urls
+from .issue_type import urlpatterns as issue_type_urls
 from .module import urlpatterns as module_urls
 from .notification import urlpatterns as notification_urls
 from .page import urlpatterns as page_urls
@@ -19,6 +20,7 @@ from .state import urlpatterns as state_urls
 from .user import urlpatterns as user_urls
 from .views import urlpatterns as view_urls
 from .webhook import urlpatterns as webhook_urls
+from .workflow import urlpatterns as workflow_urls
 from .workspace import urlpatterns as workspace_urls
 from .timezone import urlpatterns as timezone_urls
 from .exporter import urlpatterns as exporter_urls
@@ -31,6 +33,7 @@ urlpatterns = [
     *external_urls,
     *intake_urls,
     *issue_urls,
+    *issue_type_urls,
     *module_urls,
     *notification_urls,
     *page_urls,
@@ -42,6 +45,7 @@ urlpatterns = [
     *workspace_urls,
     *api_urls,
     *webhook_urls,
+    *workflow_urls,
     *timezone_urls,
     *exporter_urls,
 ]

@@ -51,6 +51,11 @@ export const coreRoutes: RouteConfigEntry[] = [
     // WORKSPACE-SCOPED ROUTES
     // ======================================================================
     layout("./(all)/[workspaceSlug]/layout.tsx", [
+      // Workflow editor: full screen, outside the settings shell; the address is unchanged (X11).
+      route(
+        ":workspaceSlug/settings/workflows/:workflowId",
+        "./(all)/[workspaceSlug]/workflow-editor/[workflowId]/page.tsx"
+      ),
       // ====================================================================
       // PROJECTS APP SECTION - WORKSPACE LEVEL ROUTES
       // ====================================================================
@@ -282,6 +287,14 @@ export const coreRoutes: RouteConfigEntry[] = [
             ":workspaceSlug/settings/webhooks/:webhookId",
             "./(all)/[workspaceSlug]/(settings)/settings/(workspace)/webhooks/[webhookId]/page.tsx"
           ),
+          route(
+            ":workspaceSlug/settings/work-item-types",
+            "./(all)/[workspaceSlug]/(settings)/settings/(workspace)/work-item-types/page.tsx"
+          ),
+          route(
+            ":workspaceSlug/settings/workflows",
+            "./(all)/[workspaceSlug]/(settings)/settings/(workspace)/workflows/page.tsx"
+          ),
         ]),
 
         // --------------------------------------------------------------------
@@ -337,6 +350,16 @@ export const coreRoutes: RouteConfigEntry[] = [
             route(
               ":workspaceSlug/settings/projects/:projectId/estimates",
               "./(all)/[workspaceSlug]/(settings)/settings/projects/[projectId]/estimates/page.tsx"
+            ),
+            // Project Work Item Types
+            route(
+              ":workspaceSlug/settings/projects/:projectId/work-item-types",
+              "./(all)/[workspaceSlug]/(settings)/settings/projects/[projectId]/work-item-types/page.tsx"
+            ),
+            // Project Workflows
+            route(
+              ":workspaceSlug/settings/projects/:projectId/workflows",
+              "./(all)/[workspaceSlug]/(settings)/settings/projects/[projectId]/workflows/page.tsx"
             ),
             // Project Automations
             layout("./(all)/[workspaceSlug]/(settings)/settings/projects/[projectId]/automations/layout.tsx", [

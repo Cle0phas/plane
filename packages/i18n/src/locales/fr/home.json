@@ -32,7 +32,7 @@
       }
     },
     "quick_links": {
-      "empty": "Enregistrez des liens vers des éléments de travail que vous souhaitez avoir à portée de main.",
+      "empty": "Enregistrez des liens vers des tickets que vous souhaitez avoir à portée de main.",
       "add": "Ajouter un lien rapide",
       "title": "Lien rapide",
       "title_plural": "Liens rapides"
@@ -42,14 +42,14 @@
       "empty": {
         "project": "Vos projets récents apparaîtront ici une fois que vous en aurez visité un.",
         "page": "Vos pages récentes apparaîtront ici une fois que vous en aurez visité une.",
-        "issue": "Vos éléments de travail récents apparaîtront ici une fois que vous en aurez visité un.",
+        "issue": "Vos tickets récents apparaîtront ici une fois que vous en aurez visité un.",
         "default": "Vous n’avez pas encore d’éléments récents."
       },
       "filters": {
         "all": "Tous",
         "projects": "Projets",
         "pages": "Pages",
-        "issues": "Éléments de travail"
+        "issues": "Tickets"
       }
     },
     "new_at_plane": {

@@ -45,6 +45,7 @@ class StateSerializer(BaseSerializer):
             "project",
             "deleted_at",
             "slug",
+            "workflow_status",
         ]
 
 

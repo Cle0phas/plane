@@ -95,6 +95,271 @@
           "message": "Prüfer der Statusänderungsregel konnten nicht geändert werden. Bitte versuchen Sie es erneut."
         }
       }
+    },
+    "label": "Workflows",
+    "groups": {
+      "backlog": "Backlog",
+      "unstarted": "Nicht begonnen",
+      "started": "In Bearbeitung",
+      "completed": "Erledigt",
+      "cancelled": "Abgebrochen"
+    },
+    "roles": {
+      "admin": "Admin",
+      "member": "Mitglied",
+      "guest": "Gast"
+    },
+    "settings": {
+      "description": "Ein Workflow listet die Status von Arbeitsaufgaben und die zulässigen Übergänge zwischen ihnen auf. Jedes Projekt wählt pro Arbeitsaufgabentyp einen Workflow.",
+      "create": "Workflow erstellen",
+      "empty": "Noch kein Workflow vorhanden.",
+      "load_error": "Workflows konnten nicht geladen werden.",
+      "columns": {
+        "name": "Name",
+        "states": "Status",
+        "projects": "Verwendung",
+        "description": "Beschreibung",
+        "updated": "Aktualisiert",
+        "actions": "Aktionen"
+      },
+      "state_count": "{count, plural, one {# Status} other {# Status}}",
+      "project_count": "{count, plural, one {# Projekt} other {# Projekte}}",
+      "delete": {
+        "action": "Löschen",
+        "title": "Diesen Workflow löschen?",
+        "description": "Der Workflow und sein Diagramm werden gelöscht. Seine Status bleiben für andere Workflows verfügbar.",
+        "in_use": "Projekte verwenden diesen Workflow noch."
+      },
+      "form": {
+        "create_title": "Workflow erstellen",
+        "name": "Name",
+        "description": "Beschreibung",
+        "duplicate": "Ein Workflow mit diesem Namen existiert bereits.",
+        "submit": "Erstellen",
+        "cancel": "Abbrechen",
+        "source_project": "Von einem Projekt ausgehen",
+        "source_project_none": "Kein Projekt (leerer Workflow)"
+      },
+      "error": "Der Workflow konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+      "edit": "Bearbeiten",
+      "duplicate": {
+        "action": "Duplizieren",
+        "copy_name": "Kopie von {name}",
+        "success": "Workflow dupliziert"
+      }
+    },
+    "editor": {
+      "save": "Speichern",
+      "discard": "Änderungen verwerfen",
+      "saved": "Workflow gespeichert.",
+      "read_only": "Sie dürfen diesen Workflow nicht bearbeiten.",
+      "start": "START",
+      "global": "Beliebiger Status",
+      "diagram_label": "Workflow-Diagramm",
+      "add_state": {
+        "title": "Status hinzufügen",
+        "name": "Name",
+        "group": "Kategorie",
+        "group_auto": "Automatisch",
+        "submit": "Status hinzufügen",
+        "description": "Ein Status zeigt, wie weit eine Arbeitsaufgabe fortgeschritten ist. Wählen Sie vorhandene Status aus oder geben Sie einen Namen ein, um einen neuen zu erstellen.",
+        "search": "Suchen oder erstellen",
+        "create_option": "„{name}“ erstellen",
+        "allow_any": "Übergänge aus jedem Status erlauben",
+        "none": "Kein passender Status.",
+        "any_title": "Übergänge zu den hinzugefügten Status",
+        "any_help": "Jeder hinzugefügte Status ist von jedem anderen Status aus erreichbar.",
+        "any_needs_selection": "Wählen Sie zuerst einen Status aus oder erstellen Sie einen, um diese Option zu aktivieren.",
+        "all_used": "Alle verfügbaren Status sind bereits in diesem Workflow. Geben Sie einen Namen ein, um einen neuen zu erstellen.",
+        "any_existing_hint": "Für einen Status, der bereits im Workflow ist, verwenden Sie „Übergang hinzufügen“ und wählen Sie „Beliebiger Status“.",
+        "selected": "{count, plural, one {# ausgewählt} other {# ausgewählt}}",
+        "errors": {
+          "required": "Geben Sie einen Namen ein.",
+          "too_long": "Der Name darf höchstens 255 Zeichen lang sein.",
+          "present": "Dieser Workflow hat bereits einen Status mit diesem Namen.",
+          "reserved": "Dieser Name ist reserviert."
+        }
+      },
+      "add_transition": {
+        "title": "Übergang hinzufügen",
+        "sources": "Von",
+        "any_state": "Beliebiger Status",
+        "target": "Nach",
+        "choose_state": "Status auswählen",
+        "name": "Name (optional)",
+        "submit": "Übergang hinzufügen",
+        "in_workflow": "In diesem Workflow",
+        "other_states": "Weitere vorhandene Status",
+        "other_states_hint": "Wird bei Auswahl zum Diagramm hinzugefügt.",
+        "locked": "Auf den ausgewählten Status festgelegt.",
+        "duplicate": "Dieser Übergang existiert bereits."
+      },
+      "panel": {
+        "transition": "Übergang",
+        "set_initial": "Als Startstatus festlegen",
+        "initial": "Startstatus des Workflows",
+        "remove_state": "Aus dem Workflow entfernen",
+        "remove_transition": "Übergang löschen",
+        "remove_source": "Quellstatus {name} entfernen",
+        "empty_title": "Eigene Workflows erstellen",
+        "empty_body": "Workflows bilden die Arbeitsweise Ihres Teams ab. Fügen Sie Status hinzu, die zu den Spalten Ihres Projekt-Boards werden, verbinden Sie sie mit Übergängen und legen Sie mit Regeln fest, wer sie verwenden darf.",
+        "empty_hint": "Wählen Sie einen Status aus, um seine Details zu sehen.",
+        "color": "Spaltenfarbe",
+        "add_incoming": "Eingehenden Übergang hinzufügen",
+        "add_outgoing": "Ausgehenden Übergang hinzufügen",
+        "collapse": "Bereich einklappen",
+        "expand": "Bereich ausklappen",
+        "shared_named": "{count, plural, one {Dieser Status wird auch in # weiteren Workflow verwendet: {names}. Wenn Sie ihn umbenennen oder seine Farbe oder Kategorie ändern, ändert er sich auch dort.} other {Dieser Status wird auch in # weiteren Workflows verwendet: {names}. Wenn Sie ihn umbenennen oder seine Farbe oder Kategorie ändern, ändert er sich auch dort.}}",
+        "more_names": "{count, plural, one {{names} und # weiterer} other {{names} und # weitere}}",
+        "incoming_count": "Eingehende Übergänge · {count}",
+        "outgoing_count": "Ausgehende Übergänge · {count}",
+        "add": "Hinzufügen",
+        "path": "Pfad",
+        "add_source": "Quellstatus hinzufügen",
+        "rule": "Regel",
+        "edit": "Bearbeiten",
+        "remove": "Entfernen",
+        "edit_rule": "Regel bearbeiten",
+        "remove_rule": "Regel entfernen"
+      },
+      "restrict": {
+        "title": "Einschränken, wer verschieben darf",
+        "description": "Ohne Einschränkung kann jeder, der die Arbeitsaufgabe bearbeiten darf, diesen Übergang verwenden.",
+        "roles": "Rollen",
+        "users": "Personen",
+        "assignee": "Zugewiesene Person der Arbeitsaufgabe",
+        "creator": "Ersteller der Arbeitsaufgabe",
+        "clear": "Einschränkung entfernen",
+        "summary_roles": "Rollen: {roles}",
+        "summary_users": "{count, plural, one {# Person} other {# Personen}}"
+      },
+      "errors": {
+        "initial_state_required": "Verknüpfen Sie START mit einem Status.",
+        "duplicate_state_key": "Ein Status kommt doppelt vor. Laden Sie die Seite neu.",
+        "duplicate_status": "Ein Status kommt in diesem Workflow doppelt vor.",
+        "duplicate_status_name": "Zwei Status haben denselben Namen, oder ein Status mit diesem Namen existiert bereits: Wählen Sie ihn aus den vorhandenen Status.",
+        "invalid_transition": "Ein Übergang ist unvollständig.",
+        "reserved_status_name": "Der Name „Triage“ ist für Intake reserviert.",
+        "invalid_rule": "Eine Einschränkung ist unvollständig.",
+        "invalid_status": "Ein Status existiert nicht mehr. Laden Sie die Seite neu.",
+        "status_changed": "Ein Status wurde geändert. Laden Sie die Seite neu.",
+        "status_limit": "Der Workspace hat 1.000 Status erreicht.",
+        "status_in_use": "Diese Status enthalten noch Arbeitsaufgaben, verschieben Sie diese zuerst:",
+        "status_in_use_project": "{project}: {count, plural, one {# Arbeitsaufgabe} other {# Arbeitsaufgaben}}",
+        "default": "Der Workflow konnte nicht gespeichert werden.",
+        "stale_graph": "Dieser Workflow wurde inzwischen geändert. Laden Sie ihn neu.",
+        "duplicate_transition": "Zwei Übergänge verbinden dieselben Status."
+      },
+      "close": "Schließen",
+      "small_screen": "Öffnen Sie diesen Workflow auf einem breiteren Bildschirm, um ihn zu bearbeiten.",
+      "used_in": "{count, plural, one {In # Projekt verwendet} other {In # Projekten verwendet}}",
+      "show_labels": "Übergangsbezeichnungen anzeigen",
+      "zoom": "Zoom",
+      "minimap": "Minikarte",
+      "state_label": "Status {name}, Kategorie {group}, {incoming} eingehend, {outgoing} ausgehend",
+      "transition_label": "Übergang {name}, von {source} nach {target}",
+      "transition_label_unnamed": "Unbenannter Übergang, von {source} nach {target}",
+      "start_label": "Anfangsstatus: {name}",
+      "view": {
+        "label": "Ansicht",
+        "diagram": "Diagramm",
+        "text": "Text"
+      },
+      "add_rule": {
+        "title": "Regel hinzufügen",
+        "transition": "Übergang",
+        "none": "Fügen Sie zuerst einen Übergang hinzu.",
+        "submit": "Anwenden"
+      },
+      "text": {
+        "state": "Status",
+        "transitions": "Übergänge",
+        "origin_start": "Start",
+        "origin_any": "Beliebiger Status",
+        "unnamed": "Unbenannter Übergang",
+        "toggle": "Übergänge von {name} ein- oder ausblenden",
+        "empty": "Dieser Workflow hat noch keinen Status."
+      },
+      "start_panel": {
+        "title": "Start des Workflows",
+        "field": "Jede neue Arbeitsaufgabe beginnt im Status",
+        "unlink": "Verknüpfung entfernen"
+      },
+      "reload": "Neu laden",
+      "presence": "{count, plural, one {{names} bearbeitet diesen Workflow ebenfalls.} other {{names} bearbeiten diesen Workflow ebenfalls.}}",
+      "rename": {
+        "title": "Überall umbenennen?",
+        "line": "Wenn Sie „{from}“ in „{to}“ umbenennen, wird er auch in diesen Workflows umbenannt: {names}.",
+        "confirm": "Überall umbenennen"
+      },
+      "leave": {
+        "title": "Ohne Speichern verlassen?",
+        "body": "Die Änderungen an diesem Workflow sind nicht gespeichert.",
+        "confirm": "Ohne Speichern verlassen",
+        "stay": "Bleiben"
+      },
+      "a11y": {
+        "node": "Drücken Sie Enter oder Space, um einen Status auszuwählen. Verschieben Sie ihn mit den Pfeiltasten und entfernen Sie ihn mit Delete. Drücken Sie Esc, um abzubrechen.",
+        "node_read_only": "Drücken Sie Enter oder Space, um einen Status auszuwählen.",
+        "edge": "Drücken Sie Enter oder Space, um einen Übergang auszuwählen. Drücken Sie Delete, um ihn zu entfernen, oder Esc, um abzubrechen.",
+        "edge_read_only": "Drücken Sie Enter oder Space, um einen Übergang auszuwählen.",
+        "moved": "Status verschoben. Neue Position: x {x}, y {y}.",
+        "handle": "Verbindungspunkt"
+      }
+    },
+    "scheme": {
+      "description": "Wählen Sie den Workflow, dem jeder Arbeitsaufgabentyp in diesem Projekt folgt.",
+      "free": "Dieses Projekt verwendet keine Workflows: Jeder Statuswechsel ist erlaubt.",
+      "choose": "Workflow auswählen",
+      "apply": "Anwenden",
+      "detach": "Workflows nicht mehr verwenden",
+      "detach_confirm": "Die Status bleiben erhalten, sind wieder bearbeitbar, und jeder Statuswechsel ist wieder erlaubt.",
+      "mapping": {
+        "title": "Arbeitsaufgaben verschieben",
+        "description": "Diese Status enthalten Arbeitsaufgaben, gehören aber nicht zum gewählten Workflow. Wählen Sie, wohin die Arbeitsaufgaben verschoben werden.",
+        "row": "{state} in {workflow}: {count, plural, one {# Arbeitsaufgabe} other {# Arbeitsaufgaben}}",
+        "pick": "Zielstatus"
+      },
+      "applied": "Das Projekt folgt jetzt seinen Workflows.",
+      "detached": "Das Projekt verwendet keine Workflows mehr.",
+      "errors": {
+        "invalid_scheme": "Ein Workflow oder ein Typ ist nicht mehr gültig. Laden Sie die Seite neu.",
+        "mapping_incomplete": "Wählen Sie für jede Zeile einen Zielstatus.",
+        "invalid_mapping": "Ein Zielstatus gehört nicht zu seinem Workflow.",
+        "default": "Die Änderung konnte nicht angewendet werden."
+      },
+      "link": "Mit einem Workflow verknüpfen",
+      "other_types": "Alle anderen Typen",
+      "table": {
+        "workflow": "Workflow",
+        "types": "Arbeitsaufgabentypen",
+        "actions": "Aktionen",
+        "unknown_workflow": "Unbekannter Workflow"
+      },
+      "add": "Workflow hinzufügen",
+      "add_submit": "Hinzufügen",
+      "link_submit": "Verknüpfen",
+      "default_badge": "Standard",
+      "replace": "Ersetzen",
+      "replace_title": "Standard-Workflow ersetzen",
+      "edit_types": "Typen bearbeiten",
+      "edit_types_named": "Typen von {name} bearbeiten",
+      "remove": "Entfernen",
+      "remove_named": "{name} entfernen",
+      "remove_title": "{name} entfernen?",
+      "remove_confirm": "{count, plural, one {{types} folgt dann dem Standard-Workflow {default}.} other {{types} folgen dann dem Standard-Workflow {default}.}}",
+      "types_field": "Betroffene Arbeitsaufgabentypen",
+      "link_note": "Er gilt für jeden Arbeitsaufgabentyp, auch für später erstellte.",
+      "taken_note": "{count, plural, one {{types} wird nicht aufgeführt: er folgt bereits {workflow}.} other {{types} werden nicht aufgeführt: sie folgen bereits {workflow}.}}",
+      "unchecked_note": "Ein nicht ausgewählter Typ bleibt beim Standard-Workflow.",
+      "no_workflow": "Alle Workflows des Workspace sind bereits in der Tabelle.",
+      "no_type": "Jeder Arbeitsaufgabentyp folgt bereits einem eigenen Workflow."
+    },
+    "managed_states": {
+      "banner": "Diese Status stammen aus den Projekt-Workflows. Ändern Sie sie unter Workspace-Einstellungen, Workflows."
+    },
+    "creation": {
+      "initial_state": "Neue Arbeitsaufgaben beginnen in diesem Status."
     }
   }
 }

@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "Predvolený typ pracovnej položky nie je možné odstrániť",
           "cannot_delete_work_item_type_with_associated_work_items": "Typ pracovnej položky s priradenými pracovnými položkami nie je možné odstrániť"
         }
+      },
+      "list": {
+        "description": "Vytvorte typy pracovných položiek, ktoré môžu projekty v tomto pracovnom priestore používať.",
+        "inactive_badge": "Neaktívny",
+        "work_item_count": "{count, plural, one {# pracovná položka} few {# pracovné položky} many {# pracovnej položky} other {# pracovných položiek}}",
+        "load_error": "Typy pracovných položiek sa nepodarilo načítať.",
+        "more_actions": "Akcie pre {name}"
+      },
+      "actions": {
+        "deactivate": "Deaktivovať",
+        "reactivate": "Znova aktivovať"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "Predvolený typ nie je možné deaktivovať.",
+        "project_default_cannot_be_deactivated": "Tento typ je predvoleným typom aspoň jedného projektu.",
+        "project_default_cannot_be_deleted": "Tento typ je predvoleným typom projektu a nie je možné ho odstrániť."
+      },
+      "project": {
+        "description": "Vyberte typy pracovných položiek, ktoré tento projekt používa, a jeho predvolený typ.",
+        "used_in_project": "Používa sa v tomto projekte",
+        "set_default": "Nastaviť ako predvolený",
+        "toast_error": "Typy pracovných položiek tohto projektu sa nepodarilo aktualizovať.",
+        "disabled_reasons": {
+          "project_default": "Predvolený typ projektu nie je možné odobrať.",
+          "in_use": "Pracovné položky tohto projektu používajú tento typ.",
+          "not_enabled": "Najprv tento typ v projekte použite."
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "Dajte tomuto typu pracovnej položky jedinečný názov"
+          "placeholder": "Dajte tomuto typu pracovnej položky jedinečný názov",
+          "label": "Názov",
+          "required": "Názov je povinný.",
+          "max_length": "Názov môže mať najviac 255 znakov."
         },
         "description": {
-          "placeholder": "Popíšte, na čo je tento typ pracovnej položky určený a kedy sa má používať."
+          "placeholder": "Popíšte, na čo je tento typ pracovnej položky určený a kedy sa má používať.",
+          "label": "Popis",
+          "max_length": "Popis môže mať najviac 1000 znakov."
+        },
+        "icon": {
+          "label": "Ikona"
         }
       }
     },
@@ -388,6 +423,26 @@
           "text": "Inovovať"
         }
       }
+    },
+    "select": {
+      "label": "Typ"
+    },
+    "switcher": {
+      "label": "Zmeniť typ pracovnej položky"
+    },
+    "activity": {
+      "changed_from": "zmenil(a) typ z",
+      "to": "na"
+    },
+    "filter": {
+      "label": "Typ pracovnej položky"
+    },
+    "group_by": {
+      "label": "Typ pracovnej položky",
+      "unknown_type": "Neznámy typ"
+    },
+    "display_property": {
+      "label": "Typ pracovnej položky"
     }
   },
   "work_item_type_hierarchy": {

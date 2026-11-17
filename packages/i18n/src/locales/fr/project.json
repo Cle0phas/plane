@@ -19,9 +19,9 @@
     "start_date": "Date de début",
     "end_date": "Date de fin",
     "in_your_timezone": "Dans votre fuseau horaire",
-    "transfer_work_items": "Transférer {count} éléments de travail",
+    "transfer_work_items": "Transférer {count} tickets",
     "transfer": {
-      "no_cycles_available": "Aucun autre cycle disponible pour transférer les éléments de travail."
+      "no_cycles_available": "Aucun autre cycle disponible pour transférer les tickets."
     },
     "date_range": "Plage de dates",
     "add_date": "Ajouter une date",
@@ -29,9 +29,9 @@
       "label": "Cycle actif",
       "progress": "Progression",
       "chart": "Graphique d’avancement",
-      "priority_issue": "Éléments de travail prioritaires",
+      "priority_issue": "Tickets prioritaires",
       "assignees": "Assignés",
-      "issue_burndown": "Graphique d’avancement des éléments",
+      "issue_burndown": "Graphique d’avancement des tickets",
       "ideal": "Idéal",
       "current": "Actuel",
       "labels": "Étiquettes",
@@ -113,18 +113,18 @@
         }
       },
       "no_issues": {
-        "title": "Aucun élément de travail ajouté au cycle",
-        "description": "Ajoutez ou créez des éléments de travail que vous souhaitez planifier et livrer dans ce cycle",
+        "title": "Aucun ticket ajouté au cycle",
+        "description": "Ajoutez ou créez des tickets que vous souhaitez planifier et livrer dans ce cycle",
         "primary_button": {
-          "text": "Créer un nouvel élément de travail"
+          "text": "Créer un nouveau ticket"
         },
         "secondary_button": {
-          "text": "Ajouter un élément existant"
+          "text": "Ajouter un ticket existant"
         }
       },
       "completed_no_issues": {
-        "title": "Aucun élément de travail dans le cycle",
-        "description": "Aucun élément de travail dans le cycle. Les éléments sont soit transférés soit masqués. Pour voir les éléments masqués s’il y en a, mettez à jour vos propriétés d’affichage en conséquence."
+        "title": "Aucun ticket dans le cycle",
+        "description": "Aucun ticket dans le cycle. Les tickets sont soit transférés soit masqués. Pour voir les tickets masqués s’il y en a, mettez à jour vos propriétés d’affichage en conséquence."
       },
       "active": {
         "title": "Aucun cycle actif",
@@ -144,7 +144,7 @@
         "primary_button": {
           "text": "Créez votre première vue",
           "comic": {
-            "title": "Les vues fonctionnent sur les propriétés des éléments de travail.",
+            "title": "Les vues fonctionnent sur les propriétés des tickets.",
             "description": "Vous pouvez créer une vue ici avec autant de propriétés comme filtres que souhaité."
           }
         },
@@ -154,14 +154,14 @@
         }
       },
       "no_archived_issues": {
-        "title": "Aucun élément de travail archivé pour le moment",
-        "description": "Manuellement ou par automatisation, vous pouvez archiver les éléments de travail terminés ou annulés. Retrouvez-les ici une fois archivés.",
+        "title": "Aucun ticket archivé pour le moment",
+        "description": "Manuellement ou par automatisation, vous pouvez archiver les tickets terminés ou annulés. Retrouvez-les ici une fois archivés.",
         "primary_button": {
           "text": "Configurer l’automatisation"
         }
       },
       "issues_empty_filter": {
-        "title": "Aucun élément de travail trouvé correspondant aux filtres appliqués",
+        "title": "Aucun ticket trouvé correspondant aux filtres appliqués",
         "secondary_button": {
           "text": "Effacer tous les filtres"
         }
@@ -190,25 +190,25 @@
   "project_issues": {
     "empty_state": {
       "no_issues": {
-        "title": "Créez un élément de travail et assignez-le à quelqu’un, même à vous-même",
-        "description": "Pensez aux éléments de travail comme des tâches, du travail, ou des JTBD (Jobs To Be Done). Un élément de travail et ses sous-éléments sont généralement des actions temporelles assignées aux membres de votre équipe. Votre équipe crée, assigne et complète des éléments de travail pour faire progresser votre projet vers son objectif.",
+        "title": "Créez un ticket et assignez-le à quelqu’un, même à vous-même",
+        "description": "Pensez aux tickets comme des tâches, du travail, ou des JTBD (Jobs To Be Done). Un ticket et ses sous-tickets sont généralement des actions temporelles assignées aux membres de votre équipe. Votre équipe crée, assigne et complète des tickets pour faire progresser votre projet vers son objectif.",
         "primary_button": {
-          "text": "Créez votre premier élément de travail",
+          "text": "Créez votre premier ticket",
           "comic": {
-            "title": "Les éléments de travail sont les blocs de construction dans Plane.",
-            "description": "Refondre l’interface de Plane, Renouveler l’image de marque de l’entreprise, ou Lancer le nouveau système d’injection de carburant sont des exemples d’éléments de travail qui ont probablement des sous-éléments."
+            "title": "Les tickets sont les blocs de construction dans Plane.",
+            "description": "Refondre l’interface de Plane, Renouveler l’image de marque de l’entreprise, ou Lancer le nouveau système d’injection de carburant sont des exemples de tickets qui ont probablement des sous-tickets."
           }
         }
       },
       "no_archived_issues": {
-        "title": "Aucun élément de travail archivé pour le moment",
-        "description": "Manuellement ou par automatisation, vous pouvez archiver les éléments de travail terminés ou annulés. Retrouvez-les ici une fois archivés.",
+        "title": "Aucun ticket archivé pour le moment",
+        "description": "Manuellement ou par automatisation, vous pouvez archiver les tickets terminés ou annulés. Retrouvez-les ici une fois archivés.",
         "primary_button": {
           "text": "Configurer l’automatisation"
         }
       },
       "issues_empty_filter": {
-        "title": "Aucun élément de travail trouvé correspondant aux filtres appliqués",
+        "title": "Aucun ticket trouvé correspondant aux filtres appliqués",
         "secondary_button": {
           "text": "Effacer tous les filtres"
         }
@@ -225,7 +225,7 @@
     "empty_state": {
       "general": {
         "title": "Associez vos jalons de projet aux Modules et suivez facilement le travail agrégé.",
-        "description": "Un groupe d’éléments de travail qui appartiennent à un parent logique et hiérarchique forme un module. Considérez-les comme un moyen de suivre le travail par étapes clés du projet. Ils ont leurs propres périodes et délais ainsi que des analyses pour vous aider à voir à quel point vous êtes proche ou pas d’atteindre une étape clé.",
+        "description": "Un groupe de tickets qui appartiennent à un parent logique et hiérarchique forme un module. Considérez-les comme un moyen de suivre le travail par étapes clés du projet. Ils ont leurs propres périodes et délais ainsi que des analyses pour vous aider à voir à quel point vous êtes proche ou pas d’atteindre une étape clé.",
         "primary_button": {
           "text": "Construisez votre premier module",
           "comic": {
@@ -235,13 +235,13 @@
         }
       },
       "no_issues": {
-        "title": "Aucun élément de travail dans le module",
-        "description": "Créez ou ajoutez des éléments de travail que vous souhaitez accomplir dans le cadre de ce module",
+        "title": "Aucun ticket dans le module",
+        "description": "Créez ou ajoutez des tickets que vous souhaitez accomplir dans le cadre de ce module",
         "primary_button": {
-          "text": "Créer de nouveaux éléments de travail"
+          "text": "Créer de nouveaux tickets"
         },
         "secondary_button": {
-          "text": "Ajouter un élément existant"
+          "text": "Ajouter un ticket existant"
         }
       },
       "archived": {
@@ -272,7 +272,7 @@
     "empty_state": {
       "general": {
         "title": "Rédigez une note, un document ou une base de connaissances complète. Obtenez l’aide de Galileo, l’assistant IA de Plane, pour commencer",
-        "description": "Les Pages sont un espace de réflexion dans Plane. Prenez des notes de réunion, formatez-les facilement, intégrez des éléments de travail, disposez-les à l’aide d’une bibliothèque de composants, et gardez-les tous dans le contexte de votre projet. Pour faciliter la rédaction de tout document, faites appel à Galileo, l’IA de Plane, avec un raccourci ou un clic sur un bouton.",
+        "description": "Les Pages sont un espace de réflexion dans Plane. Prenez des notes de réunion, formatez-les facilement, intégrez des tickets, disposez-les à l’aide d’une bibliothèque de composants, et gardez-les tous dans le contexte de votre projet. Pour faciliter la rédaction de tout document, faites appel à Galileo, l’IA de Plane, avec un raccourci ou un clic sur un bouton.",
         "primary_button": {
           "text": "Créez votre première page"
         }
@@ -301,7 +301,7 @@
     "empty_state": {
       "inbox": {
         "title": "L’Intake n’est pas activé pour le projet.",
-        "description": "L’Intake vous aide à gérer les demandes entrantes dans votre projet et à les ajouter comme éléments de travail dans votre flux. Activez l’Intake depuis les paramètres du projet pour gérer les demandes.",
+        "description": "L’Intake vous aide à gérer les demandes entrantes dans votre projet et à les ajouter comme tickets dans votre flux. Activez l’Intake depuis les paramètres du projet pour gérer les demandes.",
         "primary_button": {
           "text": "Gérer les fonctionnalités"
         }
@@ -353,7 +353,7 @@
     "order_by": {
       "name": "Nom",
       "progress": "Progression",
-      "issues": "Nombre d’éléments de travail",
+      "issues": "Nombre de tickets",
       "due_date": "Date d’échéance",
       "created_at": "Date de création",
       "manual": "Manuel"

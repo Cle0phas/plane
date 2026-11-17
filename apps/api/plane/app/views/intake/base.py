@@ -414,11 +414,10 @@ class IntakeIssueViewSet(BaseViewSet):
             issue_serializer = IssueCreateSerializer(
                 issue, data=issue_data, partial=True, context={"project_id": project_id, "allow_triage_state": True}
             )
-            # Read-only fields are ignored on save, so they are not reported as changes either.
-            issue_requested_data = json.dumps(writable_data(issue_serializer, issue_data), cls=DjangoJSONEncoder)
-
             if not issue_serializer.is_valid():
                 return Response(issue_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # After validation, which may set the workflow state. Read-only fields are not reported as changes.
+            issue_requested_data = json.dumps(writable_data(issue_serializer, issue_data), cls=DjangoJSONEncoder)
 
         # Validate intake issue data if user has permission
         intake_serializer = None

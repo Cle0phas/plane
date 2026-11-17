@@ -24,6 +24,7 @@ from .project import ProjectBaseModel
 from plane.utils.uuid import convert_uuid_to_integer
 from .description import Description
 from .state import StateGroup
+from .issue_type import ProjectIssueType
 
 
 def get_default_properties():
@@ -102,7 +103,7 @@ class IssueManager(SoftDeletionManager):
 
 
 class Issue(ChangeTrackerMixin, ProjectBaseModel):
-    TRACKED_FIELDS = ["state_id"]
+    TRACKED_FIELDS = ["state_id", "project_id", "type_id"]
 
     PRIORITY_CHOICES = (
         ("urgent", "Urgent"),
@@ -178,7 +179,10 @@ class Issue(ChangeTrackerMixin, ProjectBaseModel):
         ordering = ("-created_at",)
 
     def save(self, *args, **kwargs):
+        # The type must be known before the state is defaulted or checked.
+        kwargs = self._ensure_default_type(kwargs)
         self._ensure_default_state()
+        self._ensure_workflow_state()
         kwargs = self._sync_completed_at(kwargs)
 
         if self._state.adding:
@@ -229,6 +233,12 @@ class Issue(ChangeTrackerMixin, ProjectBaseModel):
         """Assign a default state when none is set."""
         if self.state is not None:
             return
+        from plane.utils.workflows import initial_state, workflow_id_for
+
+        workflow_id = workflow_id_for(self.project_id, self.type_id)
+        if workflow_id is not None:
+            self.state = initial_state(self.project_id, workflow_id)
+            return
         try:
             from plane.db.models import State
 
@@ -236,6 +246,59 @@ class Issue(ChangeTrackerMixin, ProjectBaseModel):
             self.state = default_state or State.objects.filter(~models.Q(is_triage=True), project=self.project).first()
         except ImportError as e:
             log_exception(e)
+
+    def _ensure_workflow_state(self):
+        """Spec 4.4: under a workflow scheme an item only rests in a managed state of its own workflow."""
+        if not (
+            self._state.adding
+            or self.has_changed("state_id")
+            or self.has_changed("type_id")
+            or self.has_changed("project_id")
+        ):
+            return
+        from plane.db.models import State
+        from plane.utils.workflows import state_in_workflow, workflow_id_for
+
+        workflow_id = workflow_id_for(self.project_id, self.type_id)
+        if workflow_id is None:
+            return
+        if self.state_id is None:
+            # Fail closed: the workflow has no resolvable initial state, never save a stateless managed item.
+            raise ValidationError("The work item workflow has no initial state.")
+        if self.state.group == StateGroup.TRIAGE.value:
+            # Intake only: an item may start in triage or stay there, never be moved into it from a managed state.
+            previous_id = self._original_values.get("state_id")
+            if self._state.adding or (
+                previous_id is not None
+                and State.all_state_objects.filter(pk=previous_id, group=StateGroup.TRIAGE.value).exists()
+            ):
+                return
+        if not state_in_workflow(self.state, workflow_id, self.project_id):
+            raise ValidationError("The state is not part of the work item workflow.")
+
+    def _ensure_default_type(self, kwargs):
+        """Use the project default type when the type is missing or not enabled in the project. Returns kwargs."""
+        if self.type_id is not None and not self._state.adding and not self.has_changed("project_id"):
+            return kwargs
+        if (
+            self.type_id is not None
+            and ProjectIssueType.objects.filter(
+                project_id=self.project_id, issue_type_id=self.type_id, issue_type__deleted_at__isnull=True
+            ).exists()
+        ):
+            return kwargs
+        default_type_id = (
+            ProjectIssueType.objects.filter(project_id=self.project_id, is_default=True)
+            .values_list("issue_type_id", flat=True)
+            .first()
+        )
+        if default_type_id is None:
+            return kwargs
+        self.type_id = default_type_id
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None:
+            kwargs["update_fields"] = list(set(update_fields) | {"type"})
+        return kwargs
 
     def _sync_completed_at(self, kwargs):
         """Update completed_at when state changes. Returns kwargs."""

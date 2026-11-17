@@ -86,7 +86,7 @@
         "export_separate_files": "Exporter les données dans des fichiers séparés",
         "exporting_projects": "Exportation du projet",
         "format": "Format",
-        "filters_info": "Appliquez des filtres pour exporter des éléments de travail spécifiques selon vos critères.",
+        "filters_info": "Appliquez des filtres pour exporter des tickets spécifiques selon vos critères.",
         "modal": {
           "title": "Exporter vers",
           "toasts": {
@@ -282,12 +282,12 @@
       "templates": {
         "title": "Modèles",
         "heading": "Modèles",
-        "description": "Économisez 80% du temps consacré à la création de projets, d’éléments de travail et de pages en utilisant des modèles."
+        "description": "Économisez 80% du temps consacré à la création de projets, de tickets et de pages en utilisant des modèles."
       },
       "relations": {
         "title": "Relations",
         "heading": "Relations",
-        "description": "Créez et gérez des types de relations qui connectent les éléments de travail dans votre espace de travail."
+        "description": "Créez et gérez des types de relations qui connectent les tickets dans votre espace de travail."
       },
       "cancel_trial": {
         "title": "Annulez d'abord votre période d'essai.",
@@ -464,7 +464,7 @@
         "app_consent_unapproved_description": "Assurez-vous de faire confiance à cette application avant de la connecter à votre espace de travail.",
         "go_to_app": "Aller à l’application",
         "enable_app_mentions": "Activer les mentions de l'application",
-        "enable_app_mentions_tooltip": "Lorsque cela est activé, les utilisateurs peuvent mentionner ou attribuer des éléments de travail à cette application.",
+        "enable_app_mentions_tooltip": "Lorsque cela est activé, les utilisateurs peuvent mentionner ou attribuer des tickets à cette application.",
         "scopes": "Périmètres",
         "select_scopes": "Sélectionner les périmètres",
         "read_access_to": "Accès en lecture seule à",

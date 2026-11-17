@@ -95,6 +95,271 @@
           "message": "Durum değişikliği kuralı inceleyicileri değiştirilemedi. Lütfen tekrar deneyin."
         }
       }
+    },
+    "label": "İş Akışları",
+    "groups": {
+      "backlog": "Backlog",
+      "unstarted": "Başlamadı",
+      "started": "Devam ediyor",
+      "completed": "Tamamlandı",
+      "cancelled": "İptal edildi"
+    },
+    "roles": {
+      "admin": "Yönetici",
+      "member": "Üye",
+      "guest": "Konuk"
+    },
+    "settings": {
+      "description": "Bir iş akışı, iş öğelerinin durumlarını ve aralarında izin verilen geçişleri listeler. Her proje, iş öğesi türü başına bir iş akışı seçer.",
+      "create": "İş akışı oluştur",
+      "empty": "Henüz iş akışı yok.",
+      "load_error": "İş akışları yüklenemedi.",
+      "columns": {
+        "name": "Ad",
+        "states": "Durumlar",
+        "projects": "Kullanım",
+        "description": "Açıklama",
+        "updated": "Güncellendi",
+        "actions": "İşlemler"
+      },
+      "state_count": "{count, plural, one {# durum} other {# durum}}",
+      "project_count": "{count, plural, one {# proje} other {# proje}}",
+      "delete": {
+        "action": "Sil",
+        "title": "Bu iş akışı silinsin mi?",
+        "description": "İş akışı ve diyagramı silinir. Statüleri diğer iş akışları için kullanılabilir kalır.",
+        "in_use": "Bazı projeler bu iş akışını hâlâ kullanıyor."
+      },
+      "form": {
+        "create_title": "İş akışı oluştur",
+        "name": "Ad",
+        "description": "Açıklama",
+        "duplicate": "Bu ada sahip bir iş akışı zaten var.",
+        "submit": "Oluştur",
+        "cancel": "İptal",
+        "source_project": "Projeden başla",
+        "source_project_none": "Proje yok (boş iş akışı)"
+      },
+      "error": "İş akışı kaydedilemedi. Lütfen tekrar deneyin.",
+      "edit": "Düzenle",
+      "duplicate": {
+        "action": "Çoğalt",
+        "copy_name": "{name} kopyası",
+        "success": "İş akışı çoğaltıldı"
+      }
+    },
+    "editor": {
+      "save": "Kaydet",
+      "discard": "Değişiklikleri at",
+      "saved": "İş akışı kaydedildi.",
+      "read_only": "Bu iş akışını düzenleme izniniz yok.",
+      "start": "BAŞLANGIÇ",
+      "global": "Herhangi bir durum",
+      "diagram_label": "İş akışı diyagramı",
+      "add_state": {
+        "title": "Durum ekle",
+        "name": "Ad",
+        "group": "Kategori",
+        "group_auto": "Otomatik",
+        "submit": "Durum ekle",
+        "description": "Durum, bir iş öğesinin ne kadar ilerlediğini gösterir. Mevcut durumları seçin veya yeni bir durum oluşturmak için bir ad yazın.",
+        "search": "Ara veya oluştur",
+        "create_option": "\"{name}\" oluştur",
+        "allow_any": "Herhangi bir durumdan geçişlere izin ver",
+        "none": "Eşleşen durum yok.",
+        "any_title": "Eklenen durumlara geçişler",
+        "any_help": "Eklenen her duruma, herhangi bir başka durumdan ulaşılabilir.",
+        "any_needs_selection": "Bu seçeneği etkinleştirmek için önce bir durum seçin veya oluşturun.",
+        "all_used": "Kullanılabilir tüm durumlar zaten bu iş akışında. Yeni bir durum oluşturmak için bir ad yazın.",
+        "any_existing_hint": "İş akışında zaten bulunan bir durum için \"Geçiş ekle\" düğmesini kullanın ve \"Herhangi bir durum\" seçeneğini belirleyin.",
+        "selected": "{count, plural, one {# seçildi} other {# seçildi}}",
+        "errors": {
+          "required": "Bir ad girin.",
+          "too_long": "Ad en fazla 255 karakter olmalıdır.",
+          "present": "Bu iş akışında bu ada sahip bir durum zaten var.",
+          "reserved": "Bu ad ayrılmıştır."
+        }
+      },
+      "add_transition": {
+        "title": "Geçiş ekle",
+        "sources": "Kaynak",
+        "any_state": "Herhangi bir durum",
+        "target": "Hedef",
+        "choose_state": "Durum seçin",
+        "name": "Ad (isteğe bağlı)",
+        "submit": "Geçiş ekle",
+        "in_workflow": "Bu iş akışında",
+        "other_states": "Diğer mevcut durumlar",
+        "other_states_hint": "Seçildiğinde diyagrama eklenir.",
+        "locked": "Seçili duruma sabitlendi.",
+        "duplicate": "Bu geçiş zaten var."
+      },
+      "panel": {
+        "transition": "Geçiş",
+        "set_initial": "Başlangıç durumu olarak ayarla",
+        "initial": "İş akışının başlangıç durumu",
+        "remove_state": "İş akışından kaldır",
+        "remove_transition": "Geçişi sil",
+        "remove_source": "{name} kaynak durumunu kaldır",
+        "empty_title": "Özel iş akışları oluşturun",
+        "empty_body": "İş akışları ekibinizin çalışma biçimine uyar. Proje panonuzun sütunlarına dönüşen durumlar ekleyin, bunları geçişlerle bağlayın ve kimlerin kullanabileceğini kurallarla sınırlayın.",
+        "empty_hint": "Ayrıntılarını görmek için bir durum seçin.",
+        "color": "Sütun rengi",
+        "add_incoming": "Gelen geçiş ekle",
+        "add_outgoing": "Giden geçiş ekle",
+        "collapse": "Paneli daralt",
+        "expand": "Paneli genişlet",
+        "shared_named": "{count, plural, one {Bu durum # başka iş akışında da kullanılıyor: {names}. Yeniden adlandırmak ya da rengini veya kategorisini değiştirmek onu orada da değiştirir.} other {Bu durum # başka iş akışında da kullanılıyor: {names}. Yeniden adlandırmak ya da rengini veya kategorisini değiştirmek onu orada da değiştirir.}}",
+        "more_names": "{count, plural, one {{names} ve # diğer} other {{names} ve # diğer}}",
+        "incoming_count": "Gelen geçişler · {count}",
+        "outgoing_count": "Giden geçişler · {count}",
+        "add": "Ekle",
+        "path": "Yol",
+        "add_source": "Kaynak durum ekle",
+        "rule": "Kural",
+        "edit": "Düzenle",
+        "remove": "Kaldır",
+        "edit_rule": "Kuralı düzenle",
+        "remove_rule": "Kuralı kaldır"
+      },
+      "restrict": {
+        "title": "Kimin taşıyabileceğini kısıtla",
+        "description": "Kısıtlama yoksa iş öğesini düzenleyebilen herkes bu geçişi kullanabilir.",
+        "roles": "Roller",
+        "users": "Kişiler",
+        "assignee": "İş öğesinin atananı",
+        "creator": "İş öğesinin oluşturanı",
+        "clear": "Kısıtlamayı kaldır",
+        "summary_roles": "Roller: {roles}",
+        "summary_users": "{count, plural, one {# kişi} other {# kişi}}"
+      },
+      "errors": {
+        "initial_state_required": "BAŞLANGIÇ öğesini bir duruma bağlayın.",
+        "duplicate_state_key": "Bir durum iki kez görünüyor. Sayfayı yeniden yükleyin.",
+        "duplicate_status": "Bir statü bu iş akışında iki kez görünüyor.",
+        "duplicate_status_name": "İki durum aynı ada sahip ya da bu adda bir statü zaten var: mevcut statülerden seçin.",
+        "invalid_transition": "Bir geçiş eksik.",
+        "reserved_status_name": "\"Triage\" adı Intake için ayrılmıştır.",
+        "invalid_rule": "Bir kısıtlama eksik.",
+        "invalid_status": "Bir statü artık mevcut değil. Sayfayı yeniden yükleyin.",
+        "status_changed": "Bir durumun statüsü değişti. Sayfayı yeniden yükleyin.",
+        "status_limit": "Çalışma alanı 1.000 statüye ulaştı.",
+        "status_in_use": "Bu durumlar hâlâ iş öğeleri içeriyor, önce onları taşıyın:",
+        "status_in_use_project": "{project}: {count, plural, one {# iş öğesi} other {# iş öğesi}}",
+        "default": "İş akışı kaydedilemedi.",
+        "stale_graph": "Bu iş akışı bu arada değiştirildi. Lütfen yeniden yükleyin.",
+        "duplicate_transition": "İki geçiş aynı durumları bağlıyor."
+      },
+      "close": "Kapat",
+      "small_screen": "Bu iş akışını düzenlemek için daha geniş bir ekranda açın.",
+      "used_in": "{count, plural, one {# projede kullanılıyor} other {# projede kullanılıyor}}",
+      "show_labels": "Geçiş etiketlerini göster",
+      "zoom": "Yakınlaştırma",
+      "minimap": "Mini harita",
+      "state_label": "Durum {name}, kategori {group}, {incoming} gelen, {outgoing} giden",
+      "transition_label": "Geçiş {name}, kaynak: {source}, hedef: {target}",
+      "transition_label_unnamed": "Adsız geçiş, kaynak: {source}, hedef: {target}",
+      "start_label": "Başlangıç durumu: {name}",
+      "view": {
+        "label": "Görünüm",
+        "diagram": "Diyagram",
+        "text": "Metin"
+      },
+      "add_rule": {
+        "title": "Kural ekle",
+        "transition": "Geçiş",
+        "none": "Önce bir geçiş ekleyin.",
+        "submit": "Uygula"
+      },
+      "text": {
+        "state": "Durum",
+        "transitions": "Geçişler",
+        "origin_start": "Başlangıç",
+        "origin_any": "Herhangi bir durum",
+        "unnamed": "Adsız geçiş",
+        "toggle": "{name} durumunun geçişlerini göster veya gizle",
+        "empty": "Bu iş akışında henüz durum yok."
+      },
+      "start_panel": {
+        "title": "İş akışının başlangıcı",
+        "field": "Her yeni iş öğesi şu durumda başlar",
+        "unlink": "Bağlantıyı kaldır"
+      },
+      "reload": "Yeniden yükle",
+      "presence": "{count, plural, one {Bu iş akışı şu kişi tarafından da düzenleniyor: {names}.} other {Bu iş akışı şu kişiler tarafından da düzenleniyor: {names}.}}",
+      "rename": {
+        "title": "Her yerde yeniden adlandırılsın mı?",
+        "line": "\"{from}\" adını \"{to}\" olarak değiştirmek, şu iş akışlarında da adını değiştirir: {names}.",
+        "confirm": "Her yerde yeniden adlandır"
+      },
+      "leave": {
+        "title": "Kaydetmeden çıkılsın mı?",
+        "body": "Bu iş akışındaki değişiklikler kaydedilmedi.",
+        "confirm": "Kaydetmeden çık",
+        "stay": "Kal"
+      },
+      "a11y": {
+        "node": "Bir durumu seçmek için Enter veya Space tuşuna basın. Taşımak için ok tuşlarını, kaldırmak için Delete tuşunu kullanın. İptal etmek için Esc tuşuna basın.",
+        "node_read_only": "Bir durumu seçmek için Enter veya Space tuşuna basın.",
+        "edge": "Bir geçişi seçmek için Enter veya Space tuşuna basın. Silmek için Delete, iptal etmek için Esc tuşuna basın.",
+        "edge_read_only": "Bir geçişi seçmek için Enter veya Space tuşuna basın.",
+        "moved": "Durum taşındı. Yeni konum: x {x}, y {y}.",
+        "handle": "Bağlantı noktası"
+      }
+    },
+    "scheme": {
+      "description": "Bu projede her iş öğesi türünün izleyeceği iş akışını seçin.",
+      "free": "Bu proje iş akışı kullanmıyor: her durum değişikliğine izin verilir.",
+      "choose": "İş akışı seçin",
+      "apply": "Uygula",
+      "detach": "İş akışı kullanmayı bırak",
+      "detach_confirm": "Durumlar kalır, yeniden düzenlenebilir olur ve her durum değişikliğine yeniden izin verilir.",
+      "mapping": {
+        "title": "İş öğelerini taşı",
+        "description": "Bu durumlar iş öğeleri içeriyor ancak seçilen iş akışının parçası değil. İş öğelerinin nereye gideceğini seçin.",
+        "row": "{workflow} içinde {state}: {count, plural, one {# iş öğesi} other {# iş öğesi}}",
+        "pick": "Hedef durum"
+      },
+      "applied": "Proje artık iş akışlarını izliyor.",
+      "detached": "Proje artık iş akışı kullanmıyor.",
+      "errors": {
+        "invalid_scheme": "Bir iş akışı veya tür artık geçerli değil. Sayfayı yeniden yükleyin.",
+        "mapping_incomplete": "Her satır için bir hedef durum seçin.",
+        "invalid_mapping": "Bir hedef durum kendi iş akışının parçası değil.",
+        "default": "Değişiklik uygulanamadı."
+      },
+      "link": "Bir iş akışına bağla",
+      "other_types": "Diğer tüm türler",
+      "table": {
+        "workflow": "İş akışı",
+        "types": "İş öğesi türleri",
+        "actions": "İşlemler",
+        "unknown_workflow": "Bilinmeyen iş akışı"
+      },
+      "add": "İş akışı ekle",
+      "add_submit": "Ekle",
+      "link_submit": "Bağla",
+      "default_badge": "varsayılan",
+      "replace": "Değiştir",
+      "replace_title": "Varsayılan iş akışını değiştir",
+      "edit_types": "Türleri düzenle",
+      "edit_types_named": "{name} iş akışının türlerini düzenle",
+      "remove": "Kaldır",
+      "remove_named": "{name} iş akışını kaldır",
+      "remove_title": "{name} iş akışı kaldırılsın mı?",
+      "remove_confirm": "{count, plural, one {{types} bundan sonra varsayılan iş akışını ({default}) izleyecek.} other {{types} bundan sonra varsayılan iş akışını ({default}) izleyecek.}}",
+      "types_field": "İlgili iş öğesi türleri",
+      "link_note": "Daha sonra oluşturulanlar dahil her iş öğesi türüne uygulanır.",
+      "taken_note": "{count, plural, one {{types} listelenmiyor: zaten {workflow} iş akışını izliyor.} other {{types} listelenmiyor: zaten {workflow} iş akışını izliyorlar.}}",
+      "unchecked_note": "İşaretlenmemiş bir tür varsayılan iş akışında kalır.",
+      "no_workflow": "Çalışma alanının tüm iş akışları zaten tabloda.",
+      "no_type": "Her iş öğesi türü zaten kendine ait bir iş akışını izliyor."
+    },
+    "managed_states": {
+      "banner": "Bu durumlar projenin iş akışlarından gelir. Bunları Çalışma alanı ayarları, İş Akışları bölümünden değiştirin."
+    },
+    "creation": {
+      "initial_state": "Yeni iş öğeleri bu durumda başlar."
     }
   }
 }

@@ -11,6 +11,8 @@ import {
   ExportOutline,
   MembersOutline,
   WebhooksOutline,
+  WorkflowsOutline,
+  WorkItemsOutline,
 } from "@makeplane/propel/icons";
 // plane imports
 import type { ISvgIcons } from "@plane/blocks/icons";
@@ -22,4 +24,6 @@ export const WORKSPACE_SETTINGS_ICONS: Record<TWorkspaceSettingsTabs, IconGlyph 
   export: ExportOutline,
   "billing-and-plans": BillingsOutline,
   webhooks: WebhooksOutline,
+  "work-item-types": WorkItemsOutline,
+  workflows: WorkflowsOutline,
 };

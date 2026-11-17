@@ -6,10 +6,12 @@
 
 import React from "react";
 import { observer } from "mobx-react";
+import { useParams } from "next/navigation";
 // types
 import type { TIssue } from "@plane/types";
 // components
 import { StateSelect } from "@/components/dropdowns/state/state-select";
+import { useAllowedStateIds } from "@/components/workflow";
 
 type Props = {
   issue: TIssue;
@@ -20,6 +22,8 @@ type Props = {
 
 export const SpreadsheetStateColumn = observer(function SpreadsheetStateColumn(props: Props) {
   const { issue, onChange, disabled, onClose } = props;
+  const { workspaceSlug } = useParams();
+  const allowedStateIds = useAllowedStateIds(workspaceSlug?.toString(), issue.project_id ?? undefined, issue);
 
   return (
     <div className="h-11 border-b-[0.5px] border-subtle">
@@ -34,6 +38,7 @@ export const SpreadsheetStateColumn = observer(function SpreadsheetStateColumn(p
         variant="table-cell"
         onClose={onClose}
         tooltip
+        allowedStateIds={allowedStateIds}
       />
     </div>
   );

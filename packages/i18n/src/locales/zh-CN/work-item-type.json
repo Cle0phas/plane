@@ -290,6 +290,33 @@
           "cannot_delete_default_work_item_type": "无法删除默认工作项类型",
           "cannot_delete_work_item_type_with_associated_work_items": "无法删除有关联工作项的工作项类型"
         }
+      },
+      "list": {
+        "description": "创建此工作区中的项目可以使用的工作项类型。",
+        "inactive_badge": "未激活",
+        "work_item_count": "{count, plural, one {# 个工作项} other {# 个工作项}}",
+        "load_error": "无法加载工作项类型。",
+        "more_actions": "{name} 的操作"
+      },
+      "actions": {
+        "deactivate": "停用",
+        "reactivate": "重新激活"
+      },
+      "disabled_reasons": {
+        "default_cannot_be_deactivated": "默认类型无法停用。",
+        "project_default_cannot_be_deactivated": "此类型是至少一个项目的默认类型。",
+        "project_default_cannot_be_deleted": "此类型是某个项目的默认类型，无法删除。"
+      },
+      "project": {
+        "description": "选择此项目使用的工作项类型及其默认类型。",
+        "used_in_project": "在此项目中使用",
+        "set_default": "设为默认",
+        "toast_error": "无法更新此项目的工作项类型。",
+        "disabled_reasons": {
+          "project_default": "无法移除项目的默认类型。",
+          "in_use": "此项目的工作项正在使用此类型。",
+          "not_enabled": "请先在项目中使用此类型。"
+        }
       }
     },
     "create": {
@@ -329,10 +356,18 @@
     "create_update": {
       "form": {
         "name": {
-          "placeholder": "为此工作项类型取一个独特的名称"
+          "placeholder": "为此工作项类型取一个独特的名称",
+          "label": "名称",
+          "required": "名称为必填项。",
+          "max_length": "名称不能超过 255 个字符。"
         },
         "description": {
-          "placeholder": "描述此工作项类型的用途和使用时机。"
+          "placeholder": "描述此工作项类型的用途和使用时机。",
+          "label": "描述",
+          "max_length": "描述不能超过 1000 个字符。"
+        },
+        "icon": {
+          "label": "图标"
         }
       }
     },
@@ -388,6 +423,26 @@
           "text": "升级"
         }
       }
+    },
+    "select": {
+      "label": "类型"
+    },
+    "switcher": {
+      "label": "更改工作项类型"
+    },
+    "activity": {
+      "changed_from": "将类型从",
+      "to": "更改为"
+    },
+    "filter": {
+      "label": "工作项类型"
+    },
+    "group_by": {
+      "label": "工作项类型",
+      "unknown_type": "未知类型"
+    },
+    "display_property": {
+      "label": "工作项类型"
     }
   },
   "work_item_type_hierarchy": {

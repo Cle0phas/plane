@@ -18,11 +18,13 @@ import {
   StartDateOutline,
   StateOutline,
   UserOutline,
+  WorkItemsOutline,
 } from "@makeplane/propel/icons";
 // plane imports
 import { Avatar } from "@makeplane/propel/components/avatar";
 import { Logo } from "@plane/blocks/emoji-icon-picker";
 import { CycleGroupIcon, PriorityIcon, StateGroupIcon } from "@plane/blocks/icons";
+import { useTranslation } from "@plane/i18n";
 import type {
   ICycle,
   IState,
@@ -51,8 +53,11 @@ import {
   getSubscriberFilterConfig,
   getTargetDateFilterConfig,
   getUpdatedAtFilterConfig,
+  getWorkItemTypeFilterConfig,
   isLoaderReady,
 } from "@plane/utils";
+// components
+import { WorkItemTypeIcon } from "@/components/work-item-types/work-item-type-icon";
 // store hooks
 import { useCycle } from "@/hooks/store/use-cycle";
 import { useLabel } from "@/hooks/store/use-label";
@@ -60,6 +65,7 @@ import { useMember } from "@/hooks/store/use-member";
 import { useModule } from "@/hooks/store/use-module";
 import { useProject } from "@/hooks/store/use-project";
 import { useProjectState } from "@/hooks/store/use-project-state";
+import { useWorkItemType } from "@/hooks/store/use-work-item-type";
 // plane web imports
 import { useFiltersOperatorConfigs } from "@/hooks/rich-filters/use-filters-operator-configs";
 
@@ -98,10 +104,14 @@ export const useWorkItemFiltersConfig = (props: TUseWorkItemFiltersConfigProps):
   const { getModuleById } = useModule();
   const { getStateById } = useProjectState();
   const { getUserDetails } = useMember();
+  const { getWorkspaceTypes } = useWorkItemType();
+  const { t } = useTranslation();
   // derived values
+  // computedFn caches per observer: the hook must run in an observer (WorkItemFilterRoot) for a stable identity.
+  const workItemTypes = getWorkspaceTypes(workspaceSlug);
   const operatorConfigs = useFiltersOperatorConfigs({ workspaceSlug });
   const filtersToShow = useMemo(() => new Set(allowedFilters), [allowedFilters]);
-  const project = useMemo(() => getProjectById(projectId), [projectId, getProjectById]);
+  const currentProject = useMemo(() => getProjectById(projectId), [projectId, getProjectById]);
   const members: IUserLite[] | undefined = useMemo(
     () =>
       memberIds
@@ -131,10 +141,7 @@ export const useWorkItemFiltersConfig = (props: TUseWorkItemFiltersConfigProps):
     [moduleIds, getModuleById]
   );
   const projects = useMemo(
-    () =>
-      projectIds
-        ? (projectIds.map((projectId) => getProjectById(projectId)).filter((project) => project) as IProject[])
-        : [],
+    () => (projectIds ? (projectIds.map((id) => getProjectById(id)).filter((item) => item) as IProject[]) : []),
     [projectIds, getProjectById]
   );
   const areAllConfigsInitialized = useMemo(() => isLoaderReady(projectLoader), [projectLoader]);
@@ -191,26 +198,26 @@ export const useWorkItemFiltersConfig = (props: TUseWorkItemFiltersConfigProps):
   const cycleFilterConfig = useMemo(
     () =>
       getCycleFilterConfig<TWorkItemFilterProperty>("cycle_id")({
-        isEnabled: isFilterEnabled("cycle_id") && project?.cycle_view === true && cycles !== undefined,
+        isEnabled: isFilterEnabled("cycle_id") && currentProject?.cycle_view === true && cycles !== undefined,
         filterIcon: CyclesOutline,
         getOptionIcon: (cycleGroup) => <CycleGroupIcon cycleGroup={cycleGroup} className="h-3.5 w-3.5 flex-shrink-0" />,
         cycles: cycles ?? [],
         ...operatorConfigs,
       }),
-    [isFilterEnabled, project?.cycle_view, cycles, operatorConfigs]
+    [isFilterEnabled, currentProject?.cycle_view, cycles, operatorConfigs]
   );
 
   // module filter config
   const moduleFilterConfig = useMemo(
     () =>
       getModuleFilterConfig<TWorkItemFilterProperty>("module_id")({
-        isEnabled: isFilterEnabled("module_id") && project?.module_view === true && modules !== undefined,
+        isEnabled: isFilterEnabled("module_id") && currentProject?.module_view === true && modules !== undefined,
         filterIcon: ModuleOutline,
         getOptionIcon: () => <ModuleOutline className="h-3 w-3 flex-shrink-0" />,
         modules: modules ?? [],
         ...operatorConfigs,
       }),
-    [isFilterEnabled, project?.module_view, modules, operatorConfigs]
+    [isFilterEnabled, currentProject?.module_view, modules, operatorConfigs]
   );
 
   // assignee filter config
@@ -305,6 +312,20 @@ export const useWorkItemFiltersConfig = (props: TUseWorkItemFiltersConfigProps):
     [isFilterEnabled, operatorConfigs]
   );
 
+  // work item type filter config, limited to the current workspace's types
+  const workItemTypeFilterConfig = useMemo(
+    () =>
+      getWorkItemTypeFilterConfig<TWorkItemFilterProperty>("type_id")({
+        isEnabled: isFilterEnabled("type_id") && workItemTypes.length > 0,
+        filterIcon: WorkItemsOutline,
+        label: t("work_item_types.filter.label"),
+        workItemTypes,
+        getOptionIcon: (workItemType) => <WorkItemTypeIcon workItemType={workItemType} decorative />,
+        ...operatorConfigs,
+      }),
+    [isFilterEnabled, workItemTypes, operatorConfigs, t]
+  );
+
   // start date filter config
   const startDateFilterConfig = useMemo(
     () =>
@@ -356,7 +377,7 @@ export const useWorkItemFiltersConfig = (props: TUseWorkItemFiltersConfigProps):
         isEnabled: isFilterEnabled("project_id") && projects !== undefined,
         filterIcon: ProjectsOutline,
         projects: projects,
-        getOptionIcon: (project) => <Logo logo={project.logo_props} size={12} />,
+        getOptionIcon: (projectItem) => <Logo logo={projectItem.logo_props} size={12} />,
         ...operatorConfigs,
       }),
     [isFilterEnabled, projects, operatorConfigs]
@@ -369,6 +390,7 @@ export const useWorkItemFiltersConfig = (props: TUseWorkItemFiltersConfigProps):
       stateGroupFilterConfig,
       assigneeFilterConfig,
       priorityFilterConfig,
+      workItemTypeFilterConfig,
       projectFilterConfig,
       mentionFilterConfig,
       labelFilterConfig,
@@ -393,6 +415,7 @@ export const useWorkItemFiltersConfig = (props: TUseWorkItemFiltersConfigProps):
       created_by_id: createdByFilterConfig,
       subscriber_id: subscriberFilterConfig,
       priority: priorityFilterConfig,
+      type_id: workItemTypeFilterConfig,
       start_date: startDateFilterConfig,
       target_date: targetDateFilterConfig,
       created_at: createdAtFilterConfig,

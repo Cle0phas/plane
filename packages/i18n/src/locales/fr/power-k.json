@@ -1,12 +1,12 @@
 {
   "power_k": {
     "actions_commands": {
-      "bulk_delete_work_items": "Supprimer en masse les éléments de travail"
+      "bulk_delete_work_items": "Supprimer en masse les tickets"
     },
     "contextual_actions": {
       "work_item": {
-        "title": "Actions sur l’élément de travail",
-        "indicator": "Élément de travail",
+        "title": "Actions sur le ticket",
+        "indicator": "Ticket",
         "change_state": "Changer d’état",
         "change_priority": "Changer la priorité",
         "change_assignees": "Assigner à",
@@ -20,14 +20,14 @@
         "unsubscribe": "Se désabonner des notifications",
         "delete": "Supprimer",
         "copy_id": "Copier l’ID",
-        "copy_id_toast_success": "ID de l’élément de travail copié dans le presse-papiers.",
-        "copy_id_toast_error": "Une erreur s’est produite lors de la copie de l’ID de l’élément de travail dans le presse-papiers.",
+        "copy_id_toast_success": "ID du ticket copié dans le presse-papiers.",
+        "copy_id_toast_error": "Une erreur s’est produite lors de la copie de l’ID du ticket dans le presse-papiers.",
         "copy_title": "Copier le titre",
-        "copy_title_toast_success": "Titre de l’élément de travail copié dans le presse-papiers.",
-        "copy_title_toast_error": "Une erreur s’est produite lors de la copie du titre de l’élément de travail dans le presse-papiers.",
+        "copy_title_toast_success": "Titre du ticket copié dans le presse-papiers.",
+        "copy_title_toast_error": "Une erreur s’est produite lors de la copie du titre du ticket dans le presse-papiers.",
         "copy_url": "Copier l’URL",
-        "copy_url_toast_success": "URL de l’élément de travail copiée dans le presse-papiers.",
-        "copy_url_toast_error": "Une erreur s’est produite lors de la copie de l’URL de l’élément de travail dans le presse-papiers."
+        "copy_url_toast_success": "URL du ticket copiée dans le presse-papiers.",
+        "copy_url_toast_error": "Une erreur s’est produite lors de la copie de l’URL du ticket dans le presse-papiers."
       },
       "cycle": {
         "title": "Actions sur le cycle",
@@ -66,7 +66,7 @@
       }
     },
     "creation_actions": {
-      "create_work_item": "Nouvel élément de travail",
+      "create_work_item": "Nouveau ticket",
       "create_page": "Nouvelle page",
       "create_view": "Nouvelle vue",
       "create_cycle": "Nouveau cycle",
@@ -83,16 +83,16 @@
       "nav_account_settings": "Aller aux paramètres du compte",
       "open_project": "Ouvrir un projet",
       "nav_projects_list": "Aller à la liste des projets",
-      "nav_all_workspace_work_items": "Aller à tous les éléments de travail",
-      "nav_assigned_workspace_work_items": "Aller aux éléments de travail assignés",
-      "nav_created_workspace_work_items": "Aller aux éléments de travail créés",
-      "nav_subscribed_workspace_work_items": "Aller aux éléments de travail suivis",
+      "nav_all_workspace_work_items": "Aller à tous les tickets",
+      "nav_assigned_workspace_work_items": "Aller aux tickets assignés",
+      "nav_created_workspace_work_items": "Aller aux tickets créés",
+      "nav_subscribed_workspace_work_items": "Aller aux tickets suivis",
       "nav_workspace_analytics": "Aller aux analyses de l’espace de travail",
       "nav_workspace_drafts": "Aller aux brouillons de l’espace de travail",
       "nav_workspace_archives": "Aller aux archives de l’espace de travail",
       "open_workspace_setting": "Ouvrir un paramètre de l’espace de travail",
       "nav_workspace_settings": "Aller aux paramètres de l’espace de travail",
-      "nav_project_work_items": "Aller aux éléments de travail",
+      "nav_project_work_items": "Aller aux tickets",
       "open_project_cycle": "Ouvrir un cycle",
       "nav_project_cycles": "Aller aux cycles",
       "open_project_module": "Ouvrir un module",

@@ -45,7 +45,7 @@
     },
     "notifications": {
       "heading": "Notifications par e-mail",
-      "description": "Restez informé des éléments de travail auxquels vous êtes abonné. Activez cette option pour être notifié.",
+      "description": "Restez informé des tickets auxquels vous êtes abonné. Activez cette option pour être notifié.",
       "select_default_view": "Sélectionner la vue par défaut",
       "compact": "Compact",
       "full": "Plein écran"
@@ -59,7 +59,7 @@
     },
     "activity": {
       "heading": "Activité",
-      "description": "Suivez vos actions et modifications récentes dans tous les projets et éléments de travail."
+      "description": "Suivez vos actions et modifications récentes dans tous les projets et tickets."
     },
     "connections": {
       "title": "Connexions",
@@ -78,16 +78,16 @@
     "stats": {
       "workload": "Charge de travail",
       "overview": "Vue d’ensemble",
-      "created": "Éléments de travail créés",
-      "assigned": "Éléments de travail assignés",
-      "subscribed": "Éléments de travail suivis",
+      "created": "Tickets créés",
+      "assigned": "Tickets assignés",
+      "subscribed": "Tickets suivis",
       "state_distribution": {
-        "title": "Éléments de travail par état",
-        "empty": "Créez des éléments de travail pour les visualiser par état dans le graphique pour une meilleure analyse."
+        "title": "Tickets par état",
+        "empty": "Créez des tickets pour les visualiser par état dans le graphique pour une meilleure analyse."
       },
       "priority_distribution": {
-        "title": "Éléments de travail par priorité",
-        "empty": "Créez des éléments de travail pour les visualiser par priorité dans le graphique pour une meilleure analyse."
+        "title": "Tickets par priorité",
+        "empty": "Créez des tickets pour les visualiser par priorité dans le graphique pour une meilleure analyse."
       },
       "recent_activity": {
         "title": "Activité récente",
@@ -115,19 +115,19 @@
     "empty_state": {
       "activity": {
         "title": "Aucune activité pour le moment",
-        "description": "Commencez par créer un nouvel élément de travail ! Ajoutez-y des détails et des propriétés. Explorez davantage Plane pour voir votre activité."
+        "description": "Commencez par créer un nouveau ticket ! Ajoutez-y des détails et des propriétés. Explorez davantage Plane pour voir votre activité."
       },
       "assigned": {
-        "title": "Aucun élément de travail ne vous est assigné",
-        "description": "Les éléments de travail qui vous sont assignés peuvent être suivis ici."
+        "title": "Aucun ticket ne vous est assigné",
+        "description": "Les tickets qui vous sont assignés peuvent être suivis ici."
       },
       "created": {
-        "title": "Aucun élément de travail pour le moment",
-        "description": "Tous les éléments de travail que vous créez apparaissent ici, suivez-les directement ici."
+        "title": "Aucun ticket pour le moment",
+        "description": "Tous les tickets que vous créez apparaissent ici, suivez-les directement ici."
       },
       "subscribed": {
-        "title": "Aucun élément de travail pour le moment",
-        "description": "Abonnez-vous aux éléments de travail qui vous intéressent, suivez-les tous ici."
+        "title": "Aucun ticket pour le moment",
+        "description": "Abonnez-vous aux tickets qui vous intéressent, suivez-les tous ici."
       }
     }
   },
