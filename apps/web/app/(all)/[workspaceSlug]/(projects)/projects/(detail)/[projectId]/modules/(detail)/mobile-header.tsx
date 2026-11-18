@@ -25,8 +25,8 @@ import { useModule } from "@/hooks/store/use-module";
 import { useProject } from "@/hooks/store/use-project";
 
 const SUPPORTED_LAYOUTS = [
-  { key: EIssueLayoutTypes.LIST, i18n_title: "issue.layouts.list", icon: ListOutline },
   { key: EIssueLayoutTypes.KANBAN, i18n_title: "issue.layouts.kanban", icon: BoardOutline },
+  { key: EIssueLayoutTypes.LIST, i18n_title: "issue.layouts.list", icon: ListOutline },
   { key: EIssueLayoutTypes.CALENDAR, i18n_title: "issue.layouts.calendar", icon: CalendarOutline },
 ];
 
