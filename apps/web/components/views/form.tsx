@@ -23,14 +23,8 @@ import {
 } from "@makeplane/propel/components/dialog";
 import { EmojiPicker, Logo } from "@plane/blocks/emoji-icon-picker";
 import { ViewsOutline } from "@makeplane/propel/icons";
-import type {
-  IIssueDisplayFilterOptions,
-  IIssueDisplayProperties,
-  IProjectView,
-  EIssueLayoutTypes,
-  IIssueFilters,
-} from "@plane/types";
-import { EViewAccess, EIssuesStoreType } from "@plane/types";
+import type { IIssueDisplayFilterOptions, IIssueDisplayProperties, IProjectView, IIssueFilters } from "@plane/types";
+import { EIssueLayoutTypes, EViewAccess, EIssuesStoreType } from "@plane/types";
 import { getComputedDisplayFilters, getComputedDisplayProperties, getTabIndex } from "@plane/utils";
 // components
 import { DisplayFiltersSelection, FiltersDropdown } from "@/components/issues/issue-layouts/filters";
@@ -56,7 +50,7 @@ const DEFAULT_VALUES: Partial<IProjectView> = {
   description: "",
   access: EViewAccess.PUBLIC,
   display_properties: getComputedDisplayProperties(),
-  display_filters: { ...getComputedDisplayFilters(), group_by: "state" },
+  display_filters: { ...getComputedDisplayFilters(), layout: EIssueLayoutTypes.KANBAN, group_by: "state" },
 };
 
 export const ProjectViewForm = observer(function ProjectViewForm(props: Props) {

@@ -8,11 +8,11 @@ import { useCallback, useState } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 // plane imports
-import { EIssueFilterType, ISSUE_LAYOUTS, ISSUE_DISPLAY_FILTERS_BY_PAGE } from "@plane/constants";
+import { EIssueFilterType, ISSUE_DISPLAY_FILTERS_BY_PAGE } from "@plane/constants";
 import { useTranslation } from "@plane/i18n";
 import { BoardOutline, CalendarOutline, ChevronDownOutline, ListOutline } from "@makeplane/propel/icons";
-import type { IIssueDisplayFilterOptions, IIssueDisplayProperties, EIssueLayoutTypes } from "@plane/types";
-import { EIssuesStoreType } from "@plane/types";
+import type { IIssueDisplayFilterOptions, IIssueDisplayProperties } from "@plane/types";
+import { EIssueLayoutTypes, EIssuesStoreType } from "@plane/types";
 import { Icon } from "@makeplane/propel/components/icon";
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@makeplane/propel/components/menu";
 // components
@@ -25,9 +25,9 @@ import { useModule } from "@/hooks/store/use-module";
 import { useProject } from "@/hooks/store/use-project";
 
 const SUPPORTED_LAYOUTS = [
-  { key: "list", i18n_title: "issue.layouts.list", icon: ListOutline },
-  { key: "kanban", i18n_title: "issue.layouts.kanban", icon: BoardOutline },
-  { key: "calendar", i18n_title: "issue.layouts.calendar", icon: CalendarOutline },
+  { key: EIssueLayoutTypes.KANBAN, i18n_title: "issue.layouts.kanban", icon: BoardOutline },
+  { key: EIssueLayoutTypes.LIST, i18n_title: "issue.layouts.list", icon: ListOutline },
+  { key: EIssueLayoutTypes.CALENDAR, i18n_title: "issue.layouts.calendar", icon: CalendarOutline },
 ];
 
 export const ModuleIssuesMobileHeader = observer(function ModuleIssuesMobileHeader() {
@@ -89,13 +89,13 @@ export const ModuleIssuesMobileHeader = observer(function ModuleIssuesMobileHead
             Layout
           </MenuTrigger>
           <MenuContent side="bottom" align="start">
-            {SUPPORTED_LAYOUTS.map((layout, index) => (
+            {SUPPORTED_LAYOUTS.map((layout) => (
               <MenuItem
                 key={layout.key}
                 label={t(layout.i18n_title)}
-                icon={<Icon icon={<IssueLayoutIcon layout={ISSUE_LAYOUTS[index].key} className="size-3" />} />}
+                icon={<Icon icon={<IssueLayoutIcon layout={layout.key} className="size-3" />} />}
                 onClick={() => {
-                  handleLayoutChange(ISSUE_LAYOUTS[index].key);
+                  handleLayoutChange(layout.key);
                 }}
               />
             ))}

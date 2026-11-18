@@ -34,16 +34,17 @@ export const SITES_ISSUE_LAYOUTS: {
   },
 ];
 
+// The kanban comes first: it is the default layout of every project.
 export const ISSUE_LAYOUT_MAP: TIssueLayoutMap = {
-  [EIssueLayoutTypes.LIST]: {
-    key: EIssueLayoutTypes.LIST,
-    i18n_title: "issue.layouts.title.list",
-    i18n_label: "issue.layouts.list",
-  },
   [EIssueLayoutTypes.KANBAN]: {
     key: EIssueLayoutTypes.KANBAN,
     i18n_title: "issue.layouts.title.kanban",
     i18n_label: "issue.layouts.kanban",
+  },
+  [EIssueLayoutTypes.LIST]: {
+    key: EIssueLayoutTypes.LIST,
+    i18n_title: "issue.layouts.title.list",
+    i18n_label: "issue.layouts.list",
   },
   [EIssueLayoutTypes.CALENDAR]: {
     key: EIssueLayoutTypes.CALENDAR,

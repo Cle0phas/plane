@@ -77,13 +77,13 @@
       "list": "Liste",
       "kanban": "Tableau",
       "calendar": "Calendrier",
-      "spreadsheet": "Tableau",
+      "spreadsheet": "Feuille de calcul",
       "gantt": "Chronologie",
       "title": {
         "list": "Disposition en liste",
         "kanban": "Disposition en tableau",
         "calendar": "Disposition en calendrier",
-        "spreadsheet": "Disposition en tableau",
+        "spreadsheet": "Disposition en feuille de calcul",
         "gantt": "Disposition en chronologie"
       }
     },
