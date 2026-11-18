@@ -6,31 +6,12 @@
 
 import type { TLanguage, ILanguageOption } from "../types";
 
-export const FALLBACK_LANGUAGE: TLanguage = "en";
+// ASIN serves French first; English stays the source of every key (decision 2026-11-17).
+export const FALLBACK_LANGUAGE: TLanguage = "fr";
 
 export const SUPPORTED_LANGUAGES: ILanguageOption[] = [
-  { label: "English", value: "en" },
   { label: "Français", value: "fr" },
-  { label: "Español", value: "es" },
-  { label: "日本語", value: "ja" },
-  { label: "简体中文", value: "zh-CN" },
-  { label: "繁體中文", value: "zh-TW" },
-  { label: "Русский", value: "ru" },
-  { label: "Italian", value: "it" },
-  { label: "Čeština", value: "cs" },
-  { label: "Slovenčina", value: "sk" },
-  { label: "Deutsch", value: "de" },
-  { label: "Українська", value: "ua" },
-  { label: "Polski", value: "pl" },
-  { label: "한국어", value: "ko" },
-  { label: "Português Brasil", value: "pt-BR" },
-  { label: "Indonesian", value: "id" },
-  { label: "Română", value: "ro" },
-  { label: "Tiếng việt", value: "vi-VN" },
-  { label: "Türkçe", value: "tr-TR" },
-  { label: "ქართული", value: "ka-ge" },
-  { label: "Nederlands", value: "nl" },
-  { label: "Български", value: "bg" },
+  { label: "English", value: "en" },
 ];
 
 export const LANGUAGE_STORAGE_KEY = "userLanguage";

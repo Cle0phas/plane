@@ -116,11 +116,10 @@
       "load_error": "Impossible de charger les workflows.",
       "columns": {
         "name": "Nom",
-        "states": "États",
         "projects": "Utilisé dans",
-        "description": "Description",
         "updated": "Modifié le",
-        "actions": "Actions"
+        "actions": "Actions",
+        "preview": "Aperçu des états"
       },
       "state_count": "{count, plural, one {# état} many {# états} other {# états}}",
       "project_count": "{count, plural, one {# projet} many {# projets} other {# projets}}",
@@ -128,7 +127,7 @@
         "action": "Supprimer",
         "title": "Supprimer ce workflow ?",
         "description": "Le workflow et son diagramme sont supprimés. Ses statuts restent disponibles pour les autres workflows.",
-        "in_use": "Des projets utilisent encore ce workflow."
+        "used_by": "{count, plural, one {Utilisé par # projet} many {Utilisé par # projets} other {Utilisé par # projets}}"
       },
       "form": {
         "create_title": "Créer un workflow",
@@ -146,7 +145,24 @@
         "action": "Dupliquer",
         "copy_name": "Copie de {name}",
         "success": "Workflow dupliqué"
-      }
+      },
+      "search": "Rechercher un workflow",
+      "usage": {
+        "label": "Utilisation",
+        "trigger": "Utilisation : {value}",
+        "all": "Tous",
+        "used": "Utilisés",
+        "unused": "Non utilisés"
+      },
+      "count": "{count, plural, one {# workflow} many {# workflows} other {# workflows}}",
+      "transition_count": "{count, plural, one {# transition} many {# transitions} other {# transitions}}",
+      "empty_badge": "Vide",
+      "no_state": "Aucun état",
+      "add_first_state": "ajouter un premier état",
+      "not_used": "Non utilisé",
+      "more_actions": "Plus d’actions pour {name}",
+      "description_label": "Description de {name}",
+      "no_match": "Aucun workflow ne correspond"
     },
     "editor": {
       "save": "Enregistrer",
@@ -278,7 +294,12 @@
         "origin_any": "Tous les états",
         "unnamed": "Transition sans nom",
         "toggle": "Afficher ou masquer les transitions de {name}",
-        "empty": "Ce workflow n’a encore aucun état."
+        "empty": "Ce workflow n’a encore aucun état.",
+        "toggle_column": "Déplier ou replier",
+        "initial_state": "État initial",
+        "legend_start": "Transition initiale",
+        "legend_any": "Transition globale (depuis tous les états)",
+        "legend_click": "Clic sur une transition : édition dans le panneau latéral."
       },
       "start_panel": {
         "title": "Départ du workflow",
@@ -305,7 +326,8 @@
         "edge_read_only": "Appuyez sur Entrée ou Espace pour sélectionner une transition.",
         "moved": "État déplacé. Nouvelle position : x {x}, y {y}.",
         "handle": "Point de connexion"
-      }
+      },
+      "breadcrumb": "Fil d’Ariane"
     },
     "scheme": {
       "description": "Choisissez le workflow que suit chaque type de ticket dans ce projet.",

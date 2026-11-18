@@ -21,6 +21,10 @@ vi.mock("@plane/i18n", () => ({
 const setToast = vi.hoisted(() => vi.fn());
 vi.mock("@plane/blocks/toast", () => ({ setToast }));
 
+// Base UI menus wait for their exit animations on close; jsdom has no Web Animations API.
+// oxlint-disable-next-line no-extend-native -- test-only polyfill of a missing browser API
+Element.prototype.getAnimations ??= () => [];
+
 const state = vi.hoisted(() => ({
   isAdmin: true,
   workflows: [] as TWorkflowSummary[],
@@ -43,12 +47,11 @@ const summary = (id: string, name: string, extra: Partial<TWorkflowSummary> = {}
   created_at: "2026-11-01T10:00:00Z",
   updated_at: "2026-11-02T10:00:00Z",
   state_count: 3,
+  states: [],
+  transition_count: 0,
   project_count: 0,
   ...extra,
 });
-const DUPLICATE = "workflows.settings.duplicate.action";
-const DELETE = "workflows.settings.delete.action";
-
 beforeEach(() => {
   state.isAdmin = true;
   state.workflows = [summary("a", "Software")];
@@ -66,46 +69,126 @@ const open = () => {
   return userEvent.setup();
 };
 
-describe("duplication", () => {
-  it("proposes a copy name and confirms with a toast", async () => {
-    const user = open();
-    await user.click(screen.getByRole("button", { name: DUPLICATE }));
-    await waitFor(() => expect(state.duplicateWorkflow).toHaveBeenCalledWith("ws", "a", "Copy of Software"));
-    expect(setToast).toHaveBeenCalledWith(expect.objectContaining({ type: "success" }));
+const states = (...names: string[]) => names.map((name) => ({ name, group: "started" as const }));
+const MORE = "workflows.settings.more_actions";
+const DUPLICATE = "workflows.settings.duplicate.action";
+const DELETE = "workflows.settings.delete.action";
+const SEARCH = "workflows.settings.search";
+
+const openMenu = async (user: ReturnType<typeof userEvent.setup>) => {
+  await user.click(screen.getAllByRole("button", { name: MORE })[0]);
+};
+
+describe("rows", () => {
+  it("previews the first five states in flow order, then the rest as a count", () => {
+    state.workflows = [
+      summary("a", "Software", {
+        states: states("A", "B", "C", "D", "E", "F", "G"),
+        state_count: 7,
+        transition_count: 6,
+      }),
+    ];
+    open();
+    for (const name of ["A", "B", "C", "D", "E"]) expect(screen.getByText(name)).toBeTruthy();
+    expect(screen.queryByText("F")).toBeNull();
+    expect(screen.getByText("+2").getAttribute("title")).toBe("F, G");
   });
 
-  it("numbers the copy when the name is taken", async () => {
-    state.workflows = [summary("a", "Software"), summary("b", "Copy of Software")];
-    const user = open();
-    await user.click(screen.getAllByRole("button", { name: DUPLICATE })[0]);
-    await waitFor(() => expect(state.duplicateWorkflow).toHaveBeenCalledWith("ws", "a", "Copy of Software (2)"));
+  it("flags an empty workflow and invites an admin to add a first state", () => {
+    state.workflows = [summary("a", "Draft", { state_count: 0 })];
+    open();
+    expect(screen.getByText("workflows.settings.empty_badge")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "workflows.settings.add_first_state" })).toBeTruthy();
   });
 
-  it("shows the error toast when the server refuses", async () => {
-    state.duplicateWorkflow = vi.fn().mockRejectedValue(new Error("refused"));
-    const user = open();
-    await user.click(screen.getByRole("button", { name: DUPLICATE }));
-    await waitFor(() => expect(setToast).toHaveBeenCalledWith(expect.objectContaining({ type: "error" })));
-    expect(setToast).not.toHaveBeenCalledWith(expect.objectContaining({ type: "success" }));
+  it("keeps the description out of the table, behind a focusable icon", () => {
+    state.workflows = [summary("a", "Support", { description: "Help desk" })];
+    open();
+    expect(screen.queryByRole("columnheader", { name: "workflows.settings.columns.description" })).toBeNull();
+    const info = screen.getByRole("button", { name: "workflows.settings.description_label" });
+    const ids = (info.getAttribute("aria-describedby") ?? "").split(" ");
+    expect(ids.map((id) => document.getElementById(id)?.textContent)).toContain("Help desk");
+  });
+
+  it("says when a workflow is not used", () => {
+    open();
+    expect(screen.getByText("workflows.settings.not_used")).toBeTruthy();
   });
 });
 
-describe("deletion", () => {
-  it("is inactive, with its reason exposed, while a project uses the workflow", () => {
-    state.workflows = [summary("a", "Software", { project_count: 1 })];
-    open();
-    const button = screen.getByRole("button", { name: DELETE });
-    expect(button).toHaveProperty("disabled", true);
-    const reason = document.getElementById(button.getAttribute("aria-describedby") ?? "");
-    expect(reason?.textContent).toBe("workflows.settings.delete.in_use");
+describe("toolbar", () => {
+  beforeEach(() => {
+    state.workflows = [summary("a", "Software", { project_count: 1 }), summary("b", "Support")];
+  });
+
+  it("searches by name, ignoring case", async () => {
+    const user = open();
+    await user.type(screen.getByRole("searchbox", { name: SEARCH }), "SUPP");
+    expect(screen.queryByRole("link", { name: "Software" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Support" })).toBeTruthy();
+  });
+
+  it("says so when nothing matches", async () => {
+    const user = open();
+    await user.type(screen.getByRole("searchbox", { name: SEARCH }), "zzz");
+    expect(screen.getByText("workflows.settings.no_match")).toBeTruthy();
+    expect(screen.queryByRole("table")).toBeNull();
+  });
+
+  it("filters on usage", async () => {
+    const user = open();
+    await user.click(screen.getByRole("button", { name: "workflows.settings.usage.label" }));
+    await user.click(await screen.findByRole("menuitemradio", { name: "workflows.settings.usage.unused" }));
+    expect(screen.queryByRole("link", { name: "Software" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Support" })).toBeTruthy();
+  });
+});
+
+describe("actions menu", () => {
+  it("duplicates with a free copy name and confirms with a toast", async () => {
+    state.workflows = [summary("a", "Software"), summary("b", "Copy of Software")];
+    const user = open();
+    await openMenu(user);
+    await user.click(await screen.findByRole("menuitem", { name: DUPLICATE }));
+    await waitFor(() => expect(state.duplicateWorkflow).toHaveBeenCalledWith("ws", "a", "Copy of Software (2)"));
+    expect(setToast).toHaveBeenCalledWith(expect.objectContaining({ type: "success" }));
+  });
+
+  it("shows the error toast when the server refuses", async () => {
+    state.duplicateWorkflow = vi.fn().mockRejectedValue(new Error("no"));
+    const user = open();
+    await openMenu(user);
+    await user.click(await screen.findByRole("menuitem", { name: DUPLICATE }));
+    await waitFor(() => expect(setToast).toHaveBeenCalledWith(expect.objectContaining({ type: "error" })));
+  });
+
+  it("disables deletion of a used workflow and says why", async () => {
+    state.workflows = [summary("a", "Software", { project_count: 2 })];
+    const user = open();
+    await openMenu(user);
+    const item = await screen.findByRole("menuitem", { name: new RegExp(DELETE) });
+    expect(item.getAttribute("aria-disabled")).toBe("true");
+    expect(item.textContent).toContain("workflows.settings.delete.used_by");
+    expect(screen.queryByText("workflows.settings.delete.in_use")).toBeNull();
   });
 
   it("asks for confirmation before removing an unused workflow", async () => {
     const user = open();
-    await user.click(screen.getByRole("button", { name: DELETE }));
+    await openMenu(user);
+    await user.click(await screen.findByRole("menuitem", { name: DELETE }));
     expect(state.removeWorkflow).not.toHaveBeenCalled();
-    await user.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: DELETE }));
+    const dialog = await screen.findByRole("alertdialog");
+    await user.click(within(dialog).getByRole("button", { name: DELETE }));
     await waitFor(() => expect(state.removeWorkflow).toHaveBeenCalledWith("ws", "a"));
+  });
+
+  it("is hidden from a non-admin, with the invitation to add a state", () => {
+    state.isAdmin = false;
+    state.workflows = [summary("a", "Draft", { state_count: 0 })];
+    open();
+    expect(screen.queryByRole("button", { name: MORE })).toBeNull();
+    expect(screen.queryByRole("link", { name: "workflows.settings.add_first_state" })).toBeNull();
+    expect(screen.queryByRole("columnheader", { name: "workflows.settings.columns.actions" })).toBeNull();
   });
 });
 
@@ -138,22 +221,5 @@ describe("used in", () => {
     open();
     expect(screen.queryByRole("button", { name: "workflows.settings.project_count" })).toBeNull();
     expect(screen.getByText("workflows.settings.project_count")).toBeTruthy();
-  });
-});
-
-describe("write actions", () => {
-  it("are hidden from a non-admin", () => {
-    state.isAdmin = false;
-    open();
-    expect(screen.queryByRole("button", { name: DUPLICATE })).toBeNull();
-    expect(screen.queryByRole("button", { name: DELETE })).toBeNull();
-    expect(screen.queryByRole("link", { name: "workflows.settings.edit" })).toBeNull();
-    expect(screen.queryByRole("columnheader", { name: "workflows.settings.columns.actions" })).toBeNull();
-  });
-
-  it("are shown to an admin", () => {
-    open();
-    expect(screen.getByRole("button", { name: DUPLICATE })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "workflows.settings.edit" })).toBeTruthy();
   });
 });
