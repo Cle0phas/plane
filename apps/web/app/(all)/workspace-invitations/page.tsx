@@ -132,13 +132,6 @@ function WorkspaceInvitationPage() {
                     <AnchorButton
                       variant="secondary"
                       size="md"
-                      href="https://github.com/makeplane"
-                      external
-                      label="Star us on GitHub"
-                    />
-                    <AnchorButton
-                      variant="secondary"
-                      size="md"
                       href="https://forum.plane.so"
                       external
                       label="Join our community of active creators"
