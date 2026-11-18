@@ -54,13 +54,9 @@ function WorkspaceInvitationPage() {
         accepted: true,
         token: token,
       })
-      .then(() => {
-        if (invitationDetail.email === currentUser?.email) {
-          router.push(`/${invitationDetail.workspace.slug}`);
-        } else {
-          router.push("/");
-        }
-      })
+      .then(() =>
+        router.push(invitationDetail.email === currentUser?.email ? `/${invitationDetail.workspace.slug}` : "/")
+      )
       .catch((err: unknown) => console.error(err));
   };
 
@@ -71,9 +67,7 @@ function WorkspaceInvitationPage() {
         accepted: false,
         token: token,
       })
-      .then(() => {
-        router.push("/");
-      })
+      .then(() => router.push("/"))
       .catch((err: unknown) => console.error(err));
   };
 
